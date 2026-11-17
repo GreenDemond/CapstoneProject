@@ -206,3 +206,28 @@ test("a task that ends later shows as one bar across the days in Week view", asy
   await page.getByRole("button", { name: "Week", exact: true }).click();
   await expect(page.locator(".bar-strip .span-bar", { hasText: "Science project" })).toHaveCount(1);
 });
+
+// Confetti appears when a task is completed, and is removed by itself.
+test("completing a task shows drawn confetti that clears itself", async ({ page }) => {
+  await openCalendar(page);
+  await page.getByLabel("What is it?").fill("Music practice");
+  await page.getByLabel("Due date").fill(dayFromNow(3));
+  await page.getByLabel("Due time").fill("12:00");
+  await page.getByRole("button", { name: "Add to my calendar" }).click();
+  await page.locator("ul.cal-list li", { hasText: "Music practice" }).getByRole("button", { name: "Complete" }).click();
+  await expect(page.locator(".confetti-piece").first()).toBeAttached();
+  await expect(page.locator(".confetti-layer")).toHaveCount(0, { timeout: 4000 });
+});
+
+// With reduced motion on, no confetti is drawn.
+test("no confetti when the device asks for reduced motion", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await openCalendar(page);
+  await page.getByLabel("What is it?").fill("Piano");
+  await page.getByLabel("Due date").fill(dayFromNow(3));
+  await page.getByLabel("Due time").fill("12:00");
+  await page.getByRole("button", { name: "Add to my calendar" }).click();
+  await page.locator("ul.cal-list li", { hasText: "Piano" }).getByRole("button", { name: "Complete" }).click();
+  await expect(page.locator(".celebrate")).toBeVisible();
+  await expect(page.locator(".confetti-piece")).toHaveCount(0);
+});

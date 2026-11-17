@@ -392,3 +392,21 @@ h3 {
   overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
 }
 .month-bars { grid-column: 1 / -1; }
+
+/* Drawn confetti (js/confetti.js). Off under reduced motion. */
+.confetti-layer {
+  position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 1000;
+}
+.confetti-piece {
+  position: absolute; top: -12px; width: 9px; height: 14px; border-radius: 2px;
+  animation: confetti-fall 1.6s ease-in forwards;
+}
+@keyframes confetti-fall {
+  to {
+    transform: translate(var(--drift), 105vh) rotate(var(--spin));
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .confetti-layer { display: none; }
+}

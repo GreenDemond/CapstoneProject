@@ -110,3 +110,9 @@ Wording rules: no "overdue," "missed," or "late." Past events look the same as f
 - In **Week** and **Month**, a spanning item is drawn as one bar across its days, in a strip above the days it covers, not repeated on each day. The bar shows the title and the end date.
 - In the **Day** view, the item shows as a band above the timeline, as before.
 - Overlapping bars stack vertically, one per row, so none hides another.
+
+## Added 2026-11-17: drawn confetti on completion
+
+- Confetti falls for about 2 seconds when a calendar item is completed, and when a work step is finished with Done or Drifted. It is drawn by the app in the palette colours.
+- No image file and no sound. Nothing is shown when the device asks for reduced motion.
+- A third-party confetti GIF was not used: its licence was not shown (see the conversation of 2026-11-17).

@@ -7,6 +7,7 @@ import { QUESTIONS, cardLines } from "./logic/focus-intake.js";
 import { GOAL_KEYS, MAX_TEXT, emptyProfile, setGoals, addNote, deleteNote, notesNewestFirst } from "./logic/profile.js";
 import { loadProfileState, saveProfile } from "./storage.js";
 import { aiAvailable, suggestWithAi } from "./ai.js";
+import { confetti } from "./confetti.js";
 import { GROUPS, CATEGORIES, groupItems, makeItem, makeEvent, isEvent, removeItem, parseDue, setStatus, completedItems } from "./logic/calendar.js";
 import { loadCalendarItems, saveCalendarItems, loadCompletionCounts, saveCompletionCounts } from "./storage.js";
 import { addCompletion, removeCompletion, totals } from "./logic/counter.js";
@@ -525,6 +526,7 @@ function choose(choice, splitText = "") {
   if (choice !== "still") {
     lastAdvance = now;
   }
+  if (choice === "done" || choice === "drifted") confetti();
   if (allDone(work)) {
     stopTimer();
     mode = "done";
@@ -870,6 +872,7 @@ function changeStatus(id, status) {
     }
   }
   celebrateText = status === "completed" ? "Fire it Up" : "";
+  if (status === "completed") confetti();
   renderCalendar();
 }
 
