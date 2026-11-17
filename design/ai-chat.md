@@ -29,6 +29,24 @@ Status: **revised 2026-11-17 after the advisor's review; waiting for Ben's answe
 - **Why it is editable (Ben):** students adjust the guide so the AI works with how *they* respond, for example "I need one tiny step at a time" or "ask me before you suggest anything".
 - **Later, a set-up page (on the to-do list, not in this slice):** a page that works with the student, one question at a time, to write their guide. It would build on "How I like to work" (`design/focus-intake.md`). The student reads and edits the result before it is used.
 
+## One guide per kind of work (Ben, 2026-11-17)
+
+Each of the six kinds (Essay, Reading, Problem set, Project, Test prep, Other) can have its own guide. Essays might want "ask me what I think before suggesting anything"; problem sets "one tiny step at a time, never show a worked answer".
+
+**How the app picks a guide:** the kind's own guide if the student wrote one; otherwise their "All kinds" guide; otherwise the built-in default. The locked rules wrap whichever is used, the same way.
+
+**Settings screen (new section "How the AI talks", under the AI helpers list):**
+1. First screen: one short list with **All kinds** and the six kinds. Each row says either "Using the default" or "Your own guide". Nothing else on the screen.
+2. Tap a row: a screen for that kind with the guide in a box (the text it will really use, so nothing is hidden), a **Reply length** choice (Short, Medium, Long), and three buttons: **Save**, **Use the default** (clears only this kind's own guide), **Back**. A line says what the locked rules are (see above). The 500-character limit is shown as a count.
+3. Nothing is saved until Save, and the screen says "Saved on this device." only when the browser confirmed it (same pattern as the profile).
+4. "Use the default" on a kind removes its own guide and the row goes back to "Using the default". The built-in default is always readable on the All kinds screen, so a student can start from it.
+
+**Stored** (same section as the other chat settings): `{ guides: { all, essay, reading, ... }, length: { all, essay, ... } }`. Missing or damaged entries are ignored one by one.
+
+**Which kind applies in a chat:** the student picks the kind at the start of the chat with the same six buttons as the paste screen, pre-selected to the kind of the steps they are working on, if any. This means the chat does not guess. Open question below.
+
+**Later:** the set-up page that writes a guide with the student can be run per kind, and can start from their "How I like to work" answers.
+
 ## Research behind it
 
 - Hints, not answers: an answer-giving AI lowered later test scores in a high school trial (`01-evidence.md`; AGENTS rule 1). A chat makes this the main risk.
@@ -84,12 +102,13 @@ Status: **revised 2026-11-17 after the advisor's review; waiting for Ben's answe
    **New (from the advisor):**
    - **T8 and T6 change.** OK to record that the chat sends the conversation and your guide to the AI you chose, and that students can edit the instructions? The parent should agree too, before classmates use it.
    - **If the on-device check or the AI flags distress:** (A) the chat ends and only Start over is offered, or (B) the "talk to an adult you trust" line shows and a calm "Keep going with my homework" button continues. I lean B, because school texts will trigger false matches.
+   - **Which kind does a chat use?** (a) The student picks the kind at the start of each chat, pre-selected from their saved steps (recommended: no guessing, one tap). (b) The chat always uses the kind of the steps they are working on, with no choice. (c) One guide for everything, no per-kind guides.
    - **Helpline number:** add one (you and the parent choose it), or leave it out.
 2. **Keep the chat after a refresh?** I recommend no (nothing stored, simplest and safest). Saving it on the device is possible later.
 3. **Where it lives.** A fourth button in the top row, or inside the paste screen? I recommend the top row.
 
 ## First slice (one session), then later slices
 1. **Slice 1:** chat screen from the top row; fixed opening question; Send, Stop, Start over, Back to home; the built-in default guide (not editable yet) at Short; rules first, guide, rules last; 6,000-character history limit; whole replies with the cut-off and empty-reply lines; both rule 11 layers; tests (history limit, word check, building the instructions, cut-off signal) and browser tests with stand-in replies (main path, cut-off, distress message not sent, double tap, Stop, 360 px).
-2. **Slice 2:** reply length and the editable guide in Settings, with saving, Reset, and the honest on-screen wording.
+2. **Slice 2:** reply length and the editable guides (All kinds, then one per kind) in Settings, with saving, Reset, and the honest on-screen wording.
 3. **Slice 3:** **Use these as my steps** (only under the latest AI message; "No steps found in that reply." if none).
 4. **Later:** the set-up page for the guide.
