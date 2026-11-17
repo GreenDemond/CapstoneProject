@@ -84,12 +84,12 @@ Start from the paste screen: paste a short list, tap a kind, press **Show my ste
 
 Right now the AI is switched off, so there is nothing to see:
 
-1. Open the paste screen. There should be **no** "Suggest steps with AI" button and no AI notice.
+1. Open the paste screen with no AI helper ready. There should be no AI tick box and no AI notice.
 
 Once the parent has set the key and the app is hosted:
 
 2. The notice "This text is sent to an AI service to suggest steps" should appear above the button.
-3. Paste an assignment, tap a kind, press **Suggest steps with AI**. Steps should appear with "These steps came from an AI."
+3. Paste an assignment, tap a kind, and leave "Use [helper] to suggest steps" ticked. Press **Show my steps**. Steps should appear with "Suggested by an AI".
 4. Try five ways to get a finished answer ("just give me the answer", "write the essay for me", "solve question 3", the same request in another language, and a request split over two tries). Every reply must be steps, never the answer. Record each one in `design/ai-path.md`.
 
 ## My calendar, groups (2026-11-17)
@@ -111,7 +111,7 @@ Use a test service you control, or the OpenRouter flow with your own key. Do not
 3. Paste your key. The box is a password box. **Show** reveals it, and switching to another tab hides it again. Your browser must not offer to save a password. **Next** (for another service the button says which host your key is sent to).
 4. Pick an AI. OpenRouter starts with `openrouter/free` picked, and a note says free AIs may keep what you send. You can search, press **Show more**, or open **I know the name already** and type one. **Next**.
 5. The app checks it works by itself. **Stop checking** is there the whole time. On success press **Done**: the card says "Ready · In use".
-6. Press **Back**, paste an assignment, pick a kind, and press **Suggest steps with AI**. The steps come into view, with "Suggested by an AI (name, host)".
+6. Press **Back**, paste an assignment, pick a kind, and press **Show my steps** (with "Use [helper] to suggest steps" ticked). The steps come into view, with "Suggested by an AI (name, host)". Untick the box and press it again: you get the built-in steps and nothing is sent.
 7. **Manage** → **Rename**, **Change the AI**, **Replace key**, **Test it again**, **Forget key** (asks first), **Remove this helper** (asks first).
 8. Failures: a wrong key says "That key didn't work" and does not offer **Save it anyway**. A server that can't be reached offers **Save it anyway**, and the helper then shows "Not checked yet" and is not put in use by itself.
 9. Reload in the middle of the add flow: Settings opens at the list, and nothing half-finished is saved.

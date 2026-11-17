@@ -15,9 +15,9 @@ test("Suggest steps shows steps labelled as AI with the host, and the key stays 
   await addOther(page);
   await page.getByRole("button", { name: "Back" }).click();
   await pasteAndPick(page);
-  await expect(page.locator("#ai-privacy")).toContainText("the AI service ai.example.test (ai.example.test)");
-  await page.getByRole("button", { name: "Suggest steps with AI" }).click();
-  await expect(page.locator("#message")).toContainText("Suggested by an AI (ai.example.test, ai.example.test)");
+  await expect(page.locator("#ai-privacy")).toContainText("the AI service ai.example.test to suggest steps");
+  await page.getByRole("button", { name: "Show my steps" }).click();
+  await expect(page.locator("#message")).toContainText("Suggested by an AI: ai.example.test");
   await expect(page.locator("#steps li").first()).toHaveText("Read two sources about rivers");
   // The steps are on screen, not just somewhere below the buttons.
   await expect(page.locator("#steps li").first()).toBeInViewport();
@@ -37,7 +37,7 @@ test("a rejected key on the paste screen gives one plain line and the starter st
   await standIn(page, { acceptKey: "another-key" });
   await page.getByRole("button", { name: "Back" }).click();
   await pasteAndPick(page);
-  await page.getByRole("button", { name: "Suggest steps with AI" }).click();
+  await page.getByRole("button", { name: "Show my steps" }).click();
   await expect(page.locator("#message")).toContainText("didn't accept the key");
   await expect(page.locator("#steps li")).not.toHaveCount(0);
   const html = await page.content();
@@ -52,12 +52,45 @@ test("a double click on Suggest sends one request", async ({ page }) => {
   await page.getByRole("button", { name: "Back" }).click();
   await pasteAndPick(page);
   const before = seen.chat.length;
-  await page.getByRole("button", { name: "Suggest steps with AI" }).dblclick();
+  await page.getByRole("button", { name: "Show my steps" }).dblclick();
   await expect(page.locator("#message")).toContainText("Suggested by an AI");
   expect(seen.chat.length - before).toBe(1);
 });
 
-test("the Suggest button is hidden with no ready helper", async ({ page }) => {
+// With no ready helper there is no tick box, and Show my steps gives the built-in steps.
+test("with no ready helper, Show my steps gives the built-in steps and no AI box", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("button", { name: "Suggest steps with AI" })).toBeHidden();
+  await expect(page.locator("#ai-box")).toBeHidden();
+  await pasteAndPick(page);
+  await page.getByRole("button", { name: "Show my steps" }).click();
+  await expect(page.locator("#steps li").first()).toBeVisible();
+  await expect(page.locator("#message")).not.toContainText("Suggested by an AI");
+});
+
+// The notice and tick box come before the button, and unticking means nothing is sent.
+test("the tick box sits above the button, and unticking sends nothing and gives built-in steps", async ({ page }) => {
+  const seen = await standIn(page, { content: "AI step one\nAI step two" });
+  await openSettings(page);
+  await addOther(page);
+  await page.getByRole("button", { name: "Back" }).click();
+  await pasteAndPick(page);
+  const box = await page.locator("#ai-use").boundingBox();
+  const button = await page.getByRole("button", { name: "Show my steps" }).boundingBox();
+  expect(box.y).toBeLessThan(button.y);
+  await expect(page.locator("#ai-privacy")).toContainText("pressing Show my steps sends this text");
+  await expect(page.locator("#ai-use")).toBeChecked();
+
+  const before = seen.chat.length;
+  await expect(page.locator("#paste-hint")).toContainText("except when you use the AI helper");
+  await page.locator("#ai-use").uncheck();
+  await expect(page.locator("#paste-hint")).not.toContainText("except");
+  await page.getByRole("button", { name: "Show my steps" }).click();
+  await expect(page.locator("#steps li").first()).toBeVisible();
+  await expect(page.locator("#steps li").first()).not.toHaveText("AI step one");
+  expect(seen.chat.length).toBe(before);
+
+  await page.locator("#ai-use").check();
+  await page.getByRole("button", { name: "Show my steps" }).click();
+  await expect(page.locator("#message")).toContainText("Suggested by an AI");
+  await expect(page.locator("#steps li").first()).toHaveText("AI step one");
 });

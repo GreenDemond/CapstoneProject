@@ -61,7 +61,7 @@ function renderSteps(count) {
   showMore.hidden = count >= allSteps.length;
 }
 
-showButton.addEventListener("click", () => {
+showButton.addEventListener("click", async () => {
   const { text, truncated } = limitPaste(textBox.value);
   if (text === "") {
     message.textContent = "Paste something to start.";
@@ -69,6 +69,19 @@ showButton.addEventListener("click", () => {
   }
   if (chosenKind === null) {
     message.textContent = "Tap the kind of work it is, then try again.";
+    return;
+  }
+
+  if (suggesting) {
+    return;
+  }
+  if (aiHelperToUse()) {
+    suggesting = true;
+    try {
+      await suggestWithChosenService(text);
+    } finally {
+      suggesting = false;
+    }
     return;
   }
 
@@ -652,7 +665,23 @@ function renderWork() {
 // AI suggestions (design/ai-path.md). Hidden unless the server says it is available,
 // which needs a key set up by an adult. Any failure falls back to the starter steps.
 const aiBox = document.getElementById("ai-box");
-const aiButton = document.getElementById("ai-suggest");
+// The helper's name, with its host when that is different, so it is clear where the text goes.
+function where(helper) {
+  const host = hostOf(helper.url);
+  return host === helper.label ? host : `${helper.label} (${host})`;
+}
+
+// The top line must stay true: the text leaves this device only when the AI tick box is on.
+const pasteHint = document.getElementById("paste-hint");
+function refreshPasteHint() {
+  pasteHint.textContent = aiHelperToUse()
+    ? "Paste the instructions or what you have to do. This stays on your device, except when you use the AI helper below."
+    : "Paste the instructions or what you have to do. This stays on your device.";
+}
+
+const aiUse = document.getElementById("ai-use");
+aiUse.addEventListener("change", refreshPasteHint);
+const aiUseLabel = document.getElementById("ai-use-label");
 
 // The AI button shows only when the chosen helper is ready (it has a key and an AI picked).
 const aiPrivacy = document.getElementById("ai-privacy");
@@ -689,35 +718,24 @@ function refreshAiStatus() {
   aiChoice.replaceChildren(...options);
   const ready = current !== null && isReady(current);
   aiBox.hidden = !ready;
+  refreshPasteHint();
   if (ready) {
-    aiPrivacy.textContent = `This text is sent to the AI service ${current.label} (${hostOf(current.url)}) to suggest steps. Don't paste your name or anything private.`;
+    aiUseLabel.textContent = `Use ${current.label} to suggest steps`;
+    aiPrivacy.textContent = `If this is ticked, pressing Show my steps sends this text to the AI service ${where(current)} to suggest steps. Don't paste your name or anything private.`;
   }
 }
 
-// A second press while a request is running is ignored (one call at a time).
+// Show my steps asks the AI helper when one is ready and the tick box is on. A second press while a
+// request is running is ignored (one call at a time).
 let suggesting = false;
-aiButton.addEventListener("click", async () => {
-  if (suggesting) {
-    return;
-  }
-  suggesting = true;
-  try {
-    await suggestWithChosenService();
-  } finally {
-    suggesting = false;
-  }
-});
 
-async function suggestWithChosenService() {
-  const { text } = limitPaste(textBox.value);
-  if (text === "") {
-    message.textContent = "Paste something to start.";
-    return;
-  }
-  if (chosenKind === null) {
-    message.textContent = "Tap the kind of work it is, then try again.";
-    return;
-  }
+function aiHelperToUse() {
+  const { services, chosenId } = getAiSettings();
+  const helper = inUseHelper(services, chosenId);
+  return helper && isReady(helper) && aiUse.checked ? helper : null;
+}
+
+async function suggestWithChosenService(text) {
   const { services, chosenId } = getAiSettings();
   const service = inUseHelper(services, chosenId);
   const key = service && isReady(service) ? await readKey(service.id) : null;
@@ -726,7 +744,7 @@ async function suggestWithChosenService() {
     refreshAiStatus();
     return;
   }
-  aiButton.disabled = true;
+  showButton.disabled = true;
   message.textContent = `Asking the AI service ${service.label}...`;
   // Slower services can take a few minutes; say so, so it does not look stuck.
   const slowNote = setTimeout(() => {
@@ -734,7 +752,7 @@ async function suggestWithChosenService() {
   }, 10000);
   const result = await askService(service, key, text, chosenKind);
   clearTimeout(slowNote);
-  aiButton.disabled = false;
+  showButton.disabled = false;
 
   if (result.trustedAdult) {
     message.textContent = "If something serious is going on, please talk to an adult you trust.";
@@ -742,7 +760,7 @@ async function suggestWithChosenService() {
   }
   if (result.steps) {
     allSteps = result.steps;
-    message.textContent = `Suggested by an AI (${service.label}, ${hostOf(service.url)}). Change anything you like.`;
+    message.textContent = `Suggested by an AI: ${where(service)}. Change anything you like.`;
   } else {
     allSteps = starterStepsFor(chosenKind, cleanPastedText(text));
     message.textContent = `${result.error} Here are the starter steps instead.`;

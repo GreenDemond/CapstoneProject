@@ -14,7 +14,7 @@
 
       <section id="paste-screen" aria-labelledby="paste-heading">
         <h2 id="paste-heading">What's the assignment?</h2>
-        <p class="hint">Paste the instructions or what you have to do. This stays on your device.</p>
+        <p class="hint" id="paste-hint">Paste the instructions or what you have to do. This stays on your device.</p>
 
         <label for="assignment-text" class="visually-hidden">Assignment text</label>
         <textarea id="assignment-text" rows="8" placeholder="Paste here"></textarea>
@@ -24,12 +24,12 @@
           <div id="kind-buttons" class="kind-buttons"></div>
         </fieldset>
 
-        <button type="button" id="show-steps" class="primary">Show my steps</button>
         <div id="ai-box" hidden>
-          <p class="hint" id="ai-privacy">This text is sent to an AI service to suggest steps. Don't paste your name or anything private.</p>
-          <button type="button" id="ai-suggest">Suggest steps with AI</button>
+          <p><label><input type="checkbox" id="ai-use" checked> <span id="ai-use-label">Use an AI helper to suggest steps</span></label></p>
+          <p class="hint" id="ai-privacy">If this is ticked, pressing Show my steps sends this text to an AI service to suggest steps. Don't paste your name or anything private.</p>
           <p class="hint">Suggestions come from an AI, not a person. The app stores none of it.</p>
         </div>
+        <button type="button" id="show-steps" class="primary">Show my steps</button>
         <p id="ai-status" class="hint" aria-live="polite"></p>
         <p id="ai-choice-row" hidden><label for="ai-choice">Which AI helper?</label> <select id="ai-choice"></select></p>
         <p id="message" class="message" role="status" aria-live="polite"></p>

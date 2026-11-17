@@ -88,3 +88,13 @@ The hints-only rules, the child-safety line, and step parsing move into `js/logi
 - **Ben's parent-billed key:** typed into Settings on Ben's own computer only. The shared app never offers it, because keys live only in each browser.
 - **Shortcut button:** removed. Address and model name are typed in full. Ben does not test through Settings; testing is done with stand-in responses.
 - A service is ready only when it has a key and a model name.
+
+## Change (2026-11-17, Ben): Show my steps uses the AI helper
+
+Ben asked for Show my steps to "do something meaningful". With a ready AI helper, **Show my steps now asks the helper for steps fitted to the assignment**, and falls back to the built-in steps if it fails. The separate "Suggest steps with AI" button is gone.
+
+- A tick box, "Use [helper] to suggest steps", sits above the button, ticked by default, with the privacy line: "If this is ticked, pressing Show my steps sends this text to the AI service [name (host)] ... Don't paste your name or anything private."
+- The line at the top of the screen stays true: "This stays on your device" changes to "...except when you use the AI helper below" while the box is ticked and a helper is ready.
+- Unticking sends nothing and gives the built-in steps. With no ready helper, the box and notice are not shown.
+- The text is sent only when the student presses Show my steps, as before (DECISIONS T8).
+

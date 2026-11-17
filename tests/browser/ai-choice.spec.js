@@ -51,7 +51,7 @@ test("a helper that needs an AI picked is not replaced by another, and Finish se
   });
   await page.reload();
   await expect(page.locator("#ai-status")).toContainText("isn't ready yet");
-  await expect(page.getByRole("button", { name: "Suggest steps with AI" })).toBeHidden();
+  await expect(page.locator("#ai-box")).toBeHidden();
   await expect(page.locator("#ai-choice")).toHaveValue("");
   await page.getByRole("button", { name: "Settings" }).click();
   await expect(page.locator(".helper-card").nth(0)).toContainText("Needs an AI picked");
