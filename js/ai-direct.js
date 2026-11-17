@@ -98,6 +98,9 @@ export async function askChat(service, key, { kind, guide, messages }, signal) {
   if (result.failed === "aborted") {
     return { aborted: true };
   }
+  if (result.failed === "timeout") {
+    return { error: "The helper didn't answer in time." };
+  }
   if (result.failed) {
     return { error: COULDNT_REACH };
   }

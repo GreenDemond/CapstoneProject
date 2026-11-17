@@ -1345,56 +1345,18 @@ refreshHome();
 
 // Talk it through (design/ai-chat.md): a plain chat with the AI helper the student chose.
 // The chat lives on this page only. Replies are shown whole, as text, never as HTML.
+// The screen is built once; new messages are added to the log and the status line is changed
+// in place, so screen readers announce only what is new.
 const chatScreen = document.getElementById("chat-screen");
 const chatBody = document.getElementById("chat-body");
 const chatHeading = document.getElementById("chat-heading");
 let chatMessages = []; // what is sent: { role, text }
-let chatShown = []; // what is on screen: { who: "you" | "ai" | "note", text }
+let chatLog = []; // what is on screen, so the log can be rebuilt after Settings: { who, text }
 let chatKind = null;
 let chatBusy = false;
 let chatRun = 0; // changes on Start over, Back, and Stop, so a late reply is ignored
 let chatAbort = null;
-let chatStatus = "";
-let chatDraft = "";
-
-function openChatScreen() {
-  const { services, chosenId } = getAiSettings();
-  const helper = inUseHelper(services, chosenId);
-  pasteScreen.hidden = true;
-  stepsScreen.hidden = true;
-  chatScreen.hidden = false;
-  if (chatMessages.length === 0 && chatKind === null) {
-    chatKind = chosenKind;
-  }
-  renderChat(helper && isReady(helper) ? helper : null);
-  chatHeading.focus();
-}
-
-function closeChat() {
-  chatRun += 1;
-  chatAbort?.abort();
-  chatBusy = false;
-  chatMessages = [];
-  chatShown = [];
-  chatStatus = "";
-  chatDraft = "";
-  chatBody.replaceChildren();
-  chatScreen.hidden = true;
-  pasteScreen.hidden = false;
-  document.getElementById("open-chat").focus();
-}
-
-function startOver() {
-  chatRun += 1;
-  chatAbort?.abort();
-  chatBusy = false;
-  chatMessages = [];
-  chatShown = [];
-  chatStatus = "";
-  chatDraft = "";
-  renderChat(currentChatHelper());
-  document.getElementById("chat-input")?.focus();
-}
+let chatParts = null; // the pieces on screen: log, input, send, stop, status, kind buttons
 
 function currentChatHelper() {
   const { services, chosenId } = getAiSettings();
@@ -1402,59 +1364,59 @@ function currentChatHelper() {
   return helper && isReady(helper) ? helper : null;
 }
 
-function renderChat(helper) {
+function resetChat() {
+  chatRun += 1;
+  chatAbort?.abort();
+  chatBusy = false;
+  chatMessages = [];
+  chatLog = [];
+}
+
+function openChatScreen() {
+  pasteScreen.hidden = true;
+  stepsScreen.hidden = true;
+  chatScreen.hidden = false;
+  if (chatMessages.length === 0 && chatKind === null) {
+    chatKind = chosenKind;
+  }
+  buildChat();
+  chatHeading.focus();
+}
+
+function closeChat() {
+  resetChat();
+  chatKind = null; // the next chat starts from the kind chosen on the paste screen
+  chatParts = null;
   chatBody.replaceChildren();
-  if (!helper) {
-    chatBody.append(
-      el("p", "Add an AI helper in Settings first.", { class: "hint" }),
-      button("Open Settings", () => { chatScreen.hidden = true; openSettingsScreen(); }, "primary"),
-      button("Back to home", closeChat),
-    );
-    return;
-  }
-  chatBody.append(
-    el("p", `This chat isn't saved. Your messages go to the AI service ${where(helper)}. Don't type your name or anything private. Replies come from an AI, not a person.`, { class: "hint" }),
-  );
+  chatScreen.hidden = true;
+  pasteScreen.hidden = false;
+  document.getElementById("open-chat").focus();
+}
 
-  const kinds = el("div", undefined, { class: "kind-buttons", role: "group", "aria-label": "What kind of work is this?" });
-  for (const kind of KINDS) {
-    const b = button(kind.label, () => { chatKind = kind.id; renderChat(currentChatHelper()); document.getElementById("chat-input")?.focus(); }, "kind");
-    b.setAttribute("aria-pressed", String(kind.id === chatKind));
-    kinds.append(b);
-  }
-  chatBody.append(kinds);
+function startOver() {
+  resetChat();
+  buildChat();
+  chatParts.input.focus();
+}
 
-  const log = el("div", undefined, { id: "chat-log", class: "chat-log", role: "log", "aria-live": "polite", "aria-label": "Chat" });
-  log.append(chatBubble("ai", OPENING_QUESTION));
-  for (const item of chatShown) {
-    log.append(chatBubble(item.who, item.text));
+function setChatStatus(text) {
+  if (chatParts) {
+    chatParts.status.textContent = text;
   }
-  chatBody.append(log);
+}
 
-  const input = el("textarea", undefined, { id: "chat-input", rows: "3", "aria-label": "Your message" });
-  input.value = chatDraft;
-  input.addEventListener("input", () => { chatDraft = input.value; });
-  input.addEventListener("keydown", (event) => {
-    // Enter sends and Shift+Enter makes a new line, on a computer. On a phone Enter is a new line.
-    if (event.key === "Enter" && !event.shiftKey && globalThis.matchMedia?.("(pointer: fine)").matches) {
-      event.preventDefault();
-      sendChat();
-    }
-  });
-  chatBody.append(input);
-
-  const actions = el("div", undefined, { class: "kind-buttons" });
-  const send = button("Send", sendChat, "primary");
-  send.id = "chat-send";
-  send.disabled = chatBusy;
-  actions.append(send);
-  if (chatBusy) {
-    actions.append(button("Stop", stopChat));
+function setChatBusy(busy) {
+  chatBusy = busy;
+  if (chatParts) {
+    chatParts.send.disabled = busy;
+    chatParts.stop.hidden = !busy;
   }
-  actions.append(button("Start over", startOver), button("Back to home", closeChat));
-  chatBody.append(actions);
-  chatBody.append(el("p", chatStatus, { id: "chat-status", class: "message", role: "status", "aria-live": "polite" }));
-  log.scrollTop = log.scrollHeight;
+}
+
+function addChatBubble(who, text) {
+  chatLog.push({ who, text });
+  chatParts.log.append(chatBubble(who, text));
+  chatParts.log.scrollTop = chatParts.log.scrollHeight;
 }
 
 function chatBubble(who, text) {
@@ -1466,57 +1428,124 @@ function chatBubble(who, text) {
   return bubble;
 }
 
+function buildChat() {
+  chatBody.replaceChildren();
+  chatParts = null;
+  const helper = currentChatHelper();
+  if (!helper) {
+    chatBody.append(
+      el("p", "Add an AI helper in Settings first.", { class: "hint" }),
+      button("Open Settings", () => { chatScreen.hidden = true; openSettingsScreen(); }, "primary"),
+      button("Back to home", closeChat),
+    );
+    return;
+  }
+  chatBody.append(
+    el("p", `This chat isn't saved. Your messages go to the AI service ${where(helper)}. Don't type your name or anything private. Replies come from an AI, not a person.`, { class: "hint" }),
+    el("p", "An AI can still get it wrong. If it gives you a finished answer, don't copy it.", { class: "hint" }),
+  );
+
+  const kinds = el("div", undefined, { class: "kind-buttons", role: "group", "aria-label": "What kind of work is this?" });
+  const kindButtons = [];
+  for (const kind of KINDS) {
+    const b = button(kind.label, () => {
+      chatKind = kind.id;
+      kindButtons.forEach((other, i) => other.setAttribute("aria-pressed", String(KINDS[i].id === chatKind)));
+      chatParts.input.focus();
+    }, "kind");
+    b.setAttribute("aria-pressed", String(kind.id === chatKind));
+    kindButtons.push(b);
+    kinds.append(b);
+  }
+  chatBody.append(kinds);
+
+  const log = el("div", undefined, { class: "chat-log", role: "log", "aria-live": "polite", "aria-label": "Chat" });
+  const input = el("textarea", undefined, { id: "chat-input", rows: "3", "aria-label": "Your message" });
+  input.addEventListener("keydown", (event) => {
+    // Enter sends and Shift+Enter makes a new line, on a computer. On a phone Enter is a new line.
+    if (event.key === "Enter" && !event.shiftKey && !event.isComposing && globalThis.matchMedia?.("(pointer: fine)").matches) {
+      event.preventDefault();
+      sendChat();
+    }
+  });
+  const send = button("Send", sendChat, "primary");
+  send.id = "chat-send";
+  const stop = button("Stop", stopChat);
+  stop.hidden = true;
+  const actions = el("div", undefined, { class: "kind-buttons" });
+  actions.append(send, stop, button("Start over", startOver), button("Back to home", closeChat));
+  const status = el("p", "", { id: "chat-status", class: "message", role: "status", "aria-live": "polite" });
+  chatBody.append(log, input, actions, status);
+  chatParts = { log, input, send, stop, status };
+
+  log.append(chatBubble("ai", OPENING_QUESTION));
+  for (const item of chatLog) {
+    log.append(chatBubble(item.who, item.text));
+  }
+  log.scrollTop = log.scrollHeight;
+  setChatBusy(chatBusy);
+}
+
+// Puts the student's own words back in the box, in front of anything typed since.
+function giveBackWords(text) {
+  const typed = chatParts.input.value;
+  chatParts.input.value = typed.trim() === "" ? text : `${text}\n${typed}`;
+}
+
 function stopChat() {
   chatRun += 1;
   chatAbort?.abort();
-  chatBusy = false;
-  chatStatus = "Stopped. Your message is above.";
-  renderChat(currentChatHelper());
-  document.getElementById("chat-input")?.focus();
+  setChatBusy(false);
+  // The last message was not answered: take it back out and return the words to the box.
+  const last = chatMessages.at(-1);
+  if (last?.role === "user") {
+    chatMessages.pop();
+    chatLog.pop();
+    chatParts.log.lastElementChild?.remove();
+    giveBackWords(last.text);
+  }
+  setChatStatus("Stopped. Your message is back in the box.");
+  chatParts.input.focus();
 }
 
 async function sendChat() {
-  if (chatBusy) {
+  if (chatBusy || !chatParts) {
     return;
   }
-  const text = chatDraft.trim();
+  const text = chatParts.input.value.trim();
   if (text === "") {
     return;
   }
   if (text.length > MAX_MESSAGE) {
-    chatStatus = "That message is long. Shorten it and try again.";
-    renderChat(currentChatHelper());
+    setChatStatus("That message is long. Shorten it and try again.");
     return;
   }
   if (chatKind === null) {
-    chatStatus = "Tap the kind of work it is, then send again.";
-    renderChat(currentChatHelper());
+    setChatStatus("Tap the kind of work it is, then send again.");
     return;
   }
   const service = currentChatHelper();
-  chatBusy = true; // set before waiting for the key, so a quick second tap sends nothing
+  setChatBusy(true); // set before waiting for the key, so a quick second tap sends nothing
+  const run = (chatRun += 1);
   const key = service ? await readKey(service.id) : null;
+  if (run !== chatRun) {
+    return; // Back or Start over was pressed while the key was being read
+  }
   if (!service || !key) {
-    chatBusy = false;
-    chatStatus = "No AI helper is ready. Finish one in Settings first.";
-    renderChat(currentChatHelper());
+    setChatBusy(false);
+    setChatStatus("No AI helper is ready. Finish one in Settings first.");
     return;
   }
 
   chatMessages.push({ role: "user", text });
-  chatShown.push({ who: "you", text });
-  chatDraft = "";
-  chatStatus = `Waiting for ${service.label}...`;
-  chatRun += 1;
-  const run = chatRun;
+  chatParts.input.value = "";
+  addChatBubble("you", text);
+  setChatStatus(`Waiting for ${service.label}...`);
   chatAbort = new AbortController();
-  renderChat(service);
-  document.getElementById("chat-input")?.focus();
+  chatParts.input.focus();
   const slowNote = setTimeout(() => {
     if (run === chatRun) {
-      chatStatus = `Still waiting for ${service.label}. Slower AIs can take a few minutes.`;
-      const line = document.getElementById("chat-status");
-      if (line) line.textContent = chatStatus;
+      setChatStatus(`Still waiting for ${service.label}. Slower AIs can take a few minutes.`);
     }
   }, 10000);
 
@@ -1525,28 +1554,33 @@ async function sendChat() {
   if (run !== chatRun) {
     return; // Stop, Start over, or Back was pressed: ignore a late answer
   }
-  chatBusy = false;
-  chatStatus = "";
+  setChatBusy(false);
+  setChatStatus("");
 
   if (result.error || result.empty) {
-    // Nothing usable came back: take the message back out and put the words in the box.
+    // Nothing usable came back: take the message back out and return the words to the box.
     chatMessages.pop();
-    chatShown.pop();
-    chatDraft = text;
-    chatStatus = result.error
-      ? `${result.error} Your message is still in the box.`
-      : "The AI ran out of room before answering. Try again, or pick a different AI in Settings. Your message is still in the box.";
+    chatLog.pop();
+    chatParts.log.lastElementChild?.remove();
+    giveBackWords(text);
+    setChatStatus(
+      result.error
+        ? `${result.error} Your message is back in the box.`
+        : result.cutOff
+          ? "The AI ran out of room before answering. Try again, or pick a different AI in Settings. Your message is back in the box."
+          : "The AI sent an empty reply. Try again. Your message is back in the box.",
+    );
   } else if (result.trustedAdult) {
-    chatShown.push({ who: "note", text: TRUSTED_ADULT_LINE });
+    // The line is shown, and the message is not sent again with later ones.
+    chatMessages.pop();
+    addChatBubble("note", TRUSTED_ADULT_LINE);
   } else {
     chatMessages.push({ role: "assistant", text: result.text });
-    chatShown.push({ who: "ai", text: result.text });
+    addChatBubble("ai", result.text);
     if (result.cutOff) {
-      chatShown.push({ who: "note", text: "The reply was cut off by the AI service." });
+      addChatBubble("note", "The reply was cut off by the AI service.");
     }
   }
-  renderChat(service);
-  document.getElementById("chat-input")?.focus();
 }
 
 document.getElementById("open-chat").addEventListener("click", openChatScreen);

@@ -116,6 +116,71 @@ test("a TRUSTED_ADULT reply shows the adult line, hides the reply, and the chat 
   await expect(page.locator(".chat-you")).toHaveCount(2);
 });
 
+// The flagged message is not sent again with later ones.
+test("after the adult line the flagged message is not sent again", async ({ page }) => {
+  const seen = await openChat(page, { content: "TRUSTED_ADULT" });
+  await page.getByRole("button", { name: "Essay" }).click();
+  await say(page, "something serious");
+  await expect(page.getByText("talk to an adult you trust")).toBeVisible();
+  await say(page, "ok back to homework");
+  await expect(page.locator(".chat-you")).toHaveCount(2);
+  const sent = JSON.parse(seen.chat.at(-1).body).messages.map((m) => m.content);
+  expect(sent.join(" ")).not.toContain("something serious");
+});
+
+// Words typed while waiting are not lost when the call fails.
+test("words typed while waiting are kept when the call fails", async ({ page }) => {
+  await openChat(page, { chatStatus: 500, chatDelay: 600 });
+  await page.getByRole("button", { name: "Essay" }).click();
+  await say(page, "first words");
+  await expect(page.getByText("Waiting for")).toBeVisible();
+  await page.getByLabel("Your message").fill("next thought");
+  await expect(page.getByText("Your message is back in the box.")).toBeVisible();
+  await expect(page.getByLabel("Your message")).toHaveValue("first words\nnext thought");
+});
+
+// The log is not rebuilt for each message, so a screen reader hears only what is new.
+test("a new reply is added to the same chat log, not a rebuilt one", async ({ page }) => {
+  await openChat(page, { content: "reply" });
+  await page.getByRole("button", { name: "Essay" }).click();
+  await page.locator(".chat-log").evaluate((node) => { node.dataset.mark = "same"; });
+  await say(page, "hi");
+  await expect(page.locator(".chat-ai")).toHaveCount(2);
+  await expect(page.locator(".chat-log")).toHaveAttribute("data-mark", "same");
+});
+
+// The warning about answers is on the chat screen from the start.
+test("the chat says an AI can still get it wrong", async ({ page }) => {
+  await openChat(page);
+  await expect(page.getByText("An AI can still get it wrong. If it gives you a finished answer, don't copy it.")).toBeVisible();
+});
+
+// Enter sends and Shift+Enter makes a new line (a computer keyboard).
+test("Enter sends and Shift+Enter adds a new line", async ({ page, isMobile }) => {
+  test.skip(isMobile, "phones use the Send button");
+  const seen = await openChat(page, { content: "reply" });
+  await page.getByRole("button", { name: "Essay" }).click();
+  const box = page.getByLabel("Your message");
+  await box.fill("line one");
+  await box.press("Shift+Enter");
+  await box.pressSequentially("line two");
+  await expect(box).toHaveValue("line one\nline two");
+  await box.press("Enter");
+  await expect(page.locator(".chat-ai")).toHaveCount(2);
+  expect(JSON.parse(seen.chat.at(-1).body).messages.at(-1).content).toBe("line one\nline two");
+});
+
+// Back while a reply is coming: the late reply does not appear in the next chat.
+test("Back while waiting ignores the late reply", async ({ page }) => {
+  await openChat(page, { chatDelay: 1200, content: "late answer" });
+  await page.getByRole("button", { name: "Essay" }).click();
+  await say(page, "slow");
+  await page.getByRole("button", { name: "Back to home" }).click();
+  await page.getByRole("button", { name: "Talk it through" }).click();
+  await page.waitForTimeout(1800);
+  await expect(page.locator("body")).not.toContainText("late answer");
+});
+
 // Double tap sends once.
 test("a quick double tap on Send sends one message", async ({ page }) => {
   const seen = await openChat(page, { chatDelay: 600 });
@@ -132,7 +197,8 @@ test("Stop ends the wait and a late reply is ignored", async ({ page }) => {
   await page.getByRole("button", { name: "Essay" }).click();
   await say(page, "slow one");
   await page.getByRole("button", { name: "Stop" }).click();
-  await expect(page.getByText("Stopped. Your message is above.")).toBeVisible();
+  await expect(page.getByText("Stopped. Your message is back in the box.")).toBeVisible();
+  await expect(page.getByLabel("Your message")).toHaveValue("slow one");
   await page.waitForTimeout(2000);
   await expect(page.locator("body")).not.toContainText("late answer");
   await expect(page.getByRole("button", { name: "Send", exact: true })).toBeEnabled();

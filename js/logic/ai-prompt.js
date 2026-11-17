@@ -7,7 +7,7 @@ export const MAX_STEP_LENGTH = 200;
 export const TRUSTED_ADULT = "TRUSTED_ADULT";
 
 export const SYSTEM_PROMPT = [
-  "You help a student with ADHD break an assignment into small steps.",
+  "You help a student break an assignment into small steps.",
   "Give 3 to 5 short process steps, one per line, with no bullets or numbers.",
   "Each step is something the student does: read, write a plan, try the first part, check their work.",
   "Never give the answer, the finished text, a solution, or the content of the work.",
