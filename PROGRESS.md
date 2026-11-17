@@ -36,6 +36,7 @@ Nothing.
 
 **Ben**
 
+- **OpenRouter account (Ben, as an adult; free, no card).** Sign up, block training for free and paid models, create a key, and keep it private. Then an agent picks a free model on a zero-retention or safety-retention provider (DECISIONS change log, 2026-11-17).
 - Whether to delete the `web-app/` folder (see above).
 - The app's name. The page is titled "Focus app" for now.
 - How progress is shown: pet rock, quest map, or build-a-picture.
