@@ -1,6 +1,6 @@
 # Colour palette options (for Ben to choose)
 
-Status: **options only. Ben chooses.** Nothing is changed in the app yet.
+Status: **earthy palette applied 2026-11-17**, as Ben asked. Sand paper, dark brown text, olive moss accent, clay used sparingly. Text pairs pass 4.5:1 in light and dark modes. The calendar group fills are still to choose.
 
 ## How to read this
 

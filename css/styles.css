@@ -1,18 +1,29 @@
 /* Colors are placeholders until Ben chooses the look (DECISIONS.md "Still Ben's to decide"). */
+/* Earthy palette (chosen by Ben, 2026-11-17). Text pairs pass 4.5:1 in both modes. */
 :root {
-  --bg: #fdfcf8;
-  --text: #1d1d1f;
-  --muted: #5a5a5f;
-  --accent: #2f6f5e;
+  --bg: #fbf6ec;      /* warm sand paper */
+  --text: #2e2a24;    /* earthy dark brown */
+  --muted: #6b6257;   /* taupe for hints */
+  --accent: #4f6b3a;  /* olive moss */
+  --clay: #b5653d;    /* warm accent, used sparingly */
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #1b1c1e;
-    --text: #f2f2f2;
-    --muted: #b8b8bd;
-    --accent: #7fc4ad;
+    --bg: #26231e;
+    --text: #f1ebe0;
+    --muted: #c2b8a6;
+    --accent: #a9c08f;
+    --clay: #d9956f;
   }
+}
+
+:root[data-theme="dark"] {
+  --bg: #26231e;
+  --text: #f1ebe0;
+  --muted: #c2b8a6;
+  --accent: #a9c08f;
+  --clay: #d9956f;
 }
 
 *,
