@@ -102,30 +102,16 @@ Once the parent has set the key and the app is hosted:
 6. Reload the page and open **My calendar**. The items should still be there.
 7. Press **Delete** on one. It should go at once.
 
-## AI settings (2026-11-17)
+## AI helpers (settings redesign, 2026-11-17)
 
-1. Open the app. The paste screen should say "No AI is set up yet, so you'll get the built-in steps."
-2. Press **Settings**. Press **Use the OpenRouter address**; the name fills in as "OpenRouter". Press **Add this AI**. You should see "Saved. This AI can't answer until its key is added" and the list shows "No key yet".
-3. Press **Back**. The paste screen still says "No AI is set up yet".
-4. Reload, open **Settings**: the service is still there. Press **Remove OpenRouter**; the list says "No AI is set up yet".
-5. Type the name "Home AI" and the address `http://ai.tail6e5320.ts.net:8080/`. A warning "This address is not encrypted" should appear under the address.
-6. Type `ftp://nope` as the address and press **Add this AI**. You should see a message asking for http:// or https://.
+Use a test service you control, or the OpenRouter flow with your own key. Do not use a key you cannot afford to lose.
 
-## AI keys in this browser (2026-11-17)
-
-1. Open **Settings**. Add a service named "Test AI" with address `https://example.com`, and type the key `sk-test-1234567890` in the **Key** box. Press **Add this AI**. The list should say "Key saved: ••••7890". The full key must not appear anywhere on the page.
-2. Reload the page, open **Settings**. "Key saved: ••••7890" should still be there.
-3. Back on the paste screen, the line should say "Using: Test AI".
-4. Add another service with a key that has a space in it. You should see "A key has no spaces."
-5. Press **Forget key** on "Test AI". It should say "No key yet" and the paste screen should go back to "No AI is set up yet".
-
-## Calling the AI service you chose (2026-11-17)
-
-Use a test service you control (or the stand-in in the tests). Do not use a key you cannot afford to lose.
-
-1. **Settings** → name, address, model name, and key. Press **Add this AI**. The list shows "Key saved: ••••" and the model. The full key must not appear.
-2. Press **Test it**. You should see "Connected. This AI can answer." or one plain line explaining the failure.
-3. Back on the paste screen, paste an assignment, pick **Essay**, and press **Suggest steps with AI**. The message should say "Suggested by an AI (name)" and the steps appear.
-4. Press **Suggest steps with AI** twice quickly. Only one request should go out.
-5. Forget the key. The Suggest button should disappear, and the paste screen goes back to "No AI is set up yet".
-6. Warnings: the Settings key box shows the spending-limit and shared-computer notes before you save.
+1. Press **Settings**. With no helper you see "AI helpers", one sentence, and **Add an AI helper**.
+2. **Add an AI helper** → pick **OpenRouter** or **Another service** (type its web address, for example `http://my-computer:8080`) → **Next**. For an `http://` address a note about it not being encrypted appears under the box, and the Next button does not move.
+3. Paste your key. The box is a password box. **Show** reveals it, and switching to another tab hides it again. Your browser must not offer to save a password. **Next** (for another service the button says which host your key is sent to).
+4. Pick an AI. OpenRouter starts with `openrouter/free` picked, and a note says free AIs may keep what you send. You can search, press **Show more**, or open **I know the name already** and type one. **Next**.
+5. The app checks it works by itself. **Stop checking** is there the whole time. On success press **Done**: the card says "Ready · In use".
+6. Press **Back**, paste an assignment, pick a kind, and press **Suggest steps with AI**. The steps come into view, with "Suggested by an AI (name, host)".
+7. **Manage** → **Rename**, **Change the AI**, **Replace key**, **Test it again**, **Forget key** (asks first), **Remove this helper** (asks first).
+8. Failures: a wrong key says "That key didn't work" and does not offer **Save it anyway**. A server that can't be reached offers **Save it anyway**, and the helper then shows "Not checked yet" and is not put in use by itself.
+9. Reload in the middle of the add flow: Settings opens at the list, and nothing half-finished is saved.

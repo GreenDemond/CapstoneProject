@@ -1,10 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  chatAddress,
   parseAddress,
   addService,
   removeService,
-  chosenService,
+  inUseHelper,
   pasteStatus,
   normalizeServices,
   MAX_SERVICES,
@@ -22,7 +23,7 @@ function memoryStorage() {
 
 test("http and https addresses are both accepted, and http is flagged", () => {
   assert.equal(parseAddress("https://example.com/v1").plainHttp, false);
-  const plain = parseAddress("http://ai.tail6e5320.ts.net:8080/");
+  const plain = parseAddress("http://my-computer.example.ts.net:8080/");
   assert.equal(plain.ok, true);
   assert.equal(plain.plainHttp, true);
 });
@@ -39,9 +40,31 @@ test("an address with a name and password in it is refused", () => {
   assert.equal(parseAddress("https://user:secret@example.com").ok, false);
 });
 
-test("a service needs a name, and the name can't be only spaces", () => {
-  const { error } = addService([], { label: "   ", url: OPENROUTER_ADDRESS });
-  assert.ok(error);
+test("a blank name defaults to the address's host, and a name is not required", () => {
+  const { list, error } = addService([], { label: "   ", url: "http://my-computer.example.ts.net:8080" });
+  assert.equal(error, null);
+  assert.equal(list[0].label, "my-computer.example.ts.net");
+});
+
+test("the student types a base address, and the app adds the chat path", () => {
+  assert.equal(chatAddress("http://my-computer.example.ts.net:8080"), "http://my-computer.example.ts.net:8080/v1/chat/completions");
+  assert.equal(chatAddress("https://openrouter.ai/api/v1"), "https://openrouter.ai/api/v1/chat/completions");
+  assert.equal(chatAddress("https://openrouter.ai/api/v1/chat/completions"), "https://openrouter.ai/api/v1/chat/completions");
+  assert.equal(chatAddress("https://home.example.com/custom/run"), null);
+  assert.equal(chatAddress("nope"), null);
+});
+
+test("an OpenRouter service defaults to openrouter/free, and another service has no default", () => {
+  const openrouter = addService([], { label: "OR", url: "https://openrouter.ai/api/v1" }).list[0];
+  assert.equal(openrouter.model, "openrouter/free");
+  const other = addService([], { label: "Other", url: "https://other.example.com" }).list[0];
+  assert.equal(other.model, "");
+});
+
+test("a model name is optional when adding; it is picked from the list later", () => {
+  const { list, error } = addService([], { label: "A", url: "https://a.example.com" });
+  assert.equal(error, null);
+  assert.equal(list[0].model, "");
 });
 
 test("duplicate addresses and the list limit are refused", () => {
@@ -61,16 +84,16 @@ test("removing a service keeps the others in order", () => {
   assert.deepEqual(removeService(list, first.id).map((s) => s.label), ["B"]);
 });
 
-test("the chosen service falls back to the first when the choice is gone", () => {
+test("the helper in use falls back to a ready one, or none, when the choice is gone", () => {
   let list = addService([], { label: "A", url: "https://a.example.com", model: "m" }).list;
   list = addService(list, { label: "B", url: "https://b.example.com", model: "m" }).list;
-  assert.equal(chosenService(list, "missing").label, "A");
-  assert.equal(chosenService([], "anything"), null);
+  assert.equal(inUseHelper(list, "missing"), null);
+  assert.equal(inUseHelper([], "anything"), null);
 });
 
 test("the paste screen warns when no AI is ready, even if one is saved without a key", () => {
   const list = addService([], { label: "Home AI", url: "https://home.example.com", model: "m" }).list;
-  assert.match(pasteStatus(list, null), /No AI is set up yet/);
+  assert.match(pasteStatus(list, null), /Home AI isn.t ready yet/);
   assert.match(pasteStatus([], null), /No AI is set up yet/);
   const ready = list.map((s) => ({ ...s, keyReady: true }));
   assert.equal(pasteStatus(ready, null), "Using: Home AI");
@@ -103,4 +126,21 @@ test("saved settings keep the profile and calendar sections", () => {
   assert.deepEqual(saved.profile, { goals: { today: "x" } });
   assert.deepEqual(saved.calendar.counts, { "2026-11-17": 2 });
   assert.deepEqual(loadAiSettings(storage).services.map((s) => s.label), ["A"]);
+});
+
+import { modelsAddress, readModelIds } from "../../js/logic/ai-services.js";
+
+test("the model list address follows the standard for OpenRouter and an OpenAI-style service", () => {
+  assert.equal(modelsAddress("https://openrouter.ai/api/v1/chat/completions"), "https://openrouter.ai/api/v1/models");
+  assert.equal(modelsAddress("http://my-computer.example.ts.net:8080/v1/chat/completions"), "http://my-computer.example.ts.net:8080/v1/models");
+});
+
+test("a chat address that is not the standard form gives no guessed list address", () => {
+  assert.equal(modelsAddress("https://home.example.com/custom/run"), null);
+  assert.equal(modelsAddress("not a url"), null);
+});
+
+test("model ids are read from the standard list reply, and damaged items are skipped", () => {
+  assert.deepEqual(readModelIds({ object: "list", data: [{ id: "a" }, { id: "" }, "b", null, { id: 5 }] }), ["a", "b"]);
+  assert.deepEqual(readModelIds({}), []);
 });

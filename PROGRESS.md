@@ -3,7 +3,7 @@
 The only memory between sessions. Keep it current; rewrite it, do not let it grow into a diary.
 
 ## Working
-- AI settings screen (built, switched off): Settings button on the paste screen; add an OpenRouter or other address (http or https; http shows a warning); remove; choose one. The paste screen warns "No AI is set up yet" until a service has a key. Tests: `tests/logic/ai-services.test.js`, `tests/browser/settings.spec.js`.
+- AI helpers (built, tested with stand-ins, parent approved the page rule): the Settings screen is a short list of helpers, a one-question-per-step add flow (service, key, pick an AI, check it works), and Manage (rename, change the AI, replace or forget the key, test again, remove). Nothing is saved until the check passes, or the student chooses Save it anyway (shown as Not checked yet). Suggest steps calls the chosen helper and scrolls to the steps. Design: design/settings-ux.md v2, design/ai-direct.md. Real-service checks done by hand: Ben's PolyStrata server (needs `cors_origins`) and OpenRouter. Not done: the five answer-giving attempts against a real service, before classmates use it.
 
 - **Project setup.** `npm start` serves the app at http://localhost:3000. `npm run check` runs lint, the logic tests, and the browser tests at phone and desktop widths.
 - **Paste screen** (`design/paste-and-split.md`). The student pastes an assignment, picks one of six kinds of work, and sees five starter steps, with "Show more steps" for the full list. Numbered and bulleted items in the paste come first. Pasted text is cut at 6,000 characters with a message. Nothing is saved, and Start only confirms the steps are ready.
@@ -17,8 +17,6 @@ The only memory between sessions. Keep it current; rewrite it, do not let it gro
 - Logic in `js/logic/`: `clean-text.js` (tidies and limits pasted text), `starter-steps.js` (builds the steps), `focus-intake.js` (questions and card text). All tested.
 
 ## In progress
-- AI call, step 3 (built, tested with stand-ins; the wider page rule is approved by the parent (DECISIONS.md)): Test it, and Suggest steps calls the chosen service from the browser. Design: design/ai-direct.md.
-- AI keys, step 2 (built): keys are saved encrypted in this browser (IndexedDB, non-extractable key) and shown only as "••••1234". Settings has a key box, Save key, and Forget key. Next: the Test button and the request to the chosen service (step 3), which needs the page's security rules changed.
 
 Nothing.
 

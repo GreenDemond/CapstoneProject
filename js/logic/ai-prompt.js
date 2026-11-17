@@ -36,10 +36,11 @@ export function readReply(content) {
   return steps.length === 0 ? null : { steps };
 }
 
-export function buildChatBody({ model, kind, text }) {
+// Some services spend output on hidden reasoning before the visible reply, so the limit must be generous.
+export function buildChatBody({ model, kind, text, maxTokens = 300 }) {
   return {
     model,
-    max_tokens: 300,
+    max_tokens: maxTokens,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       { role: "user", content: `Kind of work: ${kind}\n\n${text}` },

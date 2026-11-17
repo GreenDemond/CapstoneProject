@@ -1,59 +1,99 @@
 import { test, expect } from "@playwright/test";
+import { HOST, KEY, standIn, openSettings, setUpOther, addOther, nextButton, pageTop } from "./helpers/ai.js";
 
-const KEY = "sk-test-settings-1234567890";
-
-async function fillService(page, { name = "Home AI", address = "https://home.example.com/v1/chat/completions", model = "home-model", key = KEY } = {}) {
-  await page.getByLabel('Name, for example "Home AI"').fill(name);
-  await page.getByLabel("Address").fill(address);
-  await page.getByLabel("Model name (the one your service lists)").fill(model);
-  await page.getByLabel("Key (required)").fill(key);
-}
-
-// Main path: add a service with a key and model, see it listed, then remove it.
-test("adding and removing an AI service, with the no-AI warning", async ({ page }) => {
+// Main path: add a service end to end, see it Ready and In use, and the paste screen follows.
+test("adding an AI helper end to end makes it Ready and In use", async ({ page }) => {
+  await standIn(page);
   await page.goto("/");
   await expect(page.locator("#ai-status")).toContainText("No AI is set up yet");
-
   await page.getByRole("button", { name: "Settings" }).click();
-  await fillService(page);
-  await page.getByRole("button", { name: "Add this AI" }).click();
-  await expect(page.locator("#settings-message")).toContainText("encrypted on this device");
-  await expect(page.locator("#ai-list li")).toHaveCount(1);
-  await expect(page.locator("#ai-list")).toContainText("Model: home-model");
+  await expect(page.getByText("Without one, you still get the built-in steps.")).toBeVisible();
+
+  await addOther(page);
+  const card = page.locator(".helper-card");
+  await expect(card).toHaveCount(1);
+  await expect(card).toContainText("ai.example.test");
+  await expect(card).toContainText("Ready · In use");
+  await expect(page.getByText("is ready and in use.")).toBeVisible();
 
   await page.getByRole("button", { name: "Back" }).click();
-  await expect(page.locator("#ai-status")).toContainText("Using: Home AI");
+  await expect(page.locator("#ai-status")).toContainText("Using: ai.example.test");
 
   await page.reload();
   await page.getByRole("button", { name: "Settings" }).click();
-  await expect(page.locator("#ai-list li")).toHaveCount(1);
-  await page.getByRole("button", { name: "Remove Home AI" }).click();
-  await expect(page.locator("#ai-empty")).toBeVisible();
-  await page.getByRole("button", { name: "Back" }).click();
-  await expect(page.locator("#ai-status")).toContainText("No AI is set up yet");
+  await expect(page.locator(".helper-card")).toContainText("Ready · In use");
 });
 
-// Awkward path: plain http shows a warning; a bad address, a missing model, or a missing key is refused.
-test("plain http shows a warning, and missing or bad details are refused", async ({ page }) => {
-  await page.goto("/");
+// Awkward paths: bad details are refused at step 1 and 2 with the plain message, before anything is sent.
+test("bad addresses, duplicates, and an empty key are refused in plain words", async ({ page }) => {
+  await standIn(page);
+  await openSettings(page);
+  await page.getByRole("button", { name: "Add an AI helper" }).click();
+
+  await nextButton(page).click();
+  await expect(page.getByRole("status").last()).toContainText("Pick one first");
+
+  await page.getByLabel(/^Another service/).check();
+  await page.getByLabel("Its web address").fill("nope");
+  await nextButton(page).click();
+  await expect(page.getByRole("status").last()).toContainText("doesn't look like a web address");
+
+  await page.getByLabel("Its web address").fill("https://x.example.com/custom/run");
+  await nextButton(page).click();
+  await expect(page.getByRole("status").last()).toContainText("address the service gives you");
+
+  await page.getByLabel("Its web address").fill("https://openrouter.evil.example");
+  await nextButton(page).click();
+  await expect(page.getByRole("status").last()).toContainText("isn't OpenRouter's address");
+
+  await page.getByLabel("Its web address").fill(HOST);
+  await nextButton(page).click();
+  await nextButton(page).click();
+  await expect(page.getByRole("status").last()).toContainText("Paste your key first");
+});
+
+test("a duplicate address is refused at step 1, before a key is typed", async ({ page }) => {
+  await standIn(page);
+  await openSettings(page);
+  await addOther(page);
+  await page.getByRole("button", { name: "Add an AI helper" }).click();
+  await page.getByLabel(/^Another service/).check();
+  await page.getByLabel("Its web address").fill(HOST);
+  await nextButton(page).click();
+  await expect(page.getByRole("status").last()).toContainText("already added");
+});
+
+// Plain http shows its note while typing, and the space is reserved so Next does not move.
+test("a plain http address shows a note without moving the Next button", async ({ page }) => {
+  await openSettings(page);
+  await page.getByRole("button", { name: "Add an AI helper" }).click();
+  await page.getByLabel(/^Another service/).check();
+  const before = await pageTop(nextButton(page));
+  await page.getByLabel("Its web address").fill("http://my-computer:8080");
+  await expect(page.locator("#http-note")).toContainText("isn't encrypted");
+  expect(await pageTop(nextButton(page))).toBe(before);
+});
+
+// Cancel at every step saves nothing, and a reload mid-setup leaves nothing behind.
+test("cancelling at any step saves nothing, and a reload mid-setup starts again", async ({ page }) => {
+  await standIn(page);
+  await openSettings(page);
+  await page.getByRole("button", { name: "Add an AI helper" }).click();
+  await page.getByRole("button", { name: "Cancel" }).click();
+  await expect(page.getByRole("button", { name: "Add an AI helper" })).toBeFocused();
+
+  await page.getByRole("button", { name: "Add an AI helper" }).click();
+  await page.getByLabel(/^Another service/).check();
+  await page.getByLabel("Its web address").fill(HOST);
+  await nextButton(page).click();
+  await page.getByLabel("Your key").fill(KEY);
+  await page.getByRole("button", { name: "Cancel" }).click();
+  await expect(page.locator(".helper-card")).toHaveCount(0);
+
+  await setUpOther(page);
+  await page.reload();
+  const stored = await page.evaluate(() => localStorage.getItem("focusapp.v1"));
+  expect(stored ?? "").not.toContain(KEY);
   await page.getByRole("button", { name: "Settings" }).click();
-
-  await page.getByLabel("Address").fill("http://ai.tail6e5320.ts.net:8080/v1/chat/completions");
-  await expect(page.locator("#ai-address-warning")).toContainText("not encrypted");
-
-  await page.getByRole("button", { name: "Add this AI" }).click();
-  await expect(page.locator("#settings-message")).toContainText("Paste the key first");
-
-  await fillService(page, { address: "ftp://nope" });
-  await page.getByRole("button", { name: "Add this AI" }).click();
-  await expect(page.locator("#settings-message")).toContainText("http://");
-
-  await fillService(page, { address: "http://ai.tail6e5320.ts.net:8080/v1/chat/completions", model: "" });
-  await page.getByRole("button", { name: "Add this AI" }).click();
-  await expect(page.locator("#settings-message")).toContainText("model name");
-
-  await fillService(page, { model: "m", key: "" });
-  await page.getByRole("button", { name: "Add this AI" }).click();
-  await expect(page.locator("#settings-message")).toContainText("Paste the key first");
-  await expect(page.locator("#ai-list li")).toHaveCount(0);
+  await expect(page.locator(".helper-card")).toHaveCount(0);
 });

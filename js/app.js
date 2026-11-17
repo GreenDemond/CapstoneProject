@@ -5,11 +5,11 @@ import { cleanPastedText, limitPaste } from "./logic/clean-text.js";
 import { KINDS, DEFAULT_STEP_COUNT, starterStepsFor, withTwoMinuteStart } from "./logic/starter-steps.js";
 import { QUESTIONS, cardLines } from "./logic/focus-intake.js";
 import { GOAL_KEYS, MAX_TEXT, emptyProfile, setGoals, addNote, deleteNote, notesNewestFirst } from "./logic/profile.js";
-import { loadProfileState, saveProfile, loadAiSettings, saveAiSettings } from "./storage.js";
-import { parseAddress, plainHttpWarning, addService, removeService, chosenService, usableServices, pasteStatus } from "./logic/ai-services.js";
-import { checkKey, keyHint, maskedKey } from "./logic/ai-key.js";
-import { keyStoreAvailable, saveKey, hasKey, deleteKey, readKey } from "./keystore.js";
-import { askService, testService } from "./ai-direct.js";
+import { loadProfileState, saveProfile } from "./storage.js";
+import { inUseHelper, usableServices, pasteStatus, isReady, hostOf } from "./logic/ai-services.js";
+import { readKey } from "./keystore.js";
+import { askService } from "./ai-direct.js";
+import { initSettings, getAiSettings, onAiChange, setChosenHelper } from "./settings.js";
 import { confetti } from "./confetti.js";
 import { GROUPS, CATEGORIES, groupItems, makeItem, makeEvent, isEvent, removeItem, parseDue, setStatus, completedItems } from "./logic/calendar.js";
 import { loadCalendarItems, saveCalendarItems, loadCompletionCounts, saveCompletionCounts } from "./storage.js";
@@ -654,13 +654,43 @@ function renderWork() {
 const aiBox = document.getElementById("ai-box");
 const aiButton = document.getElementById("ai-suggest");
 
-// The AI button shows only when the chosen service has a key saved.
+// The AI button shows only when the chosen helper is ready (it has a key and an AI picked).
 const aiPrivacy = document.getElementById("ai-privacy");
-function refreshAiButton() {
-  const service = chosenService(usableServices(aiSettings.services), aiSettings.chosenId);
-  aiBox.hidden = !service;
-  if (service) {
-    aiPrivacy.textContent = `This text is sent to the AI service ${service.label} to suggest steps. Don't paste your name or anything private.`;
+const aiStatus = document.getElementById("ai-status");
+const aiChoiceRow = document.getElementById("ai-choice-row");
+const aiChoice = document.getElementById("ai-choice");
+aiChoice.addEventListener("change", () => {
+  if (aiChoice.value !== "") {
+    setChosenHelper(aiChoice.value);
+  }
+});
+
+function refreshAiStatus() {
+  const { services, chosenId } = getAiSettings();
+  aiStatus.textContent = pasteStatus(services, chosenId);
+  const usable = usableServices(services);
+  aiChoiceRow.hidden = usable.length === 0;
+  const current = inUseHelper(services, chosenId);
+  const options = usable.map((item) => {
+    const option = document.createElement("option");
+    option.value = item.id;
+    option.textContent = item.label;
+    option.selected = item.id === current?.id;
+    return option;
+  });
+  // If the helper in use is not ready, the menu says so instead of naming a different one.
+  if (!current || !isReady(current)) {
+    const none = document.createElement("option");
+    none.value = "";
+    none.textContent = "Choose one";
+    none.selected = true;
+    options.unshift(none);
+  }
+  aiChoice.replaceChildren(...options);
+  const ready = current !== null && isReady(current);
+  aiBox.hidden = !ready;
+  if (ready) {
+    aiPrivacy.textContent = `This text is sent to the AI service ${current.label} (${hostOf(current.url)}) to suggest steps. Don't paste your name or anything private.`;
   }
 }
 
@@ -688,16 +718,22 @@ async function suggestWithChosenService() {
     message.textContent = "Tap the kind of work it is, then try again.";
     return;
   }
-  const service = chosenService(usableServices(aiSettings.services), aiSettings.chosenId);
-  const key = service ? await readKey(service.id) : null;
+  const { services, chosenId } = getAiSettings();
+  const service = inUseHelper(services, chosenId);
+  const key = service && isReady(service) ? await readKey(service.id) : null;
   if (!service || !key) {
-    message.textContent = "No AI is ready. Add a key in Settings first.";
-    refreshAiButton();
+    message.textContent = "No AI helper is ready. Finish one in Settings first.";
+    refreshAiStatus();
     return;
   }
   aiButton.disabled = true;
   message.textContent = `Asking the AI service ${service.label}...`;
+  // Slower services can take a few minutes; say so, so it does not look stuck.
+  const slowNote = setTimeout(() => {
+    message.textContent = `Still waiting for ${service.label}. Slower AIs can take a few minutes.`;
+  }, 10000);
   const result = await askService(service, key, text, chosenKind);
+  clearTimeout(slowNote);
   aiButton.disabled = false;
 
   if (result.trustedAdult) {
@@ -706,244 +742,24 @@ async function suggestWithChosenService() {
   }
   if (result.steps) {
     allSteps = result.steps;
-    message.textContent = `Suggested by an AI (${service.label}). Change anything you like.`;
+    message.textContent = `Suggested by an AI (${service.label}, ${hostOf(service.url)}). Change anything you like.`;
   } else {
     allSteps = starterStepsFor(chosenKind, cleanPastedText(text));
     message.textContent = `${result.error} Here are the starter steps instead.`;
   }
+  pastedText = cleanPastedText(text);
   ready.textContent = "";
   renderSteps(DEFAULT_STEP_COUNT);
   stepsScreen.hidden = false;
+  // Same as "Show my steps": bring the steps into view, so the student sees what came back.
+  stepsScreen.scrollIntoView({ block: "start" });
 }
 
-// Settings: the AI services a student adds (design/ai-endpoints.md). Keys come in the next step.
+// Settings: the AI helpers screens live in js/settings.js. The paste screen follows them.
 const settingsScreen = document.getElementById("settings-screen");
-const openSettings = document.getElementById("open-settings");
-const aiList = document.getElementById("ai-list");
-const aiEmpty = document.getElementById("ai-empty");
-const aiName = document.getElementById("ai-name");
-const aiAddress = document.getElementById("ai-address");
-const aiAddressWarning = document.getElementById("ai-address-warning");
-const aiKey = document.getElementById("ai-key");
-const aiModel = document.getElementById("ai-model");
-const aiForm = document.getElementById("ai-form");
-const settingsMessage = document.getElementById("settings-message");
-const aiStatus = document.getElementById("ai-status");
-
-let aiSettings = loadAiSettings();
-
-// Which saved services have a key in the encrypted store. Checked on each load.
-async function loadKeyStates() {
-  const services = await Promise.all(
-    aiSettings.services.map(async (service) => ({ ...service, keyReady: await hasKey(service.id) })),
-  );
-  aiSettings = { ...aiSettings, services };
-  refreshAiStatus();
-}
-
-function refreshAiStatus() {
-  aiStatus.textContent = pasteStatus(aiSettings.services, aiSettings.chosenId);
-  refreshAiButton();
-}
-
-function persistAi(onSaved) {
-  if (saveAiSettings(aiSettings)) {
-    onSaved?.();
-  } else {
-    settingsMessage.textContent = "Couldn't save on this device, so this change may be lost when you leave the page.";
-  }
-  refreshAiStatus();
-}
-
-function renderAiList() {
-  const chosen = chosenService(aiSettings.services, aiSettings.chosenId);
-  aiList.replaceChildren();
-  aiEmpty.hidden = aiSettings.services.length > 0;
-  for (const service of aiSettings.services) {
-    const item = document.createElement("li");
-    const radio = document.createElement("input");
-    radio.type = "radio";
-    radio.name = "ai-choice";
-    radio.id = `ai-${service.id}`;
-    radio.checked = chosen?.id === service.id;
-    radio.addEventListener("change", () => {
-      aiSettings = { ...aiSettings, chosenId: service.id };
-      persistAi();
-    });
-    const label = document.createElement("label");
-    label.htmlFor = radio.id;
-    label.textContent = service.label;
-    const address = document.createElement("span");
-    address.className = "hint";
-    address.textContent = service.url;
-    const note = document.createElement("span");
-    note.className = "hint";
-    note.textContent = !service.keyReady
-      ? "No key yet, so this AI can't answer."
-      : service.model === ""
-        ? "Needs a model name before it can answer."
-        : `Key saved: ${maskedKey(service.keyHint)}`;
-    const model = document.createElement("span");
-    model.className = "hint";
-    model.textContent = `Model: ${service.model}`;
-    item.append(radio, label, address, model, note);
-
-    if (service.keyReady && service.model !== "") {
-      const test = document.createElement("button");
-      test.type = "button";
-      test.textContent = "Test it";
-      test.setAttribute("aria-label", `Test ${service.label}`);
-      test.addEventListener("click", async () => {
-        const key = await readKey(service.id);
-        if (!key) {
-          settingsMessage.textContent = "The key couldn't be read. Forget it and save it again.";
-          return;
-        }
-        settingsMessage.textContent = "Testing...";
-        const result = await testService(service, key);
-        settingsMessage.textContent = `${service.label}: ${result.message}`;
-      });
-      item.append(test);
-
-      const forget = document.createElement("button");
-      forget.type = "button";
-      forget.textContent = "Forget key";
-      forget.setAttribute("aria-label", `Forget the key for ${service.label}`);
-      forget.addEventListener("click", async () => {
-        await deleteKey(service.id);
-        setKeyReady(service.id, false, "");
-        settingsMessage.textContent = `Forgot the key for ${service.label}.`;
-      });
-      item.append(forget);
-    } else {
-      const keyLabel = document.createElement("label");
-      keyLabel.htmlFor = `ai-key-${service.id}`;
-      keyLabel.textContent = "Key";
-      const keyInput = document.createElement("input");
-      keyInput.type = "password";
-      keyInput.id = `ai-key-${service.id}`;
-      keyInput.autocomplete = "off";
-      keyInput.spellcheck = false;
-      const save = document.createElement("button");
-      save.type = "button";
-      save.textContent = "Save key";
-      save.addEventListener("click", async () => {
-        const checked = checkKey(keyInput.value);
-        if (!checked.ok) {
-          settingsMessage.textContent = checked.reason;
-          return;
-        }
-        const saved = await saveKey(service.id, checked.key);
-        if (!saved) {
-          settingsMessage.textContent = "Couldn't save the key on this device. Check that this browser allows saving data.";
-          return;
-        }
-        setKeyReady(service.id, true, keyHint(checked.key));
-        settingsMessage.textContent = `Key saved for ${service.label}.`;
-      });
-      item.append(keyLabel, keyInput, save);
-    }
-
-    const remove = document.createElement("button");
-    remove.type = "button";
-    remove.textContent = "Remove";
-    remove.setAttribute("aria-label", `Remove ${service.label}`);
-    remove.addEventListener("click", async () => {
-      await deleteKey(service.id);
-      aiSettings = { services: removeService(aiSettings.services, service.id), chosenId: aiSettings.chosenId };
-      persistAi(() => {
-        settingsMessage.textContent = `Removed ${service.label}.`;
-      });
-      renderAiList();
-    });
-    item.append(remove);
-    aiList.append(item);
-  }
-}
-
-// Updates one service's key state on screen and in the saved list (never the key itself).
-function setKeyReady(id, ready, hint) {
-  aiSettings = {
-    ...aiSettings,
-    services: aiSettings.services.map((service) =>
-      service.id === id ? { ...service, keyReady: ready, keyHint: hint } : service,
-    ),
-  };
-  persistAi();
-  renderAiList();
-}
-
-function updateAddressWarning() {
-  const parsed = parseAddress(aiAddress.value);
-  const show = aiAddress.value.trim() !== "" && parsed.ok && parsed.plainHttp;
-  aiAddressWarning.hidden = !show;
-  aiAddressWarning.textContent = show ? plainHttpWarning() : "";
-}
-
-aiAddress.addEventListener("input", updateAddressWarning);
-
-aiForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const parsed = parseAddress(aiAddress.value);
-  if (!parsed.ok) {
-    settingsMessage.textContent = parsed.reason;
-    return;
-  }
-  const typedKey = checkKey(aiKey.value);
-  if (!typedKey.ok) {
-    settingsMessage.textContent = typedKey.reason;
-    return;
-  }
-  const { list, error } = addService(aiSettings.services, { label: aiName.value, url: parsed.url, model: aiModel.value });
-  if (error) {
-    settingsMessage.textContent = error;
-    return;
-  }
-  const added = list[list.length - 1];
-  aiSettings = { services: list, chosenId: aiSettings.chosenId ?? added.id };
-  let keySaved = false;
-  keySaved = await saveKey(added.id, typedKey.key);
-  if (keySaved) {
-    aiSettings = {
-      ...aiSettings,
-      services: aiSettings.services.map((service) =>
-        service.id === added.id ? { ...service, keyReady: true, keyHint: keyHint(typedKey.key) } : service,
-      ),
-    };
-  }
-  aiName.value = "";
-  aiAddress.value = "";
-  aiKey.value = "";
-  aiModel.value = "";
-  updateAddressWarning();
-  renderAiList();
-  persistAi(() => {
-    settingsMessage.textContent = keySaved
-      ? "Saved, with the key stored encrypted on this device."
-      : "Saved the AI, but couldn't save the key on this device. Add the key again below.";
-  });
-});
-
-openSettings.addEventListener("click", () => {
-  pasteScreen.hidden = true;
-  settingsScreen.hidden = false;
-  settingsMessage.textContent = "";
-  renderAiList();
-  settingsScreen.querySelector("h2").focus();
-});
-
-document.getElementById("settings-back").addEventListener("click", () => {
-  settingsScreen.hidden = true;
-  pasteScreen.hidden = false;
-  refreshAiStatus();
-  openSettings.focus();
-});
-
+initSettings({ screen: settingsScreen, pasteScreen, openButton: document.getElementById("open-settings") });
+onAiChange(refreshAiStatus);
 refreshAiStatus();
-refreshAiButton();
-if (keyStoreAvailable()) {
-  loadKeyStates();
-}
 
 // "My calendar": items the student adds with a due time, sorted into groups by how
 // soon they are due (design/calendar.md). Saved only on this device.
