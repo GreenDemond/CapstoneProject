@@ -78,7 +78,7 @@ function button(text, onClick, { primary = false, label = null, id = null } = {}
 // ---------- module state ----------
 
 let screen = null;
-let pasteScreen = null;
+let showScreen = null;
 let openButton = null;
 let views = {};
 let keyStatesPromise = Promise.resolve();
@@ -191,15 +191,13 @@ function useHelper(item) {
 }
 
 export function openSettingsScreen() {
-  pasteScreen.hidden = true;
-  screen.hidden = false;
+  showScreen("settings");
   renderList();
 }
 
 function closeSettings() {
   endFlow();
-  screen.hidden = true;
-  pasteScreen.hidden = false;
+  showScreen("home");
   openButton.focus();
 }
 
@@ -839,9 +837,9 @@ async function testAgain(item) {
 
 // ---------- start-up ----------
 
-export function initSettings({ screen: screenEl, pasteScreen: pasteEl, openButton: openEl }) {
+export function initSettings({ screen: screenEl, showScreen: showScreenFn, openButton: openEl }) {
   screen = screenEl;
-  pasteScreen = pasteEl;
+  showScreen = showScreenFn;
   openButton = openEl;
   views = {
     list: screen.querySelector("#helpers-list"),

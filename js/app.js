@@ -36,6 +36,42 @@ let chosenKind = null;
 let allSteps = [];
 let pastedText = "";
 
+// One place decides which screen is showing. Home is the paste screen, plus the steps preview
+// below it when the student has one open.
+const SCREENS = {
+  home: document.getElementById("paste-screen"),
+  intake: document.getElementById("intake-screen"),
+  profile: document.getElementById("profile-screen"),
+  work: document.getElementById("work-screen"),
+  calendar: document.getElementById("calendar-screen"),
+  chat: document.getElementById("chat-screen"),
+  settings: document.getElementById("settings-screen"),
+};
+let currentScreen = "home";
+let stepsPreviewOpen = false;
+let suggestAbort = null; // cancels the AI request started from the home screen
+
+function showScreen(name) {
+  currentScreen = name;
+  if (name !== "home") {
+    suggestAbort?.abort();
+  }
+  for (const [id, section] of Object.entries(SCREENS)) {
+    section.hidden = id !== name;
+  }
+  stepsScreen.hidden = !(name === "home" && stepsPreviewOpen);
+}
+
+// Shows the steps preview. It appears at once on the home screen, or when the student returns home.
+function openStepsPreview() {
+  stepsPreviewOpen = true;
+  if (currentScreen === "home") {
+    stepsScreen.hidden = false;
+    stepsScreen.scrollIntoView({ block: "start" });
+    document.getElementById("steps-heading").focus();
+  }
+}
+
 for (const kind of KINDS) {
   const button = document.createElement("button");
   button.type = "button";
@@ -93,11 +129,10 @@ showButton.addEventListener("click", async () => {
   allSteps = starterStepsFor(chosenKind, pastedText);
   ready.textContent = "";
   renderSteps(DEFAULT_STEP_COUNT);
-  stepsScreen.hidden = false;
   message.textContent = truncated
     ? "That's a long one. The first 6,000 characters are kept."
     : "";
-  stepsScreen.scrollIntoView({ block: "start" });
+  openStepsPreview();
 });
 
 document.getElementById("two-minute").addEventListener("click", () => {
@@ -117,7 +152,6 @@ startButton.addEventListener("click", () => {
 
 // "How I like to work": four one-tap questions, then a first-guess card.
 // Nothing is saved (storage comes with item 5). Closing the screen clears it.
-const pasteScreen = document.getElementById("paste-screen");
 const intakeScreen = document.getElementById("intake-screen");
 const intakeBody = document.getElementById("intake-body");
 const openIntake = document.getElementById("open-intake");
@@ -219,9 +253,7 @@ function changeLine(id) {
 function openIntakeScreen() {
   intakeAnswers = {};
   changingId = null;
-  pasteScreen.hidden = true;
-  stepsScreen.hidden = true;
-  intakeScreen.hidden = false;
+  showScreen("intake");
   showIntakeView("start");
   intakeScreen.scrollIntoView({ block: "start" });
 }
@@ -230,8 +262,7 @@ function closeIntake() {
   intakeAnswers = {};
   changingId = null;
   intakeBody.replaceChildren();
-  intakeScreen.hidden = true;
-  pasteScreen.hidden = false;
+  showScreen("home");
   openIntake.focus();
 }
 
@@ -239,7 +270,6 @@ openIntake.addEventListener("click", openIntakeScreen);
 
 // "My profile": goals and "What got in the way?" notes, saved on this device only
 // (design/profile.md). Nothing is shared, and nothing is judged.
-const profileScreen = document.getElementById("profile-screen");
 const profileBody = document.getElementById("profile-body");
 const openProfile = document.getElementById("open-profile");
 
@@ -378,10 +408,7 @@ function clearEverything() {
 }
 
 function openProfileScreen() {
-  pasteScreen.hidden = true;
-  stepsScreen.hidden = true;
-  intakeScreen.hidden = true;
-  profileScreen.hidden = false;
+  showScreen("profile");
   saveMessage = "";
   leaveWarned = false;
   renderProfile();
@@ -395,8 +422,7 @@ function backFromProfile() {
     profileBody.querySelector(".message")?.replaceChildren("You have changes that aren't saved. Press Save first, or press Back again to leave.");
     return;
   }
-  profileScreen.hidden = true;
-  pasteScreen.hidden = false;
+  showScreen("home");
   openProfile.focus();
 }
 
@@ -404,7 +430,6 @@ openProfile.addEventListener("click", openProfileScreen);
 
 // The work screen (design/work-screen.md): one step at a time. Steps live on the
 // page only; a refresh starts again from the paste screen.
-const workScreen = document.getElementById("work-screen");
 const workBody = document.getElementById("work-body");
 const workHeading = document.getElementById("work-heading");
 
@@ -520,11 +545,8 @@ function openWorkScreen(texts, existing = null) {
   hintsShown = 0;
   workNote = "";
   driftNote = "";
-  pasteScreen.hidden = true;
-  stepsScreen.hidden = true;
-  intakeScreen.hidden = true;
-  profileScreen.hidden = true;
-  workScreen.hidden = false;
+  stepsPreviewOpen = false;
+  showScreen("work");
   startTimer();
   renderWork();
   workHeading.focus();
@@ -537,8 +559,7 @@ function closeWork() {
   }
   work = null;
   workBody.replaceChildren();
-  workScreen.hidden = true;
-  pasteScreen.hidden = false;
+  showScreen("home");
   refreshHome();
   (pickup.hidden ? showButton : pickupStart).focus();
 }
@@ -780,6 +801,9 @@ async function suggestWithChosenService(text) {
   const { services, chosenId } = getAiSettings();
   const service = inUseHelper(services, chosenId);
   const key = service && isReady(service) ? await readKey(service.id) : null;
+  if (currentScreen !== "home") {
+    return; // the student left while the key was being read: send nothing
+  }
   if (!service || !key) {
     message.textContent = "No AI helper is ready. Finish one in Settings first.";
     refreshAiStatus();
@@ -791,9 +815,22 @@ async function suggestWithChosenService(text) {
   const slowNote = setTimeout(() => {
     message.textContent = `Still waiting for ${service.label}. Slower AIs can take a few minutes.`;
   }, 10000);
-  const result = await askService(service, key, text, chosenKind);
-  clearTimeout(slowNote);
-  showButton.disabled = false;
+  const abort = new AbortController();
+  suggestAbort = abort;
+  let result;
+  try {
+    result = await askService(service, key, text, chosenKind, abort.signal);
+  } finally {
+    clearTimeout(slowNote);
+    showButton.disabled = false;
+    if (suggestAbort === abort) {
+      suggestAbort = null;
+    }
+  }
+  if (abort.signal.aborted) {
+    message.textContent = ""; // the student left; show nothing
+    return;
+  }
 
   if (result.trustedAdult) {
     message.textContent = "If something serious is going on, please talk to an adult you trust.";
@@ -809,14 +846,12 @@ async function suggestWithChosenService(text) {
   pastedText = cleanPastedText(text);
   ready.textContent = "";
   renderSteps(DEFAULT_STEP_COUNT);
-  stepsScreen.hidden = false;
-  // Same as "Show my steps": bring the steps into view, so the student sees what came back.
-  stepsScreen.scrollIntoView({ block: "start" });
+  openStepsPreview();
 }
 
 // Settings: the AI helpers screens live in js/settings.js. The paste screen follows them.
 const settingsScreen = document.getElementById("settings-screen");
-initSettings({ screen: settingsScreen, pasteScreen, openButton: document.getElementById("open-settings") });
+initSettings({ screen: settingsScreen, showScreen, openButton: document.getElementById("open-settings") });
 onAiChange(refreshAiStatus);
 refreshAiStatus();
 
@@ -1062,19 +1097,13 @@ function deleteCalendarItem(id) {
 }
 
 function openCalendarScreen() {
-  pasteScreen.hidden = true;
-  stepsScreen.hidden = true;
-  intakeScreen.hidden = true;
-  profileScreen.hidden = true;
-  workScreen.hidden = true;
-  calendarScreen.hidden = false;
+  showScreen("calendar");
   renderCalendar();
   calendarScreen.querySelector("h2").focus();
 }
 
 function backFromCalendar() {
-  calendarScreen.hidden = true;
-  pasteScreen.hidden = false;
+  showScreen("home");
   openCalendar.focus();
 }
 
@@ -1349,7 +1378,6 @@ refreshHome();
 // The chat lives on this page only. Replies are shown whole, as text, never as HTML.
 // The screen is built once; new messages are added to the log and the status line is changed
 // in place, so screen readers announce only what is new.
-const chatScreen = document.getElementById("chat-screen");
 const chatBody = document.getElementById("chat-body");
 const chatHeading = document.getElementById("chat-heading");
 let chatMessages = []; // what is sent: { role, text }
@@ -1375,9 +1403,7 @@ function resetChat() {
 }
 
 function openChatScreen() {
-  pasteScreen.hidden = true;
-  stepsScreen.hidden = true;
-  chatScreen.hidden = false;
+  showScreen("chat");
   if (chatMessages.length === 0 && chatKind === null) {
     chatKind = chosenKind;
   }
@@ -1390,8 +1416,7 @@ function closeChat() {
   chatKind = null; // the next chat starts from the kind chosen on the paste screen
   chatParts = null;
   chatBody.replaceChildren();
-  chatScreen.hidden = true;
-  pasteScreen.hidden = false;
+  showScreen("home");
   document.getElementById("open-chat").focus();
 }
 
@@ -1437,7 +1462,7 @@ function buildChat() {
   if (!helper) {
     chatBody.append(
       el("p", "Add an AI helper in Settings first.", { class: "hint" }),
-      button("Open Settings", () => { chatScreen.hidden = true; openSettingsScreen(); }, "primary"),
+      button("Open Settings", () => openSettingsScreen(), "primary"),
       button("Back to home", closeChat),
     );
     return;

@@ -9,6 +9,7 @@ Each step below: implemented by a cheaper model where possible, then `npm run ch
 ## Progress
 - Step 1 done (storage: shared save helper, damaged and other-version data handled, 18 new tests; also fixed a false "couldn't be read" warning on the profile when only other sections were saved).
 - Step 2 done (local server: malformed address no longer crashes it; only `index.html`, `js/` and `css/` are served).
+- Step 3 done (one `showScreen` for every screen, including Settings; the steps preview survives a visit elsewhere; the home AI request is cancelled when the student leaves; focusable headings; 12 navigation tests).
 
 ## Phase 1: keep data safe, one screen at a time
 
