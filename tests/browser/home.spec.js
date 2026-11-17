@@ -1,10 +1,10 @@
 import { test, expect } from "@playwright/test";
 
-// Main path: the page opens and shows the setup message.
-test("the app opens and shows the setup message", async ({ page }) => {
+// Main path: the page opens on the paste screen.
+test("the app opens on the paste screen", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Focus app" })).toBeVisible();
-  await expect(page.getByText("Setup complete")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "What's the assignment?" })).toBeVisible();
 });
 
 // Awkward path: no page asks for anything outside this app (DECISIONS.md T2),

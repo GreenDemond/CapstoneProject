@@ -11,7 +11,31 @@
   <body>
     <main id="app">
       <h1>Focus app</h1>
-      <p class="status">Setup complete. The study tools will appear here.</p>
+
+      <section id="paste-screen" aria-labelledby="paste-heading">
+        <h2 id="paste-heading">What's the assignment?</h2>
+        <p class="hint">Paste the instructions or what you have to do. This stays on your device.</p>
+
+        <label for="assignment-text" class="visually-hidden">Assignment text</label>
+        <textarea id="assignment-text" rows="8" placeholder="Paste here"></textarea>
+
+        <fieldset class="kinds">
+          <legend>What kind of work is this?</legend>
+          <div id="kind-buttons" class="kind-buttons"></div>
+        </fieldset>
+
+        <button type="button" id="show-steps" class="primary">Show my steps</button>
+        <p id="message" class="message" role="status" aria-live="polite"></p>
+      </section>
+
+      <section id="steps-screen" hidden aria-labelledby="steps-heading">
+        <h2 id="steps-heading">Here's a start</h2>
+        <p class="hint">Changing these steps is coming next.</p>
+        <ol id="steps" class="steps" tabindex="-1"></ol>
+        <button type="button" id="show-more" hidden>Show more steps</button>
+        <button type="button" id="start" class="primary">Start</button>
+        <p id="ready" class="message" role="status" aria-live="polite"></p>
+      </section>
     </main>
     <script type="module" src="js/app.js"></script>
   </body>

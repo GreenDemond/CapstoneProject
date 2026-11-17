@@ -29,7 +29,8 @@ const server = createServer(async (req, res) => {
     relative === "index.html" ||
     SERVED_FOLDERS.some((folder) => relative.startsWith(`${folder}/`));
   const fullPath = resolve(join(ROOT, normalize(relative)));
-  const insideRoot = fullPath.startsWith(ROOT + sep) || fullPath === ROOT + "index.html";
+  // ROOT already ends with a slash, so a path inside it starts with ROOT.
+  const insideRoot = fullPath.startsWith(ROOT) && !fullPath.split(sep).includes("..");
 
   if (!allowed || !insideRoot || !TYPES[extname(fullPath)]) {
     res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
