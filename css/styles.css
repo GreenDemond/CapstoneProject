@@ -283,3 +283,24 @@ h3 {
   border-color: #2e2a24;
   background: transparent;
 }
+
+.big-notes {
+  min-height: 9rem;
+  font-size: 1.05rem;
+}
+
+.item-notes {
+  margin: 0.4rem 0 0;
+  white-space: pre-wrap;
+}
+
+.item-links {
+  list-style: none;
+  padding: 0;
+  margin: 0.4rem 0 0;
+}
+
+.item-links a {
+  color: var(--accent);
+  overflow-wrap: anywhere;
+}

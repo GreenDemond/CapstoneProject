@@ -65,3 +65,10 @@ Wording rules: no "overdue," "missed," or "late." Past events look the same as f
 3. **Reminders on by default,** or off until the student turns them on? I recommend off.
 4. **Should work steps also appear on the calendar** (for example, "Essay: step 3 at 4 pm")? That would link the two features, which is useful but adds data. I recommend not in this first slice.
 5. **Order:** Day view first (as above), or all three views together?
+
+## Added 2026-11-17: notes and links on an item
+
+- **Notes:** a large box (up to 2,000 characters) for anything the student wants to write about the item. Plain text, shown with `textContent`.
+- **Links:** up to 10 web addresses, one per line. Only addresses starting with `https://` are accepted; anything else gets the message "Links must start with https://." Links open in a new tab with `rel="noopener noreferrer"`. The app loads nothing from them.
+- **PDFs:** not in this step. A PDF can be several megabytes, and storing it on the device needs a separate design and a change to the one-saved-object rule (T3). Ben to decide.
+- **Push notifications:** not in this step. They need a push service run by a large company and a server (T2, T7). Needs a parent's decision and a new DECISIONS entry. Reminders that show while the app is open remain the plan.

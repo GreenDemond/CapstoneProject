@@ -60,3 +60,22 @@ test("items survive a reload and can be deleted", async ({ page }) => {
   await expect(page.locator("ul.cal-list").getByText("Lab report")).toHaveCount(0);
   await expect(page.getByText("Nothing planned yet.")).toBeVisible();
 });
+
+// Notes and links: the link opens in a new tab, and a non-https link is refused.
+test("notes and https links are saved, and a plain-web link is refused", async ({ page }) => {
+  await openCalendar(page);
+  await page.getByLabel("What is it?").fill("Reading");
+  await page.getByLabel("Due date").fill(dayFromNow(3));
+  await page.getByLabel("Due time").fill("12:00");
+  await page.getByLabel("Web links, one per line").fill("http://insecure.example.org");
+  await page.getByRole("button", { name: "Add to my calendar" }).click();
+  await expect(page.getByText("Links must start with https://")).toBeVisible();
+
+  await page.getByLabel("Web links, one per line").fill("https://example.org/chapter");
+  await page.getByLabel("Notes (as much as you want)").fill("Look at the figures on page 4.");
+  await page.getByRole("button", { name: "Add to my calendar" }).click();
+  await expect(page.locator("p.item-notes")).toHaveText("Look at the figures on page 4.");
+  const link = page.locator("ul.item-links a");
+  await expect(link).toHaveAttribute("href", "https://example.org/chapter");
+  await expect(link).toHaveAttribute("rel", "noopener noreferrer");
+});

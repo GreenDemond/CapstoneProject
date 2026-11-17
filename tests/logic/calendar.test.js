@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { bucketFor, parseDue, makeItem, groupItems, removeItem } from "../../js/logic/calendar.js";
+import { bucketFor, parseDue, makeItem, groupItems, removeItem, parseLinks, MAX_LINKS, MAX_NOTES } from "../../js/logic/calendar.js";
 
 const NOW = new Date(2026, 10, 17, 10, 0); // 17 Nov 2026, 10:00 local
 
@@ -55,4 +55,31 @@ test("items are grouped and sorted soonest first", () => {
 test("removing an item leaves the rest", () => {
   const items = [{ id: "a" }, { id: "b" }];
   assert.deepEqual(removeItem(items, "a"), [{ id: "b" }]);
+});
+
+test("links must be https web addresses, one per line", () => {
+  assert.deepEqual(parseLinks("https://example.org/a\n  https://example.org/b  ").links, [
+    "https://example.org/a",
+    "https://example.org/b",
+  ]);
+  assert.equal(parseLinks("javascript:alert(1)").ok, false);
+  assert.equal(parseLinks("http://example.org").ok, false);
+  assert.equal(parseLinks("not a link").ok, false);
+  assert.deepEqual(parseLinks(""), { ok: true, links: [] });
+});
+
+test("too many links is refused", () => {
+  const many = Array.from({ length: MAX_LINKS + 1 }, (_, i) => `https://example.org/${i}`).join("\n");
+  assert.equal(parseLinks(many).ok, false);
+});
+
+test("notes are kept, trimmed and cut to the limit", () => {
+  const result = makeItem({ title: "Essay", day: "2026-11-17", time: "10:00", notes: "x".repeat(MAX_NOTES + 10) }, "a");
+  assert.equal(result.item.notes.length, MAX_NOTES);
+});
+
+test("an item keeps its notes and links", () => {
+  const result = makeItem({ title: "Essay", day: "2026-11-17", time: "10:00", notes: " Read section 2 ", links: "https://example.org" }, "a");
+  assert.equal(result.item.notes, "Read section 2");
+  assert.deepEqual(result.item.links, ["https://example.org/"]);
 });

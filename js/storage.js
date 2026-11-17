@@ -93,14 +93,24 @@ export function loadCalendarItems(storage = defaultStorage()) {
       return [];
     }
     // Keep only items that have the expected shape; drop the rest one by one.
-    return items.filter(
-      (item) =>
-        item &&
-        typeof item.id === "string" &&
-        typeof item.title === "string" &&
-        typeof item.due === "string" &&
-        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(item.due),
-    );
+    return items
+      .filter(
+        (item) =>
+          item &&
+          typeof item.id === "string" &&
+          typeof item.title === "string" &&
+          typeof item.due === "string" &&
+          /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(item.due),
+      )
+      .map((item) => ({
+        id: item.id,
+        title: item.title,
+        due: item.due,
+        notes: typeof item.notes === "string" ? item.notes : "",
+        links: Array.isArray(item.links)
+          ? item.links.filter((link) => typeof link === "string" && link.startsWith("https://"))
+          : [],
+      }));
   } catch {
     return [];
   }

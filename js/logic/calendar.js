@@ -2,6 +2,8 @@
 // Pure logic: no browser APIs. Times are the device's local time.
 
 export const MAX_TITLE = 200;
+export const MAX_NOTES = 2000;
+export const MAX_LINKS = 10;
 export const GROUPS = [
   { id: "urgent", label: "Urgent", hint: "Must be done within the hour" },
   { id: "significant", label: "Significant", hint: "Due by the end of today" },
@@ -55,8 +57,33 @@ export function parseDue(day, time) {
   return due;
 }
 
+// Only web addresses that start with https:// are kept.
+export function parseLinks(text) {
+  const lines = String(text ?? "")
+    .split(/\n/)
+    .map((line) => line.trim())
+    .filter((line) => line !== "");
+  const links = [];
+  for (const line of lines) {
+    let url;
+    try {
+      url = new URL(line);
+    } catch {
+      return { ok: false, reason: "Links must start with https://" };
+    }
+    if (url.protocol !== "https:") {
+      return { ok: false, reason: "Links must start with https://" };
+    }
+    links.push(url.href);
+  }
+  if (links.length > MAX_LINKS) {
+    return { ok: false, reason: `Up to ${MAX_LINKS} links for one item.` };
+  }
+  return { ok: true, links };
+}
+
 // Returns { ok: true, item } or { ok: false, reason }.
-export function makeItem({ title, day, time }, id) {
+export function makeItem({ title, day, time, notes = "", links = "" }, id) {
   const cleaned = typeof title === "string" ? title.trim().slice(0, MAX_TITLE) : "";
   if (cleaned === "") {
     return { ok: false, reason: "Write what it is first." };
@@ -65,7 +92,20 @@ export function makeItem({ title, day, time }, id) {
   if (!due) {
     return { ok: false, reason: "Choose a due date and time." };
   }
-  return { ok: true, item: { id, title: cleaned, due: `${day}T${time}` } };
+  const parsedLinks = parseLinks(links);
+  if (!parsedLinks.ok) {
+    return parsedLinks;
+  }
+  return {
+    ok: true,
+    item: {
+      id,
+      title: cleaned,
+      due: `${day}T${time}`,
+      notes: String(notes ?? "").trim().slice(0, MAX_NOTES),
+      links: parsedLinks.links,
+    },
+  };
 }
 
 export function groupItems(items, now) {

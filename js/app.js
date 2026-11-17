@@ -708,6 +708,12 @@ function renderCalendar(draft = { title: "", day: "", time: "" }, message = "") 
   form.append(...labelled("What is it?", titleBox, "cal-title"));
   form.append(...labelled("Due date", dayBox, "cal-day"));
   form.append(...labelled("Due time", timeBox, "cal-time"));
+  const notesBox = el("textarea", undefined, { id: "cal-notes", rows: "8", maxlength: "2000", class: "big-notes" });
+  notesBox.value = draft.notes ?? "";
+  const linksBox = el("textarea", undefined, { id: "cal-links", rows: "3", placeholder: "https://" });
+  linksBox.value = draft.links ?? "";
+  form.append(...labelled("Notes (as much as you want)", notesBox, "cal-notes"));
+  form.append(...labelled("Web links, one per line (must start with https://)", linksBox, "cal-links"));
   form.append(button("Add to my calendar", () => addCalendarItem(), "primary"));
   form.append(el("p", message, { class: "message", role: "status" }));
   calendarBody.append(form);
@@ -729,6 +735,18 @@ function renderCalendar(draft = { title: "", day: "", time: "" }, message = "") 
       const due = group.id === "urgent" && new Date(item.due) < new Date() ? `${dueText(item.due)} · Due time has passed` : dueText(item.due);
       row.append(el("span", `${item.title}, ${due}`), " ");
       row.append(button("Delete", () => deleteCalendarItem(item.id), "small"));
+      if (item.notes) {
+        row.append(el("p", item.notes, { class: "item-notes" }));
+      }
+      if (item.links?.length) {
+        const linkList = el("ul", undefined, { class: "item-links" });
+        for (const link of item.links) {
+          const a = el("a", link, { href: link, target: "_blank", rel: "noopener noreferrer" });
+          linkList.append(el("li"));
+          linkList.lastChild.append(a);
+        }
+        row.append(linkList);
+      }
       list.append(row);
     }
     calendarBody.append(list);
@@ -742,6 +760,8 @@ function addCalendarItem() {
     title: document.getElementById("cal-title").value,
     day: document.getElementById("cal-day").value,
     time: document.getElementById("cal-time").value,
+    notes: document.getElementById("cal-notes").value,
+    links: document.getElementById("cal-links").value,
   };
   const result = makeItem(draft, calendarId());
   if (!result.ok) {
@@ -755,7 +775,7 @@ function addCalendarItem() {
     return;
   }
   calendarItems = next;
-  renderCalendar({ title: "", day: "", time: "" }, "Added.");
+  renderCalendar({ title: "", day: "", time: "", notes: "", links: "" }, "Added.");
   document.getElementById("cal-title").focus();
 }
 
