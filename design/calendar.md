@@ -96,3 +96,10 @@ Wording rules: no "overdue," "missed," or "late." Past events look the same as f
 - On the add form, **Type** chooses **A task, due at a time** or **A trip or event, over several days**. A trip asks for a **From date** and a **To date** (no times). The To date can't be before the From date.
 - A trip shows on every day it covers in the Week and Month views, and in the Day view as a band above the timeline. The List view has a **Trips and events** list.
 - Trips are not put in the priority groups and don't need a due time. Completing and counting work as for tasks.
+
+## Added 2026-11-17: print or save a day as a PDF, with tick boxes
+
+- In the Day view, a **Print or save as PDF** button.
+- It opens the browser's own print window, with a plain page for that day: the trips band, then each item with a tick box, its time, title, and notes. Tick boxes are for ticking on paper.
+- Saving as a PDF uses the browser's own "Save as PDF" option. The file stays on the device; nothing is uploaded.
+- The print page is hidden on screen and shown only when printing.

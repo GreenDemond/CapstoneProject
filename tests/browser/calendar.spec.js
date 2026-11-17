@@ -175,3 +175,23 @@ test("a trip that ends before it starts is refused", async ({ page }) => {
   await page.getByRole("button", { name: "Add to my calendar" }).click();
   await expect(page.getByText("The to date is before the from date.")).toBeVisible();
 });
+
+// Print: the Day view builds a page with a tick box per item, then calls the browser's print.
+test("the day can be printed with a tick box for each item", async ({ page }) => {
+  await openCalendar(page);
+  await page.getByLabel("What is it?").fill("Biology reading");
+  await page.getByLabel("Due date").fill(dayFromNow(0));
+  await page.getByLabel("Due time").fill("11:00");
+  await page.getByRole("button", { name: "Add to my calendar" }).click();
+  await page.getByRole("button", { name: "Day", exact: true }).click();
+  // Capture the print page at the moment printing starts; the app clears it afterwards.
+  await page.evaluate(() => {
+    globalThis.print = () => {
+      globalThis.printedBoxes = globalThis.document.querySelectorAll("#print-area li input[type=checkbox]").length;
+      globalThis.printedText = globalThis.document.getElementById("print-area").textContent;
+    };
+  });
+  await page.getByRole("button", { name: "Print or save as PDF" }).click();
+  expect(await page.evaluate(() => globalThis.printedBoxes)).toBe(1);
+  expect(await page.evaluate(() => globalThis.printedText)).toContain("Biology reading");
+});

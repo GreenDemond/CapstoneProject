@@ -1030,6 +1030,7 @@ function renderTimeView() {
       grid.append(block);
     }
     calendarBody.append(grid);
+    calendarBody.append(button("Print or save as PDF", () => printDay(), "small"));
     if (outside.length) {
       calendarBody.append(el("p", "Outside 7 am to 10 pm:", { class: "hint" }));
       for (const item of outside) calendarBody.append(blockFor(item, now));
@@ -1077,4 +1078,35 @@ function renderTimeView() {
     }
   }
   calendarBody.append(grid);
+}
+
+// Print or save the day as a PDF, with a tick box for each item (design/calendar.md).
+// Uses the browser's own print window. Nothing is uploaded.
+function printDay() {
+  const area = document.getElementById("print-area");
+  area.replaceChildren();
+  const heading = el("h1", calAnchor.toLocaleDateString([], { weekday: "long", day: "numeric", month: "long", year: "numeric" }));
+  area.append(heading);
+  for (const trip of eventsCovering(calendarItems, calAnchor)) {
+    area.append(el("p", `Trip or event: ${trip.title} (${trip.start} to ${trip.end})`));
+  }
+  const items = itemsOnDay(calendarItems, calAnchor).filter((i) => !isEvent(i));
+  if (items.length === 0) {
+    area.append(el("p", "Nothing planned for this day."));
+  }
+  const list = el("ul", undefined, { class: "print-list" });
+  for (const item of items) {
+    const row = el("li");
+    const box = el("input", undefined, { type: "checkbox", "aria-label": `Done: ${item.title}` });
+    row.append(box, " ", el("span", `${item.due.slice(11, 16)}  ${item.title}`));
+    if (item.notes) {
+      row.append(el("p", item.notes, { class: "print-notes" }));
+    }
+    list.append(row);
+  }
+  area.append(list);
+  area.hidden = false;
+  window.print();
+  area.hidden = true;
+  area.replaceChildren();
 }

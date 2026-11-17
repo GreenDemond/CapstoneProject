@@ -372,3 +372,14 @@ h3 {
 .month-cell.empty { border-color: transparent; background: transparent; }
 .day-num { display: block; font-weight: 700; }
 .mini { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+@media print {
+  body > *:not(#print-area) { display: none !important; }
+  #print-area { display: block !important; color: #000; background: #fff; font-size: 13pt; padding: 1cm; }
+  #print-area h1 { font-size: 20pt; color: #000; }
+  .print-list { list-style: none; padding: 0; }
+  .print-list li { margin: 0.4cm 0; }
+  .print-list input[type="checkbox"] { width: 0.5cm; height: 0.5cm; vertical-align: middle; }
+  .print-notes { margin: 0.1cm 0 0 0.9cm; font-size: 11pt; }
+}
+#print-area[hidden] { display: none; }
