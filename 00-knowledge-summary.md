@@ -20,7 +20,7 @@ Most findings were read from paper abstracts, not full papers. Nothing here is m
 3. Teach the student to break work into pieces and plan it. Do not do all of it for them.
 4. Add friction before a distraction instead of a wall. Showing statistics alone does little.
 5. If AI is involved, it gives hints, never answers.
-6. No questionnaire can predict what makes a person focus. Help the student test it for themselves.
+6. No questionnaire has been shown to predict what helps a person focus. Help the student test it for themselves.
 7. Do not build brain-training games, and do not claim to treat ADHD.
 8. Collect as little data as possible, and never ask about a diagnosis.
 
