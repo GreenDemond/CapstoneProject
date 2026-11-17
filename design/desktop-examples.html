@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Desktop layout ideas</title>
+<style>
+  :root { --bg:#fbf6ec; --text:#2e2a24; --muted:#6b6257; --accent:#4f6b3a; --orange:#e6893f; --yellow:#e7c04f; --blue:#9cc3dd; --sage:#c9d3b8; --stone:#d8d2c4; --line:#cbbfa6; }
+  body { margin:0; background:#ece4d2; color:var(--text); font-family: system-ui, sans-serif; padding:24px; }
+  h1 { font-size:1.6rem; margin:0 0 4px; color:var(--accent); }
+  h2 { font-size:1.2rem; margin:28px 0 4px; }
+  .intro, .why { color:var(--muted); margin:0 0 12px; }
+  .window { background:var(--bg); border:1px solid var(--line); border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+  .bar { background:#e3d9c4; padding:8px 12px; font-size:.85rem; color:var(--muted); border-bottom:1px solid var(--line); }
+  .body { display:grid; min-height:360px; }
+  .btn { display:inline-block; margin:4px 6px 4px 0; padding:9px 14px; border:1px solid var(--accent); border-radius:8px; font-size:.95rem; background:var(--bg); }
+  .btn.primary { background:var(--accent); color:var(--bg); }
+  .small { font-size:.85rem; color:var(--muted); }
+  .step { font-size:1.4rem; font-weight:600; margin:8px 0 14px; }
+  .list { list-style:none; margin:0; padding:0; }
+  .list li { padding:10px 12px; border-bottom:1px solid var(--line); font-size:.95rem; }
+  .list li.now { background:#efe6d0; font-weight:600; }
+  .side { border-right:1px solid var(--line); padding:14px; }
+  .main { padding:18px 24px; }
+  .fixed { border:2px dashed var(--accent); border-radius:10px; padding:12px; display:inline-block; margin-top:10px; }
+  .note { background:var(--yellow); border-radius:8px; padding:10px; font-size:.95rem; margin-top:14px; max-width:520px; }
+  .hour { display:grid; grid-template-columns:70px 1fr; border-top:1px solid var(--line); min-height:34px; padding:4px 0; }
+  .hour .t { color:var(--muted); font-size:.85rem; }
+  .block { background:var(--orange); border-radius:6px; padding:3px 8px; font-size:.9rem; align-self:start; }
+  .blank { color:#a99e88; font-style:italic; font-size:.9rem; }
+  .week { display:grid; grid-template-columns:repeat(7, 1fr); }
+  .day { border-right:1px solid var(--line); padding:8px; min-height:200px; }
+  .day:last-child { border-right:0; }
+  .day h3 { font-size:.9rem; margin:0 0 8px; }
+  .chip { display:block; border-radius:6px; padding:4px 6px; font-size:.85rem; margin-bottom:6px; }
+</style>
+</head>
+<body>
+<h1>Desktop layout ideas</h1>
+<p class="intro">Wide versions of the three ideas. Rough sketches, not final.</p>
+
+<h2>1. Fixed honest pair, with a margin note</h2>
+<p class="why">Done and Still working stay in one fixed place. Drifted and Later are the same size as Done. The margin note shows what the student left for themselves last time.</p>
+<div class="window">
+  <div class="bar">Focus app: work</div>
+  <div class="body" style="grid-template-columns: 260px 1fr;">
+    <div class="side">
+      <p class="small" style="margin-top:0">Your steps</p>
+      <ul class="list">
+        <li>Find three sources</li>
+        <li class="now">Read the first two pages and note the main claim</li>
+        <li>Write one paragraph</li>
+        <li>Check the reference list</li>
+      </ul>
+    </div>
+    <div class="main">
+      <div class="small">Step 2 of 10</div>
+      <div class="step">Read the first two pages and note the main claim</div>
+      <div class="fixed">
+        <span class="btn primary">Done</span>
+        <span class="btn">Still working</span>
+        <span class="btn">Stuck</span>
+        <span class="btn">Drifted</span>
+        <span class="btn">Later</span>
+      </div>
+      <div class="note">From last time: "Got stuck on the graph. Ask Sam about the axis labels."</div>
+    </div>
+  </div>
+</div>
+
+<h2>2. Open on the next step</h2>
+<p class="why">The app opens on your next step. The other screens are small, quiet links along the top, so nothing competes with the work.</p>
+<div class="window">
+  <div class="bar">Focus app</div>
+  <div class="body" style="grid-template-rows: auto 1fr;">
+    <div style="padding:10px 18px; border-bottom:1px solid var(--line)">
+      <span class="small">Calendar · Profile · New assignment</span>
+    </div>
+    <div class="main" style="display:flex; flex-direction:column; justify-content:center; min-height:300px;">
+      <div class="small">Pick up where you left off</div>
+      <div class="step" style="font-size:1.7rem">Read the first two pages and note the main claim</div>
+      <div><span class="btn primary">Start this step</span> <span class="btn">Show all my steps</span></div>
+    </div>
+  </div>
+</div>
+
+<h2>3. Keeper's log calendar, full week</h2>
+<p class="why">A full week fits on a computer. Every hour of the day is written down, and empty hours stay blank. Nothing is marked as missed.</p>
+<div class="window">
+  <div class="bar">My calendar · week of 16 November</div>
+  <div class="body" style="grid-template-rows:auto 1fr;">
+    <div style="padding:10px 18px; border-bottom:1px solid var(--line)" class="small">Finished so far this week: 3</div>
+    <div class="week">
+      <div class="day"><h3>Mon 16</h3><span class="chip" style="background:var(--orange)">Essay draft</span><span class="chip" style="background:var(--stone)">Piano</span></div>
+      <div class="day"><h3>Tue 17</h3><span class="chip" style="background:var(--blue)">Lab report</span><span class="blank">nothing planned</span></div>
+      <div class="day"><h3>Wed 18</h3><span class="chip" style="background:var(--sage)">Reading</span></div>
+      <div class="day"><h3>Thu 19</h3><span class="blank">nothing planned</span></div>
+      <div class="day"><h3>Fri 20</h3><span class="chip" style="background:var(--yellow)">Quiz</span></div>
+      <div class="day"><h3>Sat 21</h3><span class="blank">nothing planned</span></div>
+      <div class="day"><h3>Sun 22</h3><span class="blank">nothing planned</span></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Layout ideas</title>
+<style>
+  :root { --bg:#fbf6ec; --text:#2e2a24; --muted:#6b6257; --accent:#4f6b3a; --orange:#e6893f; --yellow:#e7c04f; --blue:#9cc3dd; --sage:#c9d3b8; --stone:#d8d2c4; }
+  body { margin:0; background:#ece4d2; color:var(--text); font-family: system-ui, sans-serif; padding:16px; }
+  h1 { font-size:1.4rem; margin:0 0 4px; color:var(--accent); }
+  .intro { color:var(--muted); margin:0 0 18px; }
+  .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:18px; }
+  .card { background:var(--bg); border:1px solid #cbbfa6; border-radius:14px; padding:14px; }
+  .card h2 { font-size:1.05rem; margin:0 0 2px; }
+  .card .why { color:var(--muted); font-size:.9rem; margin:0 0 12px; }
+  .phone { width:100%; max-width:300px; margin:0 auto; background:var(--bg); border:2px solid var(--text); border-radius:22px; padding:14px 12px; box-sizing:border-box; min-height:380px; }
+  .step { font-size:1.15rem; font-weight:600; margin:6px 0 12px; }
+  .tag { font-size:.8rem; color:var(--muted); }
+  .btn { display:inline-block; margin:4px 4px 4px 0; padding:8px 10px; border:1px solid var(--accent); border-radius:8px; font-size:.9rem; background:var(--bg); }
+  .btn.primary { background:var(--accent); color:var(--bg); }
+  .btn.clay { border-color:#b5653d; }
+  .fixed { border:2px dashed var(--accent); border-radius:10px; padding:8px; margin-top:8px; }
+  .note { background:var(--yellow); border-radius:8px; padding:8px; font-size:.9rem; margin-top:10px; }
+  .small { font-size:.85rem; color:var(--muted); }
+  .hour { display:flex; border-top:1px solid #cbbfa6; padding:4px 0; font-size:.85rem; min-height:28px; }
+  .hour span.t { width:44px; color:var(--muted); }
+  .block { background:var(--orange); color:var(--text); border-radius:6px; padding:2px 6px; font-size:.82rem; }
+  .blank { color:#b5aa95; font-style:italic; }
+</style>
+</head>
+<body>
+<h1>Three layout ideas</h1>
+<p class="intro">Each box is a rough picture of one phone screen. Nothing here is final.</p>
+
+<div class="grid">
+
+  <section class="card">
+    <h2>1. Fixed honest pair, with a margin note</h2>
+    <p class="why">The two honest answers stay in the same place. Drifted and Later look the same size as Done.</p>
+    <div class="phone">
+      <div class="small">Step 3 of 10</div>
+      <div class="step">Read the first two pages and note the main claim</div>
+      <div class="fixed">
+        <span class="btn primary">Done</span>
+        <span class="btn">Still working</span>
+        <div style="margin-top:6px">
+          <span class="btn">Stuck</span>
+          <span class="btn">Drifted</span>
+          <span class="btn">Later</span>
+        </div>
+      </div>
+      <div class="note">Margin note from last time: "Got stuck on the graph. Ask Sam."</div>
+      <div class="small" style="margin-top:8px">Same size and weight for Drifted as for Done.</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>2. Open on the next step</h2>
+    <p class="why">The app opens on the next step. Nothing else is in the way.</p>
+    <div class="phone">
+      <div class="small">Pick up where you left off</div>
+      <div class="step">Next: Read the first two pages and note the main claim</div>
+      <span class="btn primary" style="width:100%;text-align:center;box-sizing:border-box">Start this step</span>
+      <div style="margin-top:14px">
+        <span class="btn">My calendar</span>
+        <span class="btn">My profile</span>
+      </div>
+      <div class="small" style="margin-top:10px">Paste a new assignment only when you choose to.</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>3. Keeper's log calendar</h2>
+    <p class="why">A day is a list of hours. Empty hours stay blank. Nothing is marked as missed.</p>
+    <div class="phone">
+      <div class="small">Tuesday 17 November</div>
+      <div class="hour"><span class="t">9 am</span><span class="block">Essay draft</span></div>
+      <div class="hour"><span class="t">10 am</span><span class="blank">nothing planned</span></div>
+      <div class="hour"><span class="t">11 am</span><span class="block" style="background:var(--blue)">Lab report</span></div>
+      <div class="hour"><span class="t">12 pm</span><span class="blank">nothing planned</span></div>
+      <div class="hour"><span class="t">1 pm</span><span class="block" style="background:var(--sage)">Piano</span></div>
+      <div class="small" style="margin-top:8px">Finished so far today: 1</div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
