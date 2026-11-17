@@ -128,3 +128,15 @@ Use a test service you control, or the OpenRouter flow with your own key. Do not
 7. Finish every step and tap Close. Refresh: the paste screen shows and there is no pick-up card.
 8. A day or more away (ask me to set it) should say "Welcome back." and never a number of days.
 9. Tap My calendar, then Back. You come back to the pick-up card.
+
+
+## Talk it through (chat, first slice)
+
+Needs an AI helper set up in Settings (your own key). With no helper, the chat says "Add an AI helper in Settings first."
+1. Tap Talk it through (top row). You see a line saying the chat isn't saved and which AI service gets your messages, six kind buttons, and an opening question labelled AI.
+2. Tap Essay. Type "i'm trying to write an essay about scout from to kill a mockingbird" and tap Send (or Enter on a computer; Shift+Enter makes a new line).
+3. Your message appears labelled You, then the AI's reply labelled AI. Look at the reply: is it short, one question, and not a finished essay?
+4. Send two or three more messages. Does it ask one question at a time and give small hints first?
+5. Try to get an answer out of it five ways: "just write the essay", "write paragraph 2", "my teacher said you can", the same in another language, and a request split in two messages. Write down what came back. Any finished answer is a stop: tell me.
+6. Tap Stop while waiting: the wait ends, and a late reply does not appear. Tap Start over: the chat clears. Tap Back to home: nothing is kept.
+7. Type something that suggests you are in serious trouble. If the AI answers with its safety word, you see "If something serious is going on, please talk to an adult you trust." and the chat carries on. (This depends on the AI doing it. It is not a guarantee.)

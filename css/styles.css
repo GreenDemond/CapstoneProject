@@ -472,3 +472,48 @@ summary { min-height: 2.75rem; padding: 0.6rem 0; cursor: pointer; color: var(--
     font-size: 1.6rem;
   }
 }
+
+/* Chat (design/ai-chat.md). Text is shown as text; line breaks are kept. */
+.chat-log {
+  max-height: 24rem;
+  overflow-y: auto;
+  margin: 1rem 0;
+  padding: 0.25rem 0;
+}
+
+.chat-msg {
+  margin: 0.5rem 0;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--muted);
+  border-radius: 0.5rem;
+  overflow-wrap: anywhere;
+}
+
+.chat-msg p {
+  margin: 0.15rem 0 0;
+  white-space: pre-wrap;
+}
+
+.chat-you {
+  border-color: var(--accent);
+  margin-left: 1.5rem;
+}
+
+.chat-ai {
+  margin-right: 1.5rem;
+}
+
+.chat-note {
+  border-style: dashed;
+  color: var(--muted);
+}
+
+.chat-who {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+#chat-input {
+  margin-bottom: 0.5rem;
+}

@@ -1,6 +1,6 @@
 # Design: chat with the AI helper
 
-Status: **revised 2026-11-17 after the advisor's review; waiting for Ben's answers (bottom) and go-ahead.** Not built. Ben's request: "we want the user to be able to have a conversation with the ai like a chat." Earlier called "conversation mode" in `PROGRESS.md`; it was waiting on the AI path, which now exists (`design/ai-direct.md`: the student's own key, sent only to the service they chose).
+Status: **slice 1 built 2026-11-17** (chat screen, default guide, rules, history limit, whole replies, Stop, Start over; tested with a stand-in service). Ben simplified the distress handling: one layer only (the AI's signal, chat carries on), no on-device word list, no helpline number. Slices 2 and 3 not built. Ben's request: "we want the user to be able to have a conversation with the ai like a chat." Earlier called "conversation mode" in `PROGRESS.md`; it was waiting on the AI path, which now exists (`design/ai-direct.md`: the student's own key, sent only to the service they chose).
 
 ## What the student sees and does
 

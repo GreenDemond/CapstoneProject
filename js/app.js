@@ -9,8 +9,9 @@ import { loadProfileState, saveProfile, loadWork, saveWork } from "./storage.js"
 import { pickupLine, listLabel } from "./logic/home.js";
 import { inUseHelper, usableServices, pasteStatus, isReady, hostOf } from "./logic/ai-services.js";
 import { readKey } from "./keystore.js";
-import { askService } from "./ai-direct.js";
-import { initSettings, getAiSettings, onAiChange, setChosenHelper } from "./settings.js";
+import { askService, askChat } from "./ai-direct.js";
+import { MAX_MESSAGE, OPENING_QUESTION, TRUSTED_ADULT_LINE, DEFAULT_GUIDE } from "./logic/chat.js";
+import { initSettings, getAiSettings, onAiChange, setChosenHelper, openSettingsScreen } from "./settings.js";
 import { confetti } from "./confetti.js";
 import { GROUPS, CATEGORIES, groupItems, makeItem, makeEvent, isEvent, removeItem, parseDue, setStatus, completedItems } from "./logic/calendar.js";
 import { loadCalendarItems, saveCalendarItems, loadCompletionCounts, saveCompletionCounts } from "./storage.js";
@@ -1341,3 +1342,211 @@ document.getElementById("new-assignment").addEventListener("click", () => {
 });
 
 refreshHome();
+
+// Talk it through (design/ai-chat.md): a plain chat with the AI helper the student chose.
+// The chat lives on this page only. Replies are shown whole, as text, never as HTML.
+const chatScreen = document.getElementById("chat-screen");
+const chatBody = document.getElementById("chat-body");
+const chatHeading = document.getElementById("chat-heading");
+let chatMessages = []; // what is sent: { role, text }
+let chatShown = []; // what is on screen: { who: "you" | "ai" | "note", text }
+let chatKind = null;
+let chatBusy = false;
+let chatRun = 0; // changes on Start over, Back, and Stop, so a late reply is ignored
+let chatAbort = null;
+let chatStatus = "";
+let chatDraft = "";
+
+function openChatScreen() {
+  const { services, chosenId } = getAiSettings();
+  const helper = inUseHelper(services, chosenId);
+  pasteScreen.hidden = true;
+  stepsScreen.hidden = true;
+  chatScreen.hidden = false;
+  if (chatMessages.length === 0 && chatKind === null) {
+    chatKind = chosenKind;
+  }
+  renderChat(helper && isReady(helper) ? helper : null);
+  chatHeading.focus();
+}
+
+function closeChat() {
+  chatRun += 1;
+  chatAbort?.abort();
+  chatBusy = false;
+  chatMessages = [];
+  chatShown = [];
+  chatStatus = "";
+  chatDraft = "";
+  chatBody.replaceChildren();
+  chatScreen.hidden = true;
+  pasteScreen.hidden = false;
+  document.getElementById("open-chat").focus();
+}
+
+function startOver() {
+  chatRun += 1;
+  chatAbort?.abort();
+  chatBusy = false;
+  chatMessages = [];
+  chatShown = [];
+  chatStatus = "";
+  chatDraft = "";
+  renderChat(currentChatHelper());
+  document.getElementById("chat-input")?.focus();
+}
+
+function currentChatHelper() {
+  const { services, chosenId } = getAiSettings();
+  const helper = inUseHelper(services, chosenId);
+  return helper && isReady(helper) ? helper : null;
+}
+
+function renderChat(helper) {
+  chatBody.replaceChildren();
+  if (!helper) {
+    chatBody.append(
+      el("p", "Add an AI helper in Settings first.", { class: "hint" }),
+      button("Open Settings", () => { chatScreen.hidden = true; openSettingsScreen(); }, "primary"),
+      button("Back to home", closeChat),
+    );
+    return;
+  }
+  chatBody.append(
+    el("p", `This chat isn't saved. Your messages go to the AI service ${where(helper)}. Don't type your name or anything private. Replies come from an AI, not a person.`, { class: "hint" }),
+  );
+
+  const kinds = el("div", undefined, { class: "kind-buttons", role: "group", "aria-label": "What kind of work is this?" });
+  for (const kind of KINDS) {
+    const b = button(kind.label, () => { chatKind = kind.id; renderChat(currentChatHelper()); document.getElementById("chat-input")?.focus(); }, "kind");
+    b.setAttribute("aria-pressed", String(kind.id === chatKind));
+    kinds.append(b);
+  }
+  chatBody.append(kinds);
+
+  const log = el("div", undefined, { id: "chat-log", class: "chat-log", role: "log", "aria-live": "polite", "aria-label": "Chat" });
+  log.append(chatBubble("ai", OPENING_QUESTION));
+  for (const item of chatShown) {
+    log.append(chatBubble(item.who, item.text));
+  }
+  chatBody.append(log);
+
+  const input = el("textarea", undefined, { id: "chat-input", rows: "3", "aria-label": "Your message" });
+  input.value = chatDraft;
+  input.addEventListener("input", () => { chatDraft = input.value; });
+  input.addEventListener("keydown", (event) => {
+    // Enter sends and Shift+Enter makes a new line, on a computer. On a phone Enter is a new line.
+    if (event.key === "Enter" && !event.shiftKey && globalThis.matchMedia?.("(pointer: fine)").matches) {
+      event.preventDefault();
+      sendChat();
+    }
+  });
+  chatBody.append(input);
+
+  const actions = el("div", undefined, { class: "kind-buttons" });
+  const send = button("Send", sendChat, "primary");
+  send.id = "chat-send";
+  send.disabled = chatBusy;
+  actions.append(send);
+  if (chatBusy) {
+    actions.append(button("Stop", stopChat));
+  }
+  actions.append(button("Start over", startOver), button("Back to home", closeChat));
+  chatBody.append(actions);
+  chatBody.append(el("p", chatStatus, { id: "chat-status", class: "message", role: "status", "aria-live": "polite" }));
+  log.scrollTop = log.scrollHeight;
+}
+
+function chatBubble(who, text) {
+  const bubble = el("div", undefined, { class: `chat-msg chat-${who}` });
+  if (who !== "note") {
+    bubble.append(el("span", who === "you" ? "You" : "AI", { class: "chat-who" }));
+  }
+  bubble.append(el("p", text));
+  return bubble;
+}
+
+function stopChat() {
+  chatRun += 1;
+  chatAbort?.abort();
+  chatBusy = false;
+  chatStatus = "Stopped. Your message is above.";
+  renderChat(currentChatHelper());
+  document.getElementById("chat-input")?.focus();
+}
+
+async function sendChat() {
+  if (chatBusy) {
+    return;
+  }
+  const text = chatDraft.trim();
+  if (text === "") {
+    return;
+  }
+  if (text.length > MAX_MESSAGE) {
+    chatStatus = "That message is long. Shorten it and try again.";
+    renderChat(currentChatHelper());
+    return;
+  }
+  if (chatKind === null) {
+    chatStatus = "Tap the kind of work it is, then send again.";
+    renderChat(currentChatHelper());
+    return;
+  }
+  const service = currentChatHelper();
+  chatBusy = true; // set before waiting for the key, so a quick second tap sends nothing
+  const key = service ? await readKey(service.id) : null;
+  if (!service || !key) {
+    chatBusy = false;
+    chatStatus = "No AI helper is ready. Finish one in Settings first.";
+    renderChat(currentChatHelper());
+    return;
+  }
+
+  chatMessages.push({ role: "user", text });
+  chatShown.push({ who: "you", text });
+  chatDraft = "";
+  chatStatus = `Waiting for ${service.label}...`;
+  chatRun += 1;
+  const run = chatRun;
+  chatAbort = new AbortController();
+  renderChat(service);
+  document.getElementById("chat-input")?.focus();
+  const slowNote = setTimeout(() => {
+    if (run === chatRun) {
+      chatStatus = `Still waiting for ${service.label}. Slower AIs can take a few minutes.`;
+      const line = document.getElementById("chat-status");
+      if (line) line.textContent = chatStatus;
+    }
+  }, 10000);
+
+  const result = await askChat(service, key, { kind: chatKind, guide: DEFAULT_GUIDE, messages: chatMessages }, chatAbort.signal);
+  clearTimeout(slowNote);
+  if (run !== chatRun) {
+    return; // Stop, Start over, or Back was pressed: ignore a late answer
+  }
+  chatBusy = false;
+  chatStatus = "";
+
+  if (result.error || result.empty) {
+    // Nothing usable came back: take the message back out and put the words in the box.
+    chatMessages.pop();
+    chatShown.pop();
+    chatDraft = text;
+    chatStatus = result.error
+      ? `${result.error} Your message is still in the box.`
+      : "The AI ran out of room before answering. Try again, or pick a different AI in Settings. Your message is still in the box.";
+  } else if (result.trustedAdult) {
+    chatShown.push({ who: "note", text: TRUSTED_ADULT_LINE });
+  } else {
+    chatMessages.push({ role: "assistant", text: result.text });
+    chatShown.push({ who: "ai", text: result.text });
+    if (result.cutOff) {
+      chatShown.push({ who: "note", text: "The reply was cut off by the AI service." });
+    }
+  }
+  renderChat(service);
+  document.getElementById("chat-input")?.focus();
+}
+
+document.getElementById("open-chat").addEventListener("click", openChatScreen);

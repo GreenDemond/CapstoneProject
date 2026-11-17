@@ -4,6 +4,7 @@
 // key is never put in a message. Requests do not follow redirects, so an address that
 // redirects cannot move the key or the text to another place.
 import { buildChatBody, readReply } from "./logic/ai-prompt.js";
+import { buildChatRequest, readChatReply } from "./logic/chat.js";
 import { failureKindForStatus } from "./logic/settings-flow.js";
 
 export const COULDNT_REACH = "Couldn't reach the service. Check the address and your connection. If the address is right, the service may need to allow this app (its CORS setting).";
@@ -89,6 +90,27 @@ export async function askService(service, key, text, kind, signal) {
     return { error: "The service didn't suggest any steps." };
   }
   return reply;
+}
+
+// One chat turn. Returns { text, cutOff }, { empty, cutOff }, { trustedAdult }, { aborted }, or { error }.
+export async function askChat(service, key, { kind, guide, messages }, signal) {
+  const result = await postJson(service, key, buildChatRequest({ model: service.model, kind, guide, messages }), signal);
+  if (result.failed === "aborted") {
+    return { aborted: true };
+  }
+  if (result.failed) {
+    return { error: COULDNT_REACH };
+  }
+  if (!result.response.ok) {
+    return { error: plainFailure(result.response.status) };
+  }
+  let data;
+  try {
+    data = await result.response.json();
+  } catch {
+    return { error: "The service answered in a way the app doesn't understand." };
+  }
+  return readChatReply(data);
 }
 
 // A harmless check. Returns { ok: true } or { ok: false, kind, aborted? }.
