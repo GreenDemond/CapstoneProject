@@ -106,5 +106,5 @@ test("completing an item shows Fire it Up", async ({ page }) => {
   await page.getByLabel("Due time").fill("12:00");
   await page.getByRole("button", { name: "Add to my calendar" }).click();
   await page.locator("ul.cal-list li", { hasText: "Science lab" }).getByRole("button", { name: "Complete" }).click();
-  await expect(page.locator("p.celebrate")).toHaveText("Fire it Up");
+  await expect(page.locator("p.celebrate")).toContainText("Fire it Up");
 });

@@ -104,3 +104,12 @@ test("focus stays on the current step after Done", async ({ page }) => {
   await page.getByRole("button", { name: "Done", exact: true }).click();
   await expect(page.locator(".current-step")).toBeFocused();
 });
+
+// Drifted is rewarded in the same kind of words as Done.
+test("Drifted gets a check and the same kind of encouragement as Done", async ({ page }) => {
+  await startWork(page);
+  await page.getByRole("button", { name: "Drifted", exact: true }).click();
+  await page.getByLabel("The smallest part of this step").fill("Open one source");
+  await page.getByRole("button", { name: "Start this part" }).click();
+  await expect(page.locator("p.reward")).toContainText("That counts too.");
+});

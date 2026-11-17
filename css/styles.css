@@ -322,3 +322,21 @@ h3 {
   color: var(--clay);
   margin: 0.5rem 0;
 }
+
+/* Calm completion check (no sound). Turned off by the reduced-motion rule above. */
+.check {
+  display: inline-block;
+  animation: check-pop 0.35s ease-out;
+}
+
+.reward {
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0.5rem 0;
+  animation: check-pop 0.35s ease-out;
+}
+
+@keyframes check-pop {
+  from { transform: scale(0.6); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}

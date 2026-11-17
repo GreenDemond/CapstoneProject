@@ -508,7 +508,11 @@ function choose(choice, splitText = "") {
   const next = applyChoice(work, choice, splitText);
   mode = "steps";
   hintsShown = 0;
-  workNote = choice === "still" ? "Keep going. Tap any button when you're ready." : "";
+  workNote = {
+    still: "Keep going. Tap any button when you're ready.",
+    done: "Step done.",
+    drifted: "That counts too. Smaller steps count.",
+  }[choice] ?? "";
   driftNote = "";
   if (next === work && choice !== "still") {
     renderWork();
@@ -544,7 +548,8 @@ function renderWork() {
   const stepText = el("p", step.text, { class: "current-step", tabindex: "-1" });
   workBody.append(stepText);
   if (workNote) {
-    workBody.append(el("p", workNote, { class: "gentle" }));
+    const reward = workNote === "Step done." || workNote.startsWith("That counts");
+    workBody.append(el("p", reward ? `✓ ${workNote}` : workNote, { class: reward ? "reward" : "gentle", role: "status" }));
   }
   if (timeUp && mode === "steps") {
     workBody.append(el("p", "Time's up. Keep going, or tap Still working.", { class: "gentle", role: "status" }));
@@ -726,7 +731,9 @@ function renderCalendar(draft = { title: "", day: "", time: "" }, message = "") 
   calendarBody.append(form);
 
   if (celebrateText) {
-    calendarBody.append(el("p", celebrateText, { class: "celebrate", role: "status" }));
+    const line = el("p", undefined, { class: "celebrate", role: "status" });
+    line.append(el("span", "✓ ", { class: "check", "aria-hidden": "true" }), celebrateText);
+    calendarBody.append(line);
   }
   const finished = finishedThisWeek(calendarItems, new Date());
   calendarBody.append(el("p", finished === 0 ? "Nothing finished yet this week." : `You finished ${finished} ${finished === 1 ? "thing" : "things"} this week.`, { class: "log", role: "status" }));
