@@ -83,7 +83,7 @@ The hints-only rules, the child-safety line, and step parsing move into `js/logi
 
 ## Decisions by Ben (2026-11-17), applied
 
-- **Page rule:** `connect-src 'self' https: http:`, so plain http is allowed from any address, as Ben asked. This widens the rule the parent decides. **Parent to confirm before any classmate uses it.** The narrower rule above is the fallback.
+- **Page rule:** `connect-src 'self' https: http:`, so plain http is allowed from any address, as Ben asked. This widens the rule the parent decides. **Parent confirmed in chat (2026-11-17), recorded in DECISIONS.md.** The narrower rule above is the fallback.
 - **Keys:** every service needs a key to be saved. For a server that doesn't check keys, any text is accepted and ignored. The "needs no key" tick box is removed.
 - **Ben's parent-billed key:** typed into Settings on Ben's own computer only. The shared app never offers it, because keys live only in each browser.
 - **Shortcut button:** removed. Address and model name are typed in full. Ben does not test through Settings; testing is done with stand-in responses.
