@@ -304,3 +304,14 @@ h3 {
   color: var(--accent);
   overflow-wrap: anywhere;
 }
+
+.log {
+  font-weight: 600;
+  color: var(--accent);
+  margin: 0.5rem 0;
+}
+
+.tag {
+  color: var(--muted);
+  font-size: 0.95rem;
+}

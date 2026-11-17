@@ -12,6 +12,15 @@ export const GROUPS = [
   { id: "later", label: "Later", hint: "More than 5 days away" },
 ];
 
+export const CATEGORIES = [
+  { id: "school", label: "School work" },
+  { id: "personal", label: "Personal" },
+  { id: "family", label: "Family" },
+  { id: "friends", label: "Friends" },
+  { id: "other", label: "Other" },
+];
+export const STATUSES = ["open", "in progress", "completed"];
+
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;
 
@@ -83,7 +92,7 @@ export function parseLinks(text) {
 }
 
 // Returns { ok: true, item } or { ok: false, reason }.
-export function makeItem({ title, day, time, notes = "", links = "" }, id) {
+export function makeItem({ title, day, time, notes = "", links = "", category = "other" }, id) {
   const cleaned = typeof title === "string" ? title.trim().slice(0, MAX_TITLE) : "";
   if (cleaned === "") {
     return { ok: false, reason: "Write what it is first." };
@@ -104,13 +113,18 @@ export function makeItem({ title, day, time, notes = "", links = "" }, id) {
       due: `${day}T${time}`,
       notes: String(notes ?? "").trim().slice(0, MAX_NOTES),
       links: parsedLinks.links,
+      category: CATEGORIES.some((c) => c.id === category) ? category : "other",
+      status: "open",
+      completedOn: null,
     },
   };
 }
 
+// Completed items are left out of the priority groups; they show in their own list.
 export function groupItems(items, now) {
   const groups = Object.fromEntries(GROUPS.map((g) => [g.id, []]));
-  const sorted = [...items].sort((a, b) => a.due.localeCompare(b.due));
+  const open = items.filter((item) => item.status !== "completed");
+  const sorted = [...open].sort((a, b) => a.due.localeCompare(b.due));
   for (const item of sorted) {
     const due = parseDue(item.due.slice(0, 10), item.due.slice(11, 16));
     if (!due) {
@@ -123,4 +137,45 @@ export function groupItems(items, now) {
 
 export function removeItem(items, id) {
   return items.filter((item) => item.id !== id);
+}
+
+// Sets an item's status. Completing it records the day it was finished.
+export function setStatus(items, id, status, today) {
+  if (!STATUSES.includes(status)) {
+    return items;
+  }
+  return items.map((item) => {
+    if (item.id !== id) {
+      return item;
+    }
+    if (status === "completed") {
+      return { ...item, status, completedOn: today };
+    }
+    return { ...item, status, completedOn: null };
+  });
+}
+
+// Monday 00:00 of the week containing `now`.
+function weekStart(now) {
+  const day = (now.getDay() + 6) % 7; // Monday = 0
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate() - day);
+}
+
+// How many items were finished since Monday this week. Never negative, never compared with others.
+export function finishedThisWeek(items, now) {
+  const start = weekStart(now);
+  return items.filter((item) => {
+    if (item.status !== "completed" || typeof item.completedOn !== "string") {
+      return false;
+    }
+    const [y, m, d] = item.completedOn.split("-").map(Number);
+    const when = new Date(y, m - 1, d);
+    return when >= start && when <= now;
+  }).length;
+}
+
+export function completedItems(items) {
+  return items
+    .filter((item) => item.status === "completed")
+    .sort((a, b) => (b.completedOn ?? "").localeCompare(a.completedOn ?? ""));
 }

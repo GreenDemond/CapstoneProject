@@ -110,6 +110,9 @@ export function loadCalendarItems(storage = defaultStorage()) {
         links: Array.isArray(item.links)
           ? item.links.filter((link) => typeof link === "string" && link.startsWith("https://"))
           : [],
+        category: ["school", "personal", "family", "friends", "other"].includes(item.category) ? item.category : "other",
+        status: ["open", "in progress", "completed"].includes(item.status) ? item.status : "open",
+        completedOn: typeof item.completedOn === "string" ? item.completedOn : null,
       }));
   } catch {
     return [];

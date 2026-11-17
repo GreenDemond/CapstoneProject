@@ -7,7 +7,7 @@ import { QUESTIONS, cardLines } from "./logic/focus-intake.js";
 import { GOAL_KEYS, MAX_TEXT, emptyProfile, setGoals, addNote, deleteNote, notesNewestFirst } from "./logic/profile.js";
 import { loadProfileState, saveProfile } from "./storage.js";
 import { aiAvailable, suggestWithAi } from "./ai.js";
-import { GROUPS, groupItems, makeItem, removeItem, parseDue } from "./logic/calendar.js";
+import { GROUPS, CATEGORIES, groupItems, makeItem, removeItem, parseDue, setStatus, finishedThisWeek, completedItems } from "./logic/calendar.js";
 import { loadCalendarItems, saveCalendarItems } from "./storage.js";
 import { createWork, currentIndex, doneCount, allDone, applyChoice, hintAt, ringFraction, formatTime } from "./logic/work.js";
 
@@ -712,11 +712,21 @@ function renderCalendar(draft = { title: "", day: "", time: "" }, message = "") 
   notesBox.value = draft.notes ?? "";
   const linksBox = el("textarea", undefined, { id: "cal-links", rows: "3", placeholder: "https://" });
   linksBox.value = draft.links ?? "";
+  const catBox = el("select", undefined, { id: "cal-category" });
+  for (const c of CATEGORIES) {
+    const option = el("option", c.label, { value: c.id });
+    if ((draft.category ?? "other") === c.id) option.selected = true;
+    catBox.append(option);
+  }
+  form.append(...labelled("What part of life is it?", catBox, "cal-category"));
   form.append(...labelled("Notes (as much as you want)", notesBox, "cal-notes"));
   form.append(...labelled("Web links, one per line (must start with https://)", linksBox, "cal-links"));
   form.append(button("Add to my calendar", () => addCalendarItem(), "primary"));
   form.append(el("p", message, { class: "message", role: "status" }));
   calendarBody.append(form);
+
+  const finished = finishedThisWeek(calendarItems, new Date());
+  calendarBody.append(el("p", finished === 0 ? "Nothing finished yet this week." : `You finished ${finished} ${finished === 1 ? "thing" : "things"} this week.`, { class: "log", role: "status" }));
 
   if (calendarItems.length === 0) {
     calendarBody.append(el("p", "Nothing planned yet. Add something when you're ready.", { class: "hint" }));
@@ -734,6 +744,8 @@ function renderCalendar(draft = { title: "", day: "", time: "" }, message = "") 
       const row = el("li");
       const due = group.id === "urgent" && new Date(item.due) < new Date() ? `${dueText(item.due)} · Due time has passed` : dueText(item.due);
       row.append(el("span", `${item.title}, ${due}`), " ");
+      row.append(el("span", ` · ${categoryLabel(item.category)} · ${statusLabel(item.status)}`, { class: "tag" }));
+      row.append(...statusButtons(item));
       row.append(button("Delete", () => deleteCalendarItem(item.id), "small"));
       if (item.notes) {
         row.append(el("p", item.notes, { class: "item-notes" }));
@@ -752,7 +764,54 @@ function renderCalendar(draft = { title: "", day: "", time: "" }, message = "") 
     calendarBody.append(list);
   }
 
+  const done = completedItems(calendarItems);
+  if (done.length > 0) {
+    calendarBody.append(el("h3", "Completed", { tabindex: "-1" }));
+    const list = el("ul", undefined, { class: "cal-list completed" });
+    for (const item of done) {
+      const row = el("li");
+      row.append(el("span", `${item.title}, finished ${item.completedOn}`), " ");
+      row.append(button("Reopen", () => changeStatus(item.id, "open"), "small"));
+      row.append(button("Delete", () => deleteCalendarItem(item.id), "small"));
+      list.append(row);
+    }
+    calendarBody.append(list);
+  }
+
   calendarBody.append(button("Back", backFromCalendar));
+}
+
+function categoryLabel(id) {
+  return CATEGORIES.find((c) => c.id === id)?.label ?? "Other";
+}
+
+function statusLabel(status) {
+  return { open: "Not started", "in progress": "In progress", completed: "Completed" }[status] ?? "Not started";
+}
+
+function todayIso() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function changeStatus(id, status) {
+  const next = setStatus(calendarItems, id, status, todayIso());
+  if (saveCalendarItems(next)) {
+    calendarItems = next;
+  }
+  renderCalendar();
+}
+
+function statusButtons(item) {
+  if (item.status === "completed") {
+    return [];
+  }
+  const buttons = [];
+  if (item.status === "open") {
+    buttons.push(button("Start", () => changeStatus(item.id, "in progress"), "small"));
+  }
+  buttons.push(button("Complete", () => changeStatus(item.id, "completed"), "small"));
+  return buttons;
 }
 
 function addCalendarItem() {
@@ -762,6 +821,7 @@ function addCalendarItem() {
     time: document.getElementById("cal-time").value,
     notes: document.getElementById("cal-notes").value,
     links: document.getElementById("cal-links").value,
+    category: document.getElementById("cal-category").value,
   };
   const result = makeItem(draft, calendarId());
   if (!result.ok) {
@@ -775,7 +835,7 @@ function addCalendarItem() {
     return;
   }
   calendarItems = next;
-  renderCalendar({ title: "", day: "", time: "", notes: "", links: "" }, "Added.");
+  renderCalendar({ title: "", day: "", time: "", notes: "", links: "", category: "other" }, "Added.");
   document.getElementById("cal-title").focus();
 }
 

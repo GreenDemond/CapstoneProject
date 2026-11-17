@@ -79,3 +79,21 @@ test("notes and https links are saved, and a plain-web link is refused", async (
   await expect(link).toHaveAttribute("href", "https://example.org/chapter");
   await expect(link).toHaveAttribute("rel", "noopener noreferrer");
 });
+
+// Completion: an item moves to Completed, the weekly log counts it, and Reopen brings it back.
+test("completing an item moves it to Completed and counts in the weekly log", async ({ page }) => {
+  await openCalendar(page);
+  await expect(page.getByText("Nothing finished yet this week.")).toBeVisible();
+  await page.getByLabel("What is it?").fill("Maths worksheet");
+  await page.getByLabel("What part of life is it?").selectOption("school");
+  await page.getByLabel("Due date").fill(dayFromNow(3));
+  await page.getByLabel("Due time").fill("12:00");
+  await page.getByRole("button", { name: "Add to my calendar" }).click();
+  await page.locator("ul.cal-list li", { hasText: "Maths worksheet" }).getByRole("button", { name: "Start" }).click();
+  await expect(page.locator("ul.cal-list li", { hasText: "Maths worksheet" }).locator(".tag")).toContainText("In progress");
+  await page.locator("ul.cal-list li", { hasText: "Maths worksheet" }).getByRole("button", { name: "Complete" }).click();
+  await expect(page.locator("ul.completed li", { hasText: "Maths worksheet" })).toBeVisible();
+  await expect(page.getByText("You finished 1 thing this week.")).toBeVisible();
+  await page.locator("ul.completed li", { hasText: "Maths worksheet" }).getByRole("button", { name: "Reopen" }).click();
+  await expect(page.locator("ul.completed")).toHaveCount(0);
+});

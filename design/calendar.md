@@ -72,3 +72,14 @@ Wording rules: no "overdue," "missed," or "late." Past events look the same as f
 - **Links:** up to 10 web addresses, one per line. Only addresses starting with `https://` are accepted; anything else gets the message "Links must start with https://." Links open in a new tab with `rel="noopener noreferrer"`. The app loads nothing from them.
 - **PDFs:** not in this step. A PDF can be several megabytes, and storing it on the device needs a separate design and a change to the one-saved-object rule (T3). Ben to decide.
 - **Push notifications:** not in this step. They need a push service run by a large company and a server (T2, T7). Needs a parent's decision and a new DECISIONS entry. Reminders that show while the app is open remain the plan.
+
+## Added 2026-11-17: status, weekly log, and parts of life
+
+- **Status:** every item is Not started, In progress, or Completed. Buttons: **Start** and **Complete**. A completed item moves to a **Completed** list, shows the day it was finished, and can be **Reopen**ed. Completed items leave the priority groups.
+- **Weekly log:** one neutral line at the top: "You finished 3 things this week," or "Nothing finished yet this week." Counts only since Monday. No streak, no comparison with anyone, no count of what wasn't done.
+- **Parts of life:** each item is tagged School work, Personal, Family, Friends, or Other. Chosen by the student; the tag is only a label for now.
+
+**Not built, and why:**
+- **Photo of handwritten notes, organized into priority:** reading a photo needs either an outside service (which sends the photo off the device, against T8) or a third-party reader (against T2). Needs a parent decision first.
+- **The app learning your habits to decide priority:** this means watching how the student works over time. It goes against the rule on not monitoring students and needs a design and a parent's approval.
+- **Conversation mode, where the app asks what the plan for the day is:** depends on the AI path, which is switched off until a parent sets it up.

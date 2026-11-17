@@ -83,3 +83,43 @@ test("an item keeps its notes and links", () => {
   assert.equal(result.item.notes, "Read section 2");
   assert.deepEqual(result.item.links, ["https://example.org/"]);
 });
+
+import { setStatus, finishedThisWeek, completedItems, CATEGORIES } from "../../js/logic/calendar.js";
+
+test("completed items leave the priority groups and show as finished", () => {
+  const items = [{ id: "a", title: "Essay", due: "2026-11-17T10:30", status: "open", completedOn: null }];
+  const done = setStatus(items, "a", "completed", "2026-11-17");
+  assert.equal(done[0].status, "completed");
+  assert.equal(done[0].completedOn, "2026-11-17");
+  assert.equal(groupItems(done, NOW).urgent.length, 0);
+  assert.equal(completedItems(done).length, 1);
+});
+
+test("reopening an item clears the finished day", () => {
+  const items = setStatus([{ id: "a", status: "completed", completedOn: "2026-11-17" }], "a", "in progress", "2026-11-18");
+  assert.equal(items[0].status, "in progress");
+  assert.equal(items[0].completedOn, null);
+});
+
+test("the weekly log counts only what was finished since Monday", () => {
+  const items = [
+    { id: "a", status: "completed", completedOn: "2026-11-16" }, // Monday
+    { id: "b", status: "completed", completedOn: "2026-11-17" }, // Tuesday
+    { id: "c", status: "completed", completedOn: "2026-11-09" }, // last week
+    { id: "d", status: "open", completedOn: null },
+  ];
+  assert.equal(finishedThisWeek(items, new Date(2026, 10, 18, 12, 0)), 2);
+  assert.equal(finishedThisWeek([], new Date(2026, 10, 18, 12, 0)), 0);
+});
+
+test("categories are the five agreed ones", () => {
+  assert.deepEqual(CATEGORIES.map((c) => c.id), ["school", "personal", "family", "friends", "other"]);
+});
+
+test("a new item gets a category, and an unknown category falls back to other", () => {
+  const a = makeItem({ title: "Call", day: "2026-11-17", time: "10:00", category: "family" }, "a");
+  const b = makeItem({ title: "Call", day: "2026-11-17", time: "10:00", category: "nonsense" }, "b");
+  assert.equal(a.item.category, "family");
+  assert.equal(b.item.category, "other");
+  assert.equal(a.item.status, "open");
+});

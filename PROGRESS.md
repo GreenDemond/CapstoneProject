@@ -12,6 +12,7 @@ The only memory between sessions. Keep it current; rewrite it, do not let it gro
 - **AI path, switched off** (`design/ai-path.md`). `server/suggest.js` keeps the key and the hints-only rules on the server, refuses other websites, text over 6,000 characters, and more than 10 requests an hour per visitor, and never logs the text. `js/ai.js` is the only caller. The paste screen shows a "Suggest steps with AI" button and a privacy notice only when the server says it is available. A failure falls back to the starter steps. Tested with a stand-in, not the real service.
 - **My calendar, first part** (`design/calendar.md`). Add an item with a due date and time, and see it sorted into Urgent, Significant, Not urgent, Can wait, and Later. Saved on the device in its own section, beside the profile. Delete any item. Not yet: Day, Week, and Month views, and reminders.
 - **Calendar notes and links** (`design/calendar.md`). A large notes box (up to 2,000 characters) and up to 10 web links per item. Only https:// links are accepted, and they open in a new tab.
+- **Calendar status, weekly log, and parts of life** (`design/calendar.md`). Start, Complete, and Reopen. A neutral weekly count of finished items, with no streaks. Each item tagged School work, Personal, Family, Friends, or Other.
 - Logic in `js/logic/`: `clean-text.js` (tidies and limits pasted text), `starter-steps.js` (builds the steps), `focus-intake.js` (questions and card text). All tested.
 
 ## In progress
@@ -45,6 +46,9 @@ Nothing.
 - The words for drifting, getting stuck, and coming back.
 - Colors and overall look. Placeholder colors are in `css/styles.css`.
 - Work screen: how Drifted should behave when the rest of the step is left out (see `design/work-screen.md`), button words, the five hints, and saving the steps.
+- Photo of handwritten notes organized into priority: needs an outside reader (T8 or T2), so a parent decision.
+- Learning the student's habits to set priority: needs a design and a parent decision (it means watching how students work).
+- Conversation mode (the app asks about the plan for the day): waits on the AI path.
 - PDFs on calendar items: keep only the file name (no change to storage), or store the files on the device (a storage redesign, T3).
 - Push notifications that arrive with the app closed: need a push service run by a large company and a server, so a parent decision (T2, T7). Until then, reminders show only while the app is open.
 - Whether the paste screen's six kinds and their starter steps read well (see the manual checks).
