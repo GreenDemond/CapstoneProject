@@ -110,3 +110,11 @@ Once the parent has set the key and the app is hosted:
 4. Reload, open **Settings**: the service is still there. Press **Remove OpenRouter**; the list says "No AI is set up yet".
 5. Type the name "Home AI" and the address `http://ai.tail6e5320.ts.net:8080/`. A warning "This address is not encrypted" should appear under the address.
 6. Type `ftp://nope` as the address and press **Add this AI**. You should see a message asking for http:// or https://.
+
+## AI keys in this browser (2026-11-17)
+
+1. Open **Settings**. Add a service named "Test AI" with address `https://example.com`, and type the key `sk-test-1234567890` in the **Key** box. Press **Add this AI**. The list should say "Key saved: ••••7890". The full key must not appear anywhere on the page.
+2. Reload the page, open **Settings**. "Key saved: ••••7890" should still be there.
+3. Back on the paste screen, the line should say "Using: Test AI".
+4. Add another service with a key that has a space in it. You should see "A key has no spaces."
+5. Press **Forget key** on "Test AI". It should say "No key yet" and the paste screen should go back to "No AI is set up yet".

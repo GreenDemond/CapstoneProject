@@ -46,7 +46,7 @@ export function addService(list, { label, url }) {
   if (list.some((service) => service.url === url)) {
     return { list, error: "That address is already saved." };
   }
-  const service = { id: newId(list), label: name, url, keyReady: false };
+  const service = { id: newId(list), label: name, url, keyHint: "", keyReady: false };
   return { list: [...list, service], error: null };
 }
 
@@ -96,7 +96,15 @@ export function normalizeServices(data) {
     .filter((s) => s.label.trim() !== "" && s.label.length <= MAX_LABEL)
     .filter((s) => parseAddress(s.url).ok)
     .slice(0, MAX_SERVICES)
-    .map((s) => ({ id: s.id, label: s.label.trim(), url: parseAddress(s.url).url, keyReady: s.keyReady === true }));
+    .map((s) => ({
+      id: s.id,
+      label: s.label.trim(),
+      url: parseAddress(s.url).url,
+      // Only the last four characters of a key are kept here. Whether a key is ready is
+      // checked against the encrypted store on each load, not trusted from this list.
+      keyHint: typeof s.keyHint === "string" ? s.keyHint.slice(0, 4) : "",
+      keyReady: false,
+    }));
   return {
     services,
     chosenId: typeof data.chosenId === "string" ? data.chosenId : null,

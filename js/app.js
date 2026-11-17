@@ -7,6 +7,8 @@ import { QUESTIONS, cardLines } from "./logic/focus-intake.js";
 import { GOAL_KEYS, MAX_TEXT, emptyProfile, setGoals, addNote, deleteNote, notesNewestFirst } from "./logic/profile.js";
 import { loadProfileState, saveProfile, loadAiSettings, saveAiSettings } from "./storage.js";
 import { parseAddress, plainHttpWarning, addService, removeService, chosenService, pasteStatus, OPENROUTER_ADDRESS } from "./logic/ai-services.js";
+import { checkKey, keyHint, maskedKey } from "./logic/ai-key.js";
+import { keyStoreAvailable, saveKey, hasKey, deleteKey } from "./keystore.js";
 import { aiAvailable, suggestWithAi } from "./ai.js";
 import { confetti } from "./confetti.js";
 import { GROUPS, CATEGORIES, groupItems, makeItem, makeEvent, isEvent, removeItem, parseDue, setStatus, completedItems } from "./logic/calendar.js";
@@ -695,11 +697,21 @@ const aiEmpty = document.getElementById("ai-empty");
 const aiName = document.getElementById("ai-name");
 const aiAddress = document.getElementById("ai-address");
 const aiAddressWarning = document.getElementById("ai-address-warning");
+const aiKey = document.getElementById("ai-key");
 const aiForm = document.getElementById("ai-form");
 const settingsMessage = document.getElementById("settings-message");
 const aiStatus = document.getElementById("ai-status");
 
 let aiSettings = loadAiSettings();
+
+// Which saved services have a key in the encrypted store. Checked on each load.
+async function loadKeyStates() {
+  const services = await Promise.all(
+    aiSettings.services.map(async (service) => ({ ...service, keyReady: await hasKey(service.id) })),
+  );
+  aiSettings = { ...aiSettings, services };
+  refreshAiStatus();
+}
 
 function refreshAiStatus() {
   aiStatus.textContent = pasteStatus(aiSettings.services, aiSettings.chosenId);
@@ -737,21 +749,78 @@ function renderAiList() {
     address.textContent = service.url;
     const note = document.createElement("span");
     note.className = "hint";
-    note.textContent = service.keyReady ? "Key saved." : "No key yet, so this AI can't answer.";
+    note.textContent = service.keyReady
+      ? `Key saved: ${maskedKey(service.keyHint)}`
+      : "No key yet, so this AI can't answer.";
+    item.append(radio, label, address, note);
+
+    if (service.keyReady) {
+      const forget = document.createElement("button");
+      forget.type = "button";
+      forget.textContent = "Forget key";
+      forget.setAttribute("aria-label", `Forget the key for ${service.label}`);
+      forget.addEventListener("click", async () => {
+        await deleteKey(service.id);
+        setKeyReady(service.id, false, "");
+        settingsMessage.textContent = `Forgot the key for ${service.label}.`;
+      });
+      item.append(forget);
+    } else {
+      const keyLabel = document.createElement("label");
+      keyLabel.htmlFor = `ai-key-${service.id}`;
+      keyLabel.textContent = "Key";
+      const keyInput = document.createElement("input");
+      keyInput.type = "password";
+      keyInput.id = `ai-key-${service.id}`;
+      keyInput.autocomplete = "off";
+      keyInput.spellcheck = false;
+      const save = document.createElement("button");
+      save.type = "button";
+      save.textContent = "Save key";
+      save.addEventListener("click", async () => {
+        const checked = checkKey(keyInput.value);
+        if (!checked.ok) {
+          settingsMessage.textContent = checked.reason;
+          return;
+        }
+        const saved = await saveKey(service.id, checked.key);
+        if (!saved) {
+          settingsMessage.textContent = "Couldn't save the key on this device. Check that this browser allows saving data.";
+          return;
+        }
+        setKeyReady(service.id, true, keyHint(checked.key));
+        settingsMessage.textContent = `Key saved for ${service.label}.`;
+      });
+      item.append(keyLabel, keyInput, save);
+    }
+
     const remove = document.createElement("button");
     remove.type = "button";
     remove.textContent = "Remove";
     remove.setAttribute("aria-label", `Remove ${service.label}`);
-    remove.addEventListener("click", () => {
+    remove.addEventListener("click", async () => {
+      await deleteKey(service.id);
       aiSettings = { services: removeService(aiSettings.services, service.id), chosenId: aiSettings.chosenId };
       persistAi(() => {
         settingsMessage.textContent = `Removed ${service.label}.`;
       });
       renderAiList();
     });
-    item.append(radio, label, address, note, remove);
+    item.append(remove);
     aiList.append(item);
   }
+}
+
+// Updates one service's key state on screen and in the saved list (never the key itself).
+function setKeyReady(id, ready, hint) {
+  aiSettings = {
+    ...aiSettings,
+    services: aiSettings.services.map((service) =>
+      service.id === id ? { ...service, keyReady: ready, keyHint: hint } : service,
+    ),
+  };
+  persistAi();
+  renderAiList();
 }
 
 function updateAddressWarning() {
@@ -772,11 +841,16 @@ document.getElementById("ai-use-openrouter").addEventListener("click", () => {
   aiAddress.focus();
 });
 
-aiForm.addEventListener("submit", (event) => {
+aiForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const parsed = parseAddress(aiAddress.value);
   if (!parsed.ok) {
     settingsMessage.textContent = parsed.reason;
+    return;
+  }
+  const typedKey = aiKey.value.trim() === "" ? null : checkKey(aiKey.value);
+  if (typedKey && !typedKey.ok) {
+    settingsMessage.textContent = typedKey.reason;
     return;
   }
   const { list, error } = addService(aiSettings.services, { label: aiName.value, url: parsed.url });
@@ -786,12 +860,31 @@ aiForm.addEventListener("submit", (event) => {
   }
   const added = list[list.length - 1];
   aiSettings = { services: list, chosenId: aiSettings.chosenId ?? added.id };
+  let keySaved = false;
+  if (typedKey) {
+    keySaved = await saveKey(added.id, typedKey.key);
+    if (keySaved) {
+      aiSettings = {
+        ...aiSettings,
+        services: aiSettings.services.map((service) =>
+          service.id === added.id ? { ...service, keyReady: true, keyHint: keyHint(typedKey.key) } : service,
+        ),
+      };
+    }
+  }
   aiName.value = "";
   aiAddress.value = "";
+  aiKey.value = "";
   updateAddressWarning();
   renderAiList();
   persistAi(() => {
-    settingsMessage.textContent = "Saved. This AI can't answer until its key is added, which is the next step.";
+    if (typedKey && !keySaved) {
+      settingsMessage.textContent = "Saved the AI, but couldn't save the key on this device. Add the key again below.";
+    } else if (keySaved) {
+      settingsMessage.textContent = "Saved, with the key stored encrypted on this device.";
+    } else {
+      settingsMessage.textContent = "Saved. This AI can't answer until its key is added.";
+    }
   });
 });
 
@@ -811,6 +904,9 @@ document.getElementById("settings-back").addEventListener("click", () => {
 });
 
 refreshAiStatus();
+if (keyStoreAvailable()) {
+  loadKeyStates();
+}
 
 // "My calendar": items the student adds with a due time, sorted into groups by how
 // soon they are due (design/calendar.md). Saved only on this device.
