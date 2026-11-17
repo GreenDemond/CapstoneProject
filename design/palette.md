@@ -34,3 +34,13 @@ Status: **earthy palette applied 2026-11-17**, as Ben asked. Sand paper, dark br
 1. Keep the current Moss-and-paper look, or change the main accent?
 2. For the calendar groups, use these fills, or your own choice?
 3. Dark mode: add one later with the same colors?
+
+## Calendar group colours (set 2026-11-17)
+
+- Urgent: orange `#e6893f`
+- Significant: yellow `#e7c04f`
+- Not urgent: blue `#9cc3dd`
+- Can wait: sage `#c9d3b8`
+- Later: stone `#d8d2c4`
+
+Dark brown text on each fill passes 4.5 to 1.

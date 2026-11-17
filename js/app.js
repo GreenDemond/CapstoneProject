@@ -720,7 +720,7 @@ function renderCalendar(draft = { title: "", day: "", time: "" }, message = "") 
   for (const group of GROUPS) {
     const heading = el("h3", group.label, { tabindex: "-1" });
     calendarBody.append(heading, el("p", group.hint, { class: "hint" }));
-    const list = el("ul", undefined, { class: "cal-list" });
+    const list = el("ul", undefined, { class: "cal-list", "data-group": group.id });
     if (groups[group.id].length === 0) {
       list.append(el("li", "Nothing here.", { class: "hint" }));
     }

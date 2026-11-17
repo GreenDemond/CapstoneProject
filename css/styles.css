@@ -236,3 +236,50 @@ h3 {
     transition: none;
   }
 }
+
+/* Calendar groups: Urgent orange, Significant yellow, Not urgent blue (Ben, 2026-11-17).
+   Dark brown text on each fill passes 4.5:1. Can wait and Later use earthy neutrals. */
+.cal-list li {
+  padding: 0.5rem 0.7rem;
+  margin-bottom: 0.4rem;
+  border-radius: 0.5rem;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--muted);
+}
+
+.cal-list[data-group="urgent"] li {
+  background: #e6893f;
+  border-color: #b5653d;
+  color: #2e2a24;
+}
+
+.cal-list[data-group="significant"] li {
+  background: #e7c04f;
+  border-color: #b8952f;
+  color: #2e2a24;
+}
+
+.cal-list[data-group="notUrgent"] li {
+  background: #9cc3dd;
+  border-color: #5f8fb0;
+  color: #2e2a24;
+}
+
+.cal-list[data-group="insignificant"] li {
+  background: #c9d3b8;
+  border-color: #7a8a68;
+  color: #2e2a24;
+}
+
+.cal-list[data-group="later"] li {
+  background: #d8d2c4;
+  border-color: #8f887a;
+  color: #2e2a24;
+}
+
+.cal-list[data-group] li button {
+  color: #2e2a24;
+  border-color: #2e2a24;
+  background: transparent;
+}
