@@ -315,3 +315,10 @@ h3 {
   color: var(--muted);
   font-size: 0.95rem;
 }
+
+.celebrate {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--clay);
+  margin: 0.5rem 0;
+}

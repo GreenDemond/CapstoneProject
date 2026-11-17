@@ -725,6 +725,9 @@ function renderCalendar(draft = { title: "", day: "", time: "" }, message = "") 
   form.append(el("p", message, { class: "message", role: "status" }));
   calendarBody.append(form);
 
+  if (celebrateText) {
+    calendarBody.append(el("p", celebrateText, { class: "celebrate", role: "status" }));
+  }
   const finished = finishedThisWeek(calendarItems, new Date());
   calendarBody.append(el("p", finished === 0 ? "Nothing finished yet this week." : `You finished ${finished} ${finished === 1 ? "thing" : "things"} this week.`, { class: "log", role: "status" }));
 
@@ -794,11 +797,14 @@ function todayIso() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
+let celebrateText = "";
+
 function changeStatus(id, status) {
   const next = setStatus(calendarItems, id, status, todayIso());
   if (saveCalendarItems(next)) {
     calendarItems = next;
   }
+  celebrateText = status === "completed" ? "Fire it Up" : "";
   renderCalendar();
 }
 
