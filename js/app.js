@@ -2,7 +2,7 @@
 // Pure logic lives in js/logic/. Text from the student is only ever put on
 // screen with textContent, never as HTML (DECISIONS T11).
 import { cleanPastedText, limitPaste } from "./logic/clean-text.js";
-import { KINDS, DEFAULT_STEP_COUNT, starterStepsFor, withTwoMinuteStart } from "./logic/starter-steps.js";
+import { KINDS, DEFAULT_STEP_COUNT, starterStepsFor, withTwoMinuteStart, showingLine } from "./logic/starter-steps.js";
 import { QUESTIONS, cardLines } from "./logic/focus-intake.js";
 import { GOAL_KEYS, MAX_TEXT, emptyProfile, setGoals, addNote, deleteNote, notesNewestFirst } from "./logic/profile.js";
 import { loadProfileState, saveProfile, loadWork, saveWork } from "./storage.js";
@@ -20,7 +20,7 @@ import { loadCalendarItems, saveCalendarItems, loadCompletionCounts, saveComplet
 import { addCompletion, removeCompletion, totals } from "./logic/counter.js";
 import { addDays, addMonths, splitWeek, monthGrid, itemsOnDay, eventsCovering, blockPlacement, hourLabels, mondayOf } from "./logic/views.js";
 import { bucketFor, parseDue as parseDueCal } from "./logic/calendar.js";
-import { createWork, currentIndex, doneCount, allDone, applyChoice, hintAt, ringFraction, formatTime } from "./logic/work.js";
+import { createWork, currentIndex, doneCount, allDone, applyChoice, hintAt, ringFraction, formatTime, secondsUntil } from "./logic/work.js";
 
 const textBox = document.getElementById("assignment-text");
 const kindButtons = document.getElementById("kind-buttons");
@@ -29,6 +29,7 @@ const message = document.getElementById("message");
 const stepsScreen = document.getElementById("steps-screen");
 const stepsList = document.getElementById("steps");
 const showMore = document.getElementById("show-more");
+const showingNote = document.getElementById("showing-note");
 const startButton = document.getElementById("start");
 const ready = document.getElementById("ready");
 
@@ -91,7 +92,11 @@ function chooseKind(id) {
   message.textContent = "";
 }
 
+// How many steps are on screen. Start runs exactly these.
+let shownCount = DEFAULT_STEP_COUNT;
+
 function renderSteps(count) {
+  shownCount = count;
   stepsList.replaceChildren();
   for (const step of allSteps.slice(0, count)) {
     const item = document.createElement("li");
@@ -99,6 +104,7 @@ function renderSteps(count) {
     stepsList.appendChild(item);
   }
   showMore.hidden = count >= allSteps.length;
+  showingNote.textContent = showingLine(Math.min(count, allSteps.length), allSteps.length);
 }
 
 showButton.addEventListener("click", async () => {
@@ -147,7 +153,7 @@ showMore.addEventListener("click", () => {
 });
 
 startButton.addEventListener("click", () => {
-  openWorkScreen(allSteps);
+  openWorkScreen(allSteps.slice(0, shownCount));
 });
 
 // "How I like to work": four one-tap questions, then a first-guess card.
@@ -275,7 +281,7 @@ const openProfile = document.getElementById("open-profile");
 
 const loaded = loadProfileState();
 let profile = loaded.profile;
-const loadStatus = loaded.status;
+let loadStatus = loaded.status; // the start-up notice stops once a save works
 let dirty = false;
 let clearAsked = false;
 let leaveWarned = false;
@@ -290,7 +296,7 @@ const GOAL_HINTS = {
 };
 
 function todayStamp() {
-  return new Date().toISOString().slice(0, 10);
+  return dayKey(new Date()); // the local date, not UTC
 }
 
 function newNoteId() {
@@ -336,6 +342,7 @@ function renderProfile(draft = { goals: profile.goals, noteDraft: "" }) {
   profileBody.append(el("p", "If something serious is getting in the way, talk to an adult you trust.", { class: "hint" }));
   const noteBox = el("textarea", undefined, { id: "note-text", rows: "3", maxlength: String(MAX_TEXT) });
   noteBox.value = draft.noteDraft ?? "";
+  noteBox.addEventListener("input", markDirty); // a note typed alone must not be lost on Back
   profileBody.append(...labelled("Note", noteBox, "note-text"));
   profileBody.append(button("Add note", addNoteFromBox));
 
@@ -353,14 +360,14 @@ function renderProfile(draft = { goals: profile.goals, noteDraft: "" }) {
 
   profileBody.append(el("p", "Anyone using this browser can see this.", { class: "hint" }));
   profileBody.append(button("Save", saveAll, "primary"));
-  profileBody.append(el("p", dirty ? "Not saved yet." : saveMessage, { class: "message", role: "status" }));
+  profileBody.append(el("p", saveMessage || (dirty ? "Not saved yet." : ""), { class: "message", role: "status", id: "profile-status" }));
 
   if (clearAsked) {
     profileBody.append(el("p", "Clear everything in my profile? This can't be undone."));
     profileBody.append(button("Yes, clear everything", clearEverything));
-    profileBody.append(button("Cancel", () => { clearAsked = false; renderProfile(); }));
+    profileBody.append(button("Cancel", () => { clearAsked = false; renderProfile(typedValues()); }));
   } else {
-    profileBody.append(button("Clear my profile", () => { clearAsked = true; renderProfile(); }));
+    profileBody.append(button("Clear my profile", () => { clearAsked = true; renderProfile(typedValues()); }));
   }
   profileBody.append(button("Back", backFromProfile));
 }
@@ -393,8 +400,15 @@ function saveAll() {
   const { goals, noteDraft } = typedValues();
   profile = setGoals(profile, goals);
   const saved = saveProfile(profile);
-  dirty = !saved;
-  saveMessage = saved ? "Saved on this device." : "Couldn't save in this browser.";
+  // A note still in the box is not part of the save: say so, and keep warning on Back.
+  const noteWaiting = noteDraft.trim() !== "";
+  dirty = !saved || noteWaiting;
+  if (saved) loadStatus = "ok";
+  saveMessage = !saved
+    ? "Couldn't save in this browser."
+    : noteWaiting
+      ? "Goals saved. Your note isn't added yet. Press Add note to keep it."
+      : "Saved on this device.";
   renderProfile({ goals: profile.goals, noteDraft });
 }
 
@@ -403,6 +417,7 @@ function clearEverything() {
   clearAsked = false;
   const saved = saveProfile(profile);
   dirty = false;
+  if (saved) loadStatus = "ok";
   saveMessage = saved ? "Your profile is cleared." : "Couldn't save in this browser.";
   renderProfile();
 }
@@ -411,6 +426,7 @@ function openProfileScreen() {
   showScreen("profile");
   saveMessage = "";
   leaveWarned = false;
+  clearAsked = false;
   renderProfile();
   document.getElementById("profile-heading").focus();
 }
@@ -418,8 +434,8 @@ function openProfileScreen() {
 function backFromProfile() {
   if (dirty && !leaveWarned) {
     leaveWarned = true;
-    renderProfile();
-    profileBody.querySelector(".message")?.replaceChildren("You have changes that aren't saved. Press Save first, or press Back again to leave.");
+    renderProfile(typedValues());
+    document.getElementById("profile-status")?.replaceChildren("You have changes that aren't saved. Press Save first, or press Back again to leave.");
     return;
   }
   showScreen("home");
@@ -428,8 +444,8 @@ function backFromProfile() {
 
 openProfile.addEventListener("click", openProfileScreen);
 
-// The work screen (design/work-screen.md): one step at a time. Steps live on the
-// page only; a refresh starts again from the paste screen.
+// The work screen (design/work-screen.md): one step at a time. Steps and progress are
+// saved on the device after every change (design/home-screen.md).
 const workBody = document.getElementById("work-body");
 const workHeading = document.getElementById("work-heading");
 
@@ -444,6 +460,7 @@ let lastAdvance = 0;
 let timerOn = false;
 let timerMinutes = 12;
 let secondsLeft = 0;
+let endMs = 0; // when the countdown ends, by the clock
 let timeUp = false;
 let tick = null;
 
@@ -474,17 +491,18 @@ function startTimer() {
   if (!timerOn) {
     return;
   }
-  secondsLeft = timerMinutes * 60;
+  endMs = Date.now() + timerMinutes * 60000;
+  secondsLeft = secondsUntil(endMs, Date.now());
   tick = setInterval(() => {
-    secondsLeft -= 1;
+    // Read the clock each time, so a sleeping laptop or a slow tab does not stretch it.
+    secondsLeft = secondsUntil(endMs, Date.now());
     if (secondsLeft <= 0) {
-      secondsLeft = 0;
       stopTimer();
       timeUp = true;
       // Only redraw the step view. If a box or a hint is open, the line waits
       // until the student returns to the step, so their words are not lost.
       if (mode === "steps") {
-        renderWork();
+        renderWork(false);
       }
       return;
     }
@@ -578,16 +596,21 @@ function choose(choice, splitText = "") {
   const next = applyChoice(work, choice, splitText);
   mode = "steps";
   hintsShown = 0;
+  driftNote = "";
+  if (choice === "still") {
+    timeUp = false; // the student chose to keep going, so the time's-up line goes
+  }
+  if (next === work && choice !== "still") {
+    workNote = "";
+    renderWork();
+    return;
+  }
+  // The reward line shows only when something really changed.
   workNote = {
     still: "Keep going. Tap any button when you're ready.",
     done: "Step done.",
     drifted: "That counts too. Smaller steps count.",
   }[choice] ?? "";
-  driftNote = "";
-  if (next === work && choice !== "still") {
-    renderWork();
-    return;
-  }
   work = next;
   persistWork();
   if (choice !== "still") {
@@ -603,7 +626,13 @@ function choose(choice, splitText = "") {
   renderWork();
 }
 
-function renderWork() {
+// focusStep is true when the screen opens or the student's tap replaced the step view.
+// Other redraws (timer, countdown controls, step list) keep focus on the same button.
+function renderWork(focusStep = true) {
+  const active = document.activeElement;
+  const keepId = !focusStep && workBody.contains(active) ? active.id : "";
+  const keepLabel = !focusStep && workBody.contains(active) && active.tagName === "BUTTON" ? active.textContent : null;
+  const hadFocus = !focusStep && workBody.contains(active);
   workBody.replaceChildren();
   if (mode === "done" || allDone(work)) {
     workHeading.textContent = "All your steps are done.";
@@ -678,8 +707,8 @@ function renderWork() {
   choices.append(
     button("Done", () => choose("done"), "kind"),
     button("Still working", () => choose("still"), "kind"),
-    button("Stuck", () => { mode = "stuck"; renderWork(); }, "kind"),
-    button("Drifted", () => { mode = "drifting"; driftNote = ""; renderWork(); }, "kind"),
+    button("Stuck", () => { mode = "stuck"; workNote = ""; renderWork(); }, "kind"),
+    button("Drifted", () => { mode = "drifting"; driftNote = ""; workNote = ""; renderWork(); }, "kind"),
   );
   const othersLeft = work.steps.some((s, i) => i !== index && !s.done);
   if (othersLeft) {
@@ -693,8 +722,7 @@ function renderWork() {
   toggle.addEventListener("change", () => {
     timerOn = toggle.checked;
     if (timerOn) startTimer(); else { stopTimer(); timeUp = false; }
-    renderWork();
-    toggle.focus();
+    renderWork(false); // focus is put back on the new checkbox by id
   });
   timerLabel.append(toggle, " Show a countdown");
   workBody.append(timerLabel);
@@ -702,7 +730,7 @@ function renderWork() {
   if (timerOn) {
     const pick = el("div", undefined, { class: "kind-buttons" });
     for (const minutes of TIMER_CHOICES) {
-      const b = button(`${minutes} minutes`, () => { timerMinutes = minutes; startTimer(); renderWork(); }, "kind");
+      const b = button(`${minutes} minutes`, () => { timerMinutes = minutes; startTimer(); renderWork(false); }, "kind");
       if (minutes === timerMinutes) b.setAttribute("aria-pressed", "true");
       pick.append(b);
     }
@@ -711,7 +739,7 @@ function renderWork() {
 
   const listToggle = button(workListOpen ? "Hide my steps" : "Show all my steps", () => {
     workListOpen = !workListOpen;
-    renderWork();
+    renderWork(false);
     workBody.querySelector("#work-list-toggle")?.focus();
   });
   listToggle.id = "work-list-toggle";
@@ -721,7 +749,19 @@ function renderWork() {
   }
 
   workBody.append(button("Back to home", closeWork));
-  stepText.focus();
+  // Keep focus where it was; if that control is gone (or it was the step text), the step gets it,
+  // so keyboard and screen-reader users are never dropped to the top of the page.
+  let kept = null;
+  if (keepId) {
+    kept = workBody.querySelector(`#${keepId}`);
+  } else if (keepLabel !== null) {
+    kept = [...workBody.querySelectorAll("button")].find((b) => b.textContent === keepLabel) ?? null;
+  }
+  if (focusStep || (hadFocus && !kept)) {
+    stepText.focus();
+  } else {
+    kept?.focus();
+  }
 }
 
 // AI suggestions (design/ai-path.md). Hidden unless the server says it is available,

@@ -50,3 +50,86 @@ test("Clear my profile asks first, then empties it", async ({ page }) => {
   await expect(page.getByText("Your profile is cleared.")).toBeVisible();
   await expect(page.getByLabel("Today")).toHaveValue("");
 });
+
+// Typed words survive Back's warning, and Save then keeps them.
+test("a typed goal survives Back's warning and can then be saved", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "My profile" }).click();
+  await page.getByLabel("Today").fill("Finish the lab report");
+  await page.getByLabel("Note").fill("Half-written note");
+  await page.getByRole("button", { name: "Back", exact: true }).click();
+  await expect(page.locator("#profile-status")).toContainText("You have changes that aren't saved.");
+  await expect(page.getByLabel("Today")).toHaveValue("Finish the lab report");
+  await expect(page.getByLabel("Note")).toHaveValue("Half-written note");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByLabel("Today")).toHaveValue("Finish the lab report");
+  await page.reload();
+  await page.getByRole("button", { name: "My profile" }).click();
+  await expect(page.getByLabel("Today")).toHaveValue("Finish the lab report");
+});
+
+test("typed words survive Clear my profile and Cancel", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "My profile" }).click();
+  await page.getByLabel("This week").fill("Read chapter 4");
+  await page.getByLabel("Note").fill("Typing a note");
+  await page.getByRole("button", { name: "Clear my profile" }).click();
+  await expect(page.getByText("This can't be undone.")).toBeVisible();
+  await expect(page.getByLabel("This week")).toHaveValue("Read chapter 4");
+  await page.getByRole("button", { name: "Cancel" }).click();
+  await expect(page.getByLabel("This week")).toHaveValue("Read chapter 4");
+  await expect(page.getByLabel("Note")).toHaveValue("Typing a note");
+});
+
+test("the Clear question is not showing after leaving and reopening", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "My profile" }).click();
+  await page.getByRole("button", { name: "Clear my profile" }).click();
+  await page.getByRole("button", { name: "Back", exact: true }).click();
+  await page.getByRole("button", { name: "My profile" }).click();
+  await expect(page.getByText("This can't be undone.")).toHaveCount(0);
+});
+
+test("the start-up notice goes away after a successful save, and the warning goes on the status line", async ({ page }) => {
+  await page.goto("/");
+  await page.evaluate(() => localStorage.setItem("focusapp.v1", "{broken"));
+  await page.reload();
+  await page.getByRole("button", { name: "My profile" }).click();
+  const notice = page.getByText("so we started fresh. A copy was kept.");
+  await expect(notice).toBeVisible();
+  await page.getByLabel("Today").fill("x");
+  await page.getByRole("button", { name: "Back", exact: true }).click();
+  await expect(notice).toBeVisible(); // the warning did not overwrite the notice
+  await expect(page.locator("#profile-status")).toContainText("aren't saved");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByText("Saved on this device.")).toBeVisible();
+  await expect(notice).toHaveCount(0);
+});
+
+// A note made late in the evening in Los Angeles gets that day, not tomorrow's (UTC).
+test.describe("local date", () => {
+  test.use({ timezoneId: "America/Los_Angeles" });
+  test("a note written at 11pm local time gets the local date", async ({ page }) => {
+    await page.clock.setFixedTime(new Date("2026-11-18T07:30:00Z")); // 11:30pm on Nov 17 in Los Angeles
+    await page.goto("/");
+    await page.getByRole("button", { name: "My profile" }).click();
+    await page.getByLabel("Note").fill("Evening note");
+    await page.getByRole("button", { name: "Add note" }).click();
+    await page.getByRole("button", { name: "Save", exact: true }).click();
+    const stored = await page.evaluate(() => localStorage.getItem("focusapp.v1"));
+    expect(stored).toContain("2026-11-17");
+    expect(stored).not.toContain("2026-11-18");
+  });
+});
+
+// A note typed but not added is not lost silently: Save says so and Back still warns.
+test("a note typed but not added is called out on Save and Back warns", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "My profile" }).click();
+  await page.getByLabel("Note").fill("Phone again");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByText("Your note isn't added yet.")).toBeVisible();
+  await page.getByRole("button", { name: "Back" }).click();
+  await expect(page.getByText("You have changes that aren't saved.")).toBeVisible();
+  await expect(page.getByLabel("Note")).toHaveValue("Phone again");
+});

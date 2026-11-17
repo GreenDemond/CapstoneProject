@@ -114,3 +114,8 @@ export const TWO_MINUTE_STEP = "Set a timer for 2 minutes and start the first st
 export function withTwoMinuteStart(steps) {
   return [TWO_MINUTE_STEP, ...steps.filter((step) => step !== TWO_MINUTE_STEP)];
 }
+
+// The plain line under the steps when some are not shown yet. Empty when all are shown.
+export function showingLine(shown, total) {
+  return shown < total ? `Showing ${shown} of ${total}. Show more steps adds the rest.` : "";
+}

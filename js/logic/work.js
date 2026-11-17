@@ -82,6 +82,11 @@ export function ringFraction(secondsLeft, totalSeconds) {
   return Math.min(1, Math.max(0, secondsLeft / totalSeconds));
 }
 
+// Whole seconds left until endMs, read from the clock. Never negative.
+export function secondsUntil(endMs, nowMs) {
+  return Math.max(0, Math.ceil((endMs - nowMs) / 1000));
+}
+
 // "12:05" style. Never negative.
 export function formatTime(seconds) {
   const safe = Math.max(0, Math.floor(seconds));

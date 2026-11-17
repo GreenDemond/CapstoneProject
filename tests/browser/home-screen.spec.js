@@ -18,7 +18,7 @@ test("after a refresh the app opens on the next step and Start this step continu
   await expect(page.locator("#pickup-step")).toHaveText("Take notes");
   await expect(page.getByRole("heading", { name: "What's the assignment?" })).toBeHidden();
   await page.getByRole("button", { name: "Start this step" }).click();
-  await expect(page.getByText("Step 2 of 10")).toBeVisible();
+  await expect(page.getByText("Step 2 of 5")).toBeVisible();
   await expect(page.locator(".current-step")).toHaveText("Take notes");
 });
 

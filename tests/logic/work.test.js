@@ -80,3 +80,11 @@ test("the countdown ring and the time text stay in range", () => {
   assert.equal(formatTime(725), "12:05");
   assert.equal(formatTime(-3), "0:00");
 });
+
+import { secondsUntil } from "../../js/logic/work.js";
+test("secondsUntil reads the clock and never goes below zero", () => {
+  assert.equal(secondsUntil(60000, 0), 60);
+  assert.equal(secondsUntil(60000, 59500), 1); // part of a second still counts as a second
+  assert.equal(secondsUntil(60000, 60000), 0);
+  assert.equal(secondsUntil(60000, 900000), 0); // a laptop that slept past the end
+});

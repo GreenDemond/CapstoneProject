@@ -13,7 +13,7 @@ test("Done moves to the next step, one at a time", async ({ page }) => {
   await startWork(page);
   await expect(page.locator(".current-step")).toHaveText("Find three sources");
   await page.getByRole("button", { name: "Done", exact: true }).click();
-  await expect(page.getByText("Step 2 of 10")).toBeVisible();
+  await expect(page.getByText("Step 2 of 5")).toBeVisible();
   await expect(page.locator(".current-step")).toHaveText("Take notes");
 });
 
@@ -23,7 +23,7 @@ test("Drifted splits the step and the smaller part becomes the next step", async
   await page.getByRole("button", { name: "Drifted", exact: true }).click();
   await page.getByLabel("The smallest part of this step").fill("Open one source and skim it");
   await page.getByRole("button", { name: "Start this part" }).click();
-  await expect(page.getByText("Step 2 of 11")).toBeVisible();
+  await expect(page.getByText("Step 2 of 6")).toBeVisible();
   await expect(page.locator(".current-step")).toHaveText("Open one source and skim it");
 });
 
@@ -44,7 +44,7 @@ test("Later moves the step to the end and Still working stays put", async ({ pag
   await expect(page.getByText("Keep going.")).toBeVisible();
   await page.getByRole("button", { name: "Later" }).click();
   await expect(page.locator(".current-step")).toHaveText("Take notes");
-  await expect(page.getByText("Step 1 of 10")).toBeVisible();
+  await expect(page.getByText("Step 1 of 5")).toBeVisible();
 });
 
 // Countdown: turned on, shows a time, and turns off cleanly.
@@ -62,7 +62,7 @@ test("an empty Drifted box keeps the step whole and changes nothing", async ({ p
   await page.getByRole("button", { name: "Drifted", exact: true }).click();
   await page.getByLabel("The smallest part of this step").fill("   ");
   await page.getByRole("button", { name: "Start this part" }).click();
-  await expect(page.getByText("Step 1 of 10")).toBeVisible();
+  await expect(page.getByText("Step 1 of 5")).toBeVisible();
   await expect(page.locator(".current-step")).toHaveText("Find three sources");
 });
 
@@ -70,7 +70,7 @@ test("an empty Drifted box keeps the step whole and changes nothing", async ({ p
 test("finishing every step shows the done message", async ({ page }) => {
   await startWork(page, "- Only one step");
   // The screen ignores a second tap for a moment, so wait between taps like a student would.
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 5; i++) {
     await page.waitForTimeout(450);
     await page.getByRole("button", { name: "Done", exact: true }).click();
   }
@@ -83,7 +83,7 @@ test("a quick double-tap on Done only counts once", async ({ page }) => {
   const done = page.getByRole("button", { name: "Done", exact: true });
   await done.click();
   await done.click({ force: true }).catch(() => {});
-  await expect(page.getByText("Step 2 of 10")).toBeVisible();
+  await expect(page.getByText("Step 2 of 5")).toBeVisible();
   await expect(page.locator(".current-step")).toHaveText("Take notes");
 });
 
@@ -112,4 +112,85 @@ test("Drifted gets a check and the same kind of encouragement as Done", async ({
   await page.getByLabel("The smallest part of this step").fill("Open one source");
   await page.getByRole("button", { name: "Start this part" }).click();
   await expect(page.locator("p.reward")).toContainText("That counts too.");
+});
+
+// Start runs exactly the steps on screen (5 of 10 shown), and the page says so.
+test("Start after seeing 5 of 10 steps gives Step 1 of 5", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("Assignment text").fill("1. Find three sources\n2. Take notes\n3. Write a draft");
+  await page.getByRole("button", { name: "Essay" }).click();
+  await page.getByRole("button", { name: "Show my steps" }).click();
+  await expect(page.locator("#showing-note")).toHaveText("Showing 5 of 10. Show more steps adds the rest.");
+  await page.getByRole("button", { name: "Start", exact: true }).click();
+  await expect(page.getByText("Step 1 of 5")).toBeVisible();
+});
+
+test("Start after Show more steps gives the full count and no Showing line", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("Assignment text").fill("1. Find three sources\n2. Take notes\n3. Write a draft");
+  await page.getByRole("button", { name: "Essay" }).click();
+  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Show more steps" }).click();
+  await expect(page.locator("#showing-note")).toHaveText("");
+  await page.getByRole("button", { name: "Start", exact: true }).click();
+  await expect(page.getByText("Step 1 of 10")).toBeVisible();
+});
+
+// No reward line when nothing changed, and none lingers into Stuck or Drifted.
+test("an unchanged Drifted box shows no reward line", async ({ page }) => {
+  await startWork(page);
+  await page.getByRole("button", { name: "Drifted", exact: true }).click();
+  await page.getByRole("button", { name: "Start this part" }).click();
+  await expect(page.getByText("Make it a bit smaller")).toBeVisible();
+  await expect(page.locator(".reward")).toHaveCount(0);
+});
+
+test("the reward line does not linger into Stuck or Drifted", async ({ page }) => {
+  await startWork(page);
+  await page.getByRole("button", { name: "Done", exact: true }).click();
+  await expect(page.locator(".reward")).toHaveText("✓ Step done.");
+  await page.getByRole("button", { name: "Stuck", exact: true }).click();
+  await expect(page.locator(".reward")).toHaveCount(0);
+  await page.getByRole("button", { name: "Back to the step" }).click();
+  await page.getByRole("button", { name: "Drifted", exact: true }).click();
+  await expect(page.locator(".reward")).toHaveCount(0);
+});
+
+// The countdown follows the clock, not the number of ticks.
+test("the countdown is computed from the clock", async ({ page }) => {
+  await page.clock.install();
+  await startWork(page);
+  await page.getByLabel("Show a countdown").check();
+  await expect(page.locator(".ring-time")).toHaveText("12:00");
+  await page.clock.fastForward(60 * 1000); // one jump, like a laptop waking up
+  await expect(page.locator(".ring-time")).toHaveText("11:00");
+});
+
+// Redraws keep keyboard focus where it was.
+test("focus stays on the 25 minutes button after pressing it", async ({ page }) => {
+  await startWork(page);
+  await page.getByLabel("Show a countdown").check();
+  await page.getByRole("button", { name: "25 minutes" }).click();
+  await expect(page.locator(".ring-time")).toHaveText("25:00");
+  await expect(page.getByRole("button", { name: "25 minutes" })).toBeFocused();
+});
+
+test("focus stays on the countdown box when it is switched on", async ({ page }) => {
+  await startWork(page);
+  await page.getByLabel("Show a countdown").check();
+  await expect(page.getByLabel("Show a countdown")).toBeFocused();
+});
+
+// When the countdown runs out, keyboard focus stays on the step, not the top of the page.
+test("focus stays on the step when time runs out", async ({ page }) => {
+  await page.clock.install();
+  await startWork(page);
+  await page.getByLabel("Show a countdown").check();
+  await page.getByRole("button", { name: "Done", exact: true }).click();
+  await expect(page.locator(".current-step")).toBeFocused();
+  await page.clock.fastForward(13 * 60 * 1000);
+  await expect(page.getByText("Time's up.")).toBeVisible();
+  await expect(page.locator(".current-step")).toBeFocused();
+  await page.getByRole("button", { name: "Still working" }).click();
+  await expect(page.getByText("Time's up.")).toHaveCount(0);
 });

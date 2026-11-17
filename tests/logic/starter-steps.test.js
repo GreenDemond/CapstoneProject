@@ -61,3 +61,10 @@ test("the two-minute start goes first, and only once", () => {
   assert.equal(once.length, steps.length + 1);
   assert.deepEqual(withTwoMinuteStart(once), once);
 });
+
+import { showingLine } from "../../js/logic/starter-steps.js";
+test("showingLine only appears when some steps are hidden", () => {
+  assert.equal(showingLine(5, 12), "Showing 5 of 12. Show more steps adds the rest.");
+  assert.equal(showingLine(12, 12), "");
+  assert.equal(showingLine(3, 3), "");
+});
