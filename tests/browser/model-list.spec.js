@@ -12,31 +12,36 @@ async function toPickStep(page) {
   await nextButton(page).click();
 }
 
-// OpenRouter: the list is fetched without the key, openrouter/free is preselected even when the list lacks it,
-// and the free-model note shows.
-test("OpenRouter's list is fetched without the key, with openrouter/free preselected and a note", async ({ page }) => {
+// OpenRouter: the list is fetched without the key, and the pull-down starts on openrouter/free (even when the
+// list lacks it) with the free-model note. Opening it lets you pick another, and the pick is what is used.
+test("OpenRouter's pull-down starts on openrouter/free and can be changed", async ({ page }) => {
   const seen = await standIn(page, { ...OPENROUTER, models: MANY });
   await openSettings(page);
   await toPickStep(page);
-  await expect(page.getByLabel("openrouter/free", { exact: true })).toBeChecked();
+  const pick = page.getByLabel("Pick an AI");
+  await expect(pick).toHaveValue("openrouter/free");
+  await expect(pick.locator("option")).toHaveCount(15);
   await expect(page.locator("#free-note")).toContainText("Free AIs may keep or learn from what you send");
   expect(seen.models.length).toBeGreaterThan(0);
   expect(seen.models[0].auth).toBeNull();
 
-  // More than 12 AIs: a search box appears, and only the first 6 show until "Show more".
-  await expect(page.getByRole("searchbox", { name: "Search the AIs" })).toBeVisible();
-  await expect(page.locator("#ai-choices .choice")).toHaveCount(6);
-  await page.getByRole("searchbox", { name: "Search the AIs" }).fill("model-13");
-  await expect(page.locator("#ai-choices .choice")).toHaveCount(1);
-  await page.getByRole("searchbox", { name: "Search the AIs" }).fill("");
-  await page.getByRole("button", { name: "Show more" }).click();
-  await expect(page.locator("#ai-choices .choice")).toHaveCount(15);
+  await pick.selectOption("vendor/model-03");
+  await expect(page.locator("#free-note")).toHaveText("");
+  await nextButton(page).click();
+  await expect(page.getByRole("button", { name: "Done" })).toBeVisible({ timeout: 15000 });
+  expect(JSON.parse(seen.chat.at(-1).body).model).toBe("vendor/model-03");
+  await page.getByRole("button", { name: "Done" }).click();
+  await expect(page.locator(".helper-card")).toContainText("OpenRouter");
+});
 
+// Not choosing anything changes nothing: the default is what is used.
+test("leaving the pull-down alone uses the default", async ({ page }) => {
+  const seen = await standIn(page, { ...OPENROUTER, models: MANY });
+  await openSettings(page);
+  await toPickStep(page);
   await nextButton(page).click();
   await expect(page.getByRole("button", { name: "Done" })).toBeVisible({ timeout: 15000 });
   expect(JSON.parse(seen.chat.at(-1).body).model).toBe("openrouter/free");
-  await page.getByRole("button", { name: "Done" }).click();
-  await expect(page.locator(".helper-card")).toContainText("OpenRouter");
 });
 
 // A name typed by hand overrides the list.

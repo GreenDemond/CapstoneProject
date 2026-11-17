@@ -2,8 +2,6 @@
 import { chatAddress, isReady, OPENROUTER_DEFAULT_MODEL, hostOf } from "./ai-services.js";
 
 export const OPENROUTER_BASE = "https://openrouter.ai/api/v1";
-export const SHORT_LIST = 6;
-export const SEARCH_AFTER = 12;
 
 // One status word per helper, with the action it offers. Needs a key comes first when both are missing.
 export function helperStatus(service) {
@@ -92,15 +90,10 @@ export function checkService(provider, typedAddress, list, ignoreId = null) {
   return { ok: true, url };
 }
 
-// What shows in the list of AIs: the preselected AI first, then A to Z, filtered by the search.
+// What shows in the pull-down: the preselected AI first, then A to Z.
 export function orderModels(ids, preselected) {
   const rest = [...new Set(ids)].filter((id) => id !== preselected).sort((a, b) => a.localeCompare(b));
   return preselected ? [preselected, ...rest] : rest;
-}
-
-export function filterModels(ordered, query) {
-  const q = query.trim().toLowerCase();
-  return q === "" ? ordered : ordered.filter((id) => id.toLowerCase().includes(q));
 }
 
 export function defaultModel(chatUrl, ids, current) {

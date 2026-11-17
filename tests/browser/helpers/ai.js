@@ -64,7 +64,7 @@ export async function setUpOther(page, { address = HOST, key = KEY, model = "sma
   await nextButton(page).click();
   await page.getByLabel("Your key").fill(key);
   await nextButton(page).click();
-  await page.getByLabel(model, { exact: true }).check();
+  await page.getByLabel("Pick an AI").selectOption(model);
   await nextButton(page).click();
 }
 

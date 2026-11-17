@@ -15,7 +15,8 @@ test("Rename, Change the AI, Test it again, and Remove with a confirmation", asy
 
   await page.getByRole("button", { name: /^Change the AI/ }).click();
   await expect(page.getByRole("heading", { name: "Change the AI: Pick an AI" })).toBeFocused();
-  await page.getByLabel("big-model", { exact: true }).check();
+  await expect(page.getByLabel("Pick an AI")).toHaveValue("small-model");
+  await page.getByLabel("Pick an AI").selectOption("big-model");
   await nextButton(page).click();
   await expect(page.getByRole("button", { name: "Done" })).toBeVisible({ timeout: 15000 });
   await page.getByRole("button", { name: "Done" }).click();
@@ -54,8 +55,9 @@ test("the add flow works with the keyboard alone", async ({ page }) => {
   await page.keyboard.type("keyboard-only-key-123");
   await nextButton(page).focus();
   await page.keyboard.press("Enter");
-  await page.getByLabel("small-model", { exact: true }).focus();
-  await page.keyboard.press("Space");
+  // The pull-down is a native control, so the browser handles its keys; here we only choose from it.
+  await page.getByLabel("Pick an AI").focus();
+  await page.getByLabel("Pick an AI").selectOption("small-model");
   await nextButton(page).focus();
   await page.keyboard.press("Enter");
   await expect(page.getByRole("button", { name: "Done" })).toBeFocused({ timeout: 15000 });

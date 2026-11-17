@@ -12,7 +12,6 @@ import {
   stepTitle,
   checkService,
   orderModels,
-  filterModels,
   defaultModel,
   renameService,
   updateService,
@@ -20,8 +19,6 @@ import {
   stepToFix,
   setupMessage,
   isOpenRouter,
-  SHORT_LIST,
-  SEARCH_AFTER,
 } from "./logic/settings-flow.js";
 import { testService, listModels } from "./ai-direct.js";
 
@@ -466,7 +463,7 @@ function renderPickStep() {
   const { heading, body, actions } = frame("");
   const status = el("p", { class: "hint", id: "list-status", text: "Looking up the list…" });
   const stop = button("Stop", () => abortRequest(), { id: "list-stop" });
-  const choices = el("div", { class: "choices", id: "ai-choices" });
+  const choices = el("div", { class: "choice-pull", id: "ai-choices" });
   const freeNote = el("p", { class: "hint reserved", id: "free-note" });
   const typed = el("input", { id: "flow-typed", type: "text", maxlength: "100", autocomplete: "off", spellcheck: "false", value: "" });
   const typedBox = el(
@@ -528,7 +525,6 @@ function renderPickStep() {
     status.textContent = "";
     const preselected = defaultModel(flow.url, result.models, flow.model);
     flow.pick = flow.pick || preselected;
-    // Picking from the list clears a typed name, so the choice made last is the one used.
     drawChoices(choices, orderModels(result.models, preselected), () => {
       typed.value = "";
       showFreeNote();
@@ -537,44 +533,22 @@ function renderPickStep() {
   })();
 }
 
-// Draws the AI choices once. Searching and "Show more" change only this part.
+// The AIs as a pull-down, starting on the default (or the current AI), with the choice changeable.
+// Picking from it clears a typed name, so the choice made last is the one used.
 function drawChoices(container, ordered, onPick) {
   container.replaceChildren();
-  const search = ordered.length > SEARCH_AFTER ? el("input", { type: "search", id: "flow-search", "aria-label": "Search the AIs", placeholder: "Search the AIs", autocomplete: "off" }) : null;
-  const list = el("div", { class: "choice-list", role: "radiogroup", "aria-label": "AIs" });
-  const more = button("Show more", () => {
-    expanded = true;
-    paint();
+  const select = el("select", { id: "flow-pick" });
+  if (flow.pick === "") {
+    select.append(el("option", { value: "", text: "Choose an AI…", selected: true }));
+  }
+  for (const id of ordered) {
+    select.append(el("option", { value: id, text: id, selected: id === flow.pick }));
+  }
+  select.addEventListener("change", () => {
+    flow.pick = select.value;
+    onPick();
   });
-  let expanded = false;
-  const paint = () => {
-    const matches = filterModels(ordered, search?.value ?? "");
-    const shown = expanded || search?.value ? matches : matches.slice(0, SHORT_LIST);
-    list.replaceChildren(
-      ...shown.map((id, index) =>
-        el(
-          "div",
-          { class: "choice" },
-          el("input", {
-            type: "radio",
-            name: "ai-pick",
-            id: `pick-${index}`,
-            value: id,
-            checked: id === flow.pick,
-            onchange: () => {
-              flow.pick = id;
-              onPick();
-            },
-          }),
-          el("label", { for: `pick-${index}`, text: id }),
-        ),
-      ),
-    );
-    more.hidden = expanded || Boolean(search?.value) || matches.length <= SHORT_LIST;
-  };
-  search?.addEventListener("input", paint);
-  container.append(...[search, list, more].filter(Boolean));
-  paint();
+  container.append(el("label", { for: "flow-pick", text: "Pick an AI" }), select);
 }
 
 // Step 4: check it works, by itself. Stop is always there.

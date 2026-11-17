@@ -7,7 +7,6 @@ import {
   stepTitle,
   checkService,
   orderModels,
-  filterModels,
   defaultModel,
   renameService,
   canSaveAnyway,
@@ -65,11 +64,9 @@ test("step 1 refuses bad, duplicate, and lookalike addresses before any key is t
   assert.equal(looksLikeOpenRouter("https://openrouter.ai"), false);
 });
 
-test("the AI list shows the preselected one first, then A to Z, and filters by the search", () => {
-  const ordered = orderModels(["b", "a", "c", "a"], "z-default");
-  assert.deepEqual(ordered, ["z-default", "a", "b", "c"]);
-  assert.deepEqual(filterModels(ordered, "B"), ["b"]);
-  assert.deepEqual(filterModels(ordered, "  "), ordered);
+test("the AI pull-down starts with the preselected one, then A to Z, without repeats", () => {
+  assert.deepEqual(orderModels(["b", "a", "c", "a"], "z-default"), ["z-default", "a", "b", "c"]);
+  assert.deepEqual(orderModels(["b", "a"], ""), ["a", "b"]);
 });
 
 test("OpenRouter defaults to openrouter/free even if the list lacks it, and a lone AI is picked", () => {
