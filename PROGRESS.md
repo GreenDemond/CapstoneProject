@@ -6,11 +6,18 @@ The only memory between sessions. Keep it current; rewrite it, do not let it gro
 
 - **Project setup.** `npm start` serves the app at http://localhost:3000. `npm run check` runs lint, the logic tests, and the browser tests at phone and desktop widths.
 - **Paste screen** (`design/paste-and-split.md`). The student pastes an assignment, picks one of six kinds of work, and sees five starter steps, with "Show more steps" for the full list. Numbered and bulleted items in the paste come first. Pasted text is cut at 6,000 characters with a message. Nothing is saved, and Start only confirms the steps are ready.
-- Logic in `js/logic/`: `clean-text.js` (tidies and limits pasted text), `starter-steps.js` (builds the steps). Both tested.
+- **How I like to work** (`design/focus-intake.md`). Four one-tap questions, then a "My first guess" card with a Change button on each line. Nothing is saved; closing clears it. Built 2026-11-16, tested.
+- Logic in `js/logic/`: `clean-text.js` (tidies and limits pasted text), `starter-steps.js` (builds the steps), `focus-intake.js` (questions and card text). All tested.
 
 ## In progress
 
 Nothing.
+
+## Known gaps
+
+- The intake answers and card are lost on refresh until saving is built (item 5). This is on purpose; the start screen says so.
+- The intake does not yet use its answers anywhere. The trial that tests them is version 2.
+- The dedicated `advisor` agent (`.claude/agents/advisor.md`) was not loaded in the last session. A general Opus agent was used for the review instead. Restart the session to load it.
 
 ## Broken or worrying
 
@@ -30,6 +37,7 @@ Nothing.
 - The words for drifting, getting stuck, and coming back.
 - Colors and overall look. Placeholder colors are in `css/styles.css`.
 - Whether the paste screen's six kinds and their starter steps read well (see the manual checks).
+- The words for coming back (the Q4 answers and the card line "When I come back"). Placeholder wording is in place.
 
 **Parent**
 

@@ -1,6 +1,6 @@
 # Design: how I work (focus intake)
 
-Status: **proposed, revised after advisor review (2026-11-16). Waiting for Ben's decisions (see the end) before any code.**
+Status: **built 2026-11-16**, after Ben chose to build it now and approved the card name "My first guess" and the default wording. Saving the card is item 5 on the build list.
 
 ## What this is, and what it is not
 

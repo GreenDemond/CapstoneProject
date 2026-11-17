@@ -29,3 +29,17 @@ Start the app with `npm start`, then open http://localhost:3000 in Chrome.
 
 1. You should see the heading "Focus app" in Chrome at http://localhost:3000.
 2. Make the browser window narrow, about phone width. The text should still fit with no sideways scrolling.
+
+## How I like to work (2026-11-16)
+
+Start the app with `npm start`, then open http://localhost:3000 in Chrome.
+
+1. On the paste screen, press **How I like to work**. You should see the heading "How I like to work" and a **Start** button.
+2. Press **Start**. The first question is "Sound or quiet?". Tap **Quiet**.
+3. Answer the next three questions: "Short (about 12 minutes)", "Phone", and "A very small first step".
+4. You should see the heading "My first guess" and four lines, each showing your pick. The line "This is only a first guess" should be at the bottom.
+5. Press **Change** on the first line. You should go to the sound question. Pick "A steady background hiss, like a fan". You should come back to the card, and the first line should now show the hiss.
+6. Start again, and tap **Not sure** on every question. The card should show "Not sure yet" on all four lines.
+7. Press **Close** on any screen. You should return to the paste screen. Open the intake again: it should start fresh.
+8. Refresh the page halfway through. The answers are gone, and the intake starts again. This is expected until saving is built.
+9. Narrow the window to about phone width. Answer buttons should wrap, with no sideways scrolling.

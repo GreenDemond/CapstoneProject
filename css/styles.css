@@ -141,3 +141,23 @@ ol:focus-visible {
     animation: none !important;
   }
 }
+
+ul.card {
+  list-style: none;
+  padding: 0;
+}
+
+ul.card li {
+  margin-bottom: 0.6rem;
+}
+
+button.small {
+  min-height: 2.25rem;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.95rem;
+}
+
+h3 {
+  font-size: 1.1rem;
+  margin: 1rem 0 0.5rem;
+}
