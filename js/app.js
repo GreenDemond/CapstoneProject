@@ -10,7 +10,9 @@ import { pickupLine, listLabel } from "./logic/home.js";
 import { inUseHelper, usableServices, pasteStatus, isReady, hostOf } from "./logic/ai-services.js";
 import { readKey } from "./keystore.js";
 import { askService, askChat } from "./ai-direct.js";
-import { MAX_MESSAGE, OPENING_QUESTION, TRUSTED_ADULT_LINE, DEFAULT_GUIDE } from "./logic/chat.js";
+import { MAX_MESSAGE, OPENING_QUESTION, TRUSTED_ADULT_LINE } from "./logic/chat.js";
+import { loadChatSettings } from "./storage.js";
+import { guideFor, lengthFor } from "./logic/chat-settings.js";
 import { initSettings, getAiSettings, onAiChange, setChosenHelper, openSettingsScreen } from "./settings.js";
 import { confetti } from "./confetti.js";
 import { GROUPS, CATEGORIES, groupItems, makeItem, makeEvent, isEvent, removeItem, parseDue, setStatus, completedItems } from "./logic/calendar.js";
@@ -1549,7 +1551,9 @@ async function sendChat() {
     }
   }, 10000);
 
-  const result = await askChat(service, key, { kind: chatKind, guide: DEFAULT_GUIDE, messages: chatMessages }, chatAbort.signal);
+  // Settings are read now, so a change made in Settings applies to the next message.
+  const mine = loadChatSettings();
+  const result = await askChat(service, key, { kind: chatKind, guide: guideFor(mine, chatKind), length: lengthFor(mine, chatKind), messages: chatMessages }, chatAbort.signal);
   clearTimeout(slowNote);
   if (run !== chatRun) {
     return; // Stop, Start over, or Back was pressed: ignore a late answer

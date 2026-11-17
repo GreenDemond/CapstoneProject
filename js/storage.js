@@ -4,6 +4,7 @@
 import { emptyProfile, normalizeProfile } from "./logic/profile.js";
 import { normalizeServices } from "./logic/ai-services.js";
 import { normalizeWork } from "./logic/work.js";
+import { normalizeChatSettings } from "./logic/chat-settings.js";
 
 export const STORAGE_KEY = "focusapp.v1";
 export const BACKUP_KEY = "focusapp.v1.backup";
@@ -253,6 +254,40 @@ export function saveWork(work, savedOn = new Date().toISOString(), storage = def
     const data = work === null
       ? { ...rest, schemaVersion: SCHEMA_VERSION }
       : { ...rest, schemaVersion: SCHEMA_VERSION, work: { steps: work.steps, nextId: work.nextId, savedOn } };
+    storage.setItem(STORAGE_KEY, JSON.stringify(data));
+    return storage.getItem(STORAGE_KEY) === JSON.stringify(data);
+  } catch {
+    return false;
+  }
+}
+
+// The student's own chat guides and reply lengths, in their own section. Damaged entries are dropped one by one.
+export function loadChatSettings(storage = defaultStorage()) {
+  if (!storage) {
+    return normalizeChatSettings(null);
+  }
+  try {
+    const raw = storage.getItem(STORAGE_KEY);
+    return normalizeChatSettings(raw === null ? null : JSON.parse(raw)?.chat);
+  } catch {
+    return normalizeChatSettings(null);
+  }
+}
+
+export function saveChatSettings(settings, storage = defaultStorage()) {
+  if (!storage) {
+    return false;
+  }
+  try {
+    let existing = {};
+    const raw = storage.getItem(STORAGE_KEY);
+    if (raw !== null) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object" && parsed.schemaVersion === SCHEMA_VERSION) {
+        existing = parsed;
+      }
+    }
+    const data = { ...existing, schemaVersion: SCHEMA_VERSION, chat: { guides: settings.guides, lengths: settings.lengths } };
     storage.setItem(STORAGE_KEY, JSON.stringify(data));
     return storage.getItem(STORAGE_KEY) === JSON.stringify(data);
   } catch {

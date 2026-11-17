@@ -93,8 +93,8 @@ export async function askService(service, key, text, kind, signal) {
 }
 
 // One chat turn. Returns { text, cutOff }, { empty, cutOff }, { trustedAdult }, { aborted }, or { error }.
-export async function askChat(service, key, { kind, guide, messages }, signal) {
-  const result = await postJson(service, key, buildChatRequest({ model: service.model, kind, guide, messages }), signal);
+export async function askChat(service, key, { kind, guide, length, messages }, signal) {
+  const result = await postJson(service, key, buildChatRequest({ model: service.model, kind, guide, length, messages }), signal);
   if (result.failed === "aborted") {
     return { aborted: true };
   }

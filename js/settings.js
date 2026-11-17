@@ -21,6 +21,7 @@ import {
   isOpenRouter,
 } from "./logic/settings-flow.js";
 import { testService, listModels } from "./ai-direct.js";
+import { renderTalkSettings } from "./chat-settings.js";
 
 let aiSettings = loadAiSettings();
 const listeners = [];
@@ -172,6 +173,10 @@ async function renderList(message = "", focusSelector = null) {
   }
   root.append(cards);
   root.append(el("p", {}, button("Add an AI helper", () => startFlow("add", null), { primary: true, id: "add-helper" })));
+  root.append(
+    el("p", { class: "hint", text: "Talk it through can follow your own guide for how the AI talks." }),
+    el("p", {}, button("How the AI talks", () => { show("talk"); renderTalkSettings(views.talk, () => renderList("", "#open-talk")); }, { id: "open-talk" })),
+  );
   const live = el("p", { class: "setup-message", role: "status", "aria-live": "polite" });
   root.append(live);
   live.textContent = message;
@@ -842,6 +847,7 @@ export function initSettings({ screen: screenEl, pasteScreen: pasteEl, openButto
     list: screen.querySelector("#helpers-list"),
     add: screen.querySelector("#helpers-add"),
     manage: screen.querySelector("#helpers-manage"),
+    talk: screen.querySelector("#helpers-talk"),
   };
   openButton.addEventListener("click", openSettingsScreen);
   keyStatesPromise = loadKeyStates();
