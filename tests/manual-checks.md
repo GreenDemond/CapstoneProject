@@ -43,3 +43,15 @@ Start the app with `npm start`, then open http://localhost:3000 in Chrome.
 7. Press **Close** on any screen. You should return to the paste screen. Open the intake again: it should start fresh.
 8. Refresh the page halfway through. The answers are gone, and the intake starts again. This is expected until saving is built.
 9. Narrow the window to about phone width. Answer buttons should wrap, with no sideways scrolling.
+
+## My profile (2026-11-16)
+
+1. On the paste screen, press **My profile**. You should see "Today", "This week", "This month", and "This year" boxes, then "What got in the way?".
+2. Type "Finish the reading" in **Today**. Press **Save**. You should see "Saved on this device."
+3. Press **Back**, then **My profile** again. Your goal should still be there.
+4. Refresh the whole page, then open **My profile**. Your goal should still be there. (This is the saving working.)
+5. In **What got in the way?**, type "The phone buzzed and I checked it for 20 minutes", press **Add note**. It should appear at the top of the list.
+6. Press **Delete** on that note. It should disappear at once.
+7. Type a goal change but don't press **Save**. You should see "Not saved yet." Press **Back**: a message should ask you to save. Press **Back** again to leave.
+8. Press **Clear my profile**. You should see "This can't be undone." Press **Cancel**, nothing changes. Press it again and **Yes, clear everything**: all boxes and notes are empty.
+9. Narrow the window to about phone width. Boxes should fill the width, with no sideways scrolling.

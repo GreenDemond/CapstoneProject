@@ -7,6 +7,7 @@ The only memory between sessions. Keep it current; rewrite it, do not let it gro
 - **Project setup.** `npm start` serves the app at http://localhost:3000. `npm run check` runs lint, the logic tests, and the browser tests at phone and desktop widths.
 - **Paste screen** (`design/paste-and-split.md`). The student pastes an assignment, picks one of six kinds of work, and sees five starter steps, with "Show more steps" for the full list. Numbered and bulleted items in the paste come first. Pasted text is cut at 6,000 characters with a message. Nothing is saved, and Start only confirms the steps are ready.
 - **How I like to work** (`design/focus-intake.md`). Four one-tap questions, then a "My first guess" card with a Change button on each line. Nothing is saved; closing clears it. Built 2026-11-16, tested.
+- **My profile, first slice** (`design/profile.md`). Goals for today, week, month, and year, plus a list of "What got in the way?" notes. Saved on this device with `js/storage.js` (the first part of build item 5). Damaged saved data is kept as a backup and the page starts fresh. Delete one note, or clear everything after a confirm.
 - Logic in `js/logic/`: `clean-text.js` (tidies and limits pasted text), `starter-steps.js` (builds the steps), `focus-intake.js` (questions and card text). All tested.
 
 ## In progress
@@ -15,7 +16,9 @@ Nothing.
 
 ## Known gaps
 
-- The intake answers and card are lost on refresh until saving is built (item 5). This is on purpose; the start screen says so.
+- The intake answers and card are still lost on refresh. Saving them is the next small step.
+- The profile does not yet use its goals or notes for suggestions. That is a later slice.
+- "Pick up here" after time away (item 5) is not built yet.
 - The intake does not yet use its answers anywhere. The trial that tests them is version 2.
 - The dedicated `advisor` agent (`.claude/agents/advisor.md`) was not loaded in the last session. A general Opus agent was used for the review instead. Restart the session to load it.
 
@@ -53,7 +56,7 @@ In order. Each is one session or less. Each feature starts with a design note in
 2. ~~Paste and split, first part: paste, kind, starter steps.~~ Done.
 3. **Paste and split, second part: editing.** Edit a step's words, delete, reorder, add, and merge. Needs a short design note and Ben's go-ahead. Then the Start button leads to step 4.
 4. **Work screen.** One step at a time, "step 3 of 7", and the four buttons: Done, Still working, Stuck, Drifted.
-5. **Saving and coming back.** Progress survives a refresh. After a day or more away, the app opens to one "pick up here" button.
+5. **Saving and coming back.** Profile saving is done. Still to do: the intake card saved, progress through the steps saved, and the "pick up here" button after a day or more away.
 6. **Weekly goal and progress display.**
 7. **Save to file and load from file.**
 
