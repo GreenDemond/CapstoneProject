@@ -5,7 +5,8 @@ import { cleanPastedText, limitPaste } from "./logic/clean-text.js";
 import { KINDS, DEFAULT_STEP_COUNT, starterStepsFor, withTwoMinuteStart } from "./logic/starter-steps.js";
 import { QUESTIONS, cardLines } from "./logic/focus-intake.js";
 import { GOAL_KEYS, MAX_TEXT, emptyProfile, setGoals, addNote, deleteNote, notesNewestFirst } from "./logic/profile.js";
-import { loadProfileState, saveProfile } from "./storage.js";
+import { loadProfileState, saveProfile, loadAiSettings, saveAiSettings } from "./storage.js";
+import { parseAddress, plainHttpWarning, addService, removeService, chosenService, pasteStatus, OPENROUTER_ADDRESS } from "./logic/ai-services.js";
 import { aiAvailable, suggestWithAi } from "./ai.js";
 import { confetti } from "./confetti.js";
 import { GROUPS, CATEGORIES, groupItems, makeItem, makeEvent, isEvent, removeItem, parseDue, setStatus, completedItems } from "./logic/calendar.js";
@@ -685,6 +686,131 @@ aiButton.addEventListener("click", async () => {
   renderSteps(DEFAULT_STEP_COUNT);
   stepsScreen.hidden = false;
 });
+
+// Settings: the AI services a student adds (design/ai-endpoints.md). Keys come in the next step.
+const settingsScreen = document.getElementById("settings-screen");
+const openSettings = document.getElementById("open-settings");
+const aiList = document.getElementById("ai-list");
+const aiEmpty = document.getElementById("ai-empty");
+const aiName = document.getElementById("ai-name");
+const aiAddress = document.getElementById("ai-address");
+const aiAddressWarning = document.getElementById("ai-address-warning");
+const aiForm = document.getElementById("ai-form");
+const settingsMessage = document.getElementById("settings-message");
+const aiStatus = document.getElementById("ai-status");
+
+let aiSettings = loadAiSettings();
+
+function refreshAiStatus() {
+  aiStatus.textContent = pasteStatus(aiSettings.services, aiSettings.chosenId);
+}
+
+function persistAi(onSaved) {
+  if (saveAiSettings(aiSettings)) {
+    onSaved?.();
+  } else {
+    settingsMessage.textContent = "Couldn't save on this device, so this change may be lost when you leave the page.";
+  }
+  refreshAiStatus();
+}
+
+function renderAiList() {
+  const chosen = chosenService(aiSettings.services, aiSettings.chosenId);
+  aiList.replaceChildren();
+  aiEmpty.hidden = aiSettings.services.length > 0;
+  for (const service of aiSettings.services) {
+    const item = document.createElement("li");
+    const radio = document.createElement("input");
+    radio.type = "radio";
+    radio.name = "ai-choice";
+    radio.id = `ai-${service.id}`;
+    radio.checked = chosen?.id === service.id;
+    radio.addEventListener("change", () => {
+      aiSettings = { ...aiSettings, chosenId: service.id };
+      persistAi();
+    });
+    const label = document.createElement("label");
+    label.htmlFor = radio.id;
+    label.textContent = service.label;
+    const address = document.createElement("span");
+    address.className = "hint";
+    address.textContent = service.url;
+    const note = document.createElement("span");
+    note.className = "hint";
+    note.textContent = service.keyReady ? "Key saved." : "No key yet, so this AI can't answer.";
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.textContent = "Remove";
+    remove.setAttribute("aria-label", `Remove ${service.label}`);
+    remove.addEventListener("click", () => {
+      aiSettings = { services: removeService(aiSettings.services, service.id), chosenId: aiSettings.chosenId };
+      persistAi(() => {
+        settingsMessage.textContent = `Removed ${service.label}.`;
+      });
+      renderAiList();
+    });
+    item.append(radio, label, address, note, remove);
+    aiList.append(item);
+  }
+}
+
+function updateAddressWarning() {
+  const parsed = parseAddress(aiAddress.value);
+  const show = aiAddress.value.trim() !== "" && parsed.ok && parsed.plainHttp;
+  aiAddressWarning.hidden = !show;
+  aiAddressWarning.textContent = show ? plainHttpWarning() : "";
+}
+
+aiAddress.addEventListener("input", updateAddressWarning);
+
+document.getElementById("ai-use-openrouter").addEventListener("click", () => {
+  aiAddress.value = OPENROUTER_ADDRESS;
+  if (aiName.value.trim() === "") {
+    aiName.value = "OpenRouter";
+  }
+  updateAddressWarning();
+  aiAddress.focus();
+});
+
+aiForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const parsed = parseAddress(aiAddress.value);
+  if (!parsed.ok) {
+    settingsMessage.textContent = parsed.reason;
+    return;
+  }
+  const { list, error } = addService(aiSettings.services, { label: aiName.value, url: parsed.url });
+  if (error) {
+    settingsMessage.textContent = error;
+    return;
+  }
+  const added = list[list.length - 1];
+  aiSettings = { services: list, chosenId: aiSettings.chosenId ?? added.id };
+  aiName.value = "";
+  aiAddress.value = "";
+  updateAddressWarning();
+  renderAiList();
+  persistAi(() => {
+    settingsMessage.textContent = "Saved. This AI can't answer until its key is added, which is the next step.";
+  });
+});
+
+openSettings.addEventListener("click", () => {
+  pasteScreen.hidden = true;
+  settingsScreen.hidden = false;
+  settingsMessage.textContent = "";
+  renderAiList();
+  settingsScreen.querySelector("h2").focus();
+});
+
+document.getElementById("settings-back").addEventListener("click", () => {
+  settingsScreen.hidden = true;
+  pasteScreen.hidden = false;
+  refreshAiStatus();
+  openSettings.focus();
+});
+
+refreshAiStatus();
 
 // "My calendar": items the student adds with a due time, sorted into groups by how
 // soon they are due (design/calendar.md). Saved only on this device.

@@ -3,6 +3,7 @@
 The only memory between sessions. Keep it current; rewrite it, do not let it grow into a diary.
 
 ## Working
+- AI settings screen (built, switched off): Settings button on the paste screen; add an OpenRouter or other address (http or https; http shows a warning); remove; choose one. The paste screen warns "No AI is set up yet" until a service has a key. Tests: `tests/logic/ai-services.test.js`, `tests/browser/settings.spec.js`.
 
 - **Project setup.** `npm start` serves the app at http://localhost:3000. `npm run check` runs lint, the logic tests, and the browser tests at phone and desktop widths.
 - **Paste screen** (`design/paste-and-split.md`). The student pastes an assignment, picks one of six kinds of work, and sees five starter steps, with "Show more steps" for the full list. Numbered and bulleted items in the paste come first. Pasted text is cut at 6,000 characters with a message. Nothing is saved, and Start only confirms the steps are ready.
@@ -16,6 +17,7 @@ The only memory between sessions. Keep it current; rewrite it, do not let it gro
 - Logic in `js/logic/`: `clean-text.js` (tidies and limits pasted text), `starter-steps.js` (builds the steps), `focus-intake.js` (questions and card text). All tested.
 
 ## In progress
+- AI keys (design/ai-endpoints.md, parent approved 2026-11-17): next is step 2, encrypted, masked key storage in the student's browser, then the key field in Settings and the Test button. Keys must make `keyReady` true; until then no AI is used.
 
 Nothing.
 

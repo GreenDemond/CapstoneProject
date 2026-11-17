@@ -2,6 +2,7 @@
 // One key, one object, with a schema number. Damaged data is kept under a backup
 // key and the app starts fresh. Nothing here ever throws to the screen.
 import { emptyProfile, normalizeProfile } from "./logic/profile.js";
+import { normalizeServices } from "./logic/ai-services.js";
 
 export const STORAGE_KEY = "focusapp.v1";
 export const BACKUP_KEY = "focusapp.v1.backup";
@@ -175,6 +176,41 @@ export function saveCompletionCounts(counts, storage = defaultStorage()) {
     }
     const items = existing.calendar?.items ?? [];
     const data = { ...existing, schemaVersion: SCHEMA_VERSION, calendar: { items, counts } };
+    storage.setItem(STORAGE_KEY, JSON.stringify(data));
+    return storage.getItem(STORAGE_KEY) === JSON.stringify(data);
+  } catch {
+    return false;
+  }
+}
+
+// The AI services a student added (addresses and names only; keys are stored separately).
+// Kept in their own section, so saving them keeps everything else.
+export function loadAiSettings(storage = defaultStorage()) {
+  if (!storage) {
+    return { services: [], chosenId: null };
+  }
+  try {
+    const raw = storage.getItem(STORAGE_KEY);
+    return normalizeServices(raw === null ? null : JSON.parse(raw)?.ai);
+  } catch {
+    return { services: [], chosenId: null };
+  }
+}
+
+export function saveAiSettings(settings, storage = defaultStorage()) {
+  if (!storage) {
+    return false;
+  }
+  try {
+    let existing = {};
+    const raw = storage.getItem(STORAGE_KEY);
+    if (raw !== null) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object" && parsed.schemaVersion === SCHEMA_VERSION) {
+        existing = parsed;
+      }
+    }
+    const data = { ...existing, schemaVersion: SCHEMA_VERSION, ai: { services: settings.services, chosenId: settings.chosenId } };
     storage.setItem(STORAGE_KEY, JSON.stringify(data));
     return storage.getItem(STORAGE_KEY) === JSON.stringify(data);
   } catch {

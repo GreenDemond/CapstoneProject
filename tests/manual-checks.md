@@ -101,3 +101,12 @@ Once the parent has set the key and the app is hosted:
 5. Leave the title blank and press **Add to my calendar**. You should see "Write what it is first."
 6. Reload the page and open **My calendar**. The items should still be there.
 7. Press **Delete** on one. It should go at once.
+
+## AI settings (2026-11-17)
+
+1. Open the app. The paste screen should say "No AI is set up yet, so you'll get the built-in steps."
+2. Press **Settings**. Press **Use the OpenRouter address**; the name fills in as "OpenRouter". Press **Add this AI**. You should see "Saved. This AI can't answer until its key is added" and the list shows "No key yet".
+3. Press **Back**. The paste screen still says "No AI is set up yet".
+4. Reload, open **Settings**: the service is still there. Press **Remove OpenRouter**; the list says "No AI is set up yet".
+5. Type the name "Home AI" and the address `http://ai.tail6e5320.ts.net:8080/`. A warning "This address is not encrypted" should appear under the address.
+6. Type `ftp://nope` as the address and press **Add this AI**. You should see a message asking for http:// or https://.

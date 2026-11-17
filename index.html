@@ -30,7 +30,9 @@
           <button type="button" id="ai-suggest">Suggest steps with AI</button>
           <p class="hint">Suggestions come from an AI, not a person. The app stores none of it.</p>
         </div>
+        <p id="ai-status" class="hint" aria-live="polite"></p>
         <p id="message" class="message" role="status" aria-live="polite"></p>
+        <p><button type="button" id="open-settings">Settings</button></p>
         <p><button type="button" id="open-intake">How I like to work</button></p>
         <p><button type="button" id="open-profile">My profile</button></p>
         <p><button type="button" id="open-calendar">My calendar</button></p>
@@ -39,6 +41,26 @@
       <section id="calendar-screen" hidden aria-labelledby="calendar-heading">
         <h2 id="calendar-heading" tabindex="-1">My calendar</h2>
         <div id="calendar-body"></div>
+      </section>
+
+      <section id="settings-screen" hidden aria-labelledby="settings-heading">
+        <h2 id="settings-heading" tabindex="-1">Settings</h2>
+        <p><button type="button" id="settings-back">Back</button></p>
+        <h3>AI services</h3>
+        <p class="hint">Add an AI service to get suggested steps. If none is set up, you get the built-in steps. Keys come in the next step.</p>
+        <ul id="ai-list" class="ai-list"></ul>
+        <p id="ai-empty" class="hint">No AI is set up yet.</p>
+
+        <form id="ai-form" class="ai-form">
+          <label for="ai-name">Name, for example "Home AI"</label>
+          <input id="ai-name" type="text" maxlength="60" autocomplete="off">
+          <label for="ai-address">Address</label>
+          <input id="ai-address" type="url" placeholder="https://" autocomplete="off">
+          <p id="ai-address-warning" class="hint" hidden></p>
+          <p><button type="button" id="ai-use-openrouter">Use the OpenRouter address</button></p>
+          <p><button type="submit" id="ai-add">Add this AI</button></p>
+        </form>
+        <p id="settings-message" class="message" role="status" aria-live="polite"></p>
       </section>
 
       <section id="profile-screen" hidden aria-labelledby="profile-heading">

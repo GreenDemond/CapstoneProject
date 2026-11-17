@@ -168,6 +168,7 @@ These are his choices. Ask him; do not pick for him.
 1. Hosting: which service, and when (T7). Handled privately by the parent.
 2. Whether to add the AI path at all, and if so, setting up the OpenRouter key (T6).
 2. Whether classmates take part in the beta, with teacher approval and written parent permission.
+   Ben now wants students to bring their own keys (T6 says keys never reach the browser). Options are in `design/ai-endpoints.md`. Not built until the parent chooses.
 3. Whether the app is ever published beyond the beta group.
 
 ---
@@ -181,3 +182,4 @@ These are his choices. Ask him; do not pick for him.
 | 2026-11-16 | T6: AI provider set to Anthropic's Claude API; minors safeguards added. T7: hosting left to the parent; Cloudflare default removed | Parent said Ben has an Anthropic subscription and that hosting will be arranged privately | Parent |
 | 2026-11-16 | T6: provider changed from Anthropic to OpenRouter; data and spending settings added | Parent chose OpenRouter after confirming a Pro subscription includes no API access | Parent |
 | 2026-11-17 | T6: Ben, who says he is 18 or over, will create the OpenRouter account and key himself, starting with a free model to avoid cost. Free-model training must be blocked in account settings (the switch is separate from the paid one), and only a provider marked zero retention or safety retention may be used. Agents still never create accounts or handle the key | Ben asked to start the AI path at no cost; many free models run on providers that may train on prompts | Ben |
+| 2026-11-17 | T6 changed for the beta: students bring their own AI key, kept encrypted in their own browser and sent only to the service they choose. Ben's own endpoints run on the parent's bill, held on the server and local only; they are never offered in a shared copy. Classmates still need teacher approval and written parent permission (T8) | Parent (Ben's dad) approved in chat, saying Ben uses the parent's bill and peers pay with their own | Parent |
