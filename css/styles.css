@@ -383,3 +383,12 @@ h3 {
   .print-notes { margin: 0.1cm 0 0 0.9cm; font-size: 11pt; }
 }
 #print-area[hidden] { display: none; }
+
+/* Spanning bars: one bar across the days it covers */
+.bar-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin: 0.4rem 0; }
+.span-bar {
+  min-height: 2rem; text-align: left; padding: 0.2rem 0.5rem; font-size: 0.9rem;
+  color: #2e2a24; background: #d9c9a8; border: 1px dashed #2e2a24; border-radius: 0.4rem;
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+.month-bars { grid-column: 1 / -1; }

@@ -720,13 +720,14 @@ function renderCalendar(draft = { title: "", day: "", time: "" }, message = "") 
   const timeBox = el("input", undefined, { type: "time", id: "cal-time" });
   timeBox.value = draft.time;
   const dayLabel = el("label", kindBox.value === "event" ? "From date" : "Due date", { for: "cal-day" });
-  const endLabel = el("label", "To date", { for: "cal-end" });
+  const endLabel = el("label", "Ends on (optional)", { for: "cal-end" });
   const timeLabel = el("label", "Due time", { for: "cal-time" });
   const applyKind = () => {
     const isTrip = kindBox.value === "event";
     dayLabel.textContent = isTrip ? "From date" : "Due date";
-    endBox.hidden = !isTrip;
-    endLabel.hidden = !isTrip;
+    endLabel.textContent = isTrip ? "To date" : "Ends on (optional, for items over several days)";
+    endBox.hidden = false;
+    endLabel.hidden = false;
     timeBox.hidden = isTrip;
     timeLabel.hidden = isTrip;
   };
@@ -895,7 +896,9 @@ function addCalendarItem() {
     links: document.getElementById("cal-links").value,
     category: document.getElementById("cal-category").value,
   };
-  const result = draft.kind === "event"
+  // A trip, or a task with an "Ends on" date, becomes a spanning item drawn as a bar.
+  const spans = draft.kind === "event" || (draft.kind === "task" && draft.end !== "");
+  const result = spans
     ? makeEvent({ title: draft.title, start: draft.day, end: draft.end, notes: draft.notes, links: draft.links, category: draft.category }, calendarId())
     : makeItem(draft, calendarId());
   if (!result.ok) {
@@ -1040,6 +1043,10 @@ function renderTimeView() {
 
   if (calView === "week") {
     const { weekdays, weekend } = splitWeek(calAnchor);
+    const weekDaysAll = [...weekdays, ...weekend];
+    const strip = el("div", undefined, { class: "bar-strip", "aria-label": "Spanning items" });
+    for (const bar of spanBarsFor(weekDaysAll)) strip.append(bar);
+    if (strip.childElementCount > 0) calendarBody.append(strip);
     for (const [title, days] of [["Weekdays", weekdays], ["Weekend", weekend]]) {
       calendarBody.append(el("h3", title, { tabindex: "-1" }));
       const row = el("div", undefined, { class: "week-row" });
@@ -1062,6 +1069,12 @@ function renderTimeView() {
     grid.append(el("div", name, { class: "month-head", role: "columnheader" }));
   }
   for (const week of monthGrid(calAnchor)) {
+    const real = week.filter(Boolean);
+    if (real.length > 0) {
+      const strip = el("div", undefined, { class: "bar-strip month-bars" });
+      for (const bar of spanBarsFor(week.map((d) => d ?? real[0]))) strip.append(bar);
+      if (strip.childElementCount > 0) grid.append(strip);
+    }
     for (const day of week) {
       if (!day) {
         grid.append(el("div", "", { class: "month-cell empty" }));
@@ -1109,4 +1122,39 @@ function printDay() {
   window.print();
   area.hidden = true;
   area.replaceChildren();
+}
+
+// Bars for spanning items across a row of seven days (Monday first).
+// Each bar sits in a grid strip, from its first day to its last day within the row.
+function spanBarsFor(days) {
+  const first = dayKey(days[0]);
+  const last = dayKey(days[days.length - 1]);
+  const bars = [];
+  const lanes = []; // each lane is a list of [from, to] column ranges already used
+  for (const item of calendarItems.filter(isEvent)) {
+    if (item.end < first || item.start > last) continue;
+    const startIndex = Math.max(0, days.findIndex((d) => dayKey(d) >= item.start));
+    let endIndex = days.length - 1;
+    for (let i = days.length - 1; i >= 0; i--) {
+      if (dayKey(days[i]) <= item.end) { endIndex = i; break; }
+    }
+    // Stack overlapping bars vertically: take the first lane with no clash.
+    let lane = lanes.findIndex((used) => used.every(([a, b]) => endIndex < a || startIndex > b));
+    if (lane === -1) {
+      lanes.push([]);
+      lane = lanes.length - 1;
+    }
+    lanes[lane].push([startIndex, endIndex]);
+    const bar = el("button", undefined, { type: "button", class: "span-bar", "data-group": "event" });
+    bar.style.gridColumn = `${startIndex + 1} / ${endIndex + 2}`;
+    bar.style.gridRow = String(lane + 1);
+    bar.textContent = `${item.title} (to ${item.end})`;
+    bar.addEventListener("click", () => { calAnchor = new Date(item.start + "T12:00"); calView = "day"; renderCalendar(); });
+    bars.push(bar);
+  }
+  return bars;
+}
+
+function dayKey(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }

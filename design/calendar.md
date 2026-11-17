@@ -103,3 +103,10 @@ Wording rules: no "overdue," "missed," or "late." Past events look the same as f
 - It opens the browser's own print window, with a plain page for that day: the trips band, then each item with a tick box, its time, title, and notes. Tick boxes are for ticking on paper.
 - Saving as a PDF uses the browser's own "Save as PDF" option. The file stays on the device; nothing is uploaded.
 - The print page is hidden on screen and shown only when printing.
+
+## Added 2026-11-17: spanning bars
+
+- Any item can now span several days. On the form, a task can have an optional **Ends on** date; a trip or event needs a **To date**. A spanning item is stored as a multi-day item and is not put in the priority groups.
+- In **Week** and **Month**, a spanning item is drawn as one bar across its days, in a strip above the days it covers, not repeated on each day. The bar shows the title and the end date.
+- In the **Day** view, the item shows as a band above the timeline, as before.
+- Overlapping bars stack vertically, one per row, so none hides another.

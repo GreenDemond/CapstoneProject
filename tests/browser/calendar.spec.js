@@ -195,3 +195,14 @@ test("the day can be printed with a tick box for each item", async ({ page }) =>
   expect(await page.evaluate(() => globalThis.printedBoxes)).toBe(1);
   expect(await page.evaluate(() => globalThis.printedText)).toContain("Biology reading");
 });
+
+// A task that ends on a later day is drawn as one bar across those days in the Week view.
+test("a task that ends later shows as one bar across the days in Week view", async ({ page }) => {
+  await openCalendar(page);
+  await page.getByLabel("What is it?").fill("Science project");
+  await page.getByLabel("Due date").fill(dayFromNow(0));
+  await page.getByLabel("Ends on (optional").fill(dayFromNow(2));
+  await page.getByRole("button", { name: "Add to my calendar" }).click();
+  await page.getByRole("button", { name: "Week", exact: true }).click();
+  await expect(page.locator(".bar-strip .span-bar", { hasText: "Science project" })).toHaveCount(1);
+});
