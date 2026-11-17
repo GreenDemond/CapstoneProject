@@ -1,6 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { loadProfileState, saveProfile, saveCalendarItems, loadCalendarItems, STORAGE_KEY, BACKUP_KEY } from "../../js/storage.js";
+import {
+  loadProfileState, saveProfile, saveCalendarItems, loadCalendarItems, STORAGE_KEY, BACKUP_KEY,
+  saveCompletionCounts, loadCompletionCounts, saveAiSettings, loadAiSettings, saveWork, loadWork,
+  saveChatSettings, loadChatSettings,
+} from "../../js/storage.js";
 import { emptyProfile, setGoals } from "../../js/logic/profile.js";
 
 function fakeStorage(initial = {}) {
@@ -102,4 +106,201 @@ test("damaged calendar items are dropped one by one", () => {
   });
   const items = loadCalendarItems(storage);
   assert.deepEqual(items.map((i) => i.id), ["a"]);
+});
+
+const taskItem = { id: "a", title: "Essay", kind: "task", due: "2026-11-17T15:30" };
+const workValue = { steps: [{ id: 1, text: "Read", done: false }], nextId: 2 };
+
+function allSaves(storage) {
+  return [
+    saveProfile(emptyProfile(), storage),
+    saveCalendarItems([taskItem], storage),
+    saveCompletionCounts({ "2026-11-17": 2 }, storage),
+    saveAiSettings({ services: [], chosenId: null }, storage),
+    saveWork(workValue, "2026-11-17T10:00:00.000Z", storage),
+    saveWork(null, undefined, storage),
+    saveChatSettings({ guides: [], lengths: {} }, storage),
+  ];
+}
+
+test("unparseable data: the first save works, the old text is backed up, loads work after", () => {
+  const storage = fakeStorage({ [STORAGE_KEY]: "{not json" });
+  assert.equal(saveProfile(setGoals(emptyProfile(), { today: "Read" }), storage), true);
+  assert.equal(storage._data.get(BACKUP_KEY), "{not json");
+  assert.equal(loadProfileState(storage).status, "ok");
+  assert.equal(loadProfileState(storage).profile.goals.today, "Read");
+  assert.equal(saveCalendarItems([taskItem], storage), true);
+  assert.equal(loadCalendarItems(storage).length, 1);
+});
+
+test("unparseable data reads as empty for every section", () => {
+  const storage = fakeStorage({ [STORAGE_KEY]: "[1,2" });
+  assert.deepEqual(loadCalendarItems(storage), []);
+  assert.deepEqual(loadCompletionCounts(storage), {});
+  assert.deepEqual(loadAiSettings(storage), { services: [], chosenId: null });
+  assert.deepEqual(loadWork(storage), { work: null, savedOn: null });
+  assert.deepEqual(loadChatSettings(storage), loadChatSettings(fakeStorage()));
+});
+
+test("a stored value that is not an object counts as damaged", () => {
+  const storage = fakeStorage({ [STORAGE_KEY]: "42" });
+  assert.equal(saveProfile(emptyProfile(), storage), true);
+  assert.equal(storage._data.get(BACKUP_KEY), "42");
+});
+
+test("an existing backup is never overwritten", () => {
+  const storage = fakeStorage({ [STORAGE_KEY]: "{second damage", [BACKUP_KEY]: "first damage" });
+  assert.equal(saveProfile(emptyProfile(), storage), true);
+  assert.equal(storage._data.get(BACKUP_KEY), "first damage");
+  const loaded = fakeStorage({ [STORAGE_KEY]: "{bad", [BACKUP_KEY]: "first damage" });
+  loadProfileState(loaded);
+  assert.equal(loaded._data.get(BACKUP_KEY), "first damage");
+});
+
+test("data from another version is backed up first, then the app starts fresh and saves work", () => {
+  const raw = JSON.stringify({ schemaVersion: 2, profile: { x: 1 }, work: { y: 2 } });
+  const storage = fakeStorage({ [STORAGE_KEY]: raw });
+  assert.equal(saveProfile(setGoals(emptyProfile(), { today: "Read" }), storage), true);
+  assert.equal(storage._data.get(BACKUP_KEY), raw);
+  assert.equal(loadProfileState(storage).profile.goals.today, "Read");
+  assert.equal(saveWork(workValue, undefined, storage), true);
+});
+
+test("data from another version is never overwritten when a different backup is already kept", () => {
+  const raw = JSON.stringify({ schemaVersion: 2, profile: { x: 1 } });
+  const storage = fakeStorage({ [STORAGE_KEY]: raw, [BACKUP_KEY]: "older copy" });
+  assert.deepEqual(allSaves(storage), [false, false, false, false, false, false, false]);
+  assert.equal(storage._data.get(STORAGE_KEY), raw);
+  assert.equal(storage._data.get(BACKUP_KEY), "older copy");
+});
+
+test("data with no schema number is treated the same way", () => {
+  const raw = JSON.stringify({ profile: {} });
+  const storage = fakeStorage({ [STORAGE_KEY]: raw });
+  assert.equal(saveProfile(emptyProfile(), storage), true);
+  assert.equal(storage._data.get(BACKUP_KEY), raw);
+});
+
+test("unreadable text never blocks saving, even when a backup already exists", () => {
+  const storage = fakeStorage({ [STORAGE_KEY]: "{bad again", [BACKUP_KEY]: "first damage" });
+  assert.equal(saveProfile(emptyProfile(), storage), true);
+  assert.equal(storage._data.get(BACKUP_KEY), "first damage");
+});
+
+test("loading other-version data backs it up once and writes nothing to the main key", () => {
+  const raw = JSON.stringify({ schemaVersion: 2, profile: {} });
+  const storage = fakeStorage({ [STORAGE_KEY]: raw });
+  assert.equal(loadProfileState(storage).status, "recovered");
+  assert.equal(storage._data.get(STORAGE_KEY), raw);
+  assert.equal(storage._data.get(BACKUP_KEY), raw);
+  assert.deepEqual(loadCalendarItems(storage), []);
+});
+
+test("saving one section keeps all the others", () => {
+  const storage = fakeStorage();
+  saveProfile(setGoals(emptyProfile(), { today: "Read" }), storage);
+  saveCalendarItems([taskItem], storage);
+  saveCompletionCounts({ "2026-11-17": 2 }, storage);
+  saveAiSettings({ services: [], chosenId: null }, storage);
+  saveWork(workValue, "2026-11-17T10:00:00.000Z", storage);
+  const chat = loadChatSettings(storage);
+  saveChatSettings(chat, storage);
+  // Save each again in turn; nothing else may change.
+  saveProfile(setGoals(emptyProfile(), { today: "Write" }), storage);
+  saveCalendarItems([taskItem], storage);
+  assert.equal(loadProfileState(storage).profile.goals.today, "Write");
+  assert.equal(loadCalendarItems(storage).length, 1);
+  assert.deepEqual(loadCompletionCounts(storage), { "2026-11-17": 2 });
+  assert.equal(loadWork(storage).work.nextId, 2);
+  assert.deepEqual(loadChatSettings(storage), chat);
+  assert.deepEqual(loadAiSettings(storage), { services: [], chosenId: null });
+});
+
+test("items and counts each keep the other half", () => {
+  const storage = fakeStorage();
+  saveCalendarItems([taskItem], storage);
+  saveCompletionCounts({ "2026-11-17": 3 }, storage);
+  saveCalendarItems([], storage);
+  assert.deepEqual(loadCompletionCounts(storage), { "2026-11-17": 3 });
+  saveCalendarItems([taskItem], storage);
+  saveCompletionCounts({}, storage);
+  assert.equal(loadCalendarItems(storage).length, 1);
+});
+
+test("saving null removes only that section", () => {
+  const storage = fakeStorage();
+  saveProfile(setGoals(emptyProfile(), { today: "Read" }), storage);
+  saveWork(workValue, "2026-11-17T10:00:00.000Z", storage);
+  assert.equal(saveWork(null, undefined, storage), true);
+  assert.equal(loadWork(storage).work, null);
+  assert.equal(loadProfileState(storage).profile.goals.today, "Read");
+  assert.equal("work" in JSON.parse(storage._data.get(STORAGE_KEY)), false);
+});
+
+test("storage whose setItem throws: saves return false", () => {
+  const storage = fakeStorage();
+  storage.setItem = () => {
+    throw new Error("quota");
+  };
+  assert.deepEqual(allSaves(storage), [false, false, false, false, false, false, false]);
+});
+
+test("storage whose getItem throws: saves return false and loads give defaults", () => {
+  const storage = fakeStorage();
+  storage.getItem = () => {
+    throw new Error("denied");
+  };
+  assert.deepEqual(allSaves(storage), [false, false, false, false, false, false, false]);
+  assert.equal(loadProfileState(storage).status, "unavailable");
+  assert.deepEqual(loadCalendarItems(storage), []);
+  assert.deepEqual(loadCompletionCounts(storage), {});
+  assert.deepEqual(loadWork(storage), { work: null, savedOn: null });
+});
+
+test("loading damaged data never writes the main key, whichever loader runs", () => {
+  for (const raw of ["{bad", "null", "[1]", "42"]) {
+    const storage = fakeStorage({ [STORAGE_KEY]: raw });
+    loadProfileState(storage);
+    loadCalendarItems(storage);
+    loadCompletionCounts(storage);
+    loadAiSettings(storage);
+    loadWork(storage);
+    loadChatSettings(storage);
+    assert.equal(storage._data.get(STORAGE_KEY), raw, raw);
+  }
+});
+
+test("null and arrays count as damaged, so the first save starts fresh", () => {
+  for (const raw of ["null", "[1]"]) {
+    const storage = fakeStorage({ [STORAGE_KEY]: raw });
+    assert.equal(saveProfile(emptyProfile(), storage), true, raw);
+    assert.equal(storage._data.get(BACKUP_KEY), raw);
+  }
+});
+
+test("if the backup cannot be written, unreadable text is still replaced but another version is not", () => {
+  const failingBackup = (initial) => {
+    const storage = fakeStorage(initial);
+    const setItem = storage.setItem;
+    storage.setItem = (key, value) => {
+      if (key === BACKUP_KEY) throw new Error("full");
+      setItem(key, value);
+    };
+    return storage;
+  };
+  assert.equal(saveProfile(emptyProfile(), failingBackup({ [STORAGE_KEY]: "{bad" })), true);
+  const raw = JSON.stringify({ schemaVersion: 2, profile: {} });
+  const other = failingBackup({ [STORAGE_KEY]: raw });
+  assert.equal(saveProfile(emptyProfile(), other), false);
+  assert.equal(other._data.get(STORAGE_KEY), raw);
+});
+
+test("a usable store with no profile yet still saves and loads the other sections", () => {
+  const storage = fakeStorage();
+  saveCalendarItems([taskItem], storage);
+  assert.equal(loadProfileState(storage).status, "new", "nothing is damaged, so no warning");
+  assert.equal(storage._data.get(BACKUP_KEY), undefined);
+  assert.equal(loadCalendarItems(storage).length, 1);
+  assert.equal(saveProfile(emptyProfile(), storage), true);
+  assert.equal(loadCalendarItems(storage).length, 1);
 });

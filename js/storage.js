@@ -18,65 +18,131 @@ function defaultStorage() {
   }
 }
 
+// Reads the whole saved object. state is one of:
+// "ok" (usable), "empty" (nothing saved), "damaged" (not JSON, or not an object),
+// "other-version" (an object with a different or missing schemaVersion),
+// "unavailable" (the browser refused the read). raw is the stored text, if any.
+function readAll(storage) {
+  let raw;
+  try {
+    raw = storage.getItem(STORAGE_KEY);
+  } catch {
+    return { data: null, state: "unavailable", raw: null };
+  }
+  if (raw === null || raw === undefined) {
+    return { data: null, state: "empty", raw: null };
+  }
+  let data;
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    return { data: null, state: "damaged", raw };
+  }
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    return { data: null, state: "damaged", raw };
+  }
+  if (data.schemaVersion !== SCHEMA_VERSION) {
+    return { data: null, state: "other-version", raw };
+  }
+  return { data, state: "ok", raw };
+}
+
+// Keeps the first unreadable copy. A later one must not overwrite it.
+// Returns true when the raw text is safely in the backup (just written, or already there).
+function backUpOnce(storage, raw) {
+  try {
+    const existing = storage.getItem(BACKUP_KEY);
+    if (existing === null) {
+      storage.setItem(BACKUP_KEY, raw);
+      return storage.getItem(BACKUP_KEY) === raw;
+    }
+    return existing === raw;
+  } catch {
+    return false;
+  }
+}
+
+// The section as saved, or undefined unless the whole store is usable.
+function readSection(storage, name) {
+  const { data, state } = readAll(storage);
+  return state === "ok" ? data[name] : undefined;
+}
+
+// Saves one section and keeps all the others. A null value removes the section.
+// Returns true only if the browser confirmed the save. Readable data from another
+// version is never overwritten unless it is safely in the backup first. Unparseable
+// text is overwritten even if it could not be backed up, so saving never gets stuck.
+function saveSection(name, value, storage) {
+  if (!storage) {
+    return false;
+  }
+  try {
+    const { data, state, raw } = readAll(storage);
+    if (state === "unavailable") {
+      return false;
+    }
+    let base = { schemaVersion: SCHEMA_VERSION };
+    if (state === "damaged") {
+      // Unreadable text: keep the first copy as a backup, then start fresh.
+      backUpOnce(storage, raw);
+    } else if (state === "other-version") {
+      // Readable data this version does not understand. Only one version of the app
+      // exists, so start fresh, but only once it is safely in the backup. If another
+      // backup is already there, refuse rather than lose either copy.
+      if (!backUpOnce(storage, raw)) {
+        return false;
+      }
+    } else if (state === "ok") {
+      base = { ...data, schemaVersion: SCHEMA_VERSION };
+    }
+    delete base[name];
+    const next = value === null ? base : { ...base, [name]: value };
+    const text = JSON.stringify(next);
+    storage.setItem(STORAGE_KEY, text);
+    return storage.getItem(STORAGE_KEY) === text;
+  } catch {
+    return false;
+  }
+}
+
 // Returns { profile, status }. status is one of:
-// "ok" (loaded), "new" (nothing saved yet), "recovered" (damaged data, backed up),
+// "ok" (loaded), "new" (nothing saved yet), "recovered" (damaged, another version,
+// or a profile of the wrong shape: a copy is kept in the backup if it is free),
 // "unavailable" (the browser will not store anything).
 export function loadProfileState(storage = defaultStorage()) {
   if (!storage) {
     return { profile: emptyProfile(), status: "unavailable" };
   }
-  let raw;
-  try {
-    raw = storage.getItem(STORAGE_KEY);
-  } catch {
+  const { data, state, raw } = readAll(storage);
+  if (state === "unavailable") {
     return { profile: emptyProfile(), status: "unavailable" };
   }
-  if (raw === null) {
+  if (state === "empty") {
     return { profile: emptyProfile(), status: "new" };
   }
-  try {
-    const data = JSON.parse(raw);
-    if (data && data.schemaVersion === SCHEMA_VERSION) {
+  if (state === "ok" && data.profile === undefined) {
+    // Other sections are saved but no profile yet: nothing is damaged.
+    return { profile: emptyProfile(), status: "new" };
+  }
+  if (state === "ok") {
+    try {
       const profile = normalizeProfile(data.profile);
       if (profile) {
         return { profile, status: "ok" };
       }
+    } catch {
+      // Fall through to the recovery path below.
     }
-  } catch {
-    // Fall through to the recovery path below.
   }
-  // Keep the first damaged copy. A second damage must not overwrite it.
-  try {
-    if (storage.getItem(BACKUP_KEY) === null) {
-      storage.setItem(BACKUP_KEY, raw);
-    }
-  } catch {
-    // If the backup cannot be written, the app still starts fresh.
-  }
+  // Damaged, from another version, or the wrong shape. Keep a copy; never write the main key.
+  backUpOnce(storage, raw);
   return { profile: emptyProfile(), status: "recovered" };
 }
 
 // Returns true only if the browser confirmed the save. Other sections already in
 // the saved object (for example, progress saved later) are kept as they are.
 export function saveProfile(profile, storage = defaultStorage()) {
-  if (!storage) {
-    return false;
-  }
-  try {
-    let existing = {};
-    const raw = storage.getItem(STORAGE_KEY);
-    if (raw !== null) {
-      const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === "object" && parsed.schemaVersion === SCHEMA_VERSION) {
-        existing = parsed;
-      }
-    }
-    const data = { ...existing, schemaVersion: SCHEMA_VERSION, profile };
-    storage.setItem(STORAGE_KEY, JSON.stringify(data));
-    return storage.getItem(STORAGE_KEY) === JSON.stringify(data);
-  } catch {
-    return false;
-  }
+  return saveSection("profile", profile, storage);
 }
 
 // Calendar items live in their own section of the same object. Saving them keeps
@@ -86,12 +152,7 @@ export function loadCalendarItems(storage = defaultStorage()) {
     return [];
   }
   try {
-    const raw = storage.getItem(STORAGE_KEY);
-    if (raw === null) {
-      return [];
-    }
-    const data = JSON.parse(raw);
-    const items = data?.calendar?.items;
+    const items = readSection(storage, "calendar")?.items;
     if (!Array.isArray(items)) {
       return [];
     }
@@ -123,25 +184,8 @@ export function loadCalendarItems(storage = defaultStorage()) {
 }
 
 export function saveCalendarItems(items, storage = defaultStorage()) {
-  if (!storage) {
-    return false;
-  }
-  try {
-    let existing = {};
-    const raw = storage.getItem(STORAGE_KEY);
-    if (raw !== null) {
-      const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === "object" && parsed.schemaVersion === SCHEMA_VERSION) {
-        existing = parsed;
-      }
-    }
-    const keptCounts = existing.calendar?.counts ?? {};
-    const data = { ...existing, schemaVersion: SCHEMA_VERSION, calendar: { items, counts: keptCounts } };
-    storage.setItem(STORAGE_KEY, JSON.stringify(data));
-    return storage.getItem(STORAGE_KEY) === JSON.stringify(data);
-  } catch {
-    return false;
-  }
+  const keptCounts = readSection(storage ?? null, "calendar")?.counts ?? {};
+  return saveSection("calendar", { items, counts: keptCounts }, storage);
 }
 
 // Finished-item counts by day. Kept beside the items, and not changed when items are deleted.
@@ -150,8 +194,7 @@ export function loadCompletionCounts(storage = defaultStorage()) {
     return {};
   }
   try {
-    const raw = storage.getItem(STORAGE_KEY);
-    const counts = raw === null ? {} : JSON.parse(raw)?.calendar?.counts;
+    const counts = readSection(storage, "calendar")?.counts;
     if (!counts || typeof counts !== "object") {
       return {};
     }
@@ -164,25 +207,8 @@ export function loadCompletionCounts(storage = defaultStorage()) {
 }
 
 export function saveCompletionCounts(counts, storage = defaultStorage()) {
-  if (!storage) {
-    return false;
-  }
-  try {
-    let existing = {};
-    const raw = storage.getItem(STORAGE_KEY);
-    if (raw !== null) {
-      const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === "object" && parsed.schemaVersion === SCHEMA_VERSION) {
-        existing = parsed;
-      }
-    }
-    const items = existing.calendar?.items ?? [];
-    const data = { ...existing, schemaVersion: SCHEMA_VERSION, calendar: { items, counts } };
-    storage.setItem(STORAGE_KEY, JSON.stringify(data));
-    return storage.getItem(STORAGE_KEY) === JSON.stringify(data);
-  } catch {
-    return false;
-  }
+  const items = readSection(storage ?? null, "calendar")?.items ?? [];
+  return saveSection("calendar", { items, counts }, storage);
 }
 
 // The AI services a student added (addresses and names only; keys are stored separately).
@@ -192,32 +218,14 @@ export function loadAiSettings(storage = defaultStorage()) {
     return { services: [], chosenId: null };
   }
   try {
-    const raw = storage.getItem(STORAGE_KEY);
-    return normalizeServices(raw === null ? null : JSON.parse(raw)?.ai);
+    return normalizeServices(readSection(storage, "ai") ?? null);
   } catch {
     return { services: [], chosenId: null };
   }
 }
 
 export function saveAiSettings(settings, storage = defaultStorage()) {
-  if (!storage) {
-    return false;
-  }
-  try {
-    let existing = {};
-    const raw = storage.getItem(STORAGE_KEY);
-    if (raw !== null) {
-      const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === "object" && parsed.schemaVersion === SCHEMA_VERSION) {
-        existing = parsed;
-      }
-    }
-    const data = { ...existing, schemaVersion: SCHEMA_VERSION, ai: { services: settings.services, chosenId: settings.chosenId } };
-    storage.setItem(STORAGE_KEY, JSON.stringify(data));
-    return storage.getItem(STORAGE_KEY) === JSON.stringify(data);
-  } catch {
-    return false;
-  }
+  return saveSection("ai", { services: settings.services, chosenId: settings.chosenId }, storage);
 }
 
 // The student's steps and progress, in their own section. Pass null to clear them.
@@ -227,8 +235,7 @@ export function loadWork(storage = defaultStorage()) {
     return { work: null, savedOn: null };
   }
   try {
-    const raw = storage.getItem(STORAGE_KEY);
-    const section = raw === null ? null : JSON.parse(raw)?.work;
+    const section = readSection(storage, "work") ?? null;
     const work = normalizeWork(section);
     return { work, savedOn: work && typeof section.savedOn === "string" ? section.savedOn : null };
   } catch {
@@ -237,28 +244,7 @@ export function loadWork(storage = defaultStorage()) {
 }
 
 export function saveWork(work, savedOn = new Date().toISOString(), storage = defaultStorage()) {
-  if (!storage) {
-    return false;
-  }
-  try {
-    let existing = {};
-    const raw = storage.getItem(STORAGE_KEY);
-    if (raw !== null) {
-      const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === "object" && parsed.schemaVersion === SCHEMA_VERSION) {
-        existing = parsed;
-      }
-    }
-    const rest = { ...existing };
-    delete rest.work;
-    const data = work === null
-      ? { ...rest, schemaVersion: SCHEMA_VERSION }
-      : { ...rest, schemaVersion: SCHEMA_VERSION, work: { steps: work.steps, nextId: work.nextId, savedOn } };
-    storage.setItem(STORAGE_KEY, JSON.stringify(data));
-    return storage.getItem(STORAGE_KEY) === JSON.stringify(data);
-  } catch {
-    return false;
-  }
+  return saveSection("work", work === null ? null : { steps: work.steps, nextId: work.nextId, savedOn }, storage);
 }
 
 // The student's own chat guides and reply lengths, in their own section. Damaged entries are dropped one by one.
@@ -267,30 +253,12 @@ export function loadChatSettings(storage = defaultStorage()) {
     return normalizeChatSettings(null);
   }
   try {
-    const raw = storage.getItem(STORAGE_KEY);
-    return normalizeChatSettings(raw === null ? null : JSON.parse(raw)?.chat);
+    return normalizeChatSettings(readSection(storage, "chat") ?? null);
   } catch {
     return normalizeChatSettings(null);
   }
 }
 
 export function saveChatSettings(settings, storage = defaultStorage()) {
-  if (!storage) {
-    return false;
-  }
-  try {
-    let existing = {};
-    const raw = storage.getItem(STORAGE_KEY);
-    if (raw !== null) {
-      const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === "object" && parsed.schemaVersion === SCHEMA_VERSION) {
-        existing = parsed;
-      }
-    }
-    const data = { ...existing, schemaVersion: SCHEMA_VERSION, chat: { guides: settings.guides, lengths: settings.lengths } };
-    storage.setItem(STORAGE_KEY, JSON.stringify(data));
-    return storage.getItem(STORAGE_KEY) === JSON.stringify(data);
-  } catch {
-    return false;
-  }
+  return saveSection("chat", { guides: settings.guides, lengths: settings.lengths }, storage);
 }

@@ -21,14 +21,22 @@ const SERVED_FOLDERS = ["css", "js"];
 
 const server = createServer(async (req, res) => {
   const url = new URL(req.url || "/", "http://localhost");
-  const pathname = decodeURIComponent(url.pathname);
+  let pathname;
+  try {
+    // A malformed %-escape (like %E0%A4%A) makes decoding throw, so answer 400 instead of crashing.
+    pathname = decodeURIComponent(url.pathname);
+  } catch {
+    res.writeHead(400, { "Content-Type": "text/plain; charset=utf-8" });
+    res.end("Bad request");
+    return;
+  }
   const relative = pathname === "/" ? "index.html" : pathname.slice(1);
 
-  // Only the page itself and the css and js folders are served.
-  const allowed =
-    relative === "index.html" ||
-    SERVED_FOLDERS.some((folder) => relative.startsWith(`${folder}/`));
   const fullPath = resolve(join(ROOT, normalize(relative)));
+  // Check the final resolved path, so "..%2f" tricks cannot slip past the folder check.
+  const allowed =
+    fullPath === ROOT + "index.html" ||
+    SERVED_FOLDERS.some((folder) => fullPath.startsWith(ROOT + folder + sep));
   // ROOT already ends with a slash, so a path inside it starts with ROOT.
   const insideRoot = fullPath.startsWith(ROOT) && !fullPath.split(sep).includes("..");
 

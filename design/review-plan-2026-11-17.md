@@ -6,6 +6,10 @@ Reviews done (read-only): Opus advisor (whole student journey + several chats), 
 
 Each step below: implemented by a cheaper model where possible, then `npm run check`, then a review of the diff, then one commit. Steps run one at a time so two agents never edit the same file.
 
+## Progress
+- Step 1 done (storage: shared save helper, damaged and other-version data handled, 18 new tests; also fixed a false "couldn't be read" warning on the profile when only other sections were saved).
+- Step 2 done (local server: malformed address no longer crashes it; only `index.html`, `js/` and `css/` are served).
+
 ## Phase 1: keep data safe, one screen at a time
 
 1. **Storage can get stuck or drop data.** If the saved data is unreadable, every later save fails forever. If it has a different version number, the next save quietly drops every other section. Fix: one shared `saveSection` / `readSection` helper in `js/storage.js`: unreadable data is backed up once and replaced with a fresh object; a different version is never overwritten (save refuses, data kept); every caller checks the result. Logic tests for both cases.
@@ -30,7 +34,19 @@ Each step below: implemented by a cheaper model where possible, then `npm run ch
 
 ## Phase 5: accessibility and layout
 
-11. From the layout and accessibility review (screenshots at 360 px and desktop, light and dark): fixes listed in that report.
+11. From the layout and accessibility review (86 screenshots at 360 px and desktop, light and dark; no sideways scrolling found anywhere):
+   - **Day view hour labels all sit on top of each other**: the page's security rule blocks inline `style` attributes. Set positions through the style object instead; test the label order and that no security errors appear.
+   - Calendar add form has no styling (labels run into inputs, tiny inputs) and sits above the list: style it like the profile, and put it behind an "Add something" button with the list first.
+   - Grey text on the calendar's coloured rows is unreadable in dark mode (about 1.1:1) and weak in light: dark text on the fills.
+   - Focus does not move to the profile heading or to the steps after Show my steps (headings lack `tabindex="-1"`).
+   - Buttons touch each other in several places: one shared spacing rule.
+   - Small buttons are about 36 px tall: 44 px.
+   - Calendar month grid has an invalid `role="table"`; `aria-label` on plain divs is ignored.
+   - Status lines created already filled are often not read by screen readers (Settings, How the AI talks, work screen): create empty, then fill.
+   - A missing `--border` colour for the countdown ring track.
+   - "Finished so far: today 0 ..." shows when everything is zero: hide until there is something (rule 2).
+   - Tests: the phone project is 320 px, not the 360 px in T12; sleeps instead of conditions in work-screen and chat tests; a swallowed failure in the double-tap test; the "same look" test compares only class names; duplicated helpers; manual-checks.md out of date in several sections.
+   - Back buttons: one word and one place on every screen.
 
 ## Phase 6: split `js/app.js` (1,600 lines) into one file per screen
 
