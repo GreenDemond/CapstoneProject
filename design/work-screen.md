@@ -69,3 +69,16 @@ Wording rules: no red, no "missed," no timer, no sound, no ranking. The count sa
 1. **Button words.** The defaults are Done, Still working, Stuck, Drifted (DECISIONS P4). You still have to choose "the words for drifting, getting stuck, and coming back" (`PROGRESS.md` waiting list). Keep the defaults for now, or give me your words?
 2. **Hint list.** Is the list of five hints right, or do you want different ones?
 3. **Saving the steps.** This slice keeps the steps on the page only, so a refresh starts over. OK to add saving in the next slice, with "Pick up here" after time away?
+
+## Added from the ADHD Buddy upload (2026-11-17)
+
+Ideas taken from the MIT-licensed "ADHD Buddy" app. Code is not copied; the ideas are rebuilt in plain JavaScript.
+
+1. **Gentle card with one optional button.** Used for the "Pick up here" message and for "Start with the smallest part." Calm colors, no red, one button at most. Judgment: not tested.
+2. **"Later" as a button.** A step can be moved to the end of the list with no penalty and no count. It is different from Drifted, which splits the step. Judgment: not tested. Adds a fifth button, so it needs Ben's decision (see below).
+3. **Countdown ring for the current step.** An optional ring that counts down a time the student chooses (for example, 12 or 25 minutes, the two block lengths from the intake). It can be turned off. **Research:** thin. One study reported secondhand found no gain in test scores from a visible timer, and some reduction in math anxiety, but the original papers could not be checked (`https://www.timetimer.com/blogs/news/a-guide-to-time-blindness-what-it-is-and-how-to-manage-it-with-visual-tools` quotes it). The app will not claim the ring helps. It is labelled "design judgment, to be tested." Ring shows time left, never a red warning at the end: when time runs out, the card says "Time's up. Keep going, or tap Still working."
+4. **Mood check-in.** See `design/mood-check-in.md`. Not in this build.
+
+Decisions for Ben, in addition to the three above:
+- **Fifth button:** add "Later" beside Done, Still working, Stuck, and Drifted, or leave it out?
+- **Countdown ring:** on by default, or off until the student turns it on?
