@@ -115,3 +115,16 @@ Use a test service you control, or the OpenRouter flow with your own key. Do not
 7. **Manage** → **Rename**, **Change the AI**, **Replace key**, **Test it again**, **Forget key** (asks first), **Remove this helper** (asks first).
 8. Failures: a wrong key says "That key didn't work" and does not offer **Save it anyway**. A server that can't be reached offers **Save it anyway**, and the helper then shows "Not checked yet" and is not put in use by itself.
 9. Reload in the middle of the add flow: Settings opens at the list, and nothing half-finished is saved.
+
+
+## Home screen and saved steps
+
+1. Paste an assignment, pick a kind, Show my steps, Start. The top line says "Your steps are saved on this device."
+2. Tap Done once. Refresh the page. The app opens on "Pick up where you left off." with step 2 in large type and a Start this step button. The paste form is not showing.
+3. Tap Show all my steps. A list appears with a tick on step 1 and "(next)" on step 2. Tap Hide my steps. It goes away.
+4. Tap Start this step, then Back to home. You are on the same card.
+5. Look at Done, Still working, Stuck, Drifted, and Later. They should all look the same, with no colour on Done.
+6. Tap New assignment. The paste form appears with a line saying new steps replace the saved ones. Start new steps and refresh: the new first step shows.
+7. Finish every step and tap Close. Refresh: the paste screen shows and there is no pick-up card.
+8. A day or more away (ask me to set it) should say "Welcome back." and never a number of days.
+9. Tap My calendar, then Back. You come back to the pick-up card.

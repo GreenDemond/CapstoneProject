@@ -13,8 +13,28 @@
       <h1>Focus app</h1>
 
       <section id="paste-screen" aria-labelledby="paste-heading">
+        <nav id="top-nav" class="top-nav" aria-label="Screens">
+          <button type="button" id="open-calendar">My calendar</button>
+          <button type="button" id="open-profile">My profile</button>
+          <button type="button" id="open-intake">How I like to work</button>
+          <button type="button" id="open-settings">Settings</button>
+        </nav>
+
+        <div id="pickup" class="pickup" hidden>
+          <p class="hint" id="pickup-line"></p>
+          <p class="pickup-step" id="pickup-step"></p>
+          <button type="button" id="pickup-start" class="primary">Start this step</button>
+          <div class="pickup-more">
+            <button type="button" id="pickup-show" aria-expanded="false">Show all my steps</button>
+            <button type="button" id="new-assignment">New assignment</button>
+          </div>
+          <ol id="pickup-list" class="steps" hidden></ol>
+        </div>
+
+        <div id="paste-form">
         <h2 id="paste-heading">What's the assignment?</h2>
         <p class="hint" id="paste-hint">Paste the instructions or what you have to do. This stays on your device.</p>
+        <p class="hint" id="replace-note" hidden>Starting new steps replaces the ones you have saved.</p>
 
         <label for="assignment-text" class="visually-hidden">Assignment text</label>
         <textarea id="assignment-text" rows="8" placeholder="Paste here"></textarea>
@@ -33,10 +53,7 @@
         <p id="ai-status" class="hint" aria-live="polite"></p>
         <p id="ai-choice-row" hidden><label for="ai-choice">Which AI helper?</label> <select id="ai-choice"></select></p>
         <p id="message" class="message" role="status" aria-live="polite"></p>
-        <p><button type="button" id="open-settings">Settings</button></p>
-        <p><button type="button" id="open-intake">How I like to work</button></p>
-        <p><button type="button" id="open-profile">My profile</button></p>
-        <p><button type="button" id="open-calendar">My calendar</button></p>
+        </div>
       </section>
 
       <section id="calendar-screen" hidden aria-labelledby="calendar-heading">
@@ -63,7 +80,7 @@
 
       <section id="work-screen" hidden aria-labelledby="work-heading">
         <h2 id="work-heading" tabindex="-1">Work</h2>
-        <p class="hint">Your steps are kept only while this page stays open.</p>
+        <p class="hint" id="work-saved"></p>
         <div id="work-body"></div>
       </section>
 

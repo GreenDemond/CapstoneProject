@@ -3,6 +3,7 @@
 // key and the app starts fresh. Nothing here ever throws to the screen.
 import { emptyProfile, normalizeProfile } from "./logic/profile.js";
 import { normalizeServices } from "./logic/ai-services.js";
+import { normalizeWork } from "./logic/work.js";
 
 export const STORAGE_KEY = "focusapp.v1";
 export const BACKUP_KEY = "focusapp.v1.backup";
@@ -211,6 +212,47 @@ export function saveAiSettings(settings, storage = defaultStorage()) {
       }
     }
     const data = { ...existing, schemaVersion: SCHEMA_VERSION, ai: { services: settings.services, chosenId: settings.chosenId } };
+    storage.setItem(STORAGE_KEY, JSON.stringify(data));
+    return storage.getItem(STORAGE_KEY) === JSON.stringify(data);
+  } catch {
+    return false;
+  }
+}
+
+// The student's steps and progress, in their own section. Pass null to clear them.
+// Returns { work, savedOn } (work is null when nothing usable is saved).
+export function loadWork(storage = defaultStorage()) {
+  if (!storage) {
+    return { work: null, savedOn: null };
+  }
+  try {
+    const raw = storage.getItem(STORAGE_KEY);
+    const section = raw === null ? null : JSON.parse(raw)?.work;
+    const work = normalizeWork(section);
+    return { work, savedOn: work && typeof section.savedOn === "string" ? section.savedOn : null };
+  } catch {
+    return { work: null, savedOn: null };
+  }
+}
+
+export function saveWork(work, savedOn = new Date().toISOString(), storage = defaultStorage()) {
+  if (!storage) {
+    return false;
+  }
+  try {
+    let existing = {};
+    const raw = storage.getItem(STORAGE_KEY);
+    if (raw !== null) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object" && parsed.schemaVersion === SCHEMA_VERSION) {
+        existing = parsed;
+      }
+    }
+    const rest = { ...existing };
+    delete rest.work;
+    const data = work === null
+      ? { ...rest, schemaVersion: SCHEMA_VERSION }
+      : { ...rest, schemaVersion: SCHEMA_VERSION, work: { steps: work.steps, nextId: work.nextId, savedOn } };
     storage.setItem(STORAGE_KEY, JSON.stringify(data));
     return storage.getItem(STORAGE_KEY) === JSON.stringify(data);
   } catch {

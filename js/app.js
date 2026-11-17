@@ -5,7 +5,8 @@ import { cleanPastedText, limitPaste } from "./logic/clean-text.js";
 import { KINDS, DEFAULT_STEP_COUNT, starterStepsFor, withTwoMinuteStart } from "./logic/starter-steps.js";
 import { QUESTIONS, cardLines } from "./logic/focus-intake.js";
 import { GOAL_KEYS, MAX_TEXT, emptyProfile, setGoals, addNote, deleteNote, notesNewestFirst } from "./logic/profile.js";
-import { loadProfileState, saveProfile } from "./storage.js";
+import { loadProfileState, saveProfile, loadWork, saveWork } from "./storage.js";
+import { pickupLine, listLabel } from "./logic/home.js";
 import { inUseHelper, usableServices, pasteStatus, isReady, hostOf } from "./logic/ai-services.js";
 import { readKey } from "./keystore.js";
 import { askService } from "./ai-direct.js";
@@ -488,9 +489,30 @@ function ringSvg(fraction) {
   return svg;
 }
 
-function openWorkScreen(texts) {
+const workSavedLine = document.getElementById("work-saved");
+let workListOpen = false;
+
+// Steps are saved after every change, so a refresh or a week away loses nothing.
+// The line on screen says "saved" only when the browser confirmed it.
+function persistWork() {
+  const saved = saveWork(work);
+  workSavedLine.textContent = saved
+    ? "Your steps are saved on this device."
+    : "Your steps could not be saved here, so they will be lost if you close this page.";
+}
+
+function stepListNode(steps) {
+  const next = currentIndex(steps);
+  const list = el("ol", undefined, { class: "steps" });
+  steps.steps.forEach((step, i) => list.append(el("li", listLabel(step, i === next))));
+  return list;
+}
+
+function openWorkScreen(texts, existing = null) {
   stopTimer();
-  work = createWork(texts);
+  work = existing ?? createWork(texts);
+  persistWork();
+  workListOpen = false;
   mode = "steps";
   hintsShown = 0;
   workNote = "";
@@ -507,11 +529,15 @@ function openWorkScreen(texts) {
 
 function closeWork() {
   stopTimer();
+  if (work && allDone(work)) {
+    saveWork(null); // finished: nothing left to pick up
+  }
   work = null;
   workBody.replaceChildren();
   workScreen.hidden = true;
   pasteScreen.hidden = false;
-  showButton.focus();
+  refreshHome();
+  (pickup.hidden ? showButton : pickupStart).focus();
 }
 
 function currentStepId() {
@@ -539,6 +565,7 @@ function choose(choice, splitText = "") {
     return;
   }
   work = next;
+  persistWork();
   if (choice !== "still") {
     lastAdvance = now;
   }
@@ -658,7 +685,18 @@ function renderWork() {
     workBody.append(pick);
   }
 
-  workBody.append(button("Leave my steps", closeWork));
+  const listToggle = button(workListOpen ? "Hide my steps" : "Show all my steps", () => {
+    workListOpen = !workListOpen;
+    renderWork();
+    workBody.querySelector("#work-list-toggle")?.focus();
+  });
+  listToggle.id = "work-list-toggle";
+  workBody.append(listToggle);
+  if (workListOpen) {
+    workBody.append(stepListNode(work));
+  }
+
+  workBody.append(button("Back to home", closeWork));
   stepText.focus();
 }
 
@@ -1254,3 +1292,52 @@ function spanBarsFor(days) {
 function dayKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
+
+// Home screen (design/home-screen.md): when steps are saved, the app opens on the next
+// step with one main button. Otherwise it opens on the paste form, as before.
+const pickup = document.getElementById("pickup");
+const pickupStart = document.getElementById("pickup-start");
+const pickupShow = document.getElementById("pickup-show");
+const pickupList = document.getElementById("pickup-list");
+const pasteForm = document.getElementById("paste-form");
+const replaceNote = document.getElementById("replace-note");
+let pickupWork = null;
+
+function refreshHome() {
+  const saved = loadWork();
+  const live = saved.work && !allDone(saved.work) ? saved : null;
+  pickupWork = live ? live.work : null;
+  pickup.hidden = live === null;
+  pasteForm.hidden = live !== null;
+  replaceNote.hidden = live === null;
+  pickupList.hidden = true;
+  pickupList.replaceChildren();
+  pickupShow.textContent = "Show all my steps";
+  pickupShow.setAttribute("aria-expanded", "false");
+  if (!live) {
+    return;
+  }
+  document.getElementById("pickup-line").textContent = pickupLine(live.savedOn);
+  document.getElementById("pickup-step").textContent = live.work.steps[currentIndex(live.work)].text;
+}
+
+pickupStart.addEventListener("click", () => {
+  if (pickupWork) {
+    openWorkScreen(null, pickupWork);
+  }
+});
+
+pickupShow.addEventListener("click", () => {
+  const opening = pickupList.hidden;
+  pickupList.replaceChildren(...(opening && pickupWork ? stepListNode(pickupWork).children : []));
+  pickupList.hidden = !opening;
+  pickupShow.textContent = opening ? "Hide my steps" : "Show all my steps";
+  pickupShow.setAttribute("aria-expanded", String(opening));
+});
+
+document.getElementById("new-assignment").addEventListener("click", () => {
+  pasteForm.hidden = false;
+  textBox.focus();
+});
+
+refreshHome();

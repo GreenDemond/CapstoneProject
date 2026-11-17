@@ -9,7 +9,8 @@ The only memory between sessions. Keep it current; rewrite it, do not let it gro
 - **Paste screen** (`design/paste-and-split.md`). The student pastes an assignment, picks one of six kinds of work, and sees five starter steps, with "Show more steps" for the full list. Numbered and bulleted items in the paste come first. Pasted text is cut at 6,000 characters with a message. Nothing is saved, and Start only confirms the steps are ready.
 - **How I like to work** (`design/focus-intake.md`). Four one-tap questions, then a "My first guess" card with a Change button on each line. Nothing is saved; closing clears it. Built 2026-11-16, tested.
 - **My profile, first slice** (`design/profile.md`). Goals for today, week, month, and year, plus a list of "What got in the way?" notes. Saved on this device with `js/storage.js` (the first part of build item 5). Damaged saved data is kept as a backup and the page starts fresh. Delete one note, or clear everything after a confirm.
-- **Work screen** (`design/work-screen.md`). One step at a time, "Step 2 of 10", with Done, Still working, Stuck (five process hints, one at a time), Drifted (splits the step, same credit as Done), and Later (moves the step to the end). Optional countdown ring at 12 or 25 minutes, with a plain "Time's up" line. Steps are kept on the page only. Ideas from the ADHD Buddy upload, rebuilt in plain JavaScript.
+- **Home screen and saved steps** (`design/home-screen.md`, built 2026-11-17). The app opens on the next step with one button, **Start this step**, under a row of real buttons (calendar, profile, how I like to work, settings). Steps and progress are saved after every tap in their own `work` section, so a refresh or a week away loses nothing. A day or more later the line is "Welcome back. Pick up where you left off.", never a count of days. **Show all my steps** is a hidden read-only list on both the home and work screens. **New assignment** replaces the saved steps (with a note saying so). **Back to home** keeps them; finishing every step and tapping Close clears them. The five answer buttons share one look.
+- **Work screen** (`design/work-screen.md`). One step at a time, "Step 2 of 10", with Done, Still working, Stuck (five process hints, one at a time), Drifted (splits the step, same credit as Done), and Later (moves the step to the end). Optional countdown ring at 12 or 25 minutes, with a plain "Time's up" line. Steps are now saved on the device (see Home screen). Ideas from the ADHD Buddy upload, rebuilt in plain JavaScript.
 - **AI path, switched off** (`design/ai-path.md`). `server/suggest.js` keeps the key and the hints-only rules on the server, refuses other websites, text over 6,000 characters, and more than 10 requests an hour per visitor, and never logs the text. `js/ai.js` is the only caller. The paste screen shows a "Suggest steps with AI" button and a privacy notice only when the server says it is available. A failure falls back to the starter steps. Tested with a stand-in, not the real service.
 - **My calendar, first part** (`design/calendar.md`). Add an item with a due date and time, and see it sorted into Urgent, Significant, Not urgent, Can wait, and Later. Saved on the device in its own section, beside the profile. Delete any item. Not yet: Day, Week, and Month views, and reminders.
 - **Calendar notes and links** (`design/calendar.md`). A large notes box (up to 2,000 characters) and up to 10 web links per item. Only https:// links are accepted, and they open in a new tab.
@@ -24,7 +25,7 @@ Nothing.
 
 - The intake answers and card are still lost on refresh. Saving them is the next small step.
 - The profile does not yet use its goals or notes for suggestions. That is a later slice.
-- "Pick up here" after time away (item 5) is not built yet.
+- Not built from the home screen note: the margin note ("From last time"), a smaller next step after a long gap, and a full-width week calendar. See `design/home-screen.md`.
 - The intake does not yet use its answers anywhere. The trial that tests them is version 2.
 - The dedicated `advisor` agent (`.claude/agents/advisor.md`) was not loaded in the last session. A general Opus agent was used for the review instead. Restart the session to load it.
 
@@ -46,6 +47,7 @@ Nothing.
 - How progress is shown: pet rock, quest map, or build-a-picture.
 - The words for drifting, getting stuck, and coming back.
 - Colors and overall look. Placeholder colors are in `css/styles.css`.
+- Home screen: OK with the margin note being its own next design? Words for "Start this step" and "Welcome back".
 - Work screen: how Drifted should behave when the rest of the step is left out (see `design/work-screen.md`), button words, the five hints, and saving the steps.
 - Photo of handwritten notes organized into priority: needs an outside reader (T8 or T2), so a parent decision.
 - Learning the student's habits to set priority: needs a design and a parent decision (it means watching how students work).
@@ -69,7 +71,7 @@ In order. Each is one session or less. Each feature starts with a design note in
 2. ~~Paste and split, first part: paste, kind, starter steps.~~ Done.
 3. **Paste and split, second part: editing.** Edit a step's words, delete, reorder, add, and merge. Needs a short design note and Ben's go-ahead. Then the Start button leads to step 4.
 4. **Work screen.** One step at a time, "step 3 of 7", and the four buttons: Done, Still working, Stuck, Drifted.
-5. **Saving and coming back.** Profile saving is done. Still to do: the intake card saved, progress through the steps saved, and the "pick up here" button after a day or more away.
+5. **Saving and coming back.** Profile and step progress are saved, and the home screen picks up where you left off. Still to do: the intake card saved.
 6. **Weekly goal and progress display.**
 7. **Save to file and load from file.**
 

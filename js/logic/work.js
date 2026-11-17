@@ -89,3 +89,28 @@ export function formatTime(seconds) {
   const rest = String(safe % 60).padStart(2, "0");
   return `${minutes}:${rest}`;
 }
+
+export const MAX_SAVED_STEPS = 100;
+export const MAX_SAVED_STEP_LENGTH = 500;
+
+// Checks steps read back from the device. Bad steps are dropped one by one; if
+// nothing usable is left, returns null (the app then opens on the paste screen).
+export function normalizeWork(raw) {
+  if (!raw || typeof raw !== "object" || !Array.isArray(raw.steps)) {
+    return null;
+  }
+  const seen = new Set();
+  const steps = [];
+  for (const step of raw.steps.slice(0, MAX_SAVED_STEPS)) {
+    if (!step || typeof step.text !== "string" || step.text.trim() === "") continue;
+    if (!Number.isInteger(step.id) || step.id < 0 || seen.has(step.id)) continue;
+    seen.add(step.id);
+    steps.push({ id: step.id, text: step.text.slice(0, MAX_SAVED_STEP_LENGTH), done: step.done === true });
+  }
+  if (steps.length === 0) {
+    return null;
+  }
+  const highest = Math.max(...steps.map((step) => step.id));
+  const nextId = Number.isInteger(raw.nextId) && raw.nextId > highest ? raw.nextId : highest + 1;
+  return { steps, nextId };
+}
