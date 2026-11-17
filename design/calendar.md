@@ -13,7 +13,7 @@ Status: **proposed, waiting for Ben's go-ahead.** Not built yet.
 1. **Calendar page** from the paste screen, with a button **My calendar**.
 2. **Three views** as buttons at the top: **Day**, **Week**, **Month**. The chosen view is remembered only while the page stays open.
    - **Day:** the day's events in time order.
-   - **Week:** seven columns, Monday to Sunday, each with its events.
+   - **Week:** two separate calendars, as the student asked. **Weekdays** shows Monday to Friday, five columns. **Weekend** shows Saturday and Sunday, two columns. Each column lists its events. The week starts on Monday.
    - **Month:** a grid of the month, with a dot on days that have events. Tapping a day opens the Day view for it.
 3. **Add an event:** title (in the student's words), date, start time, optional length, and an optional reminder ("remind me 5, 10, 15, or 30 minutes before, or not at all").
 4. **Edit or delete** an event by tapping it. Delete asks once: "Delete this event?"
@@ -45,7 +45,7 @@ Wording rules: no "overdue," "missed," or "late." Past events look the same as f
 - **Back after a week:** the calendar opens on today. Past events are visible but not highlighted.
 - **Reminder missed because the page was closed:** nothing is shown as failed. The event is still in the calendar.
 - **Deleting by mistake:** one confirmation, as described above.
-- **Phone:** each view works on a 360-pixel screen. The month grid uses a simple list on very narrow screens.
+- **Phone:** each view works on a 360-pixel screen. On a phone, the weekday columns stack one under another, and the weekend columns sit side by side.
 
 ## Checklist (AGENTS.md stage 1)
 
@@ -58,7 +58,7 @@ Wording rules: no "overdue," "missed," or "late." Past events look the same as f
 
 ## Decisions for Ben
 
-1. **Week starts on Monday or Sunday?**
+1. ~~Week starts on Monday or Sunday?~~ Answered: the week starts on Monday, with a separate weekend calendar (Saturday and Sunday).
 2. **Clock:** 12-hour (3:30 pm) or 24-hour (15:30)? I'd use what the device uses.
 3. **Reminders on by default,** or off until the student turns them on? I recommend off.
 4. **Should work steps also appear on the calendar** (for example, "Essay: step 3 at 4 pm")? That would link the two features, which is useful but adds data. I recommend not in this first slice.
