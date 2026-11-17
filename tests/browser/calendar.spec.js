@@ -123,3 +123,30 @@ test("running totals survive a reload and deleting a finished item", async ({ pa
   await page.locator("ul.completed li", { hasText: "History notes" }).getByRole("button", { name: "Delete" }).click();
   await expect(page.getByText("all time 1")).toBeVisible();
 });
+
+// Views: the same item shows as a block in Day, in the Weekdays calendar, and in the Month grid.
+test("an item shows as a block in Day, Week and Month views", async ({ page }) => {
+  await openCalendar(page);
+  await page.getByLabel("What is it?").fill("Chemistry lab");
+  await page.getByLabel("Due date").fill(dayFromNow(0));
+  await page.getByLabel("Due time").fill("10:00");
+  await page.getByRole("button", { name: "Add to my calendar" }).click();
+
+  await page.getByRole("button", { name: "Day", exact: true }).click();
+  await expect(page.locator(".day-grid .block", { hasText: "Chemistry lab" })).toBeVisible();
+
+  await page.getByRole("button", { name: "Week", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Weekdays" })).toBeVisible();
+  await expect(page.locator(".week-col .block", { hasText: "Chemistry lab" })).toHaveCount(1);
+
+  await page.getByRole("button", { name: "Month", exact: true }).click();
+  await expect(page.locator(".month-grid .mini", { hasText: "Chemistry lab" })).toBeVisible();
+});
+
+// The List view still shows the priority groups.
+test("List view brings back the priority groups", async ({ page }) => {
+  await openCalendar(page);
+  await page.getByRole("button", { name: "Week", exact: true }).click();
+  await page.getByRole("button", { name: "List", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Urgent", exact: true })).toBeVisible();
+});

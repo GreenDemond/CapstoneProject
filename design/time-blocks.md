@@ -52,3 +52,13 @@ Wording: no red, no "late," no "overdue." A block that has passed looks the same
 1. **Go ahead with the Day timeline first,** with the keyboard controls, then dragging, then the Week view?
 2. **Default block length:** 30 minutes, or 25 (matching the work block option)?
 3. **Keep the five priority groups** as a list view beside the timeline, or replace them with the timeline? I recommend keeping both.
+
+## Added 2026-11-17: calendar views (read-only)
+
+Built: a view switcher on My calendar with **List, Day, Week, Month**, and Previous, Next, and Today buttons.
+- **Day:** an hour grid from 7 am to 10 pm. Each item is a block at its start time, 30 minutes long for now. Items outside those hours are listed below the grid.
+- **Week:** two calendars, Weekdays (Mon to Fri) and Weekend (Sat and Sun), with each day listing its items.
+- **Month:** a grid of the month. Each day shows up to two items. Tapping a day opens its Day view.
+- Blocks are coloured by their priority group. Finished items show struck through.
+
+**Not yet built:** moving or resizing blocks by dragging, or with the keyboard. Blocks don't yet have their own length; that's the next design step, waiting for Ben's answer on the Day timeline.

@@ -10,6 +10,8 @@ import { aiAvailable, suggestWithAi } from "./ai.js";
 import { GROUPS, CATEGORIES, groupItems, makeItem, removeItem, parseDue, setStatus, completedItems } from "./logic/calendar.js";
 import { loadCalendarItems, saveCalendarItems, loadCompletionCounts, saveCompletionCounts } from "./storage.js";
 import { addCompletion, removeCompletion, totals } from "./logic/counter.js";
+import { addDays, addMonths, splitWeek, monthGrid, itemsOnDay, blockPlacement, hourLabels, mondayOf } from "./logic/views.js";
+import { bucketFor, parseDue as parseDueCal } from "./logic/calendar.js";
 import { createWork, currentIndex, doneCount, allDone, applyChoice, hintAt, ringFraction, formatTime } from "./logic/work.js";
 
 const textBox = document.getElementById("assignment-text");
@@ -742,6 +744,16 @@ function renderCalendar(draft = { title: "", day: "", time: "" }, message = "") 
   log.append(el("p", `Finished so far: today ${count.today} · this week ${count.week} · this month ${count.month} · this year ${count.year} · all time ${count.all}`));
   calendarBody.append(log);
 
+  renderViewBar();
+  if (calView !== "list") {
+    if (calendarItems.length === 0) {
+      calendarBody.append(el("p", "Nothing planned yet. Add something when you're ready.", { class: "hint" }));
+    }
+    renderTimeView();
+    calendarBody.append(button("Back", backFromCalendar));
+    return;
+  }
+
   if (calendarItems.length === 0) {
     calendarBody.append(el("p", "Nothing planned yet. Add something when you're ready.", { class: "hint" }));
   }
@@ -892,3 +904,133 @@ function backFromCalendar() {
 }
 
 openCalendar.addEventListener("click", openCalendarScreen);
+
+// Views: List (the priority groups), Day, Week (weekdays and weekend), Month.
+// Read-only in this step: blocks are shown, not moved (design/time-blocks.md).
+let calView = "list";
+let calAnchor = new Date();
+
+const VIEWS = [
+  { id: "list", label: "List" },
+  { id: "day", label: "Day" },
+  { id: "week", label: "Week" },
+  { id: "month", label: "Month" },
+];
+
+function renderViewBar() {
+  const bar = el("div", undefined, { class: "view-bar", role: "group", "aria-label": "Calendar view" });
+  for (const view of VIEWS) {
+    const b = button(view.label, () => { calView = view.id; renderCalendar(); }, "kind");
+    b.setAttribute("aria-pressed", String(calView === view.id));
+    bar.append(b);
+  }
+  calendarBody.append(bar);
+}
+
+function periodLabel() {
+  const d = calAnchor;
+  if (calView === "day") return d.toLocaleDateString([], { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  if (calView === "week") {
+    const monday = mondayOf(d);
+    const sunday = addDays(monday, 6);
+    return `${monday.toLocaleDateString([], { day: "numeric", month: "short" })} to ${sunday.toLocaleDateString([], { day: "numeric", month: "short", year: "numeric" })}`;
+  }
+  return d.toLocaleDateString([], { month: "long", year: "numeric" });
+}
+
+function stepBy(direction) {
+  if (calView === "day") calAnchor = addDays(calAnchor, direction);
+  else if (calView === "week") calAnchor = addDays(calAnchor, 7 * direction);
+  else calAnchor = addMonths(calAnchor, direction);
+  renderCalendar();
+}
+
+function navRow() {
+  const row = el("div", undefined, { class: "nav-row" });
+  row.append(button("Previous", () => stepBy(-1), "small"));
+  row.append(el("p", periodLabel(), { class: "period", role: "status" }));
+  row.append(button("Next", () => stepBy(1), "small"));
+  row.append(button("Today", () => { calAnchor = new Date(); renderCalendar(); }, "small"));
+  return row;
+}
+
+function blockFor(item, now) {
+  const due = parseDueCal(item.due.slice(0, 10), item.due.slice(11, 16));
+  const group = item.status === "completed" ? "done" : due ? bucketFor(due, now) : "later";
+  const time = item.due.slice(11, 16);
+  const block = el("button", undefined, { type: "button", class: "block", "data-group": group });
+  block.textContent = `${time} ${item.title}${item.status === "completed" ? " (finished)" : ""}`;
+  block.addEventListener("click", () => { calAnchor = new Date(item.due.slice(0, 10) + "T12:00"); calView = "day"; renderCalendar(); });
+  return block;
+}
+
+function renderTimeView() {
+  calendarBody.append(navRow());
+  const now = new Date();
+
+  if (calView === "day") {
+    const grid = el("div", undefined, { class: "day-grid", "aria-label": "Day timeline" });
+    for (const hour of hourLabels()) {
+      grid.append(el("div", `${hour}:00`, { class: "hour", style: `top:${((hour - 7) / 15) * 100}%` }));
+    }
+    const outside = [];
+    for (const item of itemsOnDay(calendarItems, calAnchor)) {
+      const place = blockPlacement(item);
+      if (!place) {
+        outside.push(item);
+        continue;
+      }
+      const block = blockFor(item, now);
+      block.style.top = `${place.top}%`;
+      block.style.height = `${place.height}%`;
+      grid.append(block);
+    }
+    calendarBody.append(grid);
+    if (outside.length) {
+      calendarBody.append(el("p", "Outside 7 am to 10 pm:", { class: "hint" }));
+      for (const item of outside) calendarBody.append(blockFor(item, now));
+    }
+    return;
+  }
+
+  if (calView === "week") {
+    const { weekdays, weekend } = splitWeek(calAnchor);
+    for (const [title, days] of [["Weekdays", weekdays], ["Weekend", weekend]]) {
+      calendarBody.append(el("h3", title, { tabindex: "-1" }));
+      const row = el("div", undefined, { class: "week-row" });
+      for (const day of days) {
+        const col = el("div", undefined, { class: "week-col" });
+        col.append(el("p", day.toLocaleDateString([], { weekday: "short", day: "numeric" }), { class: "col-head" }));
+        const items = itemsOnDay(calendarItems, day);
+        if (items.length === 0) col.append(el("p", "Nothing", { class: "hint" }));
+        for (const item of items) col.append(blockFor(item, now));
+        row.append(col);
+      }
+      calendarBody.append(row);
+    }
+    return;
+  }
+
+  // Month
+  const grid = el("div", undefined, { class: "month-grid", role: "table", "aria-label": "Month" });
+  for (const name of ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]) {
+    grid.append(el("div", name, { class: "month-head", role: "columnheader" }));
+  }
+  for (const week of monthGrid(calAnchor)) {
+    for (const day of week) {
+      if (!day) {
+        grid.append(el("div", "", { class: "month-cell empty" }));
+        continue;
+      }
+      const cell = el("button", undefined, { type: "button", class: "month-cell" });
+      const items = itemsOnDay(calendarItems, day);
+      cell.append(el("span", String(day.getDate()), { class: "day-num" }));
+      for (const item of items.slice(0, 2)) cell.append(el("span", item.title, { class: "mini" }));
+      if (items.length > 2) cell.append(el("span", `+${items.length - 2} more`, { class: "mini" }));
+      cell.setAttribute("aria-label", `${day.toLocaleDateString([], { weekday: "long", day: "numeric", month: "long" })}, ${items.length} items`);
+      cell.addEventListener("click", () => { calAnchor = day; calView = "day"; renderCalendar(); });
+      grid.append(cell);
+    }
+  }
+  calendarBody.append(grid);
+}

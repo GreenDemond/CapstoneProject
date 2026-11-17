@@ -248,31 +248,36 @@ h3 {
   border: 1px solid var(--muted);
 }
 
-.cal-list[data-group="urgent"] li {
+.cal-list[data-group="urgent"] li,
+.block[data-group="urgent"] {
   background: #e6893f;
   border-color: #b5653d;
   color: #2e2a24;
 }
 
-.cal-list[data-group="significant"] li {
+.cal-list[data-group="significant"] li,
+.block[data-group="significant"] {
   background: #e7c04f;
   border-color: #b8952f;
   color: #2e2a24;
 }
 
-.cal-list[data-group="notUrgent"] li {
+.cal-list[data-group="notUrgent"] li,
+.block[data-group="notUrgent"] {
   background: #9cc3dd;
   border-color: #5f8fb0;
   color: #2e2a24;
 }
 
-.cal-list[data-group="insignificant"] li {
+.cal-list[data-group="insignificant"] li,
+.block[data-group="insignificant"] {
   background: #c9d3b8;
   border-color: #7a8a68;
   color: #2e2a24;
 }
 
-.cal-list[data-group="later"] li {
+.cal-list[data-group="later"] li,
+.block[data-group="later"] {
   background: #d8d2c4;
   border-color: #8f887a;
   color: #2e2a24;
@@ -340,3 +345,28 @@ h3 {
   from { transform: scale(0.6); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
+
+/* Calendar views */
+.view-bar, .nav-row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin: 0.5rem 0; }
+.period { margin: 0; font-weight: 600; flex: 1; }
+.day-grid { position: relative; height: 720px; border-left: 1px solid var(--muted); margin: 0.5rem 0 0 3rem; }
+.hour { position: absolute; left: -3rem; width: 2.8rem; font-size: 0.85rem; color: var(--muted); transform: translateY(-50%); }
+.block {
+  position: absolute; left: 0.25rem; right: 0.25rem; min-height: 2.25rem;
+  text-align: left; font-size: 0.95rem; color: #2e2a24; border: 1px solid #2e2a24;
+  border-radius: 0.4rem; background: var(--bg); overflow: hidden; padding: 0.2rem 0.4rem;
+}
+.block[data-group="done"] { background: #d8d2c4; text-decoration: line-through; }
+.week-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr)); gap: 0.4rem; }
+.week-col { border: 1px solid var(--muted); border-radius: 0.4rem; padding: 0.3rem; }
+.col-head { font-weight: 700; margin: 0 0 0.3rem; }
+.week-col .block { position: static; display: block; width: 100%; margin-bottom: 0.3rem; }
+.month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.month-head { font-weight: 700; text-align: center; font-size: 0.85rem; }
+.month-cell {
+  min-height: 4.5rem; text-align: left; padding: 0.2rem; border: 1px solid var(--muted);
+  background: var(--bg); color: var(--text); font-size: 0.8rem; overflow: hidden; border-radius: 0.3rem;
+}
+.month-cell.empty { border-color: transparent; background: transparent; }
+.day-num { display: block; font-weight: 700; }
+.mini { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
