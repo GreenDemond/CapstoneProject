@@ -77,3 +77,18 @@ export async function deleteKey(serviceId) {
     return false;
   }
 }
+
+// Decrypts a saved key for one request. Used only to make the call to the chosen service.
+export async function readKey(serviceId) {
+  try {
+    const record = await withStore("readonly", (store) => store.get(serviceId));
+    const master = await withStore("readonly", (store) => store.get(MASTER_ID));
+    if (!record || !master) {
+      return null;
+    }
+    const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: record.iv }, master, record.data);
+    return new TextDecoder().decode(plain);
+  } catch {
+    return null;
+  }
+}

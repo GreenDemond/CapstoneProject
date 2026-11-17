@@ -45,31 +45,31 @@ test("a service needs a name, and the name can't be only spaces", () => {
 });
 
 test("duplicate addresses and the list limit are refused", () => {
-  const first = addService([], { label: "A", url: OPENROUTER_ADDRESS }).list;
-  assert.match(addService(first, { label: "B", url: OPENROUTER_ADDRESS }).error, /already saved/);
+  const first = addService([], { label: "A", url: OPENROUTER_ADDRESS, model: "m" }).list;
+  assert.match(addService(first, { label: "B", url: OPENROUTER_ADDRESS, model: "m" }).error, /already saved/);
   let list = [];
   for (let i = 0; i < MAX_SERVICES; i += 1) {
-    list = addService(list, { label: `S${i}`, url: `https://s${i}.example.com` }).list;
+    list = addService(list, { label: `S${i}`, url: `https://s${i}.example.com`, model: "m" }).list;
   }
-  assert.match(addService(list, { label: "one more", url: "https://more.example.com" }).error, /up to 10/);
+  assert.match(addService(list, { label: "one more", url: "https://more.example.com", model: "m" }).error, /up to 10/);
 });
 
 test("removing a service keeps the others in order", () => {
-  let list = addService([], { label: "A", url: "https://a.example.com" }).list;
-  list = addService(list, { label: "B", url: "https://b.example.com" }).list;
+  let list = addService([], { label: "A", url: "https://a.example.com", model: "m" }).list;
+  list = addService(list, { label: "B", url: "https://b.example.com", model: "m" }).list;
   const [first] = list;
   assert.deepEqual(removeService(list, first.id).map((s) => s.label), ["B"]);
 });
 
 test("the chosen service falls back to the first when the choice is gone", () => {
-  let list = addService([], { label: "A", url: "https://a.example.com" }).list;
-  list = addService(list, { label: "B", url: "https://b.example.com" }).list;
+  let list = addService([], { label: "A", url: "https://a.example.com", model: "m" }).list;
+  list = addService(list, { label: "B", url: "https://b.example.com", model: "m" }).list;
   assert.equal(chosenService(list, "missing").label, "A");
   assert.equal(chosenService([], "anything"), null);
 });
 
 test("the paste screen warns when no AI is ready, even if one is saved without a key", () => {
-  const list = addService([], { label: "Home AI", url: "https://home.example.com" }).list;
+  const list = addService([], { label: "Home AI", url: "https://home.example.com", model: "m" }).list;
   assert.match(pasteStatus(list, null), /No AI is set up yet/);
   assert.match(pasteStatus([], null), /No AI is set up yet/);
   const ready = list.map((s) => ({ ...s, keyReady: true }));
@@ -79,14 +79,17 @@ test("the paste screen warns when no AI is ready, even if one is saved without a
 test("damaged saved entries are dropped one at a time and the rest kept", () => {
   const cleaned = normalizeServices({
     services: [
-      { id: "a", label: "Good", url: "https://good.example.com" },
-      { id: "b", label: "Bad address", url: "ftp://nope" },
-      { id: "c", label: "", url: "https://blank.example.com" },
+      { id: "a", label: "Good", url: "https://good.example.com", model: "m" },
+      { id: "b", label: "Bad address", url: "ftp://nope", model: "m" },
+      { id: "c", label: "", url: "https://blank.example.com", model: "m" },
+      { id: "d", label: "No model", url: "https://nomodel.example.com" },
       "junk",
     ],
     chosenId: "a",
   });
-  assert.deepEqual(cleaned.services.map((s) => s.label), ["Good"]);
+  assert.deepEqual(cleaned.services.map((s) => s.label), ["Good", "No model"]);
+  assert.equal(cleaned.services[0].model, "m");
+  assert.equal(cleaned.services[1].model, "");
   assert.equal(cleaned.chosenId, "a");
   assert.deepEqual(normalizeServices("nonsense"), { services: [], chosenId: null });
 });
@@ -94,7 +97,7 @@ test("damaged saved entries are dropped one at a time and the rest kept", () => 
 test("saved settings keep the profile and calendar sections", () => {
   const storage = memoryStorage();
   storage.setItem(STORAGE_KEY, JSON.stringify({ schemaVersion: 1, profile: { goals: { today: "x" } }, calendar: { items: [], counts: { "2026-11-17": 2 } } }));
-  const settings = { services: [{ id: "a", label: "A", url: "https://a.example.com", keyReady: false }], chosenId: "a" };
+  const settings = { services: [{ id: "a", label: "A", url: "https://a.example.com", model: "m", keyReady: false }], chosenId: "a" };
   assert.equal(saveAiSettings(settings, storage), true);
   const saved = JSON.parse(storage.getItem(STORAGE_KEY));
   assert.deepEqual(saved.profile, { goals: { today: "x" } });

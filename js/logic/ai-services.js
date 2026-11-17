@@ -4,6 +4,7 @@
 export const MAX_SERVICES = 10;
 export const MAX_LABEL = 60;
 export const OPENROUTER_ADDRESS = "https://openrouter.ai/api/v1/chat/completions";
+export const MAX_MODEL = 100;
 
 // Checks a typed address. Accepts http:// or https:// (Ben's decision, design/ai-endpoints.md).
 // Returns { ok: true, url, plainHttp } or { ok: false, reason }.
@@ -32,7 +33,7 @@ export function plainHttpWarning() {
 }
 
 // Returns { list, error }. The list keeps its order; the first service added is the default.
-export function addService(list, { label, url }) {
+export function addService(list, { label, url, model = "" }) {
   const name = typeof label === "string" ? label.trim() : "";
   if (name === "") {
     return { list, error: "Give this AI a name, so you can tell it apart." };
@@ -46,7 +47,14 @@ export function addService(list, { label, url }) {
   if (list.some((service) => service.url === url)) {
     return { list, error: "That address is already saved." };
   }
-  const service = { id: newId(list), label: name, url, keyHint: "", keyReady: false };
+  const modelName = typeof model === "string" ? model.trim() : "";
+  if (modelName === "") {
+    return { list, error: "Type the model name from your service's list." };
+  }
+  if (modelName.length > MAX_MODEL) {
+    return { list, error: `Keep the model name under ${MAX_MODEL} characters.` };
+  }
+  const service = { id: newId(list), label: name, url, model: modelName, keyHint: "", keyReady: false };
   return { list: [...list, service], error: null };
 }
 
@@ -64,7 +72,7 @@ export function chosenService(list, chosenId) {
 
 // A service can only answer once its key is saved (keyReady). Until then it does not count.
 export function usableServices(list) {
-  return list.filter((service) => service.keyReady === true);
+  return list.filter((service) => service.keyReady === true && service.model !== "");
 }
 
 // The line shown on the paste screen. Only a service with a key ready counts as set up.
@@ -100,6 +108,8 @@ export function normalizeServices(data) {
       id: s.id,
       label: s.label.trim(),
       url: parseAddress(s.url).url,
+      // A service saved before model names existed is kept, with no model: it is not ready until one is typed.
+      model: typeof s.model === "string" ? s.model.trim().slice(0, MAX_MODEL) : "",
       // Only the last four characters of a key are kept here. Whether a key is ready is
       // checked against the encrypted store on each load, not trusted from this list.
       keyHint: typeof s.keyHint === "string" ? s.keyHint.slice(0, 4) : "",

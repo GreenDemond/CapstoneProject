@@ -118,3 +118,14 @@ Once the parent has set the key and the app is hosted:
 3. Back on the paste screen, the line should say "Using: Test AI".
 4. Add another service with a key that has a space in it. You should see "A key has no spaces."
 5. Press **Forget key** on "Test AI". It should say "No key yet" and the paste screen should go back to "No AI is set up yet".
+
+## Calling the AI service you chose (2026-11-17)
+
+Use a test service you control (or the stand-in in the tests). Do not use a key you cannot afford to lose.
+
+1. **Settings** → name, address, model name, and key. Press **Add this AI**. The list shows "Key saved: ••••" and the model. The full key must not appear.
+2. Press **Test it**. You should see "Connected. This AI can answer." or one plain line explaining the failure.
+3. Back on the paste screen, paste an assignment, pick **Essay**, and press **Suggest steps with AI**. The message should say "Suggested by an AI (name)" and the steps appear.
+4. Press **Suggest steps with AI** twice quickly. Only one request should go out.
+5. Forget the key. The Suggest button should disappear, and the paste screen goes back to "No AI is set up yet".
+6. Warnings: the Settings key box shows the spending-limit and shared-computer notes before you save.

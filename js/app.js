@@ -6,10 +6,10 @@ import { KINDS, DEFAULT_STEP_COUNT, starterStepsFor, withTwoMinuteStart } from "
 import { QUESTIONS, cardLines } from "./logic/focus-intake.js";
 import { GOAL_KEYS, MAX_TEXT, emptyProfile, setGoals, addNote, deleteNote, notesNewestFirst } from "./logic/profile.js";
 import { loadProfileState, saveProfile, loadAiSettings, saveAiSettings } from "./storage.js";
-import { parseAddress, plainHttpWarning, addService, removeService, chosenService, pasteStatus, OPENROUTER_ADDRESS } from "./logic/ai-services.js";
+import { parseAddress, plainHttpWarning, addService, removeService, chosenService, usableServices, pasteStatus } from "./logic/ai-services.js";
 import { checkKey, keyHint, maskedKey } from "./logic/ai-key.js";
-import { keyStoreAvailable, saveKey, hasKey, deleteKey } from "./keystore.js";
-import { aiAvailable, suggestWithAi } from "./ai.js";
+import { keyStoreAvailable, saveKey, hasKey, deleteKey, readKey } from "./keystore.js";
+import { askService, testService } from "./ai-direct.js";
 import { confetti } from "./confetti.js";
 import { GROUPS, CATEGORIES, groupItems, makeItem, makeEvent, isEvent, removeItem, parseDue, setStatus, completedItems } from "./logic/calendar.js";
 import { loadCalendarItems, saveCalendarItems, loadCompletionCounts, saveCompletionCounts } from "./storage.js";
@@ -654,11 +654,31 @@ function renderWork() {
 const aiBox = document.getElementById("ai-box");
 const aiButton = document.getElementById("ai-suggest");
 
-aiAvailable().then((ok) => {
-  aiBox.hidden = !ok;
+// The AI button shows only when the chosen service has a key saved.
+const aiPrivacy = document.getElementById("ai-privacy");
+function refreshAiButton() {
+  const service = chosenService(usableServices(aiSettings.services), aiSettings.chosenId);
+  aiBox.hidden = !service;
+  if (service) {
+    aiPrivacy.textContent = `This text is sent to the AI service ${service.label} to suggest steps. Don't paste your name or anything private.`;
+  }
+}
+
+// A second press while a request is running is ignored (one call at a time).
+let suggesting = false;
+aiButton.addEventListener("click", async () => {
+  if (suggesting) {
+    return;
+  }
+  suggesting = true;
+  try {
+    await suggestWithChosenService();
+  } finally {
+    suggesting = false;
+  }
 });
 
-aiButton.addEventListener("click", async () => {
+async function suggestWithChosenService() {
   const { text } = limitPaste(textBox.value);
   if (text === "") {
     message.textContent = "Paste something to start.";
@@ -668,26 +688,33 @@ aiButton.addEventListener("click", async () => {
     message.textContent = "Tap the kind of work it is, then try again.";
     return;
   }
+  const service = chosenService(usableServices(aiSettings.services), aiSettings.chosenId);
+  const key = service ? await readKey(service.id) : null;
+  if (!service || !key) {
+    message.textContent = "No AI is ready. Add a key in Settings first.";
+    refreshAiButton();
+    return;
+  }
   aiButton.disabled = true;
-  message.textContent = "Asking for suggestions...";
-  const result = await suggestWithAi(text, chosenKind);
+  message.textContent = `Asking the AI service ${service.label}...`;
+  const result = await askService(service, key, text, chosenKind);
   aiButton.disabled = false;
 
-  if (result?.trustedAdult) {
+  if (result.trustedAdult) {
     message.textContent = "If something serious is going on, please talk to an adult you trust.";
     return;
   }
-  if (result?.steps?.length) {
+  if (result.steps) {
     allSteps = result.steps;
-    message.textContent = "These steps came from an AI. Change anything you like.";
+    message.textContent = `Suggested by an AI (${service.label}). Change anything you like.`;
   } else {
     allSteps = starterStepsFor(chosenKind, cleanPastedText(text));
-    message.textContent = "The AI couldn't help this time, so here are the starter steps.";
+    message.textContent = `${result.error} Here are the starter steps instead.`;
   }
   ready.textContent = "";
   renderSteps(DEFAULT_STEP_COUNT);
   stepsScreen.hidden = false;
-});
+}
 
 // Settings: the AI services a student adds (design/ai-endpoints.md). Keys come in the next step.
 const settingsScreen = document.getElementById("settings-screen");
@@ -698,6 +725,7 @@ const aiName = document.getElementById("ai-name");
 const aiAddress = document.getElementById("ai-address");
 const aiAddressWarning = document.getElementById("ai-address-warning");
 const aiKey = document.getElementById("ai-key");
+const aiModel = document.getElementById("ai-model");
 const aiForm = document.getElementById("ai-form");
 const settingsMessage = document.getElementById("settings-message");
 const aiStatus = document.getElementById("ai-status");
@@ -715,6 +743,7 @@ async function loadKeyStates() {
 
 function refreshAiStatus() {
   aiStatus.textContent = pasteStatus(aiSettings.services, aiSettings.chosenId);
+  refreshAiButton();
 }
 
 function persistAi(onSaved) {
@@ -749,12 +778,33 @@ function renderAiList() {
     address.textContent = service.url;
     const note = document.createElement("span");
     note.className = "hint";
-    note.textContent = service.keyReady
-      ? `Key saved: ${maskedKey(service.keyHint)}`
-      : "No key yet, so this AI can't answer.";
-    item.append(radio, label, address, note);
+    note.textContent = !service.keyReady
+      ? "No key yet, so this AI can't answer."
+      : service.model === ""
+        ? "Needs a model name before it can answer."
+        : `Key saved: ${maskedKey(service.keyHint)}`;
+    const model = document.createElement("span");
+    model.className = "hint";
+    model.textContent = `Model: ${service.model}`;
+    item.append(radio, label, address, model, note);
 
-    if (service.keyReady) {
+    if (service.keyReady && service.model !== "") {
+      const test = document.createElement("button");
+      test.type = "button";
+      test.textContent = "Test it";
+      test.setAttribute("aria-label", `Test ${service.label}`);
+      test.addEventListener("click", async () => {
+        const key = await readKey(service.id);
+        if (!key) {
+          settingsMessage.textContent = "The key couldn't be read. Forget it and save it again.";
+          return;
+        }
+        settingsMessage.textContent = "Testing...";
+        const result = await testService(service, key);
+        settingsMessage.textContent = `${service.label}: ${result.message}`;
+      });
+      item.append(test);
+
       const forget = document.createElement("button");
       forget.type = "button";
       forget.textContent = "Forget key";
@@ -832,15 +882,6 @@ function updateAddressWarning() {
 
 aiAddress.addEventListener("input", updateAddressWarning);
 
-document.getElementById("ai-use-openrouter").addEventListener("click", () => {
-  aiAddress.value = OPENROUTER_ADDRESS;
-  if (aiName.value.trim() === "") {
-    aiName.value = "OpenRouter";
-  }
-  updateAddressWarning();
-  aiAddress.focus();
-});
-
 aiForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const parsed = parseAddress(aiAddress.value);
@@ -848,12 +889,12 @@ aiForm.addEventListener("submit", async (event) => {
     settingsMessage.textContent = parsed.reason;
     return;
   }
-  const typedKey = aiKey.value.trim() === "" ? null : checkKey(aiKey.value);
-  if (typedKey && !typedKey.ok) {
+  const typedKey = checkKey(aiKey.value);
+  if (!typedKey.ok) {
     settingsMessage.textContent = typedKey.reason;
     return;
   }
-  const { list, error } = addService(aiSettings.services, { label: aiName.value, url: parsed.url });
+  const { list, error } = addService(aiSettings.services, { label: aiName.value, url: parsed.url, model: aiModel.value });
   if (error) {
     settingsMessage.textContent = error;
     return;
@@ -861,30 +902,25 @@ aiForm.addEventListener("submit", async (event) => {
   const added = list[list.length - 1];
   aiSettings = { services: list, chosenId: aiSettings.chosenId ?? added.id };
   let keySaved = false;
-  if (typedKey) {
-    keySaved = await saveKey(added.id, typedKey.key);
-    if (keySaved) {
-      aiSettings = {
-        ...aiSettings,
-        services: aiSettings.services.map((service) =>
-          service.id === added.id ? { ...service, keyReady: true, keyHint: keyHint(typedKey.key) } : service,
-        ),
-      };
-    }
+  keySaved = await saveKey(added.id, typedKey.key);
+  if (keySaved) {
+    aiSettings = {
+      ...aiSettings,
+      services: aiSettings.services.map((service) =>
+        service.id === added.id ? { ...service, keyReady: true, keyHint: keyHint(typedKey.key) } : service,
+      ),
+    };
   }
   aiName.value = "";
   aiAddress.value = "";
   aiKey.value = "";
+  aiModel.value = "";
   updateAddressWarning();
   renderAiList();
   persistAi(() => {
-    if (typedKey && !keySaved) {
-      settingsMessage.textContent = "Saved the AI, but couldn't save the key on this device. Add the key again below.";
-    } else if (keySaved) {
-      settingsMessage.textContent = "Saved, with the key stored encrypted on this device.";
-    } else {
-      settingsMessage.textContent = "Saved. This AI can't answer until its key is added.";
-    }
+    settingsMessage.textContent = keySaved
+      ? "Saved, with the key stored encrypted on this device."
+      : "Saved the AI, but couldn't save the key on this device. Add the key again below.";
   });
 });
 
@@ -904,6 +940,7 @@ document.getElementById("settings-back").addEventListener("click", () => {
 });
 
 refreshAiStatus();
+refreshAiButton();
 if (keyStoreAvailable()) {
   loadKeyStates();
 }

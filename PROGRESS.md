@@ -17,7 +17,8 @@ The only memory between sessions. Keep it current; rewrite it, do not let it gro
 - Logic in `js/logic/`: `clean-text.js` (tidies and limits pasted text), `starter-steps.js` (builds the steps), `focus-intake.js` (questions and card text). All tested.
 
 ## In progress
-- AI keys, step 2 (built, switched off): keys are saved encrypted in this browser (IndexedDB, non-extractable key) and shown only as "••••1234". Settings has a key box, Save key, and Forget key. Next: the Test button and the request to the chosen service (step 3), which needs the page's security rules changed.
+- AI call, step 3 (built, tested with stand-ins; the parent must confirm the wider page rule before classmates use it): Test it, and Suggest steps calls the chosen service from the browser. Design: design/ai-direct.md.
+- AI keys, step 2 (built): keys are saved encrypted in this browser (IndexedDB, non-extractable key) and shown only as "••••1234". Settings has a key box, Save key, and Forget key. Next: the Test button and the request to the chosen service (step 3), which needs the page's security rules changed.
 
 Nothing.
 

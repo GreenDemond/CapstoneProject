@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Content-Security-Policy"
-          content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'">
+          content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' https: http:; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <title>Focus app</title>
     <link rel="stylesheet" href="css/styles.css">
   </head>
@@ -26,7 +26,7 @@
 
         <button type="button" id="show-steps" class="primary">Show my steps</button>
         <div id="ai-box" hidden>
-          <p class="hint">This text is sent to an AI service to suggest steps. Don't paste your name or anything private.</p>
+          <p class="hint" id="ai-privacy">This text is sent to an AI service to suggest steps. Don't paste your name or anything private.</p>
           <button type="button" id="ai-suggest">Suggest steps with AI</button>
           <p class="hint">Suggestions come from an AI, not a person. The app stores none of it.</p>
         </div>
@@ -57,10 +57,12 @@
           <label for="ai-address">Address</label>
           <input id="ai-address" type="url" placeholder="https://" autocomplete="off">
           <p id="ai-address-warning" class="hint" hidden></p>
-          <p><button type="button" id="ai-use-openrouter">Use the OpenRouter address</button></p>
-          <label for="ai-key">Key (optional now, you can add it later)</label>
+          <label for="ai-model">Model name (the one your service lists)</label>
+          <input id="ai-model" type="text" maxlength="100" autocomplete="off" spellcheck="false">
+          <label for="ai-key">Key (required)</label>
           <input id="ai-key" type="password" autocomplete="off" spellcheck="false">
-          <p class="hint">The key is saved encrypted on this device only. Anyone using this browser may be able to use it, so use your own computer.</p>
+          <p class="hint">Set a spending limit on this key first. Don't save a key on a shared computer. In your AI account, turn off any setting that lets providers keep or train on your text.</p>
+          <p class="hint">The key is saved encrypted on this device only.</p>
           <p><button type="submit" id="ai-add">Add this AI</button></p>
         </form>
         <p id="settings-message" class="message" role="status" aria-live="polite"></p>
