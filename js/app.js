@@ -7,10 +7,10 @@ import { QUESTIONS, cardLines } from "./logic/focus-intake.js";
 import { GOAL_KEYS, MAX_TEXT, emptyProfile, setGoals, addNote, deleteNote, notesNewestFirst } from "./logic/profile.js";
 import { loadProfileState, saveProfile } from "./storage.js";
 import { aiAvailable, suggestWithAi } from "./ai.js";
-import { GROUPS, CATEGORIES, groupItems, makeItem, removeItem, parseDue, setStatus, completedItems } from "./logic/calendar.js";
+import { GROUPS, CATEGORIES, groupItems, makeItem, makeEvent, isEvent, removeItem, parseDue, setStatus, completedItems } from "./logic/calendar.js";
 import { loadCalendarItems, saveCalendarItems, loadCompletionCounts, saveCompletionCounts } from "./storage.js";
 import { addCompletion, removeCompletion, totals } from "./logic/counter.js";
-import { addDays, addMonths, splitWeek, monthGrid, itemsOnDay, blockPlacement, hourLabels, mondayOf } from "./logic/views.js";
+import { addDays, addMonths, splitWeek, monthGrid, itemsOnDay, eventsCovering, blockPlacement, hourLabels, mondayOf } from "./logic/views.js";
 import { bucketFor, parseDue as parseDueCal } from "./logic/calendar.js";
 import { createWork, currentIndex, doneCount, allDone, applyChoice, hintAt, ringFraction, formatTime } from "./logic/work.js";
 
@@ -710,13 +710,31 @@ function renderCalendar(draft = { title: "", day: "", time: "" }, message = "") 
   const form = el("div", undefined, { class: "calendar-form" });
   const titleBox = el("input", undefined, { type: "text", id: "cal-title", maxlength: "200" });
   titleBox.value = draft.title;
+  const kindBox = el("select", undefined, { id: "cal-kind" });
+  kindBox.append(el("option", "A task, due at a time", { value: "task" }), el("option", "A trip or event, over several days", { value: "event" }));
+  kindBox.value = draft.kind ?? "task";
   const dayBox = el("input", undefined, { type: "date", id: "cal-day" });
   dayBox.value = draft.day;
+  const endBox = el("input", undefined, { type: "date", id: "cal-end" });
+  endBox.value = draft.end ?? "";
   const timeBox = el("input", undefined, { type: "time", id: "cal-time" });
   timeBox.value = draft.time;
+  const dayLabel = el("label", kindBox.value === "event" ? "From date" : "Due date", { for: "cal-day" });
+  const endLabel = el("label", "To date", { for: "cal-end" });
+  const timeLabel = el("label", "Due time", { for: "cal-time" });
+  const applyKind = () => {
+    const isTrip = kindBox.value === "event";
+    dayLabel.textContent = isTrip ? "From date" : "Due date";
+    endBox.hidden = !isTrip;
+    endLabel.hidden = !isTrip;
+    timeBox.hidden = isTrip;
+    timeLabel.hidden = isTrip;
+  };
+  kindBox.addEventListener("change", applyKind);
   form.append(...labelled("What is it?", titleBox, "cal-title"));
-  form.append(...labelled("Due date", dayBox, "cal-day"));
-  form.append(...labelled("Due time", timeBox, "cal-time"));
+  form.append(...labelled("Type", kindBox, "cal-kind"));
+  form.append(dayLabel, dayBox, endLabel, endBox, timeLabel, timeBox);
+  queueMicrotask(applyKind);
   const notesBox = el("textarea", undefined, { id: "cal-notes", rows: "8", maxlength: "2000", class: "big-notes" });
   notesBox.value = draft.notes ?? "";
   const linksBox = el("textarea", undefined, { id: "cal-links", rows: "3", placeholder: "https://" });
@@ -790,6 +808,19 @@ function renderCalendar(draft = { title: "", day: "", time: "" }, message = "") 
     calendarBody.append(list);
   }
 
+  const trips = calendarItems.filter((item) => isEvent(item));
+  if (trips.length > 0) {
+    calendarBody.append(el("h3", "Trips and events", { tabindex: "-1" }));
+    const tripList = el("ul", undefined, { class: "cal-list" });
+    for (const trip of trips) {
+      const row = el("li");
+      row.append(el("span", `${trip.title}, ${trip.start} to ${trip.end}`), " ");
+      row.append(button("Delete", () => deleteCalendarItem(trip.id), "small"));
+      tripList.append(row);
+    }
+    calendarBody.append(tripList);
+  }
+
   const done = completedItems(calendarItems);
   if (done.length > 0) {
     calendarBody.append(el("h3", "Completed", { tabindex: "-1" }));
@@ -855,14 +886,18 @@ function statusButtons(item) {
 
 function addCalendarItem() {
   const draft = {
+    kind: document.getElementById("cal-kind").value,
     title: document.getElementById("cal-title").value,
     day: document.getElementById("cal-day").value,
+    end: document.getElementById("cal-end").value,
     time: document.getElementById("cal-time").value,
     notes: document.getElementById("cal-notes").value,
     links: document.getElementById("cal-links").value,
     category: document.getElementById("cal-category").value,
   };
-  const result = makeItem(draft, calendarId());
+  const result = draft.kind === "event"
+    ? makeEvent({ title: draft.title, start: draft.day, end: draft.end, notes: draft.notes, links: draft.links, category: draft.category }, calendarId())
+    : makeItem(draft, calendarId());
   if (!result.ok) {
     renderCalendar(draft, result.reason);
     return;
@@ -955,6 +990,12 @@ function navRow() {
 }
 
 function blockFor(item, now) {
+  if (isEvent(item)) {
+    const band = el("button", undefined, { type: "button", class: "block", "data-group": "event" });
+    band.textContent = `${item.title} (to ${item.end})`;
+    band.addEventListener("click", () => { calAnchor = new Date(item.start + "T12:00"); calView = "day"; renderCalendar(); });
+    return band;
+  }
   const due = parseDueCal(item.due.slice(0, 10), item.due.slice(11, 16));
   const group = item.status === "completed" ? "done" : due ? bucketFor(due, now) : "later";
   const time = item.due.slice(11, 16);
@@ -969,12 +1010,15 @@ function renderTimeView() {
   const now = new Date();
 
   if (calView === "day") {
+    for (const trip of eventsCovering(calendarItems, calAnchor)) {
+      calendarBody.append(el("p", `Trip or event: ${trip.title} (${trip.start} to ${trip.end})`, { class: "event-band" }));
+    }
     const grid = el("div", undefined, { class: "day-grid", "aria-label": "Day timeline" });
     for (const hour of hourLabels()) {
       grid.append(el("div", `${hour}:00`, { class: "hour", style: `top:${((hour - 7) / 15) * 100}%` }));
     }
     const outside = [];
-    for (const item of itemsOnDay(calendarItems, calAnchor)) {
+    for (const item of itemsOnDay(calendarItems, calAnchor).filter((i) => !isEvent(i))) {
       const place = blockPlacement(item);
       if (!place) {
         outside.push(item);

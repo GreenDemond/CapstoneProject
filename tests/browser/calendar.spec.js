@@ -150,3 +150,28 @@ test("List view brings back the priority groups", async ({ page }) => {
   await page.getByRole("button", { name: "List", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Urgent", exact: true })).toBeVisible();
 });
+
+// A trip covers several days: it shows on each day in Month, and in its own list.
+test("a trip over several days shows on each day and in the trips list", async ({ page }) => {
+  await openCalendar(page);
+  await page.getByLabel("What is it?").fill("Trip to Lisbon");
+  await page.getByLabel("Type").selectOption("event");
+  await page.getByLabel("From date").fill(dayFromNow(1));
+  await page.getByLabel("To date").fill(dayFromNow(3));
+  await page.getByRole("button", { name: "Add to my calendar" }).click();
+  await expect(page.locator("ul.cal-list").getByText("Trip to Lisbon")).toBeVisible();
+
+  await page.getByRole("button", { name: "Month", exact: true }).click();
+  await expect(page.locator(".month-grid .mini", { hasText: "Trip to Lisbon" })).toHaveCount(3);
+});
+
+// A trip with an end before its start is refused.
+test("a trip that ends before it starts is refused", async ({ page }) => {
+  await openCalendar(page);
+  await page.getByLabel("What is it?").fill("Camp");
+  await page.getByLabel("Type").selectOption("event");
+  await page.getByLabel("From date").fill(dayFromNow(5));
+  await page.getByLabel("To date").fill(dayFromNow(2));
+  await page.getByRole("button", { name: "Add to my calendar" }).click();
+  await expect(page.getByText("The to date is before the from date.")).toBeVisible();
+});

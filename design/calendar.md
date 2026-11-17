@@ -90,3 +90,9 @@ Wording rules: no "overdue," "missed," or "late." Past events look the same as f
 - Only completions are counted. Nothing counts what was missed, and nothing compares students. No streaks: a day with none simply shows 0.
 - Counts are kept per day beside the items. Deleting a finished item does not lower the count. Reopening an item takes that one completion back out.
 - Shown as one neutral line at the top of My calendar.
+
+## Added 2026-11-17: trips and multi-day events
+
+- On the add form, **Type** chooses **A task, due at a time** or **A trip or event, over several days**. A trip asks for a **From date** and a **To date** (no times). The To date can't be before the From date.
+- A trip shows on every day it covers in the Week and Month views, and in the Day view as a band above the timeline. The List view has a **Trips and events** list.
+- Trips are not put in the priority groups and don't need a due time. Completing and counting work as for tasks.

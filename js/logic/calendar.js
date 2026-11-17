@@ -123,7 +123,7 @@ export function makeItem({ title, day, time, notes = "", links = "", category = 
 // Completed items are left out of the priority groups; they show in their own list.
 export function groupItems(items, now) {
   const groups = Object.fromEntries(GROUPS.map((g) => [g.id, []]));
-  const open = items.filter((item) => item.status !== "completed");
+  const open = items.filter((item) => item.status !== "completed" && !isEvent(item));
   const sorted = [...open].sort((a, b) => a.due.localeCompare(b.due));
   for (const item of sorted) {
     const due = parseDue(item.due.slice(0, 10), item.due.slice(11, 16));
@@ -178,4 +178,57 @@ export function completedItems(items) {
   return items
     .filter((item) => item.status === "completed")
     .sort((a, b) => (b.completedOn ?? "").localeCompare(a.completedOn ?? ""));
+}
+
+// An event covers a range of days (for example a trip). Times are not needed.
+export function parseDay(text) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(text ?? ""));
+  if (!m) return null;
+  const [y, mo, d] = [Number(m[1]), Number(m[2]) - 1, Number(m[3])];
+  const date = new Date(y, mo, d);
+  return date.getFullYear() === y && date.getMonth() === mo && date.getDate() === d ? text : null;
+}
+
+// Returns { ok: true, item } or { ok: false, reason }.
+export function makeEvent({ title, start, end, notes = "", links = "", category = "other" }, id) {
+  const cleaned = typeof title === "string" ? title.trim().slice(0, MAX_TITLE) : "";
+  if (cleaned === "") {
+    return { ok: false, reason: "Write what it is first." };
+  }
+  const from = parseDay(start);
+  const to = parseDay(end);
+  if (!from || !to) {
+    return { ok: false, reason: "Choose a from date and a to date." };
+  }
+  if (to < from) {
+    return { ok: false, reason: "The to date is before the from date." };
+  }
+  const parsedLinks = parseLinks(links);
+  if (!parsedLinks.ok) {
+    return parsedLinks;
+  }
+  return {
+    ok: true,
+    item: {
+      id,
+      kind: "event",
+      title: cleaned,
+      start: from,
+      end: to,
+      notes: String(notes ?? "").trim().slice(0, MAX_NOTES),
+      links: parsedLinks.links,
+      category: CATEGORIES.some((c) => c.id === category) ? category : "other",
+      status: "open",
+      completedOn: null,
+    },
+  };
+}
+
+export function isEvent(item) {
+  return item.kind === "event";
+}
+
+// Priority groups are for tasks only. Events are listed by their dates.
+export function taskGroupsSource(items) {
+  return items.filter((item) => !isEvent(item));
 }

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { bucketFor, parseDue, makeItem, groupItems, removeItem, parseLinks, MAX_LINKS, MAX_NOTES } from "../../js/logic/calendar.js";
+import { bucketFor, parseDue, makeItem, groupItems, removeItem, parseLinks, MAX_LINKS, MAX_NOTES, makeEvent, isEvent } from "../../js/logic/calendar.js";
 
 const NOW = new Date(2026, 10, 17, 10, 0); // 17 Nov 2026, 10:00 local
 
@@ -122,4 +122,30 @@ test("a new item gets a category, and an unknown category falls back to other", 
   assert.equal(a.item.category, "family");
   assert.equal(b.item.category, "other");
   assert.equal(a.item.status, "open");
+});
+
+test("an event covers a range of days and keeps its dates", () => {
+  const r = makeEvent({ title: "Trip to Lisbon", start: "2026-12-01", end: "2026-12-05" }, "e1");
+  assert.equal(r.ok, true);
+  assert.equal(r.item.kind, "event");
+  assert.equal(r.item.start, "2026-12-01");
+  assert.equal(r.item.end, "2026-12-05");
+  assert.equal(isEvent(r.item), true);
+});
+
+test("an event needs a title, valid dates, and an end on or after the start", () => {
+  assert.equal(makeEvent({ title: "", start: "2026-12-01", end: "2026-12-05" }, "x").ok, false);
+  assert.equal(makeEvent({ title: "Trip", start: "2026-12-01", end: "" }, "x").ok, false);
+  assert.equal(makeEvent({ title: "Trip", start: "2026-12-05", end: "2026-12-01" }, "x").ok, false);
+  assert.equal(makeEvent({ title: "Trip", start: "2026-02-31", end: "2026-03-01" }, "x").ok, false);
+});
+
+test("events are kept out of the priority groups", () => {
+  const items = [
+    { id: "t", title: "Essay", due: "2026-11-17T10:30", status: "open", kind: "task" },
+    { id: "e", title: "Trip", kind: "event", start: "2026-11-17", end: "2026-11-20", status: "open" },
+  ];
+  const groups = groupItems(items, NOW);
+  assert.deepEqual(groups.urgent.map((i) => i.id), ["t"]);
+  assert.equal(Object.values(groups).flat().some((i) => i.id === "e"), false);
 });

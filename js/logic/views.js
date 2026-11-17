@@ -53,12 +53,22 @@ export function monthGrid(date) {
   return weeks;
 }
 
-// Items due on one day, in time order.
+// Items on one day, in time order. A task appears on the day it is due. An event
+// appears on every day from its start to its end, so a trip shows on each day.
 export function itemsOnDay(items, date) {
   const key = dayKey(date);
   return items
-    .filter((item) => item.due.slice(0, 10) === key)
-    .sort((a, b) => a.due.localeCompare(b.due));
+    .filter((item) => {
+      if (item.kind === "event") return item.start <= key && key <= item.end;
+      return item.due.slice(0, 10) === key;
+    })
+    .sort((a, b) => (a.kind === "event" ? "" : (a.due ?? "")).localeCompare(b.kind === "event" ? "" : (b.due ?? "")));
+}
+
+// Events that cover the day (for the band above the day grid).
+export function eventsCovering(items, date) {
+  const key = dayKey(date);
+  return items.filter((item) => item.kind === "event" && item.start <= key && key <= item.end);
 }
 
 // Where a block sits on the grid, as percentages of the grid height.
