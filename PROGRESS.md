@@ -19,14 +19,12 @@ Nothing.
 - **Starter steps are not yet tested with students.** They were written from the research (process steps only, no answers). Ask testers whether they fit each kind of work.
 - None of the instructions in `AGENTS.md` have been tried in a full loop yet. This session was the second. If a rule turns out to be unclear or unworkable, fix the rule and note it in `DECISIONS.md`.
 - Most research was read at abstract level. Items marked *(not read)* or **(confirm)** in `01-evidence.md` and `02-platform-and-privacy.md` are unchecked.
-- The commit author email is visible in the public repository. Ben has not yet said whether to keep it.
 
 ## Waiting on
 
 **Ben**
 
 - Whether to delete the `web-app/` folder (see above).
-- Whether to keep the current commit author email as public, or switch to a GitHub noreply address.
 - The app's name. The page is titled "Focus app" for now.
 - How progress is shown: pet rock, quest map, or build-a-picture.
 - The words for drifting, getting stuck, and coming back.
