@@ -75,4 +75,9 @@ In order. Each is one session or less. Each feature starts with a design note in
 6. **Weekly goal and progress display.**
 7. **Save to file and load from file.**
 
+**To do (Ben, 2026-11-17):**
+- **AI chat** (`design/ai-chat.md`, draft, advisor review in progress): chat with the AI helper, reply length options and an editable guide in Settings, replies never cut off.
+- **A set-up page for the AI guide.** A page that works with the student, a question at a time, to write the guide that tells the AI how to work with how they respond. It probably builds on "How I like to work" (`design/focus-intake.md`), whose four answers could draft the guide for the student to edit. Needs its own design note. Locked safety rules stay in force whatever the guide says.
+- Fix the Suggest steps prompt and the way replies are read (see Ben's request about terse output).
+
 After that, with Ben: the recall question, polish, and a phone-width pass. The AI path comes last, and only if the parent sets up a key.
