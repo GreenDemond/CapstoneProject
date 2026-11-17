@@ -6,6 +6,8 @@ import {
   KINDS,
   DEFAULT_STEP_COUNT,
   MAX_STEP_LENGTH,
+  TWO_MINUTE_STEP,
+  withTwoMinuteStart,
 } from "../../js/logic/starter-steps.js";
 
 test("every kind offered on screen has starter steps", () => {
@@ -50,4 +52,12 @@ test("non-text input gives no items and the starter steps only", () => {
 
 test("lines that merely contain numbers are not treated as list items", () => {
   assert.deepEqual(findListItems("Chapter 3 is due on 12/4\nPage 10 to 20"), []);
+});
+
+test("the two-minute start goes first, and only once", () => {
+  const steps = starterStepsFor("essay");
+  const once = withTwoMinuteStart(steps);
+  assert.equal(once[0], TWO_MINUTE_STEP);
+  assert.equal(once.length, steps.length + 1);
+  assert.deepEqual(withTwoMinuteStart(once), once);
 });

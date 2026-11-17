@@ -53,3 +53,14 @@ The student pastes their assignment, taps the kind of work it is, and sees five 
 
 1. Is the five-kind list right (Essay, Reading, Problem set, Project, Studying for a test, plus Something else)?
 2. OK to build editing in the same session, or split it into two?
+
+## Added 2026-11-17: two-minute start
+
+Idea from the ADHD Free Tools upload (its "Quick Wins" tool), rebuilt in our own words.
+
+- On the steps screen, a button: **Give me a two-minute start.** It puts one step at the top of the list: "Set a timer for 2 minutes and start the first step. You can stop when the timer ends."
+- The step is a process step, not an answer. The student may stop after two minutes, which is no failure.
+- Pressing the button again does nothing extra; the step is never added twice.
+- Nothing is saved. The student can still edit the list when editing is built.
+
+**Research:** "The first step should take under two minutes" is design judgment, to be tested (`00-knowledge-summary.md` section 4, point 6). Quick Wins' own claims about dopamine and sound are not used.

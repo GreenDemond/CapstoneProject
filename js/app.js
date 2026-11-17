@@ -2,7 +2,7 @@
 // Pure logic lives in js/logic/. Text from the student is only ever put on
 // screen with textContent, never as HTML (DECISIONS T11).
 import { cleanPastedText, limitPaste } from "./logic/clean-text.js";
-import { KINDS, DEFAULT_STEP_COUNT, starterStepsFor } from "./logic/starter-steps.js";
+import { KINDS, DEFAULT_STEP_COUNT, starterStepsFor, withTwoMinuteStart } from "./logic/starter-steps.js";
 import { QUESTIONS, cardLines } from "./logic/focus-intake.js";
 import { GOAL_KEYS, MAX_TEXT, emptyProfile, setGoals, addNote, deleteNote, notesNewestFirst } from "./logic/profile.js";
 import { loadProfileState, saveProfile } from "./storage.js";
@@ -71,6 +71,12 @@ showButton.addEventListener("click", () => {
     ? "That's a long one. The first 6,000 characters are kept."
     : "";
   stepsScreen.scrollIntoView({ block: "start" });
+});
+
+document.getElementById("two-minute").addEventListener("click", () => {
+  allSteps = withTwoMinuteStart(allSteps);
+  renderSteps(DEFAULT_STEP_COUNT);
+  stepsList.focus();
 });
 
 showMore.addEventListener("click", () => {

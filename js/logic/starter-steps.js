@@ -106,3 +106,11 @@ export function starterStepsFor(kindId, pastedText = "") {
   }
   return steps;
 }
+
+// A first step that takes two minutes, to make starting easier (design/paste-and-split.md).
+export const TWO_MINUTE_STEP = "Set a timer for 2 minutes and start the first step. You can stop when the timer ends.";
+
+// Puts the two-minute step first, once. Returns a new list.
+export function withTwoMinuteStart(steps) {
+  return [TWO_MINUTE_STEP, ...steps.filter((step) => step !== TWO_MINUTE_STEP)];
+}

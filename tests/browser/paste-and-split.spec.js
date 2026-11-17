@@ -27,7 +27,7 @@ test("paste, pick a kind, see starter steps, show more, and press Start", async 
   await expect(steps).toHaveCount(10);
   await expect(page.getByRole("button", { name: "Show more steps" })).toBeHidden();
 
-  await page.getByRole("button", { name: "Start" }).click();
+  await page.getByRole("button", { name: "Start", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Work" })).toBeVisible();
   await expect(page.getByText("Step 1 of 10")).toBeVisible();
   await expect(page.locator(".current-step")).toHaveText("Find three sources");
@@ -69,4 +69,16 @@ test("a paste over 6,000 characters is cut and the student is told", async ({ pa
   await page.getByRole("button", { name: "Show my steps" }).click();
   await expect(page.getByText("The first 6,000 characters are kept.")).toBeVisible();
   await expect(page.locator("#steps li")).toHaveCount(5);
+});
+
+// The two-minute start puts a short first step at the top, and Start begins with it.
+test("the two-minute start goes first and the work screen begins with it", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("Assignment text").fill("Read chapter 4.");
+  await page.getByRole("button", { name: "Essay" }).click();
+  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Give me a two-minute start" }).click();
+  await expect(page.locator("#steps li").first()).toContainText("Set a timer for 2 minutes");
+  await page.getByRole("button", { name: "Start", exact: true }).click();
+  await expect(page.locator(".current-step")).toContainText("Set a timer for 2 minutes");
 });

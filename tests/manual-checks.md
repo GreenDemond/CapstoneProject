@@ -72,3 +72,10 @@ Start from the paste screen: paste a short list, tap a kind, press **Show my ste
 10. Press **Back to my steps**. You should return to the paste screen.
 11. Use Tab and Enter only. Every button should be reachable with a visible outline.
 12. Narrow the window to about phone width. Nothing should scroll sideways.
+
+## Two-minute start (2026-11-17)
+
+1. Paste a short assignment, tap a kind, and press **Show my steps**.
+2. Press **Give me a two-minute start**. The first step should be "Set a timer for 2 minutes and start the first step."
+3. Press it again. The step should not appear twice.
+4. Press **Start**. The work screen should begin with that step.
