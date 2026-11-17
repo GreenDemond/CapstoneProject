@@ -6,6 +6,7 @@ import { KINDS, DEFAULT_STEP_COUNT, starterStepsFor, withTwoMinuteStart } from "
 import { QUESTIONS, cardLines } from "./logic/focus-intake.js";
 import { GOAL_KEYS, MAX_TEXT, emptyProfile, setGoals, addNote, deleteNote, notesNewestFirst } from "./logic/profile.js";
 import { loadProfileState, saveProfile } from "./storage.js";
+import { aiAvailable, suggestWithAi } from "./ai.js";
 import { createWork, currentIndex, doneCount, allDone, applyChoice, hintAt, ringFraction, formatTime } from "./logic/work.js";
 
 const textBox = document.getElementById("assignment-text");
@@ -632,3 +633,43 @@ function renderWork() {
   workBody.append(button("Leave my steps", closeWork));
   stepText.focus();
 }
+
+// AI suggestions (design/ai-path.md). Hidden unless the server says it is available,
+// which needs a key set up by an adult. Any failure falls back to the starter steps.
+const aiBox = document.getElementById("ai-box");
+const aiButton = document.getElementById("ai-suggest");
+
+aiAvailable().then((ok) => {
+  aiBox.hidden = !ok;
+});
+
+aiButton.addEventListener("click", async () => {
+  const { text } = limitPaste(textBox.value);
+  if (text === "") {
+    message.textContent = "Paste something to start.";
+    return;
+  }
+  if (chosenKind === null) {
+    message.textContent = "Tap the kind of work it is, then try again.";
+    return;
+  }
+  aiButton.disabled = true;
+  message.textContent = "Asking for suggestions...";
+  const result = await suggestWithAi(text, chosenKind);
+  aiButton.disabled = false;
+
+  if (result?.trustedAdult) {
+    message.textContent = "If something serious is going on, please talk to an adult you trust.";
+    return;
+  }
+  if (result?.steps?.length) {
+    allSteps = result.steps;
+    message.textContent = "These steps came from an AI. Change anything you like.";
+  } else {
+    allSteps = starterStepsFor(chosenKind, cleanPastedText(text));
+    message.textContent = "The AI couldn't help this time, so here are the starter steps.";
+  }
+  ready.textContent = "";
+  renderSteps(DEFAULT_STEP_COUNT);
+  stepsScreen.hidden = false;
+});

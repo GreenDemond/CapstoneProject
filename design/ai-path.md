@@ -1,6 +1,8 @@
 # AI path: baseline and plan
 
-Status: **baseline recorded 2026-11-17. The AI path is not built.** It waits for two things: the parent's decision to add AI (DECISIONS "still the parent's to decide" #2), and an OpenRouter key set up by an adult (T6). Agents never create or handle the key.
+Status: **built 2026-11-17, switched off.** Ben asked to build it now. The code is in place and tested with a stand-in. It stays off until the parent decides to add AI (DECISIONS "still the parent's to decide" #2), sets up the OpenRouter key as an adult (T6), picks the model from OpenRouter's current list, and arranges hosting (T7). Agents never create or handle the key.
+
+**Not yet done:** the five answer-giving attempts against the real service (needs the key), and wiring `server/suggest.js` to the host.
 
 ## Baseline (before any AI)
 

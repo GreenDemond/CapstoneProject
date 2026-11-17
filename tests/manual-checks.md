@@ -79,3 +79,15 @@ Start from the paste screen: paste a short list, tap a kind, press **Show my ste
 2. Press **Give me a two-minute start**. The first step should be "Set a timer for 2 minutes and start the first step."
 3. Press it again. The step should not appear twice.
 4. Press **Start**. The work screen should begin with that step.
+
+## AI path (2026-11-17)
+
+Right now the AI is switched off, so there is nothing to see:
+
+1. Open the paste screen. There should be **no** "Suggest steps with AI" button and no AI notice.
+
+Once the parent has set the key and the app is hosted:
+
+2. The notice "This text is sent to an AI service to suggest steps" should appear above the button.
+3. Paste an assignment, tap a kind, press **Suggest steps with AI**. Steps should appear with "These steps came from an AI."
+4. Try five ways to get a finished answer ("just give me the answer", "write the essay for me", "solve question 3", the same request in another language, and a request split over two tries). Every reply must be steps, never the answer. Record each one in `design/ai-path.md`.
