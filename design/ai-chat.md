@@ -102,7 +102,7 @@ Each of the six kinds (Essay, Reading, Problem set, Project, Test prep, Other) c
    **New (from the advisor):**
    - **T8 and T6 change.** OK to record that the chat sends the conversation and your guide to the AI you chose, and that students can edit the instructions? The parent should agree too, before classmates use it.
    - **If the on-device check or the AI flags distress:** (A) the chat ends and only Start over is offered, or (B) the "talk to an adult you trust" line shows and a calm "Keep going with my homework" button continues. I lean B, because school texts will trigger false matches.
-   - **Which kind does a chat use?** (a) The student picks the kind at the start of each chat, pre-selected from their saved steps (recommended: no guessing, one tap). (b) The chat always uses the kind of the steps they are working on, with no choice. (c) One guide for everything, no per-kind guides.
+   - ~~**Which kind does a chat use?**~~ **Answered (a), 2026-11-17:** the student picks the kind at the start of each chat, pre-selected from their saved steps. Options were: (a) The student picks the kind at the start of each chat, pre-selected from their saved steps (recommended: no guessing, one tap). (b) The chat always uses the kind of the steps they are working on, with no choice. (c) One guide for everything, no per-kind guides.
    - **Helpline number:** add one (you and the parent choose it), or leave it out.
 2. **Keep the chat after a refresh?** I recommend no (nothing stored, simplest and safest). Saving it on the device is possible later.
 3. **Where it lives.** A fourth button in the top row, or inside the paste screen? I recommend the top row.
