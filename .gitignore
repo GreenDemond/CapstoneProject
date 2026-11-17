@@ -1,0 +1,15 @@
+# Dependencies and generated files
+node_modules/
+playwright-report/
+test-results/
+
+# Secrets never go in the repository (DECISIONS.md T11)
+.env
+.dev.vars
+
+# The first web-app attempt (React and TypeScript) is not part of the project.
+# Kept on disk until Ben decides whether to delete it.
+web-app/
+
+# macOS
+.DS_Store

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xcode-select -p)",
+      "Bash(xcrun simctl list)",
+      "Bash(xcrun simctl list *)"
+    ]
+  }
+}

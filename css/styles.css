@@ -1,0 +1,55 @@
+/* Colors are placeholders until Ben chooses the look (DECISIONS.md "Still Ben's to decide"). */
+:root {
+  --bg: #fdfcf8;
+  --text: #1d1d1f;
+  --muted: #5a5a5f;
+  --accent: #2f6f5e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1b1c1e;
+    --text: #f2f2f2;
+    --muted: #b8b8bd;
+    --accent: #7fc4ad;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+#app {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1 {
+  color: var(--accent);
+  font-size: 1.75rem;
+  margin: 0 0 0.5rem;
+}
+
+.status {
+  color: var(--muted);
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "focus-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Study focus app for students with ADHD. Plain HTML, CSS and JavaScript; Node is only used for tooling.",
+  "scripts": {
+    "start": "node dev-server.mjs",
+    "test:logic": "node --test tests/logic/",
+    "test:browser": "playwright test --trace off",
+    "lint": "eslint .",
+    "check": "npm run lint && npm run test:logic && npm run test:browser"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.65.1",
+    "eslint": "10.15.0",
+    "globals": "17.14.0"
+  }
+}
