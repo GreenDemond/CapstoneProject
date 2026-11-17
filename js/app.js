@@ -7,8 +7,9 @@ import { QUESTIONS, cardLines } from "./logic/focus-intake.js";
 import { GOAL_KEYS, MAX_TEXT, emptyProfile, setGoals, addNote, deleteNote, notesNewestFirst } from "./logic/profile.js";
 import { loadProfileState, saveProfile } from "./storage.js";
 import { aiAvailable, suggestWithAi } from "./ai.js";
-import { GROUPS, CATEGORIES, groupItems, makeItem, removeItem, parseDue, setStatus, finishedThisWeek, completedItems } from "./logic/calendar.js";
-import { loadCalendarItems, saveCalendarItems } from "./storage.js";
+import { GROUPS, CATEGORIES, groupItems, makeItem, removeItem, parseDue, setStatus, completedItems } from "./logic/calendar.js";
+import { loadCalendarItems, saveCalendarItems, loadCompletionCounts, saveCompletionCounts } from "./storage.js";
+import { addCompletion, removeCompletion, totals } from "./logic/counter.js";
 import { createWork, currentIndex, doneCount, allDone, applyChoice, hintAt, ringFraction, formatTime } from "./logic/work.js";
 
 const textBox = document.getElementById("assignment-text");
@@ -687,6 +688,7 @@ const calendarScreen = document.getElementById("calendar-screen");
 const calendarBody = document.getElementById("calendar-body");
 const openCalendar = document.getElementById("open-calendar");
 let calendarItems = loadCalendarItems();
+let completionCounts = loadCompletionCounts();
 
 function calendarId() {
   return `c${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
@@ -735,8 +737,10 @@ function renderCalendar(draft = { title: "", day: "", time: "" }, message = "") 
     line.append(el("span", "✓ ", { class: "check", "aria-hidden": "true" }), celebrateText);
     calendarBody.append(line);
   }
-  const finished = finishedThisWeek(calendarItems, new Date());
-  calendarBody.append(el("p", finished === 0 ? "Nothing finished yet this week." : `You finished ${finished} ${finished === 1 ? "thing" : "things"} this week.`, { class: "log", role: "status" }));
+  const count = totals(completionCounts, new Date());
+  const log = el("div", undefined, { class: "log", role: "status" });
+  log.append(el("p", `Finished so far: today ${count.today} · this week ${count.week} · this month ${count.month} · this year ${count.year} · all time ${count.all}`));
+  calendarBody.append(log);
 
   if (calendarItems.length === 0) {
     calendarBody.append(el("p", "Nothing planned yet. Add something when you're ready.", { class: "hint" }));
@@ -807,9 +811,19 @@ function todayIso() {
 let celebrateText = "";
 
 function changeStatus(id, status) {
+  const item = calendarItems.find((i) => i.id === id);
   const next = setStatus(calendarItems, id, status, todayIso());
+  const nextCounts =
+    status === "completed"
+      ? addCompletion(completionCounts, todayIso())
+      : item?.status === "completed"
+        ? removeCompletion(completionCounts, item.completedOn)
+        : completionCounts;
   if (saveCalendarItems(next)) {
     calendarItems = next;
+    if (saveCompletionCounts(nextCounts)) {
+      completionCounts = nextCounts;
+    }
   }
   celebrateText = status === "completed" ? "Fire it Up" : "";
   renderCalendar();

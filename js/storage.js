@@ -132,7 +132,49 @@ export function saveCalendarItems(items, storage = defaultStorage()) {
         existing = parsed;
       }
     }
-    const data = { ...existing, schemaVersion: SCHEMA_VERSION, calendar: { items } };
+    const keptCounts = existing.calendar?.counts ?? {};
+    const data = { ...existing, schemaVersion: SCHEMA_VERSION, calendar: { items, counts: keptCounts } };
+    storage.setItem(STORAGE_KEY, JSON.stringify(data));
+    return storage.getItem(STORAGE_KEY) === JSON.stringify(data);
+  } catch {
+    return false;
+  }
+}
+
+// Finished-item counts by day. Kept beside the items, and not changed when items are deleted.
+export function loadCompletionCounts(storage = defaultStorage()) {
+  if (!storage) {
+    return {};
+  }
+  try {
+    const raw = storage.getItem(STORAGE_KEY);
+    const counts = raw === null ? {} : JSON.parse(raw)?.calendar?.counts;
+    if (!counts || typeof counts !== "object") {
+      return {};
+    }
+    return Object.fromEntries(
+      Object.entries(counts).filter(([day, n]) => /^\d{4}-\d{2}-\d{2}$/.test(day) && Number.isInteger(n) && n > 0),
+    );
+  } catch {
+    return {};
+  }
+}
+
+export function saveCompletionCounts(counts, storage = defaultStorage()) {
+  if (!storage) {
+    return false;
+  }
+  try {
+    let existing = {};
+    const raw = storage.getItem(STORAGE_KEY);
+    if (raw !== null) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object" && parsed.schemaVersion === SCHEMA_VERSION) {
+        existing = parsed;
+      }
+    }
+    const items = existing.calendar?.items ?? [];
+    const data = { ...existing, schemaVersion: SCHEMA_VERSION, calendar: { items, counts } };
     storage.setItem(STORAGE_KEY, JSON.stringify(data));
     return storage.getItem(STORAGE_KEY) === JSON.stringify(data);
   } catch {

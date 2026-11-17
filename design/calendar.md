@@ -83,3 +83,10 @@ Wording rules: no "overdue," "missed," or "late." Past events look the same as f
 - **Photo of handwritten notes, organized into priority:** reading a photo needs either an outside service (which sends the photo off the device, against T8) or a third-party reader (against T2). Needs a parent decision first.
 - **The app learning your habits to decide priority:** this means watching how the student works over time. It goes against the rule on not monitoring students and needs a design and a parent's approval.
 - **Conversation mode, where the app asks what the plan for the day is:** depends on the AI path, which is switched off until a parent sets it up.
+
+## Added 2026-11-17: running count of finished items
+
+- Shows finished items **today, this week (from Monday), this month, this year, and all time**.
+- Only completions are counted. Nothing counts what was missed, and nothing compares students. No streaks: a day with none simply shows 0.
+- Counts are kept per day beside the items. Deleting a finished item does not lower the count. Reopening an item takes that one completion back out.
+- Shown as one neutral line at the top of My calendar.
