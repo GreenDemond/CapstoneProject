@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { loadProfileState, saveProfile, STORAGE_KEY, BACKUP_KEY } from "../../js/storage.js";
+import { loadProfileState, saveProfile, saveCalendarItems, loadCalendarItems, STORAGE_KEY, BACKUP_KEY } from "../../js/storage.js";
 import { emptyProfile, setGoals } from "../../js/logic/profile.js";
 
 function fakeStorage(initial = {}) {
@@ -83,4 +83,23 @@ test("a save the browser does not confirm is reported as not saved", () => {
   const storage = fakeStorage();
   storage.setItem = () => {}; // accepts the call but stores nothing
   assert.equal(saveProfile(emptyProfile(), storage), false);
+});
+
+test("calendar items are saved beside the profile, and the profile survives", () => {
+  const storage = fakeStorage();
+  saveProfile(setGoals(emptyProfile(), { today: "Read" }), storage);
+  assert.equal(saveCalendarItems([{ id: "a", title: "Essay", due: "2026-11-17T15:30" }], storage), true);
+  assert.equal(loadProfileState(storage).profile.goals.today, "Read");
+  assert.equal(loadCalendarItems(storage)[0].title, "Essay");
+});
+
+test("damaged calendar items are dropped one by one", () => {
+  const storage = fakeStorage({
+    [STORAGE_KEY]: JSON.stringify({
+      schemaVersion: 1,
+      calendar: { items: [{ id: "a", title: "Good", due: "2026-11-17T15:30" }, { id: 2 }, "nope"] },
+    }),
+  });
+  const items = loadCalendarItems(storage);
+  assert.deepEqual(items.map((i) => i.id), ["a"]);
 });

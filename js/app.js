@@ -7,6 +7,8 @@ import { QUESTIONS, cardLines } from "./logic/focus-intake.js";
 import { GOAL_KEYS, MAX_TEXT, emptyProfile, setGoals, addNote, deleteNote, notesNewestFirst } from "./logic/profile.js";
 import { loadProfileState, saveProfile } from "./storage.js";
 import { aiAvailable, suggestWithAi } from "./ai.js";
+import { GROUPS, groupItems, makeItem, removeItem, parseDue } from "./logic/calendar.js";
+import { loadCalendarItems, saveCalendarItems } from "./storage.js";
 import { createWork, currentIndex, doneCount, allDone, applyChoice, hintAt, ringFraction, formatTime } from "./logic/work.js";
 
 const textBox = document.getElementById("assignment-text");
@@ -673,3 +675,113 @@ aiButton.addEventListener("click", async () => {
   renderSteps(DEFAULT_STEP_COUNT);
   stepsScreen.hidden = false;
 });
+
+// "My calendar": items the student adds with a due time, sorted into groups by how
+// soon they are due (design/calendar.md). Saved only on this device.
+const calendarScreen = document.getElementById("calendar-screen");
+const calendarBody = document.getElementById("calendar-body");
+const openCalendar = document.getElementById("open-calendar");
+let calendarItems = loadCalendarItems();
+
+function calendarId() {
+  return `c${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function dueText(due) {
+  const date = parseDue(due.slice(0, 10), due.slice(11, 16));
+  if (!date) {
+    return "";
+  }
+  return date.toLocaleString([], { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
+}
+
+function renderCalendar(draft = { title: "", day: "", time: "" }, message = "") {
+  calendarBody.replaceChildren();
+
+  const form = el("div", undefined, { class: "calendar-form" });
+  const titleBox = el("input", undefined, { type: "text", id: "cal-title", maxlength: "200" });
+  titleBox.value = draft.title;
+  const dayBox = el("input", undefined, { type: "date", id: "cal-day" });
+  dayBox.value = draft.day;
+  const timeBox = el("input", undefined, { type: "time", id: "cal-time" });
+  timeBox.value = draft.time;
+  form.append(...labelled("What is it?", titleBox, "cal-title"));
+  form.append(...labelled("Due date", dayBox, "cal-day"));
+  form.append(...labelled("Due time", timeBox, "cal-time"));
+  form.append(button("Add to my calendar", () => addCalendarItem(), "primary"));
+  form.append(el("p", message, { class: "message", role: "status" }));
+  calendarBody.append(form);
+
+  if (calendarItems.length === 0) {
+    calendarBody.append(el("p", "Nothing planned yet. Add something when you're ready.", { class: "hint" }));
+  }
+
+  const groups = groupItems(calendarItems, new Date());
+  for (const group of GROUPS) {
+    const heading = el("h3", group.label, { tabindex: "-1" });
+    calendarBody.append(heading, el("p", group.hint, { class: "hint" }));
+    const list = el("ul", undefined, { class: "cal-list" });
+    if (groups[group.id].length === 0) {
+      list.append(el("li", "Nothing here.", { class: "hint" }));
+    }
+    for (const item of groups[group.id]) {
+      const row = el("li");
+      const due = group.id === "urgent" && new Date(item.due) < new Date() ? `${dueText(item.due)} · Due time has passed` : dueText(item.due);
+      row.append(el("span", `${item.title}, ${due}`), " ");
+      row.append(button("Delete", () => deleteCalendarItem(item.id), "small"));
+      list.append(row);
+    }
+    calendarBody.append(list);
+  }
+
+  calendarBody.append(button("Back", backFromCalendar));
+}
+
+function addCalendarItem() {
+  const draft = {
+    title: document.getElementById("cal-title").value,
+    day: document.getElementById("cal-day").value,
+    time: document.getElementById("cal-time").value,
+  };
+  const result = makeItem(draft, calendarId());
+  if (!result.ok) {
+    renderCalendar(draft, result.reason);
+    return;
+  }
+  const next = [...calendarItems, result.item];
+  const saved = saveCalendarItems(next);
+  if (!saved) {
+    renderCalendar(draft, "Couldn't save in this browser.");
+    return;
+  }
+  calendarItems = next;
+  renderCalendar({ title: "", day: "", time: "" }, "Added.");
+  document.getElementById("cal-title").focus();
+}
+
+function deleteCalendarItem(id) {
+  const next = removeItem(calendarItems, id);
+  if (saveCalendarItems(next)) {
+    calendarItems = next;
+  }
+  renderCalendar();
+}
+
+function openCalendarScreen() {
+  pasteScreen.hidden = true;
+  stepsScreen.hidden = true;
+  intakeScreen.hidden = true;
+  profileScreen.hidden = true;
+  workScreen.hidden = true;
+  calendarScreen.hidden = false;
+  renderCalendar();
+  calendarScreen.querySelector("h2").focus();
+}
+
+function backFromCalendar() {
+  calendarScreen.hidden = true;
+  pasteScreen.hidden = false;
+  openCalendar.focus();
+}
+
+openCalendar.addEventListener("click", openCalendarScreen);

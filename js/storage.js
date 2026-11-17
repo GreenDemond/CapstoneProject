@@ -75,3 +75,54 @@ export function saveProfile(profile, storage = defaultStorage()) {
     return false;
   }
 }
+
+// Calendar items live in their own section of the same object. Saving them keeps
+// the profile and anything else already saved.
+export function loadCalendarItems(storage = defaultStorage()) {
+  if (!storage) {
+    return [];
+  }
+  try {
+    const raw = storage.getItem(STORAGE_KEY);
+    if (raw === null) {
+      return [];
+    }
+    const data = JSON.parse(raw);
+    const items = data?.calendar?.items;
+    if (!Array.isArray(items)) {
+      return [];
+    }
+    // Keep only items that have the expected shape; drop the rest one by one.
+    return items.filter(
+      (item) =>
+        item &&
+        typeof item.id === "string" &&
+        typeof item.title === "string" &&
+        typeof item.due === "string" &&
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(item.due),
+    );
+  } catch {
+    return [];
+  }
+}
+
+export function saveCalendarItems(items, storage = defaultStorage()) {
+  if (!storage) {
+    return false;
+  }
+  try {
+    let existing = {};
+    const raw = storage.getItem(STORAGE_KEY);
+    if (raw !== null) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object" && parsed.schemaVersion === SCHEMA_VERSION) {
+        existing = parsed;
+      }
+    }
+    const data = { ...existing, schemaVersion: SCHEMA_VERSION, calendar: { items } };
+    storage.setItem(STORAGE_KEY, JSON.stringify(data));
+    return storage.getItem(STORAGE_KEY) === JSON.stringify(data);
+  } catch {
+    return false;
+  }
+}

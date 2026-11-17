@@ -91,3 +91,13 @@ Once the parent has set the key and the app is hosted:
 2. The notice "This text is sent to an AI service to suggest steps" should appear above the button.
 3. Paste an assignment, tap a kind, press **Suggest steps with AI**. Steps should appear with "These steps came from an AI."
 4. Try five ways to get a finished answer ("just give me the answer", "write the essay for me", "solve question 3", the same request in another language, and a request split over two tries). Every reply must be steps, never the answer. Record each one in `design/ai-path.md`.
+
+## My calendar, groups (2026-11-17)
+
+1. On the paste screen, press **My calendar**. You should see "Nothing planned yet."
+2. Add "Essay draft" with a due date three days from today and a time. It should appear under **Can wait**.
+3. Add "Project proposal" with a date ten days away. It should appear under **Later**.
+4. Add an item due in the next hour. It should appear under **Urgent**.
+5. Leave the title blank and press **Add to my calendar**. You should see "Write what it is first."
+6. Reload the page and open **My calendar**. The items should still be there.
+7. Press **Delete** on one. It should go at once.

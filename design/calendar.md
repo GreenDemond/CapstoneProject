@@ -1,6 +1,8 @@
 # Design: calendar (day, week, month) with reminders
 
-Status: **proposed, waiting for Ben's go-ahead.** Not built yet.
+Status: **first part built 2026-11-17.** Built: adding items with a due date and time, sorted into groups. Not yet built: the Day, Week (weekday and weekend), and Month views, and reminders.
+
+**Priority groups (built, as Ben asked):** Urgent (due within the hour, or already passed, shown neutrally); Significant (due later today); Not urgent (due within 2 days); Can wait (due within 5 days); Later (more than 5 days away, so nothing is forced into the wrong group). The "5 days after the day entered" rule is built as the due date the student chooses, not an automatic date from the day they add it. Ben to confirm.
 
 ## Scope
 
