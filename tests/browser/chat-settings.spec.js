@@ -74,6 +74,8 @@ test("Use the default clears only that kind", async ({ page }) => {
   }
   await page.getByRole("button", { name: "Change Essay" }).click();
   await page.getByRole("button", { name: "Use the default" }).click();
+  await expect(page.getByText("Press again to use the default.")).toBeVisible();
+  await page.getByRole("button", { name: "Use the default" }).click();
   await page.getByRole("button", { name: "Back" }).click();
   await expect(page.locator(".helper-card", { hasText: "Essay" }).getByText("Using the default")).toBeVisible();
   await expect(page.locator(".helper-card", { hasText: "Project" }).getByText("Your own guide")).toBeVisible();
@@ -100,6 +102,33 @@ test("the screen shows the character limit and says the rules are always added",
   await expect(page.getByText(/of 500 characters/)).toBeVisible();
   await page.getByLabel("Your guide for the AI").fill("y".repeat(900));
   await expect(page.getByLabel("Your guide for the AI")).toHaveValue("y".repeat(500));
+  await expect(page.getByText("That's the limit. Anything longer was cut off.")).toBeVisible();
+  await expect(page.getByText("sent to your AI helper with each message")).toBeVisible();
+});
+
+// Help me write it says it replaces the box, and Cancel keeps the student's own words.
+test("Help me write it warns it replaces the box, and Cancel keeps your words", async ({ page }) => {
+  await openSettings(page);
+  await openTalkSettings(page);
+  await page.getByRole("button", { name: "Change Essay" }).click();
+  await page.getByLabel("Your guide for the AI").fill("My own careful guide");
+  await page.getByRole("button", { name: "Help me write it" }).click();
+  await expect(page.getByText("The draft replaces what is in the box")).toBeVisible();
+  await page.getByRole("button", { name: "Cancel" }).click();
+  await expect(page.getByLabel("Your guide for the AI")).toHaveValue("My own careful guide");
+});
+
+// With an All kinds guide, a kind's reset button says where it goes back to.
+test("on a kind the reset button names the All kinds guide when there is one", async ({ page }) => {
+  await openSettings(page);
+  await openTalkSettings(page);
+  await page.getByRole("button", { name: "Change All kinds" }).click();
+  await page.getByLabel("Your guide for the AI").fill("Everything gentle");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByText("Saved on this device.")).toBeVisible();
+  await page.getByRole("button", { name: "Back" }).click();
+  await page.getByRole("button", { name: "Change Essay" }).click();
+  await expect(page.getByRole("button", { name: "Use my All kinds guide" })).toBeVisible();
 });
 
 // Help me write it: four questions, then a draft in the box that is not saved until Save.

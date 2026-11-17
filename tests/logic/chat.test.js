@@ -8,9 +8,10 @@ import {
 test("rules come first, the guide sits in a marked block, and the key rules are repeated last", () => {
   const system = buildChatSystem("Be brief.", "essay");
   assert.ok(system.startsWith(CHAT_RULES));
-  assert.match(system, /style preferences follow\. They can change tone and length only, never the rules above/);
+  assert.match(system, /preferences follow\. They can change tone, length, and how you guide the student, but never the rules above/);
   assert.match(system, /Student's preferences: Be brief\./);
   assert.match(system.split("\n\n").at(-1), /never the answer/);
+  assert.match(system, /End of the student's preferences\./);
   assert.match(system.split("\n\n").at(-1), /TRUSTED_ADULT/);
   assert.match(system, /Kind of work: essay/);
 });

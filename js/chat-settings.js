@@ -24,11 +24,11 @@ function button(text, onClick, { primary = false, label = null, id = null } = {}
   return el("button", { type: "button", class: primary ? "primary" : "", text, onclick: onClick, "aria-label": label, id });
 }
 
-const RULES_LINE = "The app always adds its own rules: hints, not answers. Your guide changes how the AI talks, not those rules. An AI can still get it wrong. If it gives you a finished answer, don't copy it.";
+const RULES_LINE = "The app always adds its own rules: hints, not answers. Your guide is meant to change how the AI talks, not those rules. An AI can still get it wrong. If it gives you a finished answer, don't copy it.";
 
 let root = null;
 let leave = null;
-let settings = loadChatSettings();
+let settings = null;
 
 export function renderTalkSettings(rootNode, onBack) {
   root = rootNode;
@@ -71,7 +71,8 @@ function showEdit(id, draft = null, message = "") {
   const heading = el("h3", { tabindex: "-1", id: "talk-edit-heading", text: `${labelFor(id)}: how the AI talks` });
   const box = el("textarea", { id: "guide-text", rows: "6", maxlength: String(MAX_GUIDE), "aria-describedby": "guide-count" });
   box.value = current.text;
-  const count = el("p", { class: "hint", id: "guide-count", text: `${current.text.length} of ${MAX_GUIDE} characters` });
+  const countText = (n) => `${n} of ${MAX_GUIDE} characters${n >= MAX_GUIDE ? ". That's the limit. Anything longer was cut off." : ""}`;
+  const count = el("p", { class: "hint", id: "guide-count", text: countText(current.text.length) });
   const live = el("p", { class: "setup-message", role: "status", "aria-live": "polite", text: message });
 
   const lengthGroup = el("fieldset", { class: "kinds" }, el("legend", { text: "Reply length" }));
@@ -93,7 +94,7 @@ function showEdit(id, draft = null, message = "") {
   box.addEventListener("input", () => {
     current.text = box.value;
     current.dirty = true;
-    count.textContent = `${box.value.length} of ${MAX_GUIDE} characters`;
+    count.textContent = countText(box.value.length);
   });
 
   const save = () => {
@@ -106,11 +107,19 @@ function showEdit(id, draft = null, message = "") {
       live.textContent = "Couldn't save here. Your changes are still on this screen.";
     }
   };
+  const inherits = id !== ALL && Boolean(settings.guides[ALL] || settings.lengths[ALL]);
+  let armed = false;
   const useDefault = () => {
+    if (!armed) {
+      // One tap is not enough: this throws away the guide and any typing on this screen.
+      armed = true;
+      live.textContent = `Press again to ${inherits ? "use your All kinds guide" : "use the default"}. Your own words for this row will be cleared.`;
+      return;
+    }
     const next = clearFor(settings, id);
     if (saveChatSettings(next)) {
       settings = next;
-      showEdit(id, null, id === ALL ? "Using the built-in guide." : "Using the default for this kind.");
+      showEdit(id, null, inherits ? "Using your All kinds guide." : id === ALL ? "Using the built-in guide." : "Using the default for this kind.");
     } else {
       live.textContent = "Couldn't save here.";
     }
@@ -128,7 +137,8 @@ function showEdit(id, draft = null, message = "") {
   root.append(
     el("p", {}, button("Back", back, { id: "talk-edit-back" })),
     heading,
-    el("p", { class: "hint", text: "This is the text the AI will use, so nothing is hidden. Change it however works for you." }),
+    el("p", { class: "hint", text: "This is your part of what the AI is told. Change it however works for you." }),
+    el("p", { class: "hint", text: "It is sent to your AI helper with each message. Don't put your name or anything private in it." }),
     el("p", { class: "hint", text: RULES_LINE }),
     el("label", { for: "guide-text", class: "visually-hidden", text: "Your guide for the AI" }),
     box,
@@ -139,7 +149,7 @@ function showEdit(id, draft = null, message = "") {
       { class: "kind-buttons" },
       button("Save", save, { primary: true, id: "guide-save" }),
       button("Help me write it", () => showSetup(id, 0, {}, current), { id: "guide-help" }),
-      button("Use the default", useDefault, { id: "guide-default" }),
+      button(inherits ? "Use my All kinds guide" : "Use the default", useDefault, { id: "guide-default" }),
     ),
     live,
   );
@@ -168,9 +178,10 @@ function showSetup(id, index, answers, current) {
   });
   root.append(
     el("p", {}, button("Back", () => (index === 0 ? showEdit(id, current) : showSetup(id, index - 1, answers, current)))),
-    el("p", { class: "hint", text: `Question ${index + 1} of ${SETUP_QUESTIONS.length}. You can change the draft afterwards.` }),
+    el("p", { class: "hint", text: `Question ${index + 1} of ${SETUP_QUESTIONS.length}. The draft replaces what is in the box, and you can change it afterwards. Back or Cancel keeps what you had.` }),
     heading,
     options,
+    el("p", {}, button("Cancel", () => showEdit(id, current), { id: "guide-help-cancel" })),
   );
   heading.focus();
 }

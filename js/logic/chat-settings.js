@@ -59,7 +59,8 @@ export function hasOwn(settings, id) {
 
 // The words on the list row.
 export function rowState(settings, id) {
-  if (hasOwn(settings, id)) return "Your own guide";
+  if (settings.guides[id]) return "Your own guide";
+  if (settings.lengths[id]) return "Your own reply length";
   if (id !== ALL && (settings.guides[ALL] || settings.lengths[ALL])) return "Using your All kinds guide";
   return "Using the default";
 }

@@ -27,7 +27,7 @@ Status: **slice 1 built 2026-11-17** (chat screen, default guide, rules, history
 - **Reply length is not a hard cut.** Short, Medium, and Long change one sentence in the instructions. The service gets a generous ceiling (about 1,500 to 2,000 tokens) for all three, because some services spend part of it thinking. If the service says it stopped for length, the whole reply is shown with "The reply was cut off by the AI service." If a reply comes back empty because the ceiling was used up: "The AI ran out of room before answering. Try Short, or a different AI." No automatic Continue in the first slice. The 5-step and 200-character limits stay for **Use these as my steps** only.
 
 - **Why it is editable (Ben):** students adjust the guide so the AI works with how *they* respond, for example "I need one tiny step at a time" or "ask me before you suggest anything".
-- **Later, a set-up page (on the to-do list, not in this slice):** a page that works with the student, one question at a time, to write their guide. It would build on "How I like to work" (`design/focus-intake.md`). The student reads and edits the result before it is used.
+- **Set-up page:** built as "Help me write it" (see below). Linking it to "How I like to work" is later.
 
 ## One guide per kind of work (Ben, 2026-11-17)
 
@@ -36,16 +36,16 @@ Each of the six kinds (Essay, Reading, Problem set, Project, Test prep, Other) c
 **How the app picks a guide:** the kind's own guide if the student wrote one; otherwise their "All kinds" guide; otherwise the built-in default. The locked rules wrap whichever is used, the same way.
 
 **Settings screen (new section "How the AI talks", under the AI helpers list):**
-1. First screen: one short list with **All kinds** and the six kinds. Each row says either "Using the default" or "Your own guide". Nothing else on the screen.
-2. Tap a row: a screen for that kind with the guide in a box (the text it will really use, so nothing is hidden), a **Reply length** choice (Short, Medium, Long), and three buttons: **Save**, **Use the default** (clears only this kind's own guide), **Back**. A line says what the locked rules are (see above). The 500-character limit is shown as a count.
+1. First screen: one short list with **All kinds** and the six kinds. Each row says "Using the default", "Using your All kinds guide", "Your own guide", or "Your own reply length". Nothing else on the screen.
+2. Tap a row: a screen for that kind with the guide in a box (the text it will really use, so nothing is hidden), a **Reply length** choice (Short, Medium, Long), and four buttons: **Save**, **Help me write it**, **Use the default** (clears only this kind's own guide and length; needs a second press; reads "Use my All kinds guide" when one exists), and **Back** (warns once about unsaved changes). A line says the guide is sent to the AI helper with each message and not to put names or private things in it. A line says what the locked rules are (see above). The 500-character limit is shown as a count.
 3. Nothing is saved until Save, and the screen says "Saved on this device." only when the browser confirmed it (same pattern as the profile).
 4. "Use the default" on a kind removes its own guide and the row goes back to "Using the default". The built-in default is always readable on the All kinds screen, so a student can start from it.
 
-**Stored** (same section as the other chat settings): `{ guides: { all, essay, reading, ... }, length: { all, essay, ... } }`. Missing or damaged entries are ignored one by one.
+**Stored** (same section as the other chat settings): `{ guides: { all, essay, reading, ... }, lengths: { all, essay, ... } }`. Missing or damaged entries are ignored one by one.
 
 **Which kind applies in a chat:** the student picks the kind at the start of the chat with the same six buttons as the paste screen, pre-selected to the kind of the steps they are working on, if any. This means the chat does not guess. Open question below.
 
-**Later:** the set-up page that writes a guide with the student can be run per kind, and can start from their "How I like to work" answers.
+**Help me write it (built):** a button on each guide screen. Four one-tap questions (reply length, tone, how to start, what helps when stuck, each with "Not sure") draft a guide into the box, unsaved, replacing what was there (said before question 1; Back and Cancel keep the student's words). The draft always includes "smallest hint first". **Later:** starting the questions from their "How I like to work" answers, once those are saved.
 
 ## Research behind it
 
