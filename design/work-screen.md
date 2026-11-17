@@ -1,6 +1,6 @@
 # Design: work screen
 
-Status: **proposed, waiting for Ben's go-ahead.** Not built yet.
+Status: **built 2026-11-17** after Ben's go-ahead for the rebuild. Later and the countdown came from his "do all" request. The countdown is off until a student turns it on. Open question: how Drifted should behave (see the end).
 
 ## What this is
 
@@ -29,7 +29,7 @@ This is the third item on the build list, and the first of the "bones": the core
    If the student leaves the box as it is, the step is kept whole, as it was.
 5. **All done.** When every step is done (or drifted), the screen says "All your steps are done." with one button, **Close**. No score, no count of misses, no streak.
 
-Wording rules: no red, no "missed," no timer, no sound, no ranking. The count says "Step 3 of 7," not "3 of 7 done." Drifted and Done look the same in the count.
+Wording rules: no red, no "missed," no ticking sound, no timer that counts a student down into a penalty, no ranking. The optional countdown ring is the one timer, and it is off by default. The count says "Step 3 of 7," not "3 of 7 done." Drifted and Done look the same in the count.
 
 ## Research behind it
 
@@ -69,6 +69,13 @@ Wording rules: no red, no "missed," no timer, no sound, no ranking. The count sa
 1. **Button words.** The defaults are Done, Still working, Stuck, Drifted (DECISIONS P4). You still have to choose "the words for drifting, getting stuck, and coming back" (`PROGRESS.md` waiting list). Keep the defaults for now, or give me your words?
 2. **Hint list.** Is the list of five hints right, or do you want different ones?
 3. **Saving the steps.** This slice keeps the steps on the page only, so a refresh starts over. OK to add saving in the next slice, with "Pick up here" after time away?
+
+## Open question: what Drifted does
+
+The current build marks the step done and adds only the student's smaller part as the next step. The rest of the original step is dropped. The design says Drifted "splits" the step, which could mean the rest comes back too. Choose one:
+- **(a) Recommended:** the small part comes first, then the rest of the step returns as the next step.
+- **(b):** keep the current behavior, and say on screen that the rest is set aside.
+Credit is the same either way.
 
 ## Added from the ADHD Buddy upload (2026-11-17)
 

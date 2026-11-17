@@ -28,7 +28,9 @@ test("paste, pick a kind, see starter steps, show more, and press Start", async 
   await expect(page.getByRole("button", { name: "Show more steps" })).toBeHidden();
 
   await page.getByRole("button", { name: "Start" }).click();
-  await expect(page.getByRole("status").filter({ hasText: "steps ready" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Work" })).toBeVisible();
+  await expect(page.getByText("Step 1 of 10")).toBeVisible();
+  await expect(page.locator(".current-step")).toHaveText("Find three sources");
 });
 
 // Awkward path 1: nothing pasted. A gentle message, no steps, no red text.

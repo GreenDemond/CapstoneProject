@@ -6,6 +6,7 @@ import { KINDS, DEFAULT_STEP_COUNT, starterStepsFor } from "./logic/starter-step
 import { QUESTIONS, cardLines } from "./logic/focus-intake.js";
 import { GOAL_KEYS, MAX_TEXT, emptyProfile, setGoals, addNote, deleteNote, notesNewestFirst } from "./logic/profile.js";
 import { loadProfileState, saveProfile } from "./storage.js";
+import { createWork, currentIndex, doneCount, allDone, applyChoice, hintAt, ringFraction, formatTime } from "./logic/work.js";
 
 const textBox = document.getElementById("assignment-text");
 const kindButtons = document.getElementById("kind-buttons");
@@ -78,8 +79,7 @@ showMore.addEventListener("click", () => {
 });
 
 startButton.addEventListener("click", () => {
-  // The work screen is the next build (item 3). For now, confirm the steps are ready.
-  ready.textContent = `${allSteps.length} steps ready. The work screen comes next.`;
+  openWorkScreen(allSteps);
 });
 
 // "How I like to work": four one-tap questions, then a first-guess card.
@@ -368,3 +368,261 @@ function backFromProfile() {
 }
 
 openProfile.addEventListener("click", openProfileScreen);
+
+// The work screen (design/work-screen.md): one step at a time. Steps live on the
+// page only; a refresh starts again from the paste screen.
+const workScreen = document.getElementById("work-screen");
+const workBody = document.getElementById("work-body");
+const workHeading = document.getElementById("work-heading");
+
+const TIMER_CHOICES = [12, 25];
+const ADVANCE_GUARD_MS = 400;
+let work = null;
+let mode = "steps"; // "steps", "stuck", "drifting", "done"
+let hintsShown = 0;
+let workNote = "";
+let driftNote = "";
+let lastAdvance = 0;
+let timerOn = false;
+let timerMinutes = 12;
+let secondsLeft = 0;
+let timeUp = false;
+let tick = null;
+
+function stopTimer() {
+  if (tick !== null) {
+    clearInterval(tick);
+    tick = null;
+  }
+}
+
+// Once a second, only the ring and its time change. The rest of the screen is not
+// redrawn, so typing and keyboard focus are not disturbed.
+function updateRing() {
+  const ring = workBody.querySelector(".ring");
+  if (!ring) {
+    return;
+  }
+  ring.querySelector(".ring-time").textContent = formatTime(secondsLeft);
+  const circumference = 2 * Math.PI * 44;
+  ring
+    .querySelector(".ring-arc")
+    .setAttribute("stroke-dashoffset", String(circumference * (1 - ringFraction(secondsLeft, timerMinutes * 60))));
+}
+
+function startTimer() {
+  stopTimer();
+  timeUp = false;
+  if (!timerOn) {
+    return;
+  }
+  secondsLeft = timerMinutes * 60;
+  tick = setInterval(() => {
+    secondsLeft -= 1;
+    if (secondsLeft <= 0) {
+      secondsLeft = 0;
+      stopTimer();
+      timeUp = true;
+      // Only redraw the step view. If a box or a hint is open, the line waits
+      // until the student returns to the step, so their words are not lost.
+      if (mode === "steps") {
+        renderWork();
+      }
+      return;
+    }
+    updateRing();
+  }, 1000);
+}
+
+function ringSvg(fraction) {
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("viewBox", "0 0 100 100");
+  svg.setAttribute("width", "120");
+  svg.setAttribute("height", "120");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("focusable", "false");
+  const track = document.createElementNS(ns, "circle");
+  track.setAttribute("cx", "50");
+  track.setAttribute("cy", "50");
+  track.setAttribute("r", "44");
+  track.setAttribute("class", "ring-track");
+  const arc = document.createElementNS(ns, "circle");
+  arc.setAttribute("cx", "50");
+  arc.setAttribute("cy", "50");
+  arc.setAttribute("r", "44");
+  arc.setAttribute("class", "ring-arc");
+  const circumference = 2 * Math.PI * 44;
+  arc.setAttribute("stroke-dasharray", String(circumference));
+  arc.setAttribute("stroke-dashoffset", String(circumference * (1 - fraction)));
+  svg.append(track, arc);
+  return svg;
+}
+
+function openWorkScreen(texts) {
+  stopTimer();
+  work = createWork(texts);
+  mode = "steps";
+  hintsShown = 0;
+  workNote = "";
+  driftNote = "";
+  pasteScreen.hidden = true;
+  stepsScreen.hidden = true;
+  intakeScreen.hidden = true;
+  profileScreen.hidden = true;
+  workScreen.hidden = false;
+  startTimer();
+  renderWork();
+  workHeading.focus();
+}
+
+function closeWork() {
+  stopTimer();
+  work = null;
+  workBody.replaceChildren();
+  workScreen.hidden = true;
+  pasteScreen.hidden = false;
+  showButton.focus();
+}
+
+function currentStepId() {
+  const cur = currentIndex(work);
+  return cur === -1 ? null : work.steps[cur].id;
+}
+
+function choose(choice, splitText = "") {
+  const now = Date.now();
+  if (choice !== "still" && now - lastAdvance < ADVANCE_GUARD_MS) {
+    return; // a quick second tap must not skip a step
+  }
+  const beforeId = currentStepId();
+  const next = applyChoice(work, choice, splitText);
+  mode = "steps";
+  hintsShown = 0;
+  workNote = choice === "still" ? "Keep going. Tap any button when you're ready." : "";
+  driftNote = "";
+  if (next === work && choice !== "still") {
+    renderWork();
+    return;
+  }
+  work = next;
+  if (choice !== "still") {
+    lastAdvance = now;
+  }
+  if (allDone(work)) {
+    stopTimer();
+    mode = "done";
+  } else if (currentStepId() !== beforeId) {
+    startTimer(); // a new step starts a new countdown
+  }
+  renderWork();
+}
+
+function renderWork() {
+  workBody.replaceChildren();
+  if (mode === "done" || allDone(work)) {
+    workHeading.textContent = "All your steps are done.";
+    workBody.append(button("Close", closeWork, "primary"));
+    workBody.querySelector("button")?.focus();
+    return;
+  }
+  workHeading.textContent = "Work";
+
+  const index = currentIndex(work);
+  const step = work.steps[index];
+  const total = work.steps.length;
+  workBody.append(el("h3", `Step ${doneCount(work) + 1} of ${total}`, { tabindex: "-1" }));
+  const stepText = el("p", step.text, { class: "current-step", tabindex: "-1" });
+  workBody.append(stepText);
+  if (workNote) {
+    workBody.append(el("p", workNote, { class: "gentle" }));
+  }
+  if (timeUp && mode === "steps") {
+    workBody.append(el("p", "Time's up. Keep going, or tap Still working.", { class: "gentle", role: "status" }));
+  }
+
+  if (mode === "stuck") {
+    const hint = hintAt(hintsShown);
+    let focusTarget;
+    if (hint === null) {
+      focusTarget = el("p", "That's all the hints for now. Try the first small part, or tap Still working.", { class: "gentle", tabindex: "-1" });
+    } else {
+      focusTarget = el("p", hint, { class: "gentle", tabindex: "-1" });
+    }
+    workBody.append(focusTarget);
+    if (hint !== null) {
+      workBody.append(button("Another hint", () => { hintsShown += 1; renderWork(); }));
+    }
+    workBody.append(button("Back to the step", () => { mode = "steps"; renderWork(); }));
+    focusTarget.focus();
+    return;
+  }
+
+  if (mode === "drifting") {
+    const box = el("textarea", undefined, { id: "split-text", rows: "2", maxlength: "500", "aria-label": "The smallest part of this step" });
+    box.value = step.text;
+    workBody.append(el("p", "Start with the smallest part of this.", { class: "hint" }));
+    workBody.append(box);
+    if (driftNote) {
+      workBody.append(el("p", driftNote, { class: "gentle" }));
+    }
+    workBody.append(button("Start this part", () => {
+      const before = work;
+      choose("drifted", box.value);
+      if (work === before && mode === "steps") {
+        // Nothing changed: keep the box open so the student can make it smaller.
+        mode = "drifting";
+        driftNote = "Make it a bit smaller, or tap Back to the step.";
+        renderWork();
+        workBody.querySelector("#split-text")?.focus();
+      }
+    }, "primary"));
+    workBody.append(button("Back to the step", () => { mode = "steps"; driftNote = ""; renderWork(); }));
+    box.focus();
+    return;
+  }
+
+  const ring = timerOn ? el("div", undefined, { class: "ring" }) : null;
+  if (ring) {
+    ring.append(ringSvg(ringFraction(secondsLeft, timerMinutes * 60)), el("span", formatTime(secondsLeft), { class: "ring-time" }));
+    workBody.append(ring);
+  }
+
+  const choices = el("div", undefined, { class: "kind-buttons" });
+  choices.append(
+    button("Done", () => choose("done"), "kind"),
+    button("Still working", () => choose("still"), "kind"),
+    button("Stuck", () => { mode = "stuck"; renderWork(); }, "kind"),
+    button("Drifted", () => { mode = "drifting"; driftNote = ""; renderWork(); }, "kind"),
+  );
+  const othersLeft = work.steps.some((s, i) => i !== index && !s.done);
+  if (othersLeft) {
+    choices.append(button("Later", () => choose("later"), "kind"));
+  }
+  workBody.append(choices);
+
+  const timerLabel = el("label", undefined, { class: "timer-toggle" });
+  const toggle = el("input", undefined, { type: "checkbox", id: "timer-on" });
+  toggle.checked = timerOn;
+  toggle.addEventListener("change", () => {
+    timerOn = toggle.checked;
+    if (timerOn) startTimer(); else { stopTimer(); timeUp = false; }
+    renderWork();
+    toggle.focus();
+  });
+  timerLabel.append(toggle, " Show a countdown");
+  workBody.append(timerLabel);
+
+  if (timerOn) {
+    const pick = el("div", undefined, { class: "kind-buttons" });
+    for (const minutes of TIMER_CHOICES) {
+      const b = button(`${minutes} minutes`, () => { timerMinutes = minutes; startTimer(); renderWork(); }, "kind");
+      if (minutes === timerMinutes) b.setAttribute("aria-pressed", "true");
+      pick.append(b);
+    }
+    workBody.append(pick);
+  }
+
+  workBody.append(button("Leave my steps", closeWork));
+  stepText.focus();
+}

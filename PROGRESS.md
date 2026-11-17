@@ -8,6 +8,7 @@ The only memory between sessions. Keep it current; rewrite it, do not let it gro
 - **Paste screen** (`design/paste-and-split.md`). The student pastes an assignment, picks one of six kinds of work, and sees five starter steps, with "Show more steps" for the full list. Numbered and bulleted items in the paste come first. Pasted text is cut at 6,000 characters with a message. Nothing is saved, and Start only confirms the steps are ready.
 - **How I like to work** (`design/focus-intake.md`). Four one-tap questions, then a "My first guess" card with a Change button on each line. Nothing is saved; closing clears it. Built 2026-11-16, tested.
 - **My profile, first slice** (`design/profile.md`). Goals for today, week, month, and year, plus a list of "What got in the way?" notes. Saved on this device with `js/storage.js` (the first part of build item 5). Damaged saved data is kept as a backup and the page starts fresh. Delete one note, or clear everything after a confirm.
+- **Work screen** (`design/work-screen.md`). One step at a time, "Step 2 of 10", with Done, Still working, Stuck (five process hints, one at a time), Drifted (splits the step, same credit as Done), and Later (moves the step to the end). Optional countdown ring at 12 or 25 minutes, with a plain "Time's up" line. Steps are kept on the page only. Ideas from the ADHD Buddy upload, rebuilt in plain JavaScript.
 - Logic in `js/logic/`: `clean-text.js` (tidies and limits pasted text), `starter-steps.js` (builds the steps), `focus-intake.js` (questions and card text). All tested.
 
 ## In progress
@@ -39,6 +40,7 @@ Nothing.
 - How progress is shown: pet rock, quest map, or build-a-picture.
 - The words for drifting, getting stuck, and coming back.
 - Colors and overall look. Placeholder colors are in `css/styles.css`.
+- Work screen: how Drifted should behave when the rest of the step is left out (see `design/work-screen.md`), button words, the five hints, and saving the steps.
 - Whether the paste screen's six kinds and their starter steps read well (see the manual checks).
 - The words for coming back (the Q4 answers and the card line "When I come back"). Placeholder wording is in place.
 

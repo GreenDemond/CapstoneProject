@@ -55,3 +55,20 @@ Start the app with `npm start`, then open http://localhost:3000 in Chrome.
 7. Type a goal change but don't press **Save**. You should see "Not saved yet." Press **Back**: a message should ask you to save. Press **Back** again to leave.
 8. Press **Clear my profile**. You should see "This can't be undone." Press **Cancel**, nothing changes. Press it again and **Yes, clear everything**: all boxes and notes are empty.
 9. Narrow the window to about phone width. Boxes should fill the width, with no sideways scrolling.
+
+## Work screen (2026-11-17)
+
+Start from the paste screen: paste a short list, tap a kind, press **Show my steps**, then **Start**.
+
+1. You should see "Work" and "Step 1 of 10" with one step in large type. Only the buttons are below it.
+2. Press **Done**. The step count goes to "Step 2 of 10" and the next step appears.
+3. Press **Still working**. You should see "Keep going." The same step stays.
+4. Press **Stuck**. You should see one hint, such as "Re-read the instructions and underline the verb." Press **Another hint** to see the next one. After the last hint you should see "That's all the hints for now."
+5. Press **Drifted**. A box shows the step's text. Make it smaller (for example, "Open one source and skim it") and press **Start this part**. The count should go up, and the smaller step should be the current one.
+6. Press **Drifted** again, and press **Start this part** without changing the box. Nothing should change.
+7. Press **Later** on a step. It should move to the end of the list, and the count should not go up.
+8. Tick **Show a countdown**. A ring should appear with "12:00" counting down. Pick 25 minutes. Untick it: the ring disappears.
+9. Keep going to the last step. Pressing **Done** should show "All your steps are done." with a **Close** button.
+10. Press **Back to my steps**. You should return to the paste screen.
+11. Use Tab and Enter only. Every button should be reachable with a visible outline.
+12. Narrow the window to about phone width. Nothing should scroll sideways.
