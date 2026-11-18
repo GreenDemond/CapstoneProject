@@ -256,7 +256,7 @@ test("the list comes first and the form opens with Add something", async ({ page
   await expect(page.getByLabel("What is it?")).toHaveCount(0);
   await page.getByRole("button", { name: "Add something" }).click();
   await expect(page.getByLabel("What is it?")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Back" })).toHaveCount(2);
+  await expect(page.getByRole("button", { name: "Back to home" })).toHaveCount(2);
   await page.getByRole("button", { name: "Add something" }).click();
   await expect(page.getByLabel("What is it?")).toHaveCount(0);
 });

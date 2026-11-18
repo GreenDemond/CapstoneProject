@@ -2,6 +2,7 @@
 /* Earthy palette (chosen by Ben, 2026-11-17). Text pairs pass 4.5:1 in both modes. */
 :root {
   --bg: #fbf6ec;      /* warm sand paper */
+  --border: #8a8174;  /* track lines, 3.4:1 on --bg */
   --text: #2e2a24;    /* earthy dark brown */
   --muted: #6b6257;   /* taupe for hints */
   --accent: #4f6b3a;  /* olive moss */
@@ -11,6 +12,7 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #26231e;
+    --border: #7d7568;
     --text: #f1ebe0;
     --muted: #c2b8a6;
     --accent: #a9c08f;
@@ -20,6 +22,7 @@
 
 :root[data-theme="dark"] {
   --bg: #26231e;
+  --border: #7d7568;
   --text: #f1ebe0;
   --muted: #c2b8a6;
   --accent: #a9c08f;
@@ -214,7 +217,7 @@ h3 {
 
 .ring-track {
   fill: none;
-  stroke: var(--border, #d9d4c7);
+  stroke: var(--border);
   stroke-width: 8;
 }
 
@@ -586,4 +589,23 @@ summary { min-height: 2.75rem; padding: 0.6rem 0; cursor: pointer; color: var(--
   max-width: 100%;
   text-align: left;
   overflow-wrap: anywhere;
+}
+
+/* Buttons never touch: space to the right and below. Containers that already space their
+   buttons with a flex gap are reset so the space is not doubled. */
+button {
+  margin: 0 0.5rem 0.5rem 0;
+}
+.kind-buttons button, .row-actions button, .delete-box button, .view-bar button,
+.nav-row button, .actions button, .key-row button, .top-nav button, .pickup-more button {
+  margin: 0;
+}
+.chat-list .chat-open {
+  margin-right: 0;
+}
+
+/* A button that follows a row of choice buttons gets room above it, so they never touch. */
+.kind-buttons + button,
+.kind-buttons + p > button {
+  margin-top: 0.75rem;
 }

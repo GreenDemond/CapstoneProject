@@ -8,6 +8,13 @@ import {
   IDS, ALL, labelFor, rowState, guideFor, lengthFor, setFor, clearFor, SETUP_QUESTIONS, guideFromAnswers,
 } from "./logic/chat-settings.js";
 
+// Set a live region's text one frame after it exists, so screen readers announce it.
+function announce(node, text) {
+  requestAnimationFrame(() => {
+    node.textContent = text;
+  });
+}
+
 function el(tag, attrs = {}, ...children) {
   const node = document.createElement(tag);
   for (const [name, value] of Object.entries(attrs)) {
@@ -41,6 +48,7 @@ function showList(message = "", focusId = null) {
   root.replaceChildren();
   const heading = el("h3", { tabindex: "-1", id: "talk-heading", text: "How the AI talks" });
   const rows = el("ul", { class: "helper-cards" });
+  const live = el("p", { class: "setup-message", role: "status", "aria-live": "polite" });
   for (const id of IDS) {
     rows.append(
       el(
@@ -58,8 +66,9 @@ function showList(message = "", focusId = null) {
     el("p", { class: "hint", text: "This guide shapes how the AI talks with you in Talk it through. Each kind of work can have its own. A kind without one uses All kinds, then the built-in guide." }),
     el("p", { class: "hint", text: RULES_LINE }),
     rows,
-    el("p", { class: "setup-message", role: "status", "aria-live": "polite", text: message }),
+    live,
   );
+  announce(live, message);
   (focusId ? root.querySelector(`#${focusId}`) : null)?.focus();
   if (!focusId) heading.focus();
 }
@@ -73,7 +82,7 @@ function showEdit(id, draft = null, message = "") {
   box.value = current.text;
   const countText = (n) => `${n} of ${MAX_GUIDE} characters${n >= MAX_GUIDE ? ". That's the limit. Anything longer was cut off." : ""}`;
   const count = el("p", { class: "hint", id: "guide-count", text: countText(current.text.length) });
-  const live = el("p", { class: "setup-message", role: "status", "aria-live": "polite", text: message });
+  const live = el("p", { class: "setup-message", role: "status", "aria-live": "polite" });
 
   const lengthGroup = el("fieldset", { class: "kinds" }, el("legend", { text: "Reply length" }));
   const choices = el("div", { class: "kind-buttons" });
@@ -153,7 +162,7 @@ function showEdit(id, draft = null, message = "") {
     ),
     live,
   );
-  if (message) live.textContent = message;
+  if (message) announce(live, message);
   heading.focus();
 }
 

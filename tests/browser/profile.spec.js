@@ -32,9 +32,9 @@ test("going back with unsaved changes warns once, then leaves", async ({ page })
   await page.goto("/");
   await page.getByRole("button", { name: "My profile" }).click();
   await page.getByLabel("This year").fill("Pass chemistry");
-  await page.getByRole("button", { name: "Back", exact: true }).click();
+  await page.getByRole("button", { name: "Back to home" }).first().click();
   await expect(page.getByText("You have changes that aren't saved.")).toBeVisible();
-  await page.getByRole("button", { name: "Back", exact: true }).click();
+  await page.getByRole("button", { name: "Back to home" }).first().click();
   await expect(page.locator("#paste-screen")).toBeVisible();
 });
 
@@ -57,7 +57,7 @@ test("a typed goal survives Back's warning and can then be saved", async ({ page
   await page.getByRole("button", { name: "My profile" }).click();
   await page.getByLabel("Today").fill("Finish the lab report");
   await page.getByLabel("Note").fill("Half-written note");
-  await page.getByRole("button", { name: "Back", exact: true }).click();
+  await page.getByRole("button", { name: "Back to home" }).first().click();
   await expect(page.locator("#profile-status")).toContainText("You have changes that aren't saved.");
   await expect(page.getByLabel("Today")).toHaveValue("Finish the lab report");
   await expect(page.getByLabel("Note")).toHaveValue("Half-written note");
@@ -85,7 +85,7 @@ test("the Clear question is not showing after leaving and reopening", async ({ p
   await page.goto("/");
   await page.getByRole("button", { name: "My profile" }).click();
   await page.getByRole("button", { name: "Clear my profile" }).click();
-  await page.getByRole("button", { name: "Back", exact: true }).click();
+  await page.getByRole("button", { name: "Back to home" }).first().click();
   await page.getByRole("button", { name: "My profile" }).click();
   await expect(page.getByText("This can't be undone.")).toHaveCount(0);
 });
@@ -98,7 +98,7 @@ test("the start-up notice goes away after a successful save, and the warning goe
   const notice = page.getByText("so we started fresh. A copy was kept.");
   await expect(notice).toBeVisible();
   await page.getByLabel("Today").fill("x");
-  await page.getByRole("button", { name: "Back", exact: true }).click();
+  await page.getByRole("button", { name: "Back to home" }).first().click();
   await expect(notice).toBeVisible(); // the warning did not overwrite the notice
   await expect(page.locator("#profile-status")).toContainText("aren't saved");
   await page.getByRole("button", { name: "Save", exact: true }).click();
@@ -129,7 +129,7 @@ test("a note typed but not added is called out on Save and Back warns", async ({
   await page.getByLabel("Note").fill("Phone again");
   await page.getByRole("button", { name: "Save", exact: true }).click();
   await expect(page.getByText("Your note isn't added yet.")).toBeVisible();
-  await page.getByRole("button", { name: "Back" }).click();
+  await page.getByRole("button", { name: "Back to home" }).first().click();
   await expect(page.getByText("You have changes that aren't saved.")).toBeVisible();
   await expect(page.getByLabel("Note")).toHaveValue("Phone again");
 });

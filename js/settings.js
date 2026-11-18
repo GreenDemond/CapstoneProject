@@ -99,9 +99,16 @@ function show(name) {
   }
 }
 
+// Set a live region's text one frame after it exists, so screen readers announce it.
+function announce(node, text) {
+  requestAnimationFrame(() => {
+    node.textContent = text;
+  });
+}
+
 function setMessage(text) {
   if (msgEl) {
-    msgEl.textContent = text;
+    announce(msgEl, text);
   }
 }
 
@@ -141,7 +148,7 @@ async function renderList(message = "", focusSelector = null) {
 
   const heading = el("h3", { id: "helpers-heading", tabindex: "-1", text: "AI helpers" });
   root.append(
-    el("p", {}, button("Back", closeSettings, { id: "settings-back" })),
+    el("p", {}, button("Back to home", closeSettings, { id: "settings-back" })),
     heading,
     el("p", { class: "hint", text: "An AI helper can suggest steps for your assignment. It's optional. Without one, you still get the built-in steps." }),
   );
@@ -179,7 +186,7 @@ async function renderList(message = "", focusSelector = null) {
   );
   const live = el("p", { class: "setup-message", role: "status", "aria-live": "polite" });
   root.append(live);
-  live.textContent = message;
+  announce(live, message);
 
   const target = focusSelector ? root.querySelector(focusSelector) : null;
   (target ?? heading).focus();

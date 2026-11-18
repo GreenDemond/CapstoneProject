@@ -1,4 +1,4 @@
-import { defineConfig, devices } from "@playwright/test";
+import { defineConfig } from "@playwright/test";
 
 // Every browser test runs at phone width and at desktop width (DECISIONS.md T12).
 export default defineConfig({
@@ -17,7 +17,7 @@ export default defineConfig({
   projects: [
     {
       name: "phone",
-      use: { ...devices["iPhone SE"], defaultBrowserType: "chromium" },
+      use: { viewport: { width: 360, height: 740 }, isMobile: true, hasTouch: true },
     },
     {
       name: "desktop",

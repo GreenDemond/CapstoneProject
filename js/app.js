@@ -173,6 +173,13 @@ function el(tag, text, attrs = {}) {
   return node;
 }
 
+// A live region created already filled is often not read out. Create it empty, fill it a frame later.
+function announce(node, text) {
+  requestAnimationFrame(() => {
+    node.textContent = text;
+  });
+}
+
 function button(text, onClick, className = "") {
   const node = el("button", text, { type: "button" });
   if (className) {
@@ -184,13 +191,13 @@ function button(text, onClick, className = "") {
 
 function renderIntake() {
   intakeBody.replaceChildren();
+  intakeBody.append(button("Back to home", closeIntake));
 
   if (intakeView === "start") {
     intakeBody.append(
       el("p", "Four quick taps. They give a first guess, and you can change any line. There are no right answers.", { class: "hint" }),
       el("p", "Your answers are kept only while this page stays open.", { class: "hint" }),
       button("Start", () => showIntakeView(0), "primary"),
-      button("Close", closeIntake),
     );
     return;
   }
@@ -207,7 +214,7 @@ function renderIntake() {
     intakeBody.append(
       list,
       el("p", "This is only a first guess. You can change any line any time.", { class: "hint" }),
-      button("Close", closeIntake, "primary"),
+      button("Back to home", closeIntake, "primary"),
     );
     return;
   }
@@ -227,7 +234,7 @@ function renderIntake() {
   } else if (index > 0) {
     intakeBody.append(button("Back", () => showIntakeView(index - 1)));
   }
-  intakeBody.append(button("Close", closeIntake));
+  intakeBody.append(button("Back to home", closeIntake));
 }
 
 function showIntakeView(view) {
@@ -317,6 +324,7 @@ function labelled(text, control, id) {
 
 function renderProfile(draft = { goals: profile.goals, noteDraft: "" }) {
   profileBody.replaceChildren();
+  profileBody.append(button("Back to home", backFromProfile));
 
   if (loadStatus === "recovered") {
     profileBody.append(el("p", "Something in your saved data couldn't be read, so we started fresh. A copy was kept.", { class: "message" }));
@@ -356,7 +364,9 @@ function renderProfile(draft = { goals: profile.goals, noteDraft: "" }) {
 
   profileBody.append(el("p", "Anyone using this browser can see this.", { class: "hint" }));
   profileBody.append(button("Save", saveAll, "primary"));
-  profileBody.append(el("p", saveMessage || (dirty ? "Not saved yet." : ""), { class: "message", role: "status", id: "profile-status" }));
+  const profileStatus = el("p", undefined, { class: "message", role: "status", id: "profile-status" });
+  profileBody.append(profileStatus);
+  announce(profileStatus, saveMessage || (dirty ? "Not saved yet." : ""));
 
   if (clearAsked) {
     profileBody.append(el("p", "Clear everything in my profile? This can't be undone."));
@@ -365,7 +375,7 @@ function renderProfile(draft = { goals: profile.goals, noteDraft: "" }) {
   } else {
     profileBody.append(button("Clear my profile", () => { clearAsked = true; renderProfile(typedValues()); }));
   }
-  profileBody.append(button("Back", backFromProfile));
+  profileBody.append(button("Back to home", backFromProfile));
 }
 
 function markDirty() {
@@ -431,7 +441,8 @@ function backFromProfile() {
   if (dirty && !leaveWarned) {
     leaveWarned = true;
     renderProfile(typedValues());
-    document.getElementById("profile-status")?.replaceChildren("You have changes that aren't saved. Press Save first, or press Back again to leave.");
+    const status = document.getElementById("profile-status");
+    if (status) announce(status, "You have changes that aren't saved. Press Save first, or press Back to home again to leave.");
     return;
   }
   showScreen("home");
@@ -647,10 +658,14 @@ function renderWork(focusStep = true) {
   workBody.append(stepText);
   if (workNote) {
     const reward = workNote === "Step done." || workNote.startsWith("That counts");
-    workBody.append(el("p", reward ? `✓ ${workNote}` : workNote, { class: reward ? "reward" : "gentle", role: "status" }));
+    const noteLine = el("p", undefined, { class: reward ? "reward" : "gentle", role: "status" });
+    workBody.append(noteLine);
+    announce(noteLine, reward ? `✓ ${workNote}` : workNote);
   }
   if (timeUp && mode === "steps") {
-    workBody.append(el("p", "Time's up. Keep going, or tap Still working.", { class: "gentle", role: "status" }));
+    const timeLine = el("p", undefined, { class: "gentle", role: "status" });
+    workBody.append(timeLine);
+    announce(timeLine, "Time's up. Keep going, or tap Still working.");
   }
 
   if (mode === "stuck") {
@@ -1019,7 +1034,7 @@ function renderCalendar(notice = "", opts = {}) {
   celebrateText = "";
   calendarBody.replaceChildren();
 
-  calendarBody.append(button("Back", backFromCalendar));
+  calendarBody.append(button("Back to home", backFromCalendar));
 
   const addButton = button("Add something", () => {
     calFormOpen = !calFormOpen;
@@ -1054,7 +1069,7 @@ function renderCalendar(notice = "", opts = {}) {
   } else {
     renderTimeView();
   }
-  calendarBody.append(button("Back", backFromCalendar));
+  calendarBody.append(button("Back to home", backFromCalendar));
   if (opts.focus) {
     calendarBody.querySelector(opts.focus)?.focus();
   }

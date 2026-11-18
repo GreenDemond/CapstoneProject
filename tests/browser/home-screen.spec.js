@@ -32,11 +32,16 @@ test("Back to home keeps the steps and the list is hidden until asked for", asyn
 // Rule 6: Done, Drifted, and the other buttons look the same.
 test("the five answer buttons share one look", async ({ page }) => {
   await startWork(page);
-  const classes = [];
+  const looks = [];
   for (const name of ["Done", "Still working", "Stuck", "Drifted", "Later"]) {
-    classes.push(await page.getByRole("button", { name, exact: true }).getAttribute("class"));
+    looks.push(
+      await page.getByRole("button", { name, exact: true }).evaluate((node) => {
+        const css = node.ownerDocument.defaultView.getComputedStyle(node);
+        return JSON.stringify([css.backgroundColor, css.color, css.border, node.getBoundingClientRect().height]);
+      }),
+    );
   }
-  expect(new Set(classes).size).toBe(1);
+  expect(new Set(looks).size).toBe(1);
 });
 
 // The step list is on the work screen too, but hidden at first.

@@ -46,10 +46,10 @@ test("Back returns to the earlier question, and Close leaves nothing behind", as
   await page.getByRole("button", { name: "How I like to work" }).click();
   await page.getByRole("button", { name: "Start" }).click();
   await page.getByRole("button", { name: "Quiet", exact: true }).click();
-  await page.getByRole("button", { name: "Back" }).click();
+  await page.getByRole("button", { name: "Back", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Sound or quiet?" })).toBeVisible();
 
-  await page.getByRole("button", { name: "Close" }).click();
+  await page.getByRole("button", { name: "Back to home" }).first().click();
   await expect(page.locator("#intake-screen")).toBeHidden();
   await expect(page.locator("#paste-screen")).toBeVisible();
   await page.getByRole("button", { name: "How I like to work" }).click();

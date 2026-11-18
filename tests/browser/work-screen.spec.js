@@ -61,10 +61,11 @@ test("an empty Drifted box keeps the step whole and changes nothing", async ({ p
 
 // Awkward path: finishing every step shows the done line and a Close button.
 test("finishing every step shows the done message", async ({ page }) => {
+  await page.clock.install();
   await startWork(page, "- Only one step");
-  // The screen ignores a second tap for a moment, so wait between taps like a student would.
+  // The screen ignores a second tap for a moment, so let the clock pass between taps like a student would.
   for (let i = 0; i < 5; i++) {
-    await page.waitForTimeout(450);
+    await page.clock.runFor(450);
     await page.getByRole("button", { name: "Done", exact: true }).click();
   }
   await expect(page.getByText("All your steps are done.")).toBeVisible();
@@ -74,26 +75,28 @@ test("finishing every step shows the done message", async ({ page }) => {
 test("a quick double-tap on Done only counts once", async ({ page }) => {
   await startWork(page);
   const done = page.getByRole("button", { name: "Done", exact: true });
-  await done.click();
-  await done.click({ force: true }).catch(() => {});
+  await done.dblclick();
   await expect(page.getByText("Step 2 of 5")).toBeVisible();
   await expect(page.locator(".current-step")).toHaveText("Take notes");
+  await expect(page.getByText("Step 3 of 5")).toHaveCount(0);
 });
 
 // Typing in the Drifted box is kept while the countdown runs.
 test("typing in the Drifted box survives the countdown", async ({ page }) => {
+  await page.clock.install();
   await startWork(page);
   await page.getByLabel("Show a countdown").check();
   await page.getByRole("button", { name: "Drifted", exact: true }).click();
   await page.getByLabel("The smallest part of this step").fill("Open one source");
-  await page.waitForTimeout(1500);
+  await page.clock.runFor(1500);
   await expect(page.getByLabel("The smallest part of this step")).toHaveValue("Open one source");
 });
 
 // Keyboard: after Done, focus stays on the screen, not back at the top.
 test("focus stays on the current step after Done", async ({ page }) => {
+  await page.clock.install();
   await startWork(page);
-  await page.waitForTimeout(450);
+  await page.clock.runFor(450);
   await page.getByRole("button", { name: "Done", exact: true }).click();
   await expect(page.locator(".current-step")).toBeFocused();
 });
