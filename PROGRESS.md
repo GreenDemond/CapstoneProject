@@ -3,83 +3,62 @@
 The only memory between sessions. Keep it current; rewrite it, do not let it grow into a diary.
 
 ## Working
-- AI helpers (built, tested with stand-ins, parent approved the page rule): the Settings screen is a short list of helpers, a one-question-per-step add flow (service, key, pick an AI, check it works), and Manage (rename, change the AI, replace or forget the key, test again, remove). Nothing is saved until the check passes, or the student chooses Save it anyway (shown as Not checked yet). Suggest steps calls the chosen helper and scrolls to the steps. Design: design/settings-ux.md v2, design/ai-direct.md. Real-service checks done by hand: Ben's PolyStrata server (needs `cors_origins`) and OpenRouter. Not done: the five answer-giving attempts against a real service, before classmates use it.
 
-- **Project setup.** `npm start` serves the app at http://localhost:3000. `npm run check` runs lint, the logic tests, and the browser tests at phone and desktop widths.
-- **Paste screen** (`design/paste-and-split.md`). The student pastes an assignment, picks one of six kinds of work, and sees five starter steps, with "Show more steps" for the full list. Numbered and bulleted items in the paste come first. Pasted text is cut at 6,000 characters with a message. Nothing is saved, and Start only confirms the steps are ready.
-- **How I like to work** (`design/focus-intake.md`). Four one-tap questions, then a "My first guess" card with a Change button on each line. Nothing is saved; closing clears it. Built 2026-11-16, tested.
-- **My profile, first slice** (`design/profile.md`). Goals for today, week, month, and year, plus a list of "What got in the way?" notes. Saved on this device with `js/storage.js` (the first part of build item 5). Damaged saved data is kept as a backup and the page starts fresh. Delete one note, or clear everything after a confirm.
-- **Home screen and saved steps** (`design/home-screen.md`, built 2026-11-17). The app opens on the next step with one button, **Start this step**, under a row of real buttons (calendar, profile, how I like to work, settings). Steps and progress are saved after every tap in their own `work` section, so a refresh or a week away loses nothing. A day or more later the line is "Welcome back. Pick up where you left off.", never a count of days. **Show all my steps** is a hidden read-only list on both the home and work screens. **New assignment** replaces the saved steps (with a note saying so). **Back to home** keeps them; finishing every step and tapping Close clears them. The five answer buttons share one look.
-- **Talk it through, first slice** (`design/ai-chat.md`, built 2026-11-17, tested with a stand-in service only). A chat with the AI helper you chose, from the top row. You pick the kind of work, the AI asks questions and gives hints, replies are shown whole (a cut-off by the service is said plainly), Stop, Start over, Back to home. The chat is never saved. The rules go first, then a built-in default guide, then the key rules again. Distress: one layer, the AI's own signal shows "talk to an adult you trust" and the chat carries on. **How the AI talks** (Settings): a guide and reply length for All kinds and for each kind (a kind uses its own, then All kinds, then the built-in guide), shown as the exact text the AI uses, 500 characters, saved on the device, "Use the default" per row, and **Help me write it** (four questions draft a guide to read and change). The guide goes inside the system message after the rules, which are repeated last. **Not built yet:** "Use these as my steps". **Not tested with a real AI**: the five answer-giving checks are Ben's to run with his own key (manual-checks.md). DECISIONS has a draft T8/T6 entry the parent must confirm before classmates use it.
-- **Work screen** (`design/work-screen.md`). One step at a time, "Step 2 of 10", with Done, Still working, Stuck (five process hints, one at a time), Drifted (splits the step, same credit as Done), and Later (moves the step to the end). Optional countdown ring at 12 or 25 minutes, with a plain "Time's up" line. Steps are now saved on the device (see Home screen). Ideas from the ADHD Buddy upload, rebuilt in plain JavaScript.
-- **AI path, switched off** (`design/ai-path.md`). `server/suggest.js` keeps the key and the hints-only rules on the server, refuses other websites, text over 6,000 characters, and more than 10 requests an hour per visitor, and never logs the text. `js/ai.js` is the only caller. The paste screen shows a "Suggest steps with AI" button and a privacy notice only when the server says it is available. A failure falls back to the starter steps. Tested with a stand-in, not the real service.
-- **My calendar, first part** (`design/calendar.md`). Add an item with a due date and time, and see it sorted into Urgent, Significant, Not urgent, Can wait, and Later. Saved on the device in its own section, beside the profile. Delete any item. Not yet: Day, Week, and Month views, and reminders.
-- **Calendar notes and links** (`design/calendar.md`). A large notes box (up to 2,000 characters) and up to 10 web links per item. Only https:// links are accepted, and they open in a new tab.
-- **Calendar status, weekly log, and parts of life** (`design/calendar.md`). Start, Complete, and Reopen. A neutral weekly count of finished items, with no streaks. Each item tagged School work, Personal, Family, Friends, or Other.
-- Logic in `js/logic/`: `clean-text.js` (tidies and limits pasted text), `starter-steps.js` (builds the steps), `focus-intake.js` (questions and card text). All tested.
+- **Project setup.** `npm start` serves the app at http://localhost:3000 (only `index.html`, `js/` and `css/`). `npm run check` runs lint, the logic tests, and the browser tests at phone (360 px) and desktop widths. Code layout: `js/app.js` is a short entry point; one file per screen in `js/screens/`; shared helpers in `js/ui/`; pure logic in `js/logic/`; `js/storage.js` is the only file that touches saved data (DECISIONS T13).
+- **Home screen and saved steps** (`design/home-screen.md`). Opens on the next step with **Start this step** under a row of buttons (Talk it through, My calendar, My profile, How I like to work, Settings). Steps, progress and the kind of work are saved after every tap. A day or more later: "Welcome back. Pick up where you left off." (never a count of days). **Show all my steps**, **New assignment** (replaces the saved steps, said on screen).
+- **Paste screen** (`design/paste-and-split.md`). Paste, pick one of six kinds, see five starter steps ("Showing 5 of 12" when there are more; Show more steps adds the rest). **Start runs exactly the steps on screen.** Two-minute start. Pasted text is cut at 6,000 characters with a message. The steps preview stays when the student visits another screen and comes back.
+- **Work screen** (`design/work-screen.md`). One step at a time with Done, Still working, Stuck (five hints), Drifted (splits the step, same credit as Done), Later. The reward line shows only when something really changed. Optional countdown (12 or 25 minutes) runs from the clock, so a sleeping laptop does not stretch it; "Time's up" goes when the student taps Still working. Keyboard focus is kept on redraws.
+- **How I like to work** (`design/focus-intake.md`). Four one-tap questions and a first-guess card. Not saved and not used anywhere yet (see Waiting on).
+- **My profile** (`design/profile.md`). Goals and "What got in the way?" notes, saved on the device. Typed text survives Back, Clear and Cancel; Save says when a note is typed but not added; notes get the local date.
+- **My calendar** (`design/calendar.md`). List first; the add form behind **Add something** keeps your typing across every redraw. Groups by how soon things are due, plus a calm grey **Time has passed** group (never orange "Urgent" for past items). Notes, links, categories, Start/Complete/Reopen, a weekly log hidden while it is all zeros, "Fire it Up" only after a confirmed Complete, Delete with a second tap, double-clicks never act on the item that slides up. Day/Week/Month views (hour labels fixed), trips spanning days, print a day.
+- **AI helpers** (`design/settings-ux.md`, `design/ai-direct.md`). Students add their own AI service and key (kept encrypted in the browser, created safely even with two tabs). Show my steps can ask the chosen helper (tick box). The request is cancelled if the student leaves the home screen, and a timeout or Stop covers the whole reply.
+- **Talk it through** (`design/ai-chat.md`, `design/chat-history.md`). A chat with the chosen helper: pick the kind, hints and questions only, replies shown whole. **Chats are saved on the device** in their own storage key: today's chat reopens; a "Carry on" line for an older one; **New chat**; **My chats** (10 most recent, plain dates, Delete and Delete all with a second tap). A message is saved only with its reply, so a message that triggers the "talk to an adult you trust" line is never stored. **How the AI talks** (Settings): a guide and reply length for All kinds and per kind, **Help me write it**; the guide is one quoted line that cannot imitate the app's rule markers.
+- **Storage safety** (`js/storage.js`). Unreadable saved data is backed up once and the app starts fresh, so saving never gets stuck; data from another version is backed up before anything is written; saving one section never drops another.
+- **Navigation.** One `showScreen` decides which screen shows, so two screens never show together. Every screen leaves with **Back to home**, at the top (and at the bottom on long screens).
 
 ## In progress
 
-Nothing.
+Nothing. The whole-app review plan (`design/review-plan-2026-11-17.md`) is finished; see its Progress list.
 
 ## Known gaps
 
-- server/suggest.js is parked: the app does not use it (the browser calls the student's chosen service directly). Kept for a possible parent-run endpoint; its rate limiter trusts x-forwarded-for and has no timeout, so fix those before ever deploying it.
-- The intake answers and card are still lost on refresh. Saving them is the next small step.
-- The profile does not yet use its goals or notes for suggestions. That is a later slice.
-- Not built from the home screen note: the margin note ("From last time"), a smaller next step after a long gap, and a full-width week calendar. See `design/home-screen.md`.
-- The intake does not yet use its answers anywhere. The trial that tests them is version 2.
-- The dedicated `advisor` agent (`.claude/agents/advisor.md`) was not loaded in the last session. A general Opus agent was used for the review instead. Restart the session to load it.
+- **Five answer-giving checks with a real AI** (chat, guides, and Show my steps) have not been run. Ben runs them with his own key (`tests/manual-checks.md`). Classmates must not use the AI features until they pass and the parent confirms the draft T8/T6 rows in DECISIONS.
+- The distress check depends on the AI sending its safety word (Ben's decision: one layer). Free or small models may answer with their own text instead.
+- `server/suggest.js` is parked: the app does not use it. Fix its rate limiter (trusts x-forwarded-for) and add a timeout before ever deploying it.
+- "Use these as my steps" (chat to steps) is not built.
+- The Suggest steps prompt and reply reading still trim replies (5 steps, 200 characters each); Ben asked to look at this.
+- Not built from the home screen note: the margin note, a smaller next step after a long gap.
+- Some browser tests still sleep (`waitForTimeout`) in the chat, navigation and calendar specs; they pass but are slower than they need to be.
+- Not tested with a real screen reader or a real phone.
 
 ## Broken or worrying
 
-- **`web-app/` is a leftover from an earlier attempt.** It's React and TypeScript, which DECISIONS.md T1 does not allow. It's excluded from git and from lint. Ben needs to say whether to delete it. `SETUP.md` step 6 still describes building it and should be ignored.
-- **Editing the steps is not built yet.** The design note splits it into a second session: add, delete, reorder, and merge. The screen says "Changing these steps is coming next."
-- **Starter steps are not yet tested with students.** They were written from the research (process steps only, no answers). Ask testers whether they fit each kind of work.
-- None of the instructions in `AGENTS.md` have been tried in a full loop yet. This session was the second. If a rule turns out to be unclear or unworkable, fix the rule and note it in `DECISIONS.md`.
-- Most research was read at abstract level. Items marked *(not read)* or **(confirm)** in `01-evidence.md` and `02-platform-and-privacy.md` are unchecked.
+- **`web-app/` is a leftover** (React and TypeScript, not allowed by T1). Excluded from git and lint. Ben decides whether to delete it. Ignore `SETUP.md` step 6.
+- **Editing the steps before starting is not built** (P1). With the AI turned on, this is the biggest gap against the research: the student should make the plan. Next #1.
+- Starter steps are not yet tested with students.
+- Most research was read at abstract level; items marked *(not read)* or **(confirm)** in `01-evidence.md` and `02-platform-and-privacy.md` are unchecked.
 
 ## Waiting on
 
 **Ben**
 
-- **OpenRouter account (Ben, as an adult; free, no card).** Sign up, block training for free and paid models, create a key, and keep it private. Then an agent picks a free model on a zero-retention or safety-retention provider (DECISIONS change log, 2026-11-17).
-- Whether to delete the `web-app/` folder (see above).
-- The app's name. The page is titled "Focus app" for now.
-- How progress is shown: pet rock, quest map, or build-a-picture.
-- The words for drifting, getting stuck, and coming back.
-- Colors and overall look. Placeholder colors are in `css/styles.css`.
-- Home screen: OK with the margin note being its own next design? Words for "Start this step" and "Welcome back".
-- Work screen: how Drifted should behave when the rest of the step is left out (see `design/work-screen.md`), button words, the five hints, and saving the steps.
-- Photo of handwritten notes organized into priority: needs an outside reader (T8 or T2), so a parent decision.
-- Learning the student's habits to set priority: needs a design and a parent decision (it means watching how students work).
-- Conversation mode (the app asks about the plan for the day): waits on the AI path.
-- PDFs on calendar items: keep only the file name (no change to storage), or store the files on the device (a storage redesign, T3).
-- Push notifications that arrive with the app closed: need a push service run by a large company and a server, so a parent decision (T2, T7). Until then, reminders show only while the app is open.
-- Whether the paste screen's six kinds and their starter steps read well (see the manual checks).
-- The words for coming back (the Q4 answers and the card line "When I come back"). Placeholder wording is in place.
+- "How I like to work": save the answers and use them as starting choices (countdown length, two-minute start, Help me write it), or hide the button until it does something.
+- The AI tick box on the paste screen is on by default; it could start off.
+- Whether to delete `web-app/`.
+- The app's name (keep rule 8 in mind: "focus" can read as a claim about attention).
+- How progress is shown; the words for drifting, getting stuck and coming back; colours and overall look.
+- Work screen: how Drifted treats the rest of the step (`design/work-screen.md`).
+- PDFs on calendar items; push notifications; photo of notes; learning habits (the last three need a parent).
 
 **Parent**
 
-- Hosting. GitHub Pages could serve the app for free, since version 1 is only static files. Hosting is the parent's decision (DECISIONS T7). Not needed until the app is ready for testers.
-- Whether to publish beyond the beta group, and whether to add the AI path (needs an OpenRouter key). Not needed for version 1.
-- Teacher approval and written parent permission before classmates use the app.
+- Confirm the draft T8/T6 rows (chat sends the conversation and the guide; resumed chats send older messages again) before classmates use the chat.
+- Hosting (T7). Teacher approval and written parent permission before classmates use the app.
 
 ## Next
 
-In order. Each is one session or less. Each feature starts with a design note in `design/`.
-
-1. ~~Set up the project.~~ Done.
-2. ~~Paste and split, first part: paste, kind, starter steps.~~ Done.
-3. **Paste and split, second part: editing.** Edit a step's words, delete, reorder, add, and merge. Needs a short design note and Ben's go-ahead. Then the Start button leads to step 4.
-4. **Work screen.** One step at a time, "step 3 of 7", and the four buttons: Done, Still working, Stuck, Drifted.
-5. **Saving and coming back.** Profile and step progress are saved, and the home screen picks up where you left off. Still to do: the intake card saved.
-6. **Weekly goal and progress display.**
-7. **Save to file and load from file.**
-
-**To do (Ben, 2026-11-17):**
-- **AI chat, last slice** (`design/ai-chat.md`): "Use these as my steps".
-- **Guide set-up, next step:** the "Help me write it" questions are built (length, tone, how to start, what helps when stuck). Linking them to "How I like to work" is not done, because those answers are not saved yet.
-- Fix the Suggest steps prompt and the way replies are read (see Ben's request about terse output).
-
-After that, with Ben: the recall question, polish, and a phone-width pass. The AI path comes last, and only if the parent sets up a key.
+1. **Editing the steps before Start** (P1): edit words, delete, reorder, add. Design note first.
+2. **Recall question** on the "All your steps are done" screen (P9, Moderate evidence).
+3. **Save to file and load from file** (T4); chats left out by default.
+4. **Weekly goal and progress display** (P7).
+5. "Use these as my steps", and the Suggest steps prompt and reply reading.

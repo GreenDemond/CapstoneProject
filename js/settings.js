@@ -21,6 +21,7 @@ import {
   isOpenRouter,
 } from "./logic/settings-flow.js";
 import { testService, listModels } from "./ai-direct.js";
+import { announce } from "./ui/dom.js";
 import { renderTalkSettings } from "./chat-settings.js";
 
 let aiSettings = loadAiSettings();
@@ -97,13 +98,6 @@ function show(name) {
   for (const [key, node] of Object.entries(views)) {
     node.hidden = key !== name;
   }
-}
-
-// Set a live region's text one frame after it exists, so screen readers announce it.
-function announce(node, text) {
-  requestAnimationFrame(() => {
-    node.textContent = text;
-  });
 }
 
 function setMessage(text) {

@@ -122,9 +122,13 @@ Entries marked **(default)** are product choices made in advance so work can sta
 ```
 index.html
 css/styles.css
-js/app.js            screen wiring
+js/app.js            entry point: starts each screen, nothing else
+js/screens/          one file per screen: home, work, intake, profile, calendar, chat
+js/ui/               shared screen code: dom.js (el, button, announce), screens.js (which screen
+                     is showing), helpers.js (where, dayKey). Imports nothing from js/screens/
+js/settings.js       the Settings / AI helpers screens (and chat-settings.js)
 js/storage.js        the only file that touches local storage
-js/ai.js             the only file that calls /api/suggest
+js/ai-direct.js      the only file that sends text to an AI service (the student's chosen helper)
 js/logic/            pure logic, fully tested
 server/suggest.js    server function (portable; wired to the host later)
 tests/logic/         logic tests
@@ -189,3 +193,4 @@ These are his choices. Ask him; do not pick for him.
 | 2026-11-17 | Settings redesigned as "AI helpers" (design/settings-ux.md v2): a short list, a one-question-per-step add flow, nothing saved until a check passes, host named when a key is sent, redirects refused, key box kept out of any form | Ben asked for a better settings UI; reviewed by a child reader, a UX designer, an accessibility and ADHD reviewer, a security reviewer, and an engineer | Ben; agent built |
 | 2026-11-17 | T8 and T6, **draft, parent to confirm before classmates use it:** the chat (design/ai-chat.md) sends the AI the student's messages, the most recent part of the conversation (up to about 6,000 characters), the kind of work, and the student's own guide text. The chat is built and usable now (slice 1, with a built-in guide; editing the guide comes in slice 2). Students will be able to edit the guide, which changes how the AI talks; the app's rules (hints not answers, trusted adult) stay in the instructions but are a strong default, not a lock. The chat screen already says an AI can still get it wrong; slice 2's Settings screen will say the rest. **Classmates must not use the chat until the five answer-giving checks are run and recorded and the parent confirms.** Every message, including a distress message, reaches the chosen service before any check, because the only check is the AI's own reply. The distress check is one layer: the AI's own TRUSTED_ADULT signal anywhere in a reply shows "talk to an adult you trust" and the chat carries on. No on-device word list (Ben: that was over-building). No helpline number | Ben ("the tool, within reason, needs to be configurable to the student"; the distress handling was "over indexing") | Ben; parent to confirm |
 | 2026-11-17 | T3: a second storage key, `focusapp.v1.chats` (still only through js/storage.js), holds saved chats, so a full chat store can never stop steps, profile, or calendar from saving. Chats are now saved on the device (reverses design/ai-chat.md decision 2, "keep the chat after a refresh? No"): up to 10, newest first, delete one or all; the message that triggered the trusted-adult line is never saved (design/chat-history.md) | Ben asked to think through and adjust the experience of multiple conversations; advisor's Option B | Ben; agent chose the storage design |
+| 2026-11-17 | T13: js/app.js split into js/app.js (entry point), js/screens/*.js (one per screen) and js/ui/*.js (shared helpers). Code was moved, not rewritten; behaviour is the same | app.js was 2,000 lines; one file per screen so the next session can change one screen without reading all of them | agent |

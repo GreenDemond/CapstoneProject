@@ -3,17 +3,11 @@
 // question-by-question helper that drafts a guide. Text is shown with textContent only.
 // Nothing is saved until Save, and "saved" is shown only when the browser confirmed it.
 import { loadChatSettings, saveChatSettings } from "./storage.js";
+import { announce } from "./ui/dom.js";
 import { LENGTHS, MAX_GUIDE } from "./logic/chat.js";
 import {
   IDS, ALL, labelFor, rowState, guideFor, lengthFor, setFor, clearFor, SETUP_QUESTIONS, guideFromAnswers,
 } from "./logic/chat-settings.js";
-
-// Set a live region's text one frame after it exists, so screen readers announce it.
-function announce(node, text) {
-  requestAnimationFrame(() => {
-    node.textContent = text;
-  });
-}
 
 function el(tag, attrs = {}, ...children) {
   const node = document.createElement(tag);
