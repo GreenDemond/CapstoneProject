@@ -223,12 +223,14 @@ test("thinking is off by default only for OpenRouter helpers", () => {
   assert.deepEqual(cleaned.services.map((s) => s.think), [false, true, true, false, true]);
 });
 
-test("reasoningFor asks for no thinking only for OpenRouter helpers set to not think", () => {
+test("reasoningFor sends the right fields only when the helper is set to not think", () => {
   const url = "https://openrouter.ai/api/v1/chat/completions";
-  assert.deepEqual(reasoningFor({ url, think: false }), { effort: "none" });
-  assert.deepEqual(reasoningFor({ url }), { effort: "none" });
+  assert.deepEqual(reasoningFor({ url, think: false }), { reasoning: { effort: "none" } });
+  assert.equal(reasoningFor({ url }), null);
   assert.equal(reasoningFor({ url, think: true }), null);
-  assert.equal(reasoningFor({ url: "https://home.example.com/v1/chat/completions", think: false }), null);
-  assert.equal(reasoningFor({ url: "https://openrouter.ai.evil.test/v1/chat/completions", think: false }), null);
+  const all = { reasoning: { effort: "none" }, reasoning_effort: "none", chat_template_kwargs: { enable_thinking: false } };
+  assert.deepEqual(reasoningFor({ url: "https://home.example.com/v1/chat/completions", think: false }), all);
+  assert.deepEqual(reasoningFor({ url: "https://openrouter.ai.evil.test/v1/chat/completions", think: false }), all);
+  assert.equal(reasoningFor({ url: "https://home.example.com/v1/chat/completions", think: true }), null);
   assert.equal(reasoningFor(null), null);
 });

@@ -86,11 +86,11 @@ function postJson(service, key, body, signal) {
 // turned off (a 400), so that one request is repeated once without the setting. mustThink is true when
 // that retry worked; the saved setting is never changed here. If the retry fails too, its failure is returned.
 async function postWithThinking(service, key, body, signal) {
-  const reasoning = reasoningFor(service);
-  if (reasoning === null) {
+  const extra = reasoningFor(service);
+  if (extra === null) {
     return postJson(service, key, body, signal);
   }
-  const first = await postJson(service, key, { ...body, reasoning }, signal);
+  const first = await postJson(service, key, { ...body, ...extra }, signal);
   if (first.failed || first.response.status !== 400) {
     return first;
   }

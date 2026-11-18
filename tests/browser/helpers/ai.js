@@ -24,7 +24,7 @@ export async function standIn(page, { host = HOST, base = "/v1", models = ["smal
       return;
     }
     seen.chat.push({ auth: request.headers().authorization ?? null, body: request.postData() });
-    if (rejectReasoning && (request.postData() ?? "").includes('"reasoning"')) {
+    if (rejectReasoning && /"(reasoning|reasoning_effort|chat_template_kwargs)"/.test(request.postData() ?? "")) {
       await route.fulfill({ status: 400, headers: CORS, json: { error: "reasoning is mandatory for this model" } });
       return;
     }

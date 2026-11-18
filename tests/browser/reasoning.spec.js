@@ -61,19 +61,62 @@ test("ticking the box on Manage saves at once and stops sending the setting", as
   expect(bodies(seen).at(-1)).not.toHaveProperty("reasoning");
 });
 
-test("another service never sends the setting and has no box", async ({ page }) => {
+test("another service: the box is there, ticked by default, and nothing is sent until it is unticked", async ({ page }) => {
   const seen = await standIn(page);
   await openSettings(page);
   await addOther(page);
   await page.getByRole("button", { name: /^Manage/ }).click();
-  await expect(page.getByLabel("Let the AI think before answering")).toHaveCount(0);
+  await expect(page.getByLabel("Let the AI think before answering")).toBeChecked();
+  await expect(page.getByText("Off asks the AI to answer without thinking first.")).toBeVisible();
   await page.getByRole("button", { name: "Back" }).first().click();
   await toChat(page);
   await say(page, "hello");
   await expect(page.getByRole("log", { name: "Chat" })).toContainText("ok");
   for (const body of bodies(seen)) {
     expect(body).not.toHaveProperty("reasoning");
+    expect(body).not.toHaveProperty("reasoning_effort");
+    expect(body).not.toHaveProperty("chat_template_kwargs");
   }
+});
+
+test("another service: unticking sends all three fields in the chat", async ({ page }) => {
+  const seen = await standIn(page);
+  await openSettings(page);
+  await addOther(page);
+  await page.getByRole("button", { name: /^Manage/ }).click();
+  await page.getByLabel("Let the AI think before answering").uncheck();
+  await expect(page.getByRole("status").last()).toContainText("Saved.");
+  await page.getByRole("button", { name: "Back" }).first().click();
+  await toChat(page);
+  await say(page, "hello");
+  await expect(page.getByRole("log", { name: "Chat" })).toContainText("ok");
+  const last = bodies(seen).at(-1);
+  expect(last.reasoning).toEqual({ effort: "none" });
+  expect(last.reasoning_effort).toBe("none");
+  expect(last.chat_template_kwargs).toEqual({ enable_thinking: false });
+});
+
+test("another service that rejects the fields: still answers via the retry, says so once", async ({ page }) => {
+  await standIn(page);
+  await openSettings(page);
+  await addOther(page);
+  await page.getByRole("button", { name: /^Manage/ }).click();
+  await page.getByLabel("Let the AI think before answering").uncheck();
+  await expect(page.getByRole("status").last()).toContainText("Saved.");
+  const seen = await standIn(page, { rejectReasoning: true });
+  await page.getByRole("button", { name: "Back" }).first().click();
+  await toChat(page);
+  await say(page, "first");
+  await expect(page.getByRole("log", { name: "Chat" })).toContainText("ok");
+  await expect(page.getByText(MUST_THINK)).toBeVisible();
+  const sent = bodies(seen);
+  expect(sent.length).toBe(2);
+  expect(sent[0]).toHaveProperty("reasoning_effort");
+  expect(sent[1]).not.toHaveProperty("reasoning_effort");
+  expect(sent[1]).not.toHaveProperty("chat_template_kwargs");
+  await say(page, "second");
+  await expect(page.getByRole("log", { name: "Chat" }).getByText("ok", { exact: true })).toHaveCount(2);
+  await expect(page.getByText(MUST_THINK)).toHaveCount(0);
 });
 
 test("an AI that must think: the chat still answers and says so once", async ({ page }) => {

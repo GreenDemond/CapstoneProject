@@ -226,4 +226,5 @@ Needs your real OpenRouter key.
 3. Open Talk it through and send a message. The answer comes back and is quicker than with the box ticked.
 4. Manage, Change the AI to one that always thinks (some do). Send a chat message: it still answers, and once you see "This AI always thinks first, so thinking can't be turned off." A second message in the same visit does not repeat the line.
 5. On the home screen, paste text and press Show my steps with that helper: steps appear; the same line appears once.
-6. A helper that is not OpenRouter has no thinking box in Manage.
+6. A helper that is not OpenRouter also has the box in Manage, ticked, with "Off asks the AI to answer without thinking first. Not every AI supports this; if it doesn't, it just thinks as usual."
+7. PolyStrata: untick the box on the PolyStrata helper and send a chat message. It should answer faster. If the line "This AI always thinks first..." appears, PolyStrata refused the setting. If replies are no faster and no line appears, PolyStrata ignored it: tell the agent which setting PolyStrata documents for turning thinking off.

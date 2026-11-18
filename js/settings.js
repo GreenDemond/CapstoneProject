@@ -629,7 +629,7 @@ async function renderCheckStep() {
   if (!key) {
     result = { ok: false, kind: "key" };
   } else {
-    result = await testService({ url: flow.url, model: flow.model, think: service(flow.serviceId)?.think ?? false }, key, controller?.signal);
+    result = await testService({ url: flow.url, model: flow.model, think: service(flow.serviceId)?.think ?? !isOpenRouter(flow.url) }, key, controller?.signal);
   }
   if (mine !== token) {
     return;
@@ -838,7 +838,7 @@ function renderManage(focusSelector = null) {
     }
   }
 
-  if (isOpenRouter(item.url)) {
+  {
     const tick = el("input", { type: "checkbox", id: "think-box" });
     tick.checked = item.think === true;
     tick.addEventListener("change", () => {
@@ -848,7 +848,7 @@ function renderManage(focusSelector = null) {
       setMessage("Saved.");
     });
     root.append(
-      el("div", { class: "manage-row" }, el("p", {}, tick, " ", el("label", { for: "think-box", text: "Let the AI think before answering" })), el("p", { class: "hint", text: "Off is faster and uses less of your credit. Some AIs always think." })),
+      el("div", { class: "manage-row" }, el("p", {}, tick, " ", el("label", { for: "think-box", text: "Let the AI think before answering" })), el("p", { class: "hint", text: isOpenRouter(item.url) ? "Off is faster and uses less of your credit. Some AIs always think." : "Off asks the AI to answer without thinking first. Not every AI supports this; if it doesn't, it just thinks as usual." })),
     );
   }
 

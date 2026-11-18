@@ -142,5 +142,9 @@ Ben wants more than one OpenRouter helper (for example a free one and a paid one
 - Each helper has a saved setting `think` (yes or no). OpenRouter helpers start with it off; other services start on and never send anything about it. A helper saved before this existed follows the same rule.
 - When off, every request to an OpenRouter helper (the check, Show my steps, the chat, with or without search) carries `reasoning: { effort: "none" }`. Thinking is slower, costs credit, and uses the reply limit.
 - Some AIs always think and refuse this (an error, 400). The app then repeats that one request without the setting. If that works, the reply is used and a quiet line says "This AI always thinks first, so thinking can't be turned off." once per visit to the chat or the paste screen. The saved setting is not changed. If the repeat fails too, its failure is shown as usual.
-- Manage (OpenRouter helpers only): tick box "Let the AI think before answering", hint "Off is faster and uses less of your credit. Some AIs always think." It saves at once and says "Saved."
+- Manage (every helper): tick box "Let the AI think before answering", hint "Off is faster and uses less of your credit. Some AIs always think." It saves at once and says "Saved."
 - Data stored: one yes/no per helper, on the device.
+
+### Thinking switch for every helper (2026-11-17, Ben's request, for PolyStrata)
+
+The Manage box now shows for every helper. Defaults are unchanged: OpenRouter starts off, others start on and send nothing. When a non-OpenRouter helper is unticked, requests carry `reasoning: { effort: "none" }`, `reasoning_effort: "none"` and `chat_template_kwargs: { enable_thinking: false }`, because we do not know which one the server honours. A server that ignores them just thinks as usual; one that refuses them (400) gets the same retry without them and the same quiet "always thinks" line. Hint for these helpers: "Off asks the AI to answer without thinking first. Not every AI supports this; if it doesn't, it just thinks as usual."

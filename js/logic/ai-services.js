@@ -255,13 +255,17 @@ export function chatAddress(typed) {
   return null;
 }
 
-// What to add to a request about thinking, or null. Only OpenRouter understands this setting, and it is
-// sent only when the helper is set to not think. "none" turns thinking off (OpenRouter docs).
+// The extra fields to add to a request when the helper is set to not think, or null. OpenRouter gets its
+// own field ("none" turns thinking off, per its docs). For any other service we do not know which field it
+// honours, so all the common ones are sent; a service that ignores them just thinks as usual.
 export function reasoningFor(service) {
-  if (hostOf(service?.url ?? "") === "openrouter.ai" && service.think !== true) {
-    return { effort: "none" };
+  if (!service || service.think !== false) {
+    return null;
   }
-  return null;
+  if (hostOf(service.url ?? "") === "openrouter.ai") {
+    return { reasoning: { effort: "none" } };
+  }
+  return { reasoning: { effort: "none" }, reasoning_effort: "none", chat_template_kwargs: { enable_thinking: false } };
 }
 
 export const MUST_THINK_LINE = "This AI always thinks first, so thinking can't be turned off.";
