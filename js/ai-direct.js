@@ -5,6 +5,7 @@
 // redirects cannot move the key or the text to another place.
 import { buildChatBody, readReply } from "./logic/ai-prompt.js";
 import { buildChatRequest, readChatReply } from "./logic/chat.js";
+import { reasoningFor } from "./logic/ai-services.js";
 import { failureKindForStatus } from "./logic/settings-flow.js";
 
 export const COULDNT_REACH = "Couldn't reach the service. Check the address and your connection. If the address is right, the service may need to allow this app (its CORS setting).";
@@ -81,12 +82,29 @@ function postJson(service, key, body, signal) {
   );
 }
 
+// Sends the body with the helper's thinking setting added. Some AIs always think and refuse to have it
+// turned off (a 400), so that one request is repeated once without the setting. mustThink is true when
+// that retry worked; the saved setting is never changed here. If the retry fails too, its failure is returned.
+async function postWithThinking(service, key, body, signal) {
+  const reasoning = reasoningFor(service);
+  if (reasoning === null) {
+    return postJson(service, key, body, signal);
+  }
+  const first = await postJson(service, key, { ...body, reasoning }, signal);
+  if (first.failed || first.response.status !== 400) {
+    return first;
+  }
+  const retry = await postJson(service, key, body, signal);
+  return retry.response?.ok ? { ...retry, mustThink: true } : retry;
+}
+
 // Returns { steps }, { trustedAdult: true }, or { error } with a plain line (paste screen wording).
+// mustThink: true is added when the AI refused to have thinking turned off.
 export async function askService(service, key, text, kind, signal) {
   if (text.length > MAX_TEXT) {
     return { error: "That text is too long to send. Shorten it and try again." };
   }
-  const result = await postJson(service, key, buildChatBody({ model: service.model, kind, text, maxTokens: 1500 }), signal);
+  const result = await postWithThinking(service, key, buildChatBody({ model: service.model, kind, text, maxTokens: 1500 }), signal);
   if (result.failed) {
     return { error: COULDNT_REACH };
   }
@@ -101,14 +119,14 @@ export async function askService(service, key, text, kind, signal) {
   if (!reply) {
     return { error: "The service didn't suggest any steps." };
   }
-  return reply;
+  return result.mustThink ? { ...reply, mustThink: true } : reply;
 }
 
 export const SEARCH_NEEDS_CREDIT = "Web search needs credit on your OpenRouter account. Untick Search the web to keep chatting for free.";
 
 // One chat turn. Returns { text, cutOff }, { empty, cutOff }, { trustedAdult }, { aborted }, or { error }.
 export async function askChat(service, key, { kind, guide, length, messages, search = false }, signal) {
-  const result = await postJson(service, key, buildChatRequest({ model: service.model, kind, guide, length, messages, search }), signal);
+  const result = await postWithThinking(service, key, buildChatRequest({ model: service.model, kind, guide, length, messages, search }), signal);
   if (result.failed === "aborted") {
     return { aborted: true };
   }
@@ -128,14 +146,15 @@ export async function askChat(service, key, { kind, guide, length, messages, sea
     return { error: "The service answered in a way the app doesn't understand." };
   }
   const data = result.data;
-  return readChatReply(data);
+  const reply = readChatReply(data);
+  return result.mustThink ? { ...reply, mustThink: true } : reply;
 }
 
 // A harmless check. Returns { ok: true } or { ok: false, kind, aborted? }.
 // kind: key | notFound | credit | busy | network | timeout | emptyReply (see setupMessage).
 // It reads the reply, because "answered" must mean "answered with text the app can use".
 export async function testService(service, key, signal) {
-  const result = await postJson(
+  const result = await postWithThinking(
     service,
     key,
     {

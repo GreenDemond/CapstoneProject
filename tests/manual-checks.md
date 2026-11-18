@@ -216,3 +216,14 @@ Needs your real OpenRouter key.
 5. Manage, Change the AI to the AI another OpenRouter helper uses: refused with the same-AI message.
 6. Open Talk it through: "Which AI helper?" is above the message box. Choose the other one: the "Your messages go to..." line changes. Send a message, change the menu, send another: each goes to the helper chosen.
 7. Go back to the home screen: its "Which AI helper?" shows the same helper as the chat.
+
+## Thinking off for OpenRouter helpers (design/settings-ux.md)
+
+Needs your real OpenRouter key.
+
+1. Add an OpenRouter helper. Settings, Manage it: the box "Let the AI think before answering" is there, unticked, with "Off is faster and uses less of your credit. Some AIs always think."
+2. Tick it: the line says "Saved." Refresh and open Manage again: it is still ticked. Untick it.
+3. Open Talk it through and send a message. The answer comes back and is quicker than with the box ticked.
+4. Manage, Change the AI to one that always thinks (some do). Send a chat message: it still answers, and once you see "This AI always thinks first, so thinking can't be turned off." A second message in the same visit does not repeat the line.
+5. On the home screen, paste text and press Show my steps with that helper: steps appear; the same line appears once.
+6. A helper that is not OpenRouter has no thinking box in Manage.

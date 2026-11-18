@@ -6,7 +6,7 @@ export const HOST = "https://ai.example.test";
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, content-type", "Access-Control-Allow-Methods": "GET, POST, OPTIONS" };
 
 // A stand-in AI service. No real service or key is used. Returns what it received.
-export async function standIn(page, { host = HOST, base = "/v1", models = ["small-model", "big-model"], content = "ok", chatStatus = 200, chatBody = null, abortChat = false, acceptKey = null, chatDelay = 0, redirectTo = null } = {}) {
+export async function standIn(page, { host = HOST, base = "/v1", models = ["small-model", "big-model"], content = "ok", chatStatus = 200, chatBody = null, abortChat = false, acceptKey = null, chatDelay = 0, redirectTo = null, rejectReasoning = false } = {}) {
   const seen = { models: [], chat: [] };
   await page.route(`${host}${base}/models*`, async (route) => {
     const request = route.request();
@@ -24,6 +24,10 @@ export async function standIn(page, { host = HOST, base = "/v1", models = ["smal
       return;
     }
     seen.chat.push({ auth: request.headers().authorization ?? null, body: request.postData() });
+    if (rejectReasoning && (request.postData() ?? "").includes('"reasoning"')) {
+      await route.fulfill({ status: 400, headers: CORS, json: { error: "reasoning is mandatory for this model" } });
+      return;
+    }
     if (abortChat) {
       await route.abort();
       return;

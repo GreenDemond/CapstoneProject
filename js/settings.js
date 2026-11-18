@@ -629,7 +629,7 @@ async function renderCheckStep() {
   if (!key) {
     result = { ok: false, kind: "key" };
   } else {
-    result = await testService({ url: flow.url, model: flow.model }, key, controller?.signal);
+    result = await testService({ url: flow.url, model: flow.model, think: service(flow.serviceId)?.think ?? false }, key, controller?.signal);
   }
   if (mine !== token) {
     return;
@@ -838,6 +838,20 @@ function renderManage(focusSelector = null) {
     }
   }
 
+  if (isOpenRouter(item.url)) {
+    const tick = el("input", { type: "checkbox", id: "think-box" });
+    tick.checked = item.think === true;
+    tick.addEventListener("change", () => {
+      aiSettings = { ...aiSettings, services: updateService(aiSettings.services, item.id, { think: tick.checked }) };
+      persist();
+      notify();
+      setMessage("Saved.");
+    });
+    root.append(
+      el("div", { class: "manage-row" }, el("p", {}, tick, " ", el("label", { for: "think-box", text: "Let the AI think before answering" })), el("p", { class: "hint", text: "Off is faster and uses less of your credit. Some AIs always think." })),
+    );
+  }
+
   if (manage.mode === "remove") {
     root.append(confirmRow(`Remove ${item.label}? You can add it again later.`, "Yes, remove", async () => {
       await deleteKey(item.id);
@@ -876,7 +890,7 @@ async function testAgain(item) {
   busy = true;
   setMessage("Checking… Slower AIs can take a few minutes.");
   const key = await readKey(item.id);
-  const result = key ? await testService({ url: item.url, model: item.model }, key) : { ok: false, kind: "key" };
+  const result = key ? await testService({ url: item.url, model: item.model, think: item.think }, key) : { ok: false, kind: "key" };
   busy = false;
   if (result.ok) {
     aiSettings = { ...aiSettings, services: updateService(aiSettings.services, item.id, { checked: true }) };

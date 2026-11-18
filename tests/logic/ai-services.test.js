@@ -9,6 +9,7 @@ import {
   pasteStatus,
   normalizeServices,
   MAX_SERVICES,
+  reasoningFor,
   OPENROUTER_ADDRESS,
   MAX_LABEL,
   modelTaken,
@@ -203,4 +204,31 @@ test("loading drops repeated ids, names, or the same AI at the same address, kee
     { id: "d", label: "Four", url, model: "m4" },
   ] });
   assert.deepEqual(services.map((s) => s.id), ["a", "d"]);
+});
+
+test("thinking is off by default only for OpenRouter helpers", () => {
+  const router = addService([], { label: "R", url: "https://openrouter.ai/api/v1" }).list[0];
+  const other = addService([], { label: "O", url: "https://home.example.com", model: "m" }).list[0];
+  assert.equal(router.think, false);
+  assert.equal(other.think, true);
+  const cleaned = normalizeServices({
+    services: [
+      { id: "a", label: "Old router", url: "https://openrouter.ai/api/v1/chat/completions", model: "m" },
+      { id: "b", label: "Old other", url: "https://home.example.com/v1/chat/completions", model: "m" },
+      { id: "c", label: "Router thinks", url: "https://openrouter.ai/api/v1/chat/completions", model: "n", think: true },
+      { id: "d", label: "Other quiet", url: "https://home.example.com/v1/chat/completions", model: "n", think: false },
+      { id: "e", label: "Bad value", url: "https://home.example.com/v1/chat/completions", model: "o", think: "yes" },
+    ],
+  });
+  assert.deepEqual(cleaned.services.map((s) => s.think), [false, true, true, false, true]);
+});
+
+test("reasoningFor asks for no thinking only for OpenRouter helpers set to not think", () => {
+  const url = "https://openrouter.ai/api/v1/chat/completions";
+  assert.deepEqual(reasoningFor({ url, think: false }), { effort: "none" });
+  assert.deepEqual(reasoningFor({ url }), { effort: "none" });
+  assert.equal(reasoningFor({ url, think: true }), null);
+  assert.equal(reasoningFor({ url: "https://home.example.com/v1/chat/completions", think: false }), null);
+  assert.equal(reasoningFor({ url: "https://openrouter.ai.evil.test/v1/chat/completions", think: false }), null);
+  assert.equal(reasoningFor(null), null);
 });

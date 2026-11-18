@@ -7,7 +7,7 @@ import { KINDS, DEFAULT_STEP_COUNT, starterStepsFor, withTwoMinuteStart, showing
 import { loadWork } from "../storage.js";
 import { pickupLine } from "../logic/home.js";
 import { currentIndex, allDone } from "../logic/work.js";
-import { inUseHelper, usableServices, pasteStatus, isReady } from "../logic/ai-services.js";
+import { inUseHelper, usableServices, pasteStatus, isReady, MUST_THINK_LINE } from "../logic/ai-services.js";
 import { readKey } from "../keystore.js";
 import { askService } from "../ai-direct.js";
 import { initSettings, getAiSettings, onAiChange, setChosenHelper } from "../settings.js";
@@ -27,6 +27,7 @@ const ready = document.getElementById("ready");
 
 let chosenKind = null;
 let allSteps = [];
+let mustThinkShown = false; // the "always thinks" line is shown once per visit to this screen
 let suggestAbort = null; // cancels the AI request started from the home screen
 
 for (const kind of KINDS) {
@@ -217,6 +218,10 @@ async function suggestWithChosenService(text) {
   if (result.steps) {
     allSteps = result.steps;
     message.textContent = `Suggested by an AI: ${where(service)}. Change anything you like.`;
+    if (result.mustThink && !mustThinkShown) {
+      mustThinkShown = true;
+      message.textContent += ` ${MUST_THINK_LINE}`;
+    }
   } else {
     allSteps = starterStepsFor(chosenKind, cleanPastedText(text));
     message.textContent = `${result.error} Here are the starter steps instead.`;
@@ -236,6 +241,7 @@ const replaceNote = document.getElementById("replace-note");
 let pickupWork = null;
 
 export function refreshHome() {
+  mustThinkShown = false;
   const saved = loadWork();
   const live = saved.work && !allDone(saved.work) ? saved : null;
   pickupWork = live ? live.work : null;

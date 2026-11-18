@@ -63,7 +63,7 @@ export function addService(list, { label, url, model = "", keyHint = "", checked
     return { list, error: NAME_TAKEN };
   }
   const name = typedName === "" ? uniqueName(list, autoName(chat, modelName)) : typedName;
-  const service = { id: newId(), label: name, url: chat, model: modelName, keyHint, keyReady, checked };
+  const service = { id: newId(), label: name, url: chat, model: modelName, keyHint, keyReady, checked, think: !isOpenRouter };
   return { list: [...list, service], error: null };
 }
 
@@ -179,6 +179,9 @@ export function normalizeServices(data) {
       keyReady: false,
       // Only a helper saved with "Save it anyway" is marked as not checked; older saved helpers count as checked.
       checked: s.checked !== false,
+      // Whether the AI may think before answering. Only OpenRouter can turn thinking off, so it is off
+      // by default there (a saved helper with no setting too) and on everywhere else.
+      think: typeof s.think === "boolean" ? s.think : hostOf(parseAddress(s.url).url) !== "openrouter.ai",
     }));
   // Damaged or hand-edited data could repeat an id, a name, or an address with the same AI. Keep the first.
   const unique = [];
@@ -251,6 +254,17 @@ export function chatAddress(typed) {
   }
   return null;
 }
+
+// What to add to a request about thinking, or null. Only OpenRouter understands this setting, and it is
+// sent only when the helper is set to not think. "none" turns thinking off (OpenRouter docs).
+export function reasoningFor(service) {
+  if (hostOf(service?.url ?? "") === "openrouter.ai" && service.think !== true) {
+    return { effort: "none" };
+  }
+  return null;
+}
+
+export const MUST_THINK_LINE = "This AI always thinks first, so thinking can't be turned off.";
 
 export function hostLabel(chatUrl) {
   try {

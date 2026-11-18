@@ -136,3 +136,11 @@ Ben wants more than one OpenRouter helper (for example a free one and a paid one
 - **Key reuse:** on the key step, a button "Use the same key as <name>" appears for each helper (up to 3) at the same address that has a key. The key is read into memory only (never the box or page), the message says "Using the key from <name>.", and the helper saves its own encrypted copy. If it cannot be read: "Couldn't read that key. Paste it instead."
 - **Chat:** with more than one ready helper, the chat shows the same "Which AI helper?" menu as the paste screen, above the message box. Changing it updates the "Your messages go to..." line and the Search the web box (OpenRouter only). Changing in the middle of a chat is allowed; the next message goes to the new helper.
 - Data stored: unchanged (names are already stored).
+
+## Thinking off by default for OpenRouter (2026-11-17, Ben's request)
+
+- Each helper has a saved setting `think` (yes or no). OpenRouter helpers start with it off; other services start on and never send anything about it. A helper saved before this existed follows the same rule.
+- When off, every request to an OpenRouter helper (the check, Show my steps, the chat, with or without search) carries `reasoning: { effort: "none" }`. Thinking is slower, costs credit, and uses the reply limit.
+- Some AIs always think and refuse this (an error, 400). The app then repeats that one request without the setting. If that works, the reply is used and a quiet line says "This AI always thinks first, so thinking can't be turned off." once per visit to the chat or the paste screen. The saved setting is not changed. If the repeat fails too, its failure is shown as usual.
+- Manage (OpenRouter helpers only): tick box "Let the AI think before answering", hint "Off is faster and uses less of your credit. Some AIs always think." It saves at once and says "Saved."
+- Data stored: one yes/no per helper, on the device.
