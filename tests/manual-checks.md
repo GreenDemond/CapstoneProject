@@ -217,14 +217,15 @@ Needs your real OpenRouter key.
 6. Open Talk it through: "Which AI helper?" is above the message box. Choose the other one: the "Your messages go to..." line changes. Send a message, change the menu, send another: each goes to the helper chosen.
 7. Go back to the home screen: its "Which AI helper?" shows the same helper as the chat.
 
-## Thinking off for OpenRouter helpers (design/settings-ux.md)
+## Thinking effort per helper (design/settings-ux.md)
 
 Needs your real OpenRouter key.
 
-1. Add an OpenRouter helper. Settings, Manage it: the box "Let the AI think before answering" is there, unticked, with "Off is faster and uses less of your credit. Some AIs always think."
-2. Tick it: the line says "Saved." Refresh and open Manage again: it is still ticked. Untick it.
-3. Open Talk it through and send a message. The answer comes back and is quicker than with the box ticked.
-4. Manage, Change the AI to one that always thinks (some do). Send a chat message: it still answers, and once you see "This AI always thinks first, so thinking can't be turned off." A second message in the same visit does not repeat the line.
-5. On the home screen, paste text and press Show my steps with that helper: steps appear; the same line appears once.
-6. A helper that is not OpenRouter also has the box in Manage, ticked, with "Off asks the AI to answer without thinking first. Not every AI supports this; if it doesn't, it just thinks as usual."
-7. PolyStrata: untick the box on the PolyStrata helper and send a chat message. It should answer faster. If the line "This AI always thinks first..." appears, PolyStrata refused the setting. If replies are no faster and no line appears, PolyStrata ignored it: tell the agent which setting PolyStrata documents for turning thinking off.
+1. Add an OpenRouter helper. Settings, Manage it: "How hard should the AI think?" is there and shows Low, with the hint "Low is a good balance. Not every AI supports this; if it doesn't, it uses its own setting." The choices are None (fastest), Low, Medium, High (slowest, uses more credit).
+2. Choose Medium: the line says "Saved." Refresh and open Manage again: it still shows Medium.
+3. Choose None and send a chat message: the answer comes back, and quicker than with High.
+4. Manage, Change the AI to one that always thinks (some do), set None. Send a chat message: it still answers, and once you see "This AI always thinks first, so thinking can't be turned off." A second message in the same visit does not repeat the line.
+5. With the effort on Low, a refusing AI shows "This AI doesn't take a thinking setting, so it used its own." once instead.
+6. On the home screen, paste text and press Show my steps with that helper: steps appear; the same line appears once.
+7. A helper that is not OpenRouter has the same choice in Manage, also starting on Low.
+8. PolyStrata: choose None on the PolyStrata helper and send a chat message. It should answer faster. If a line about thinking appears, PolyStrata refused the setting. If replies are no faster and no line appears, PolyStrata ignored it: tell the agent which setting PolyStrata documents.

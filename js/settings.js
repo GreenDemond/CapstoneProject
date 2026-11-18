@@ -3,7 +3,7 @@
 // (draftKey) during setup, never in a form, a stored list, a message, or the log.
 import { loadAiSettings, saveAiSettings } from "./storage.js";
 import { keyStoreAvailable, saveKey, hasKey, deleteKey, readKey } from "./keystore.js";
-import { addService, removeService, inUseHelper, isReady, modelsAddress, readModelIds, hostOf, modelTaken, nameTaken, MAX_LABEL, DUPLICATE_HELPER, NAME_TAKEN } from "./logic/ai-services.js";
+import { addService, removeService, inUseHelper, isReady, modelsAddress, readModelIds, hostOf, modelTaken, nameTaken, MAX_LABEL, DUPLICATE_HELPER, NAME_TAKEN, EFFORTS, DEFAULT_EFFORT } from "./logic/ai-services.js";
 import { checkKey, keyHint, maskedKey } from "./logic/ai-key.js";
 import {
   helperStatus,
@@ -629,7 +629,7 @@ async function renderCheckStep() {
   if (!key) {
     result = { ok: false, kind: "key" };
   } else {
-    result = await testService({ url: flow.url, model: flow.model, think: service(flow.serviceId)?.think ?? !isOpenRouter(flow.url) }, key, controller?.signal);
+    result = await testService({ url: flow.url, model: flow.model, effort: service(flow.serviceId)?.effort ?? DEFAULT_EFFORT }, key, controller?.signal);
   }
   if (mine !== token) {
     return;
@@ -839,16 +839,19 @@ function renderManage(focusSelector = null) {
   }
 
   {
-    const tick = el("input", { type: "checkbox", id: "think-box" });
-    tick.checked = item.think === true;
-    tick.addEventListener("change", () => {
-      aiSettings = { ...aiSettings, services: updateService(aiSettings.services, item.id, { think: tick.checked }) };
+    const labels = { none: "None (fastest)", low: "Low", medium: "Medium", high: "High (slowest, uses more credit)" };
+    const pick = el("select", { id: "effort-pick" });
+    for (const { value } of EFFORTS) {
+      pick.append(el("option", { value, text: labels[value], selected: value === item.effort }));
+    }
+    pick.addEventListener("change", () => {
+      aiSettings = { ...aiSettings, services: updateService(aiSettings.services, item.id, { effort: pick.value }) };
       persist();
       notify();
       setMessage("Saved.");
     });
     root.append(
-      el("div", { class: "manage-row" }, el("p", {}, tick, " ", el("label", { for: "think-box", text: "Let the AI think before answering" })), el("p", { class: "hint", text: isOpenRouter(item.url) ? "Off is faster and uses less of your credit. Some AIs always think." : "Off asks the AI to answer without thinking first. Not every AI supports this; if it doesn't, it just thinks as usual." })),
+      el("div", { class: "manage-row" }, el("p", {}, el("label", { for: "effort-pick", text: "How hard should the AI think?" }), " ", pick), el("p", { class: "hint", text: "Low is a good balance. Not every AI supports this; if it doesn't, it uses its own setting." })),
     );
   }
 
@@ -890,7 +893,7 @@ async function testAgain(item) {
   busy = true;
   setMessage("Checking… Slower AIs can take a few minutes.");
   const key = await readKey(item.id);
-  const result = key ? await testService({ url: item.url, model: item.model, think: item.think }, key) : { ok: false, kind: "key" };
+  const result = key ? await testService({ url: item.url, model: item.model, effort: item.effort }, key) : { ok: false, kind: "key" };
   busy = false;
   if (result.ok) {
     aiSettings = { ...aiSettings, services: updateService(aiSettings.services, item.id, { checked: true }) };

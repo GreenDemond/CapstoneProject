@@ -4,7 +4,7 @@
 // the log and the status line is changed in place, so screen readers announce only what is new.
 import { KINDS } from "../logic/starter-steps.js";
 import { loadWork, loadChats, saveChats, deleteAllChats, loadChatSettings } from "../storage.js";
-import { inUseHelper, isReady, usableServices, MUST_THINK_LINE } from "../logic/ai-services.js";
+import { inUseHelper, isReady, usableServices, effortRefusedLine } from "../logic/ai-services.js";
 import { readKey } from "../keystore.js";
 import { askChat } from "../ai-direct.js";
 import { MAX_MESSAGE, OPENING_QUESTION, TRUSTED_ADULT_LINE } from "../logic/chat.js";
@@ -27,7 +27,7 @@ let chatPending = false; // the student's message is on screen and its reply has
 let chatListStatus = null; // the status line of My chats, made once
 let chatRun = 0; // changes on New chat, Back, and Stop, so a late reply is ignored
 let chatAbort = null;
-let mustThinkShown = false; // the "always thinks" line is shown once per visit to the chat
+let effortLineShown = false; // the thinking-setting line is shown once per visit to the chat
 let chatSearch = false; // "Search the web" ticked; off at the start of every chat and when a chat is opened
 let chatParts = null; // the pieces on screen: log, input, send, stop, status, carry
 
@@ -101,7 +101,7 @@ function showChat() {
 function openChatScreen() {
   resetChat();
   chatSearch = false;
-  mustThinkShown = false;
+  effortLineShown = false;
   showScreen("chat");
   chatView = "chat";
   const [recent] = loadChats();
@@ -538,9 +538,9 @@ async function sendChat() {
     saveChatAndWarn();
   } else {
     addChatBubble("ai", result.text);
-    if (result.mustThink && !mustThinkShown) {
-      mustThinkShown = true;
-      setChatStatus(MUST_THINK_LINE);
+    if (result.effortRefused && !effortLineShown) {
+      effortLineShown = true;
+      setChatStatus(effortRefusedLine(service));
     }
     addSources(result.sources ?? []);
     if (result.cutOff) {

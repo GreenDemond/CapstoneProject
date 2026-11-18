@@ -10,6 +10,10 @@ import {
   normalizeServices,
   MAX_SERVICES,
   reasoningFor,
+  EFFORTS,
+  EFFORT_IGNORED_LINE,
+  MUST_THINK_LINE,
+  effortRefusedLine,
   OPENROUTER_ADDRESS,
   MAX_LABEL,
   modelTaken,
@@ -206,31 +210,43 @@ test("loading drops repeated ids, names, or the same AI at the same address, kee
   assert.deepEqual(services.map((s) => s.id), ["a", "d"]);
 });
 
-test("thinking is off by default only for OpenRouter helpers", () => {
-  const router = addService([], { label: "R", url: "https://openrouter.ai/api/v1" }).list[0];
-  const other = addService([], { label: "O", url: "https://home.example.com", model: "m" }).list[0];
-  assert.equal(router.think, false);
-  assert.equal(other.think, true);
-  const cleaned = normalizeServices({
-    services: [
-      { id: "a", label: "Old router", url: "https://openrouter.ai/api/v1/chat/completions", model: "m" },
-      { id: "b", label: "Old other", url: "https://home.example.com/v1/chat/completions", model: "m" },
-      { id: "c", label: "Router thinks", url: "https://openrouter.ai/api/v1/chat/completions", model: "n", think: true },
-      { id: "d", label: "Other quiet", url: "https://home.example.com/v1/chat/completions", model: "n", think: false },
-      { id: "e", label: "Bad value", url: "https://home.example.com/v1/chat/completions", model: "o", think: "yes" },
-    ],
-  });
-  assert.deepEqual(cleaned.services.map((s) => s.think), [false, true, true, false, true]);
+test("new helpers start on Low effort", () => {
+  assert.equal(addService([], { label: "R", url: "https://openrouter.ai/api/v1" }).list[0].effort, "low");
+  assert.equal(addService([], { label: "O", url: "https://home.example.com", model: "m" }).list[0].effort, "low");
+  assert.deepEqual(EFFORTS.map((e) => e.label), ["None", "Low", "Medium", "High"]);
 });
 
-test("reasoningFor sends the right fields only when the helper is set to not think", () => {
-  const url = "https://openrouter.ai/api/v1/chat/completions";
-  assert.deepEqual(reasoningFor({ url, think: false }), { reasoning: { effort: "none" } });
-  assert.equal(reasoningFor({ url }), null);
-  assert.equal(reasoningFor({ url, think: true }), null);
-  const all = { reasoning: { effort: "none" }, reasoning_effort: "none", chat_template_kwargs: { enable_thinking: false } };
-  assert.deepEqual(reasoningFor({ url: "https://home.example.com/v1/chat/completions", think: false }), all);
-  assert.deepEqual(reasoningFor({ url: "https://openrouter.ai.evil.test/v1/chat/completions", think: false }), all);
-  assert.equal(reasoningFor({ url: "https://home.example.com/v1/chat/completions", think: true }), null);
-  assert.equal(reasoningFor(null), null);
+test("normalizeServices keeps a valid effort, otherwise Low, and drops the old think field", () => {
+  const home = "https://home.example.com/v1/chat/completions";
+  const cleaned = normalizeServices({
+    services: [
+      { id: "a", label: "A", url: home, model: "1", effort: "none" },
+      { id: "b", label: "B", url: home, model: "2", effort: "high" },
+      { id: "c", label: "C", url: home, model: "3", effort: "extreme" },
+      { id: "d", label: "D", url: home, model: "4" },
+      { id: "e", label: "E", url: home, model: "5", think: false },
+      { id: "f", label: "F", url: home, model: "6", effort: 3 },
+    ],
+  });
+  assert.deepEqual(cleaned.services.map((s) => s.effort), ["none", "high", "low", "low", "low", "low"]);
+  assert.ok(cleaned.services.every((s) => !("think" in s)));
+});
+
+test("reasoningFor always sends the effort: OpenRouter one field, others by effort", () => {
+  const router = "https://openrouter.ai/api/v1/chat/completions";
+  const other = "https://home.example.com/v1/chat/completions";
+  for (const effort of ["none", "low", "medium", "high"]) {
+    assert.deepEqual(reasoningFor({ url: router, effort }), { reasoning: { effort } });
+  }
+  assert.deepEqual(reasoningFor({ url: other, effort: "none" }), { reasoning: { effort: "none" }, reasoning_effort: "none", chat_template_kwargs: { enable_thinking: false } });
+  for (const effort of ["low", "medium", "high"]) {
+    assert.deepEqual(reasoningFor({ url: other, effort }), { reasoning: { effort }, reasoning_effort: effort });
+  }
+  assert.deepEqual(reasoningFor({ url: "https://openrouter.ai.evil.test/v1/chat/completions", effort: "low" }), { reasoning: { effort: "low" }, reasoning_effort: "low" });
+  assert.deepEqual(reasoningFor({ url: router }), { reasoning: { effort: "low" } });
+});
+
+test("the refused-setting line depends on the effort", () => {
+  assert.equal(effortRefusedLine({ effort: "none" }), MUST_THINK_LINE);
+  assert.equal(effortRefusedLine({ effort: "low" }), EFFORT_IGNORED_LINE);
 });

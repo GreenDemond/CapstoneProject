@@ -137,14 +137,12 @@ Ben wants more than one OpenRouter helper (for example a free one and a paid one
 - **Chat:** with more than one ready helper, the chat shows the same "Which AI helper?" menu as the paste screen, above the message box. Changing it updates the "Your messages go to..." line and the Search the web box (OpenRouter only). Changing in the middle of a chat is allowed; the next message goes to the new helper.
 - Data stored: unchanged (names are already stored).
 
-## Thinking off by default for OpenRouter (2026-11-17, Ben's request)
+## Thinking effort per helper (2026-11-18, Ben: "default AI effort to low, and have a selector none, low, medium, high")
 
-- Each helper has a saved setting `think` (yes or no). OpenRouter helpers start with it off; other services start on and never send anything about it. A helper saved before this existed follows the same rule.
-- When off, every request to an OpenRouter helper (the check, Show my steps, the chat, with or without search) carries `reasoning: { effort: "none" }`. Thinking is slower, costs credit, and uses the reply limit.
-- Some AIs always think and refuse this (an error, 400). The app then repeats that one request without the setting. If that works, the reply is used and a quiet line says "This AI always thinks first, so thinking can't be turned off." once per visit to the chat or the paste screen. The saved setting is not changed. If the repeat fails too, its failure is shown as usual.
-- Manage (every helper): tick box "Let the AI think before answering", hint "Off is faster and uses less of your credit. Some AIs always think." It saves at once and says "Saved."
-- Data stored: one yes/no per helper, on the device.
+This replaces the earlier on/off switch "Let the AI think before answering" (2026-11-17), which is gone.
 
-### Thinking switch for every helper (2026-11-17, Ben's request, for PolyStrata)
-
-The Manage box now shows for every helper. Defaults are unchanged: OpenRouter starts off, others start on and send nothing. When a non-OpenRouter helper is unticked, requests carry `reasoning: { effort: "none" }`, `reasoning_effort: "none"` and `chat_template_kwargs: { enable_thinking: false }`, because we do not know which one the server honours. A server that ignores them just thinks as usual; one that refuses them (400) gets the same retry without them and the same quiet "always thinks" line. Hint for these helpers: "Off asks the AI to answer without thinking first. Not every AI supports this; if it doesn't, it just thinks as usual."
+- Each helper has a saved `effort`: none, low, medium or high. New helpers, and helpers saved before this existed, start on low. The old on/off setting is ignored.
+- Every request (the check, Show my steps, the chat, with or without search) carries the effort. OpenRouter gets `reasoning: { effort }`. Other services get `reasoning` and `reasoning_effort` with the effort; for None they also get `chat_template_kwargs: { enable_thinking: false }`, because we do not know which one the server honours.
+- A server that refuses the fields (400) gets the same request repeated once without them. If that works, the reply is used and a quiet line shows once per visit to the chat or the paste screen: for None, "This AI always thinks first, so thinking can't be turned off."; otherwise "This AI doesn't take a thinking setting, so it used its own." The saved choice is not changed. If the repeat fails too, its failure is shown as usual.
+- Manage (every helper): a pull-down "How hard should the AI think?" with None (fastest), Low, Medium, High (slowest, uses more credit). Hint: "Low is a good balance. Not every AI supports this; if it doesn't, it uses its own setting." It saves at once and says "Saved."
+- Data stored: one word per helper, on the device.

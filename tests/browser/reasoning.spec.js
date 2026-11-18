@@ -1,9 +1,12 @@
 import { test, expect } from "@playwright/test";
 import { KEY, standIn, openSettings, addOther, nextButton } from "./helpers/ai.js";
 
-// Thinking is off by default for OpenRouter helpers. Stand-in services only: no real key or service is used.
+// Each helper has a thinking effort (None, Low, Medium, High), Low by default. Stand-in services only:
+// no real key or service is used.
 const OPENROUTER = { host: "https://openrouter.ai", base: "/api/v1" };
 const MUST_THINK = "This AI always thinks first, so thinking can't be turned off.";
+const IGNORED = "This AI doesn't take a thinking setting, so it used its own.";
+const LABEL = "How hard should the AI think?";
 
 async function addOpenRouter(page) {
   await page.getByRole("button", { name: "Add an AI helper" }).click();
@@ -29,82 +32,96 @@ async function say(page, text) {
   await page.getByRole("button", { name: "Send", exact: true }).click();
 }
 
-test("a new OpenRouter helper: the check and the chat ask for no thinking", async ({ page }) => {
+async function chooseEffort(page, option) {
+  await page.getByRole("button", { name: /^Manage/ }).click();
+  await page.getByLabel(LABEL).selectOption({ label: option });
+  await expect(page.getByRole("status").last()).toContainText("Saved.");
+  await page.getByRole("button", { name: "Back" }).first().click();
+}
+
+test("a new OpenRouter helper: the check and the chat send effort low", async ({ page }) => {
   const seen = await standIn(page, OPENROUTER);
   await openSettings(page);
   await addOpenRouter(page);
-  expect(bodies(seen)[0].reasoning).toEqual({ effort: "none" });
+  expect(bodies(seen)[0].reasoning).toEqual({ effort: "low" });
   await toChat(page);
   await say(page, "I need help starting");
   await expect(page.getByRole("log", { name: "Chat" })).toContainText("ok");
-  expect(bodies(seen).at(-1).reasoning).toEqual({ effort: "none" });
+  expect(bodies(seen).at(-1).reasoning).toEqual({ effort: "low" });
 });
 
-test("ticking the box on Manage saves at once and stops sending the setting", async ({ page }) => {
+test("Manage: the choice is there with its hint, defaults to Low, and None and High are sent", async ({ page }) => {
   const seen = await standIn(page, OPENROUTER);
   await openSettings(page);
   await addOpenRouter(page);
   await page.getByRole("button", { name: /^Manage/ }).click();
-  const box = page.getByLabel("Let the AI think before answering");
-  await expect(box).not.toBeChecked();
-  await expect(page.getByText("Off is faster and uses less of your credit. Some AIs always think.")).toBeVisible();
-  await box.check();
+  const select = page.getByLabel(LABEL);
+  await expect(select).toHaveValue("low");
+  await expect(select.locator("option")).toHaveText(["None (fastest)", "Low", "Medium", "High (slowest, uses more credit)"]);
+  await expect(page.getByText("Low is a good balance. Not every AI supports this; if it doesn't, it uses its own setting.")).toBeVisible();
+  await page.getByRole("button", { name: "Back" }).first().click();
+
+  await chooseEffort(page, "None (fastest)");
+  await toChat(page);
+  await say(page, "hello");
+  await expect(page.getByRole("log", { name: "Chat" })).toContainText("ok");
+  expect(bodies(seen).at(-1).reasoning).toEqual({ effort: "none" });
+
+  await page.getByRole("button", { name: "Back" }).click();
+  await page.getByRole("button", { name: "Settings" }).click();
+  await chooseEffort(page, "High (slowest, uses more credit)");
+  await toChat(page);
+  const before = seen.chat.length;
+  await say(page, "again");
+  await expect.poll(() => seen.chat.length).toBeGreaterThan(before);
+  expect(bodies(seen).at(-1).reasoning).toEqual({ effort: "high" });
+});
+
+test("the chosen effort is still there after a reload", async ({ page }) => {
+  await standIn(page, OPENROUTER);
+  await openSettings(page);
+  await addOpenRouter(page);
+  await page.getByRole("button", { name: /^Manage/ }).click();
+  await page.getByLabel(LABEL).selectOption({ label: "Medium" });
   await expect(page.getByRole("status").last()).toContainText("Saved.");
   await page.reload();
   await page.getByRole("button", { name: "Settings" }).click();
   await page.getByRole("button", { name: /^Manage/ }).click();
-  await expect(page.getByLabel("Let the AI think before answering")).toBeChecked();
-  await page.getByRole("button", { name: "Back" }).first().click();
-  await toChat(page);
-  await say(page, "hello");
-  await expect(page.getByRole("log", { name: "Chat" })).toContainText("ok");
-  expect(bodies(seen).at(-1)).not.toHaveProperty("reasoning");
+  await expect(page.getByLabel(LABEL)).toHaveValue("medium");
 });
 
-test("another service: the box is there, ticked by default, and nothing is sent until it is unticked", async ({ page }) => {
+test("another service: None sends all three fields, Medium sends reasoning and reasoning_effort only", async ({ page }) => {
   const seen = await standIn(page);
   await openSettings(page);
   await addOther(page);
-  await page.getByRole("button", { name: /^Manage/ }).click();
-  await expect(page.getByLabel("Let the AI think before answering")).toBeChecked();
-  await expect(page.getByText("Off asks the AI to answer without thinking first.")).toBeVisible();
-  await page.getByRole("button", { name: "Back" }).first().click();
+  await chooseEffort(page, "None (fastest)");
   await toChat(page);
   await say(page, "hello");
   await expect(page.getByRole("log", { name: "Chat" })).toContainText("ok");
-  for (const body of bodies(seen)) {
-    expect(body).not.toHaveProperty("reasoning");
-    expect(body).not.toHaveProperty("reasoning_effort");
-    expect(body).not.toHaveProperty("chat_template_kwargs");
-  }
-});
+  const none = bodies(seen).at(-1);
+  expect(none.reasoning).toEqual({ effort: "none" });
+  expect(none.reasoning_effort).toBe("none");
+  expect(none.chat_template_kwargs).toEqual({ enable_thinking: false });
 
-test("another service: unticking sends all three fields in the chat", async ({ page }) => {
-  const seen = await standIn(page);
-  await openSettings(page);
-  await addOther(page);
-  await page.getByRole("button", { name: /^Manage/ }).click();
-  await page.getByLabel("Let the AI think before answering").uncheck();
-  await expect(page.getByRole("status").last()).toContainText("Saved.");
-  await page.getByRole("button", { name: "Back" }).first().click();
+  await page.getByRole("button", { name: "Back" }).click();
+  await page.getByRole("button", { name: "Settings" }).click();
+  await chooseEffort(page, "Medium");
   await toChat(page);
-  await say(page, "hello");
-  await expect(page.getByRole("log", { name: "Chat" })).toContainText("ok");
-  const last = bodies(seen).at(-1);
-  expect(last.reasoning).toEqual({ effort: "none" });
-  expect(last.reasoning_effort).toBe("none");
-  expect(last.chat_template_kwargs).toEqual({ enable_thinking: false });
+  const before = seen.chat.length;
+  await say(page, "again");
+  await expect.poll(() => seen.chat.length).toBeGreaterThan(before);
+  const medium = bodies(seen).at(-1);
+  expect(medium.reasoning).toEqual({ effort: "medium" });
+  expect(medium.reasoning_effort).toBe("medium");
+  expect(medium).not.toHaveProperty("chat_template_kwargs");
 });
 
-test("another service that rejects the fields: still answers via the retry, says so once", async ({ page }) => {
+test("a service that rejects the fields with None: still answers via the retry, says so once", async ({ page }) => {
   await standIn(page);
   await openSettings(page);
   await addOther(page);
-  await page.getByRole("button", { name: /^Manage/ }).click();
-  await page.getByLabel("Let the AI think before answering").uncheck();
-  await expect(page.getByRole("status").last()).toContainText("Saved.");
+  await chooseEffort(page, "None (fastest)");
   const seen = await standIn(page, { rejectReasoning: true });
-  await page.getByRole("button", { name: "Back" }).first().click();
   await toChat(page);
   await say(page, "first");
   await expect(page.getByRole("log", { name: "Chat" })).toContainText("ok");
@@ -117,9 +134,13 @@ test("another service that rejects the fields: still answers via the retry, says
   await say(page, "second");
   await expect(page.getByRole("log", { name: "Chat" }).getByText("ok", { exact: true })).toHaveCount(2);
   await expect(page.getByText(MUST_THINK)).toHaveCount(0);
+  // The refusal is remembered: the second message is sent once, without the fields.
+  const after = bodies(seen);
+  expect(after.length).toBe(3);
+  expect(after[2]).not.toHaveProperty("reasoning_effort");
 });
 
-test("an AI that must think: the chat still answers and says so once", async ({ page }) => {
+test("a service that rejects the fields with Low: still answers via the retry, says so once", async ({ page }) => {
   await standIn(page, OPENROUTER);
   await openSettings(page);
   await addOpenRouter(page);
@@ -127,17 +148,18 @@ test("an AI that must think: the chat still answers and says so once", async ({ 
   await toChat(page);
   await say(page, "first");
   await expect(page.getByRole("log", { name: "Chat" })).toContainText("ok");
-  await expect(page.getByText(MUST_THINK)).toBeVisible();
+  await expect(page.getByText(IGNORED)).toBeVisible();
+  await expect(page.getByText(MUST_THINK)).toHaveCount(0);
   const sent = bodies(seen);
   expect(sent.length).toBe(2);
   expect(sent[0]).toHaveProperty("reasoning");
   expect(sent[1]).not.toHaveProperty("reasoning");
   await say(page, "second");
   await expect(page.getByRole("log", { name: "Chat" }).getByText("ok", { exact: true })).toHaveCount(2);
-  await expect(page.getByText(MUST_THINK)).toHaveCount(0);
+  await expect(page.getByText(IGNORED)).toHaveCount(0);
 });
 
-test("Show my steps sends the setting too, and says so once if the AI must think", async ({ page }) => {
+test("Show my steps sends the effort too, and says so once if the AI refuses it", async ({ page }) => {
   await standIn(page, OPENROUTER);
   await openSettings(page);
   await addOpenRouter(page);
@@ -148,11 +170,11 @@ test("Show my steps sends the setting too, and says so once if the AI must think
   await page.getByRole("button", { name: "Essay" }).click();
   await page.getByRole("button", { name: "Show my steps" }).click();
   await expect(page.locator("#message")).toContainText("Suggested by an AI");
-  expect(bodies(seen).at(-1).reasoning).toEqual({ effort: "none" });
-  await expect(page.locator("#message")).not.toContainText(MUST_THINK);
+  expect(bodies(seen).at(-1).reasoning).toEqual({ effort: "low" });
+  await expect(page.locator("#message")).not.toContainText(IGNORED);
 
   seen = await standIn(page, { ...OPENROUTER, content: steps, rejectReasoning: true });
   await page.getByRole("button", { name: "Show my steps" }).click();
-  await expect(page.locator("#message")).toContainText(MUST_THINK);
+  await expect(page.locator("#message")).toContainText(IGNORED);
   expect(bodies(seen).length).toBe(2);
 });

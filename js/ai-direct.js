@@ -82,24 +82,34 @@ function postJson(service, key, body, signal) {
   );
 }
 
-// Sends the body with the helper's thinking setting added. Some AIs always think and refuse to have it
-// turned off (a 400), so that one request is repeated once without the setting. mustThink is true when
-// that retry worked; the saved setting is never changed here. If the retry fails too, its failure is returned.
+// Sends the body with the helper's thinking effort added. Some AIs refuse the setting (a 400), so that one
+// request is repeated once without it. effortRefused is true when that retry worked; the saved setting is
+// never changed here. If the retry fails too, its failure is returned.
+// Helpers (by id, model and effort) that refused the thinking setting during this visit. They are sent
+// without it from then on, so a refusing server does not cost a failed request on every message.
+const refusedEffort = new Set();
+
 async function postWithThinking(service, key, body, signal) {
-  const extra = reasoningFor(service);
-  if (extra === null) {
-    return postJson(service, key, body, signal);
+  const remembered = `${service.id ?? service.url}|${service.model}|${service.effort ?? ""}`;
+  if (refusedEffort.has(remembered)) {
+    const plain = await postJson(service, key, body, signal);
+    return plain.response?.ok ? { ...plain, effortRefused: true } : plain;
   }
+  const extra = reasoningFor(service);
   const first = await postJson(service, key, { ...body, ...extra }, signal);
   if (first.failed || first.response.status !== 400) {
     return first;
   }
   const retry = await postJson(service, key, body, signal);
-  return retry.response?.ok ? { ...retry, mustThink: true } : retry;
+  if (retry.response?.ok) {
+    refusedEffort.add(remembered);
+    return { ...retry, effortRefused: true };
+  }
+  return retry;
 }
 
 // Returns { steps }, { trustedAdult: true }, or { error } with a plain line (paste screen wording).
-// mustThink: true is added when the AI refused to have thinking turned off.
+// effortRefused: true is added when the AI refused the thinking setting.
 export async function askService(service, key, text, kind, signal) {
   if (text.length > MAX_TEXT) {
     return { error: "That text is too long to send. Shorten it and try again." };
@@ -119,7 +129,7 @@ export async function askService(service, key, text, kind, signal) {
   if (!reply) {
     return { error: "The service didn't suggest any steps." };
   }
-  return result.mustThink ? { ...reply, mustThink: true } : reply;
+  return result.effortRefused ? { ...reply, effortRefused: true } : reply;
 }
 
 export const SEARCH_NEEDS_CREDIT = "Web search needs credit on your OpenRouter account. Untick Search the web to keep chatting for free.";
@@ -147,7 +157,7 @@ export async function askChat(service, key, { kind, guide, length, messages, sea
   }
   const data = result.data;
   const reply = readChatReply(data);
-  return result.mustThink ? { ...reply, mustThink: true } : reply;
+  return result.effortRefused ? { ...reply, effortRefused: true } : reply;
 }
 
 // A harmless check. Returns { ok: true } or { ok: false, kind, aborted? }.

@@ -63,9 +63,18 @@ export function addService(list, { label, url, model = "", keyHint = "", checked
     return { list, error: NAME_TAKEN };
   }
   const name = typedName === "" ? uniqueName(list, autoName(chat, modelName)) : typedName;
-  const service = { id: newId(), label: name, url: chat, model: modelName, keyHint, keyReady, checked, think: !isOpenRouter };
+  const service = { id: newId(), label: name, url: chat, model: modelName, keyHint, keyReady, checked, effort: DEFAULT_EFFORT };
   return { list: [...list, service], error: null };
 }
+
+// How hard the AI should think. Every helper has one; new helpers start on Low.
+export const EFFORTS = [
+  { value: "none", label: "None" },
+  { value: "low", label: "Low" },
+  { value: "medium", label: "Medium" },
+  { value: "high", label: "High" },
+];
+export const DEFAULT_EFFORT = "low";
 
 export const DUPLICATE_HELPER = "You already have a helper for that AI at that address.";
 export const NAME_TAKEN = "You already have a helper called that. Pick another name.";
@@ -179,9 +188,8 @@ export function normalizeServices(data) {
       keyReady: false,
       // Only a helper saved with "Save it anyway" is marked as not checked; older saved helpers count as checked.
       checked: s.checked !== false,
-      // Whether the AI may think before answering. Only OpenRouter can turn thinking off, so it is off
-      // by default there (a saved helper with no setting too) and on everywhere else.
-      think: typeof s.think === "boolean" ? s.think : hostOf(parseAddress(s.url).url) !== "openrouter.ai",
+      // How hard the AI should think. An unknown or missing value becomes Low; the old on/off setting is dropped.
+      effort: EFFORTS.some((e) => e.value === s.effort) ? s.effort : DEFAULT_EFFORT,
     }));
   // Damaged or hand-edited data could repeat an id, a name, or an address with the same AI. Keep the first.
   const unique = [];
@@ -255,20 +263,27 @@ export function chatAddress(typed) {
   return null;
 }
 
-// The extra fields to add to a request when the helper is set to not think, or null. OpenRouter gets its
-// own field ("none" turns thinking off, per its docs). For any other service we do not know which field it
-// honours, so all the common ones are sent; a service that ignores them just thinks as usual.
+// The extra fields added to every request: the helper's thinking effort, always sent. OpenRouter gets its
+// own field. For any other service we do not know which field it honours, so the common ones are sent;
+// a service that ignores them just uses its own setting.
 export function reasoningFor(service) {
-  if (!service || service.think !== false) {
-    return null;
+  const effort = EFFORTS.some((e) => e.value === service?.effort) ? service.effort : DEFAULT_EFFORT;
+  if (hostOf(service?.url ?? "") === "openrouter.ai") {
+    return { reasoning: { effort } };
   }
-  if (hostOf(service.url ?? "") === "openrouter.ai") {
-    return { reasoning: { effort: "none" } };
+  if (effort === "none") {
+    return { reasoning: { effort }, reasoning_effort: effort, chat_template_kwargs: { enable_thinking: false } };
   }
-  return { reasoning: { effort: "none" }, reasoning_effort: "none", chat_template_kwargs: { enable_thinking: false } };
+  return { reasoning: { effort }, reasoning_effort: effort };
 }
 
 export const MUST_THINK_LINE = "This AI always thinks first, so thinking can't be turned off.";
+export const EFFORT_IGNORED_LINE = "This AI doesn't take a thinking setting, so it used its own.";
+
+// The quiet line shown when the AI refused the thinking setting.
+export function effortRefusedLine(service) {
+  return service?.effort === "none" ? MUST_THINK_LINE : EFFORT_IGNORED_LINE;
+}
 
 export function hostLabel(chatUrl) {
   try {
