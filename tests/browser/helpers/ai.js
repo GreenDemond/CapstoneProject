@@ -57,7 +57,8 @@ export const nextButton = (page) => page.getByRole("button", { name: /^Next/ });
 export const pageTop = (locator) => locator.evaluate((node) => node.getBoundingClientRect().top + globalThis.scrollY);
 
 // Step 1 to 3 for "Another service": address, key, pick (by clicking the AI), leaving you on the check step.
-export async function setUpOther(page, { address = HOST, key = KEY, model = "small-model" } = {}) {
+// The helper is named after its host unless a name is given (a blank name would be named automatically).
+export async function setUpOther(page, { address = HOST, key = KEY, model = "small-model", name = new URL(address).hostname } = {}) {
   await page.getByRole("button", { name: "Add an AI helper" }).click();
   await page.getByLabel(/^Another service/).check();
   await page.getByLabel("Its web address").fill(address);
@@ -65,6 +66,7 @@ export async function setUpOther(page, { address = HOST, key = KEY, model = "sma
   await page.getByLabel("Your key").fill(key);
   await nextButton(page).click();
   await page.getByLabel("Pick an AI").selectOption(model);
+  await page.getByLabel("Name this helper (optional)").fill(name);
   await nextButton(page).click();
 }
 

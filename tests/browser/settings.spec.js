@@ -52,7 +52,7 @@ test("bad addresses, duplicates, and an empty key are refused in plain words", a
   await expect(page.getByRole("status").last()).toContainText("Paste your key first");
 });
 
-test("a duplicate address is refused at step 1, before a key is typed", async ({ page }) => {
+test("a second helper at the same address is allowed; the same AI there is refused", async ({ page }) => {
   await standIn(page);
   await openSettings(page);
   await addOther(page);
@@ -60,7 +60,12 @@ test("a duplicate address is refused at step 1, before a key is typed", async ({
   await page.getByLabel(/^Another service/).check();
   await page.getByLabel("Its web address").fill(HOST);
   await nextButton(page).click();
-  await expect(page.getByRole("status").last()).toContainText("already added");
+  await expect(page.getByLabel("Your key")).toBeVisible();
+  await page.getByLabel("Your key").fill(KEY);
+  await nextButton(page).click();
+  await page.getByLabel("Pick an AI").selectOption("small-model");
+  await nextButton(page).click();
+  await expect(page.getByRole("status").last()).toContainText("You already have a helper for that AI at that address.");
 });
 
 // Plain http shows its note while typing, and the space is reserved so Next does not move.

@@ -85,7 +85,8 @@ Plain rows, one button each: **Rename**; **Change the AI** (the pick step alone,
 | Empty key | "Paste your key first." |
 | Not a web address | "That doesn't look like a web address. It should start with http:// or https://." |
 | Path the app can't use | "Type the address the service gives you, for example http://host:8080 or https://openrouter.ai/api/v1." |
-| Already added | "You've already added that one." |
+| Same AI at the same address | "You already have a helper for that AI at that address." |
+| Name already used | "You already have a helper called that. Pick another name." |
 | Key rejected (401, 403) | "That key didn't work. Check you copied all of it. A grown-up can help you get a new one." |
 | Address or AI not found (400, 404) | "Something doesn't match. Let's check the address and the AI together." |
 | Out of credit (402) | "This key is out of credit. Whoever manages the account can add more." |
@@ -125,3 +126,13 @@ Add each service with stand-in responses; cancel at each step saves nothing; a f
 
 1. "AI helper" as the name?
 2. Is it OK that the first helper that becomes Ready is put in use automatically?
+
+## Several helpers at one address (2026-11-17, Ben's request)
+
+Ben wants more than one OpenRouter helper (for example a free one and a paid one).
+
+- **Duplicates:** helpers may share an address. Only the same address and the same AI (model name, case-sensitive) is refused: "You already have a helper for that AI at that address." Checked on the pick step, again when saving, and when changing the AI of a helper. Step 1 no longer refuses an address.
+- **Names:** the pick step has "Name this helper (optional)". Blank gives "OpenRouter · <model without vendor>" (other hosts: "<host> · <model>"; `openrouter/free` is kept whole), with " (2)", " (3)" added if used. Names are unique, ignoring capitals. A typed name already used, or a Rename to one, gets "You already have a helper called that. Pick another name."
+- **Key reuse:** on the key step, a button "Use the same key as <name>" appears for each helper (up to 3) at the same address that has a key. The key is read into memory only (never the box or page), the message says "Using the key from <name>.", and the helper saves its own encrypted copy. If it cannot be read: "Couldn't read that key. Paste it instead."
+- **Chat:** with more than one ready helper, the chat shows the same "Which AI helper?" menu as the paste screen, above the message box. Changing it updates the "Your messages go to..." line and the Search the web box (OpenRouter only). Changing in the middle of a chat is allowed; the next message goes to the new helper.
+- Data stored: unchanged (names are already stored).

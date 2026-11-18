@@ -55,12 +55,13 @@ test("the steps depend on what is missing, and single-step flows have their own 
 });
 
 test("step 1 refuses bad, duplicate, and lookalike addresses before any key is typed", () => {
-  assert.equal(checkService("other", "", []).kind, "notAddress");
-  assert.equal(checkService("other", "nope", []).kind, "notAddress");
-  assert.equal(checkService("other", "https://x.example.com/custom/run", []).kind, "unusableAddress");
-  assert.equal(checkService("other", "https://openrouter.evil.example", []).kind, "notOpenRouter");
-  assert.equal(checkService("openrouter", "", [{ ...ready, url: "https://openrouter.ai/api/v1/chat/completions" }]).kind, "duplicate");
-  assert.equal(checkService("other", "http://host:8080", []).url, "http://host:8080/v1/chat/completions");
+  assert.equal(checkService("other", "").kind, "notAddress");
+  assert.equal(checkService("other", "nope").kind, "notAddress");
+  assert.equal(checkService("other", "https://x.example.com/custom/run").kind, "unusableAddress");
+  assert.equal(checkService("other", "https://openrouter.evil.example").kind, "notOpenRouter");
+  // A second helper at the same address is allowed at step 1 (the same AI is refused later).
+  assert.equal(checkService("openrouter", "").ok, true);
+  assert.equal(checkService("other", "http://host:8080").url, "http://host:8080/v1/chat/completions");
   assert.equal(looksLikeOpenRouter("https://openrouter.ai"), false);
 });
 
@@ -121,4 +122,11 @@ test("the helper in use is not switched to another unless it is gone, and saved-
   assert.equal(inUseHelper([unready], null), null);
   assert.equal(inUseHelper([unchecked], null), null);
   assert.equal(inUseHelper([unchecked], "n").id, "n");
+});
+
+test("renaming refuses a name another helper has, ignoring case, but allows the same helper's own name", () => {
+  const list = [{ ...ready, id: "a", label: "Maths" }, { ...ready, id: "b", label: "Essays" }];
+  assert.match(renameService(list, "b", " maths ").error, /already have a helper called that/);
+  assert.equal(renameService(list, "a", "MATHS").error, null);
+  assert.equal(renameService(list, "b", "Writing").list[1].label, "Writing");
 });

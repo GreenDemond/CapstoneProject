@@ -3,7 +3,7 @@
 // (draftKey) during setup, never in a form, a stored list, a message, or the log.
 import { loadAiSettings, saveAiSettings } from "./storage.js";
 import { keyStoreAvailable, saveKey, hasKey, deleteKey, readKey } from "./keystore.js";
-import { addService, removeService, inUseHelper, isReady, modelsAddress, readModelIds, hostOf } from "./logic/ai-services.js";
+import { addService, removeService, inUseHelper, isReady, modelsAddress, readModelIds, hostOf, modelTaken, nameTaken, MAX_LABEL, DUPLICATE_HELPER, NAME_TAKEN } from "./logic/ai-services.js";
 import { checkKey, keyHint, maskedKey } from "./logic/ai-key.js";
 import {
   helperStatus,
@@ -215,6 +215,7 @@ function startFlow(mode, item) {
     address: "",
     model: item?.model ?? "",
     label: item?.label ?? "",
+    name: "", // the name typed on the pick step (add only); blank means automatic
     keyHint: item?.keyHint ?? "",
     path,
     step: null,
@@ -354,15 +355,17 @@ function renderServiceStep() {
         setMessage("Pick one first.");
         return;
       }
-      const result = checkService(provider, addressInput.value, aiSettings.services, flow.serviceId);
+      const result = checkService(provider, addressInput.value);
       if (!result.ok) {
         setMessage(setupMessage(result.kind));
         addressInput.focus();
         return;
       }
+      if (flow.url && result.url !== flow.url) {
+        dropKey(); // a key (typed or reused) belongs to the old address and must never go to a new one
+      }
       flow.provider = provider;
       flow.url = result.url;
-      flow.label = provider === "openrouter" ? "OpenRouter" : hostOf(result.url);
       nextStep();
     },
   });
@@ -429,6 +432,18 @@ function renderKeyStep() {
     });
     body.append(el("label", { for: "flow-key", text: "Your key" }), el("div", { class: "key-row" }, keyInput, reveal));
   }
+  // Another helper at this address may already have a key saved. Its key is read into the draft in memory
+  // (never into the box or the page); this helper then saves its own copy.
+  if (keyInput && (flow.mode === "add" || flow.mode === "finish")) {
+    const donors = aiSettings.services.filter((item) => item.url === flow.url && item.keyReady && item.id !== flow.serviceId).slice(0, 3);
+    if (donors.length > 0) {
+      const reuse = el("div", { class: "actions", id: "key-reuse" });
+      for (const donor of donors) {
+        reuse.append(button(`Use the same key as ${donor.label}`, () => useKeyFrom(donor)));
+      }
+      body.append(reuse);
+    }
+  }
   body.append(
     el("details", {}, el("summary", { text: "Where do I get a key?" }), el("p", { class: "hint", text: "Ask the adult who manages the AI account. Or make one at openrouter.ai, which needs an adult." })),
     el(
@@ -462,6 +477,22 @@ function renderKeyStep() {
   heading.focus();
 }
 
+async function useKeyFrom(donor) {
+  const mine = token;
+  const key = await readKey(donor.id);
+  if (mine !== token) {
+    return;
+  }
+  if (key === null) {
+    setMessage("Couldn't read that key. Paste it instead.");
+    return;
+  }
+  draftKey = key;
+  flow.keyHint = keyHint(draftKey);
+  nextStep();
+  setMessage(`Using the key from ${donor.label}.`);
+}
+
 // Step 3: pick an AI. The list is looked up by itself; typing a name is always possible.
 function renderPickStep() {
   const { heading, body, actions } = frame("");
@@ -478,6 +509,11 @@ function renderPickStep() {
     typed,
   );
   body.append(status, stop, choices, freeNote, typedBox);
+  let nameInput = null;
+  if (flow.mode === "add") {
+    nameInput = el("input", { id: "flow-name", type: "text", maxlength: String(MAX_LABEL), autocomplete: "off", spellcheck: "false", value: flow.name });
+    body.append(el("div", { class: "manage-row" }, el("label", { for: "flow-name", text: "Name this helper (optional)" }), nameInput));
+  }
 
   if (flow.mode === "changeAi" && flow.model) {
     typed.value = flow.model;
@@ -500,7 +536,20 @@ function renderPickStep() {
         setMessage(setupMessage("noModel"));
         return;
       }
-      flow.model = name.slice(0, 100);
+      const model = name.slice(0, 100);
+      if (nameInput) {
+        flow.name = nameInput.value.trim();
+        if (flow.name !== "" && nameTaken(aiSettings.services, flow.name)) {
+          setMessage(NAME_TAKEN);
+          nameInput.focus();
+          return;
+        }
+      }
+      if (modelTaken(aiSettings.services, flow.url, model, flow.serviceId)) {
+        setMessage(DUPLICATE_HELPER);
+        return;
+      }
+      flow.model = model;
       nextStep();
     },
   });
@@ -628,7 +677,7 @@ async function commit(checked) {
 
   if (mode === "add") {
     const added = addService(aiSettings.services, {
-      label: flow.label,
+      label: flow.name,
       url: flow.url,
       model: flow.model,
       keyHint: flow.keyHint,
@@ -642,6 +691,10 @@ async function commit(checked) {
     id = added.list[added.list.length - 1].id;
     candidate = { services: added.list, chosenId: aiSettings.chosenId };
   } else {
+    if (modelTaken(aiSettings.services, flow.url, flow.model, id)) {
+      setMessage(DUPLICATE_HELPER);
+      return failCommit();
+    }
     const changes = { model: flow.model, checked, keyReady: true };
     if (draftKey !== null) {
       changes.keyHint = flow.keyHint;

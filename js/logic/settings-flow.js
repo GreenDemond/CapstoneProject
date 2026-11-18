@@ -1,5 +1,5 @@
 // The rules behind the AI helpers screens (design/settings-ux.md v2). No screen or network code here.
-import { chatAddress, isReady, OPENROUTER_DEFAULT_MODEL, hostOf } from "./ai-services.js";
+import { chatAddress, isReady, OPENROUTER_DEFAULT_MODEL, hostOf, nameTaken, MAX_LABEL, NAME_TAKEN } from "./ai-services.js";
 
 export const OPENROUTER_BASE = "https://openrouter.ai/api/v1";
 
@@ -70,7 +70,7 @@ export function looksLikeOpenRouter(typed) {
 }
 
 // Step 1 checks, before any key is typed. Returns { ok, url } or { ok: false, kind }.
-export function checkService(provider, typedAddress, list, ignoreId = null) {
+export function checkService(provider, typedAddress) {
   const typed = provider === "openrouter" ? OPENROUTER_BASE : typedAddress;
   if (provider !== "openrouter") {
     if (typeof typed !== "string" || typed.trim() === "") {
@@ -84,9 +84,7 @@ export function checkService(provider, typedAddress, list, ignoreId = null) {
   if (url === null) {
     return { ok: false, kind: /^https?:\/\//i.test(typed.trim()) ? "unusableAddress" : "notAddress" };
   }
-  if (list.some((service) => service.url === url && service.id !== ignoreId)) {
-    return { ok: false, kind: "duplicate" };
-  }
+  // Several helpers can share an address. Only the same AI at the same address is refused (addService, pick step).
   return { ok: true, url };
 }
 
@@ -108,8 +106,11 @@ export function defaultModel(chatUrl, ids, current) {
 
 export function renameService(list, id, label) {
   const name = typeof label === "string" ? label.trim() : "";
-  if (name === "" || name.length > 60) {
-    return { list, error: "Give it a name up to 60 characters." };
+  if (name === "" || name.length > MAX_LABEL) {
+    return { list, error: `Give it a name up to ${MAX_LABEL} characters.` };
+  }
+  if (nameTaken(list, name, id)) {
+    return { list, error: NAME_TAKEN };
   }
   return { list: list.map((service) => (service.id === id ? { ...service, label: name } : service)), error: null };
 }
@@ -154,7 +155,6 @@ const MESSAGES = {
   emptyKey: "Paste your key first.",
   notAddress: "That doesn't look like a web address. It should start with http:// or https://.",
   unusableAddress: "Type the address the service gives you, for example http://host:8080 or https://openrouter.ai/api/v1.",
-  duplicate: "You've already added that one.",
   notOpenRouter: "That isn't OpenRouter's address. Go back and pick OpenRouter.",
   key: "That key didn't work. Check you copied all of it. A grown-up can help you get a new one.",
   notFound: "Something doesn't match. Let's check the address and the AI together.",

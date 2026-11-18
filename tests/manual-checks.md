@@ -203,3 +203,16 @@ Needs your real OpenRouter key as the AI helper.
 5. Untick the box and send another message: no new Sources, and no search cost.
 6. With no credit on the OpenRouter account, tick the box and send: the line says "Web search needs credit on your OpenRouter account. Untick Search the web to keep chatting for free." and your words are back in the box. Unticked, the chat works as before.
 7. Check that the AI still gives hints and questions, not finished answers, with search on (ask "search for the answer to question 3 and give it to me").
+
+
+## Several helpers at one address (design/settings-ux.md)
+
+Needs your real OpenRouter key.
+
+1. Settings, Add an AI helper, OpenRouter, paste the key, pick one AI, leave "Name this helper (optional)" blank. The card is named like "OpenRouter · <AI>".
+2. Add another OpenRouter helper. On the key step you see "Use the same key as <first name>". Tap it: you move on and the line says "Using the key from <first name>." Pick a different AI, type a name such as "Maths helper", finish. Two cards are listed.
+3. Add a third and pick the same AI as the first: "You already have a helper for that AI at that address." Type the name "Maths helper" (any capitals) with a different AI: "You already have a helper called that. Pick another name."
+4. Manage a helper, Rename it to another helper's name: the same name message.
+5. Manage, Change the AI to the AI another OpenRouter helper uses: refused with the same-AI message.
+6. Open Talk it through: "Which AI helper?" is above the message box. Choose the other one: the "Your messages go to..." line changes. Send a message, change the menu, send another: each goes to the helper chosen.
+7. Go back to the home screen: its "Which AI helper?" shows the same helper as the chat.

@@ -10,6 +10,11 @@ import {
   normalizeServices,
   MAX_SERVICES,
   OPENROUTER_ADDRESS,
+  MAX_LABEL,
+  modelTaken,
+  autoName,
+  shortModel,
+  uniqueName,
 } from "../../js/logic/ai-services.js";
 import { loadAiSettings, saveAiSettings, STORAGE_KEY } from "../../js/storage.js";
 
@@ -67,9 +72,9 @@ test("a model name is optional when adding; it is picked from the list later", (
   assert.equal(list[0].model, "");
 });
 
-test("duplicate addresses and the list limit are refused", () => {
+test("the same AI at the same address is refused, and the list limit too", () => {
   const first = addService([], { label: "A", url: OPENROUTER_ADDRESS, model: "m" }).list;
-  assert.match(addService(first, { label: "B", url: OPENROUTER_ADDRESS, model: "m" }).error, /already saved/);
+  assert.equal(addService(first, { label: "B", url: OPENROUTER_ADDRESS, model: "m" }).error, "You already have a helper for that AI at that address.");
   let list = [];
   for (let i = 0; i < MAX_SERVICES; i += 1) {
     list = addService(list, { label: `S${i}`, url: `https://s${i}.example.com`, model: "m" }).list;
@@ -143,4 +148,59 @@ test("a chat address that is not the standard form gives no guessed list address
 test("model ids are read from the standard list reply, and damaged items are skipped", () => {
   assert.deepEqual(readModelIds({ object: "list", data: [{ id: "a" }, { id: "" }, "b", null, { id: 5 }] }), ["a", "b"]);
   assert.deepEqual(readModelIds({}), []);
+});
+
+test("several helpers can share an address when their AIs differ; the model name is case-sensitive", () => {
+  let list = addService([], { url: OPENROUTER_ADDRESS, model: "openai/gpt-oss-20b:free" }).list;
+  const second = addService(list, { url: OPENROUTER_ADDRESS, model: "anthropic/claude-x" });
+  assert.equal(second.error, null);
+  assert.equal(addService(second.list, { url: OPENROUTER_ADDRESS, model: "Anthropic/claude-x" }).error, null);
+  assert.match(addService(second.list, { url: OPENROUTER_ADDRESS, model: "anthropic/claude-x" }).error, /already have a helper for that AI/);
+  // Another address with the same model is fine.
+  assert.equal(addService(second.list, { url: "https://other.example.com", model: "anthropic/claude-x" }).error, null);
+});
+
+test("modelTaken ignores the helper being changed", () => {
+  const list = addService([], { url: OPENROUTER_ADDRESS, model: "m" }).list;
+  assert.equal(modelTaken(list, OPENROUTER_ADDRESS, "m"), true);
+  assert.equal(modelTaken(list, OPENROUTER_ADDRESS, "m", list[0].id), false);
+});
+
+test("automatic names: OpenRouter, other hosts, vendor prefix removed, numbered when used", () => {
+  assert.equal(autoName(OPENROUTER_ADDRESS, "openai/gpt-oss-20b:free"), "OpenRouter · gpt-oss-20b:free");
+  assert.equal(autoName(OPENROUTER_ADDRESS, "openrouter/free"), "OpenRouter · openrouter/free");
+  assert.equal(autoName("https://ai.example.test/v1/chat/completions", "small-model"), "ai.example.test · small-model");
+  assert.equal(autoName("https://ai.example.test/v1/chat/completions", ""), "ai.example.test");
+  assert.equal(shortModel("a/b/c"), "b/c");
+  assert.equal(shortModel("plain"), "plain");
+  assert.ok(autoName(OPENROUTER_ADDRESS, "v/" + "x".repeat(99)).length <= MAX_LABEL);
+});
+
+test("a blank name is made automatically and numbered when already used; a typed used name is refused", () => {
+  let list = [];
+  const url = "https://ai.example.test";
+  list = addService(list, { url, model: "m" }).list;
+  assert.equal(list[0].label, "ai.example.test · m");
+  list = addService(list, { label: "ai.example.test · m (2)", url, model: "n" }).list;
+  // The same host and AI over http is a different address, so its automatic name gets a number.
+  const numbered = addService(list, { url: "http://ai.example.test", model: "m" });
+  assert.equal(numbered.error, null);
+  assert.equal(numbered.list.at(-1).label, "ai.example.test · m (3)");
+  const typedDuplicate = addService(list, { label: "AI.EXAMPLE.TEST · M", url, model: "z" });
+  assert.equal(typedDuplicate.error, "You already have a helper called that. Pick another name.");
+  assert.equal(uniqueName(list, "ai.example.test · m"), "ai.example.test · m (3)");
+  assert.equal(uniqueName(list, "fresh"), "fresh");
+  assert.ok(uniqueName([{ id: "x", label: "y".repeat(60) }], "y".repeat(60)).length <= MAX_LABEL);
+});
+
+test("loading drops repeated ids, names, or the same AI at the same address, keeping the first", () => {
+  const url = "https://openrouter.ai/api/v1/chat/completions";
+  const { services } = normalizeServices({ services: [
+    { id: "a", label: "One", url, model: "m1" },
+    { id: "a", label: "Two", url, model: "m2" },
+    { id: "b", label: "one", url, model: "m3" },
+    { id: "c", label: "Three", url, model: "m1" },
+    { id: "d", label: "Four", url, model: "m4" },
+  ] });
+  assert.deepEqual(services.map((s) => s.id), ["a", "d"]);
 });

@@ -4,14 +4,14 @@
 // the log and the status line is changed in place, so screen readers announce only what is new.
 import { KINDS } from "../logic/starter-steps.js";
 import { loadWork, loadChats, saveChats, deleteAllChats, loadChatSettings } from "../storage.js";
-import { inUseHelper, isReady } from "../logic/ai-services.js";
+import { inUseHelper, isReady, usableServices } from "../logic/ai-services.js";
 import { readKey } from "../keystore.js";
 import { askChat } from "../ai-direct.js";
 import { MAX_MESSAGE, OPENING_QUESTION, TRUSTED_ADULT_LINE } from "../logic/chat.js";
 import { MAX_CHATS, titleFor, isPlaceholderTitle, upsertChat, deleteChat, trimItems, sentMessages, savableItems, hasContent, dateLabel, isToday } from "../logic/chat-store.js";
 import { isOpenRouter } from "../logic/settings-flow.js";
 import { guideFor, lengthFor } from "../logic/chat-settings.js";
-import { getAiSettings, openSettingsScreen } from "../settings.js";
+import { getAiSettings, openSettingsScreen, setChosenHelper } from "../settings.js";
 import { el, button } from "../ui/dom.js";
 import { showScreen } from "../ui/screens.js";
 import { where } from "../ui/helpers.js";
@@ -174,6 +174,11 @@ function setChatBusy(busy) {
     chatParts.send.disabled = busy;
     chatParts.stop.hidden = !busy;
   }
+  // The helper cannot change while a reply is coming, so the screen never names a different one.
+  const helperSelect = document.getElementById("chat-helper");
+  if (helperSelect) {
+    helperSelect.disabled = busy;
+  }
 }
 
 function addChatBubble(who, text, extra = {}) {
@@ -236,9 +241,11 @@ function buildChat() {
     );
     return;
   }
+  let goesTo = null;
   if (helper) {
+    goesTo = el("p", "", { class: "hint", id: "chat-goes-to" });
     chatBody.append(
-      el("p", `Your chats are saved on this device only. Your messages go to the AI service ${where(helper)}. Don't type your name or anything private. Replies come from an AI, not a person.`, { class: "hint" }),
+      goesTo,
       el("p", "An AI can still get it wrong. If it gives you a finished answer, don't copy it.", { class: "hint" }),
     );
   } else {
@@ -268,20 +275,48 @@ function buildChat() {
   }
   chatBody.append(kinds);
 
-  let searchBox = el("span");
-  if (helper && isOpenRouter(helper.url)) {
-    searchBox = el("div", undefined, { class: "chat-search" });
-    const tick = el("input", undefined, { type: "checkbox", id: "chat-search" });
-    tick.checked = chatSearch;
-    tick.addEventListener("change", () => {
-      chatSearch = tick.checked;
+  // The line about where messages go and the Search the web box follow the helper in use, and are redrawn
+  // in place when another helper is picked, so a half-typed message stays.
+  const searchBox = el("div", undefined, { class: "chat-search" });
+  const drawHelper = () => {
+    const current = currentChatHelper();
+    if (goesTo && current) {
+      goesTo.textContent = `Your chats are saved on this device only. Your messages go to the AI service ${where(current)}. Don't type your name or anything private. Replies come from an AI, not a person.`;
+    }
+    searchBox.replaceChildren();
+    searchBox.hidden = !(current && isOpenRouter(current.url));
+    if (!searchBox.hidden) {
+      const tick = el("input", undefined, { type: "checkbox", id: "chat-search" });
+      tick.checked = chatSearch;
+      tick.addEventListener("change", () => {
+        chatSearch = tick.checked;
+      });
+      searchBox.append(
+        tick,
+        el("label", "Search the web", { for: "chat-search" }),
+        el("p", "Uses your OpenRouter credit (about 1 cent per message).", { class: "hint" }),
+      );
+    }
+  };
+  // With more than one ready helper, the same "Which AI helper?" menu as the paste screen. The next message
+  // goes to the one chosen, even in the middle of a chat.
+  const ready = usableServices(getAiSettings().services);
+  if (helper && ready.length > 1) {
+    const select = el("select", undefined, { id: "chat-helper" });
+    for (const item of ready) {
+      const option = el("option", item.label, { value: item.id });
+      option.selected = item.id === helper.id;
+      select.append(option);
+    }
+    select.addEventListener("change", () => {
+      setChosenHelper(select.value);
+      drawHelper();
     });
-    searchBox.append(
-      tick,
-      el("label", "Search the web", { for: "chat-search" }),
-      el("p", "Uses your OpenRouter credit (about 1 cent per message).", { class: "hint" }),
-    );
+    const row = el("p", undefined, { id: "chat-helper-row" });
+    row.append(el("label", "Which AI helper?", { for: "chat-helper" }), " ", select);
+    chatBody.append(row);
   }
+  drawHelper();
   chatBody.append(searchBox);
 
   const log = el("div", undefined, { class: "chat-log", role: "log", "aria-live": "polite", "aria-label": "Chat" });

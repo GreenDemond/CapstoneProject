@@ -39,16 +39,8 @@ export function addService(list, { label, url, model = "", keyHint = "", checked
   if (chat === null) {
     return { list, error: "Type the address the service gives you, for example http://host:8080 or https://openrouter.ai/api/v1." };
   }
-  const typedName = typeof label === "string" ? label.trim() : "";
-  const name = typedName === "" ? hostLabel(chat) : typedName;
-  if (name.length > MAX_LABEL) {
-    return { list, error: `Keep the name under ${MAX_LABEL} characters.` };
-  }
   if (list.length >= MAX_SERVICES) {
     return { list, error: `You can save up to ${MAX_SERVICES} AI services. Remove one first.` };
-  }
-  if (list.some((service) => service.url === chat)) {
-    return { list, error: "That address is already saved." };
   }
   // OpenRouter's router over free models is the default for OpenRouter addresses. The student can change it.
   // Its providers may keep prompts, so the account settings in DECISIONS T6 still apply.
@@ -58,8 +50,68 @@ export function addService(list, { label, url, model = "", keyHint = "", checked
   if (modelName.length > MAX_MODEL) {
     return { list, error: `Keep the model name under ${MAX_MODEL} characters.` };
   }
+  // Several helpers can share an address (for example two OpenRouter helpers with different AIs),
+  // but not the same AI at the same address.
+  if (modelTaken(list, chat, modelName)) {
+    return { list, error: DUPLICATE_HELPER };
+  }
+  const typedName = typeof label === "string" ? label.trim() : "";
+  if (typedName.length > MAX_LABEL) {
+    return { list, error: `Keep the name under ${MAX_LABEL} characters.` };
+  }
+  if (typedName !== "" && nameTaken(list, typedName)) {
+    return { list, error: NAME_TAKEN };
+  }
+  const name = typedName === "" ? uniqueName(list, autoName(chat, modelName)) : typedName;
   const service = { id: newId(), label: name, url: chat, model: modelName, keyHint, keyReady, checked };
   return { list: [...list, service], error: null };
+}
+
+export const DUPLICATE_HELPER = "You already have a helper for that AI at that address.";
+export const NAME_TAKEN = "You already have a helper called that. Pick another name.";
+
+// True when another helper (not ignoreId) has the same address and the same AI (model name is case-sensitive).
+export function modelTaken(list, chatUrl, model, ignoreId = null) {
+  return list.some((service) => service.id !== ignoreId && service.url === chatUrl && service.model === model);
+}
+
+// True when another helper (not ignoreId) already has this name, ignoring upper and lower case.
+export function nameTaken(list, name, ignoreId = null) {
+  const wanted = name.trim().toLowerCase();
+  return list.some((service) => service.id !== ignoreId && service.label.trim().toLowerCase() === wanted);
+}
+
+// The model name without its vendor prefix: openai/gpt-oss-20b:free -> gpt-oss-20b:free.
+// OpenRouter's own router name (openrouter/free) is kept whole, because "free" alone says little.
+export function shortModel(model) {
+  const slash = model.indexOf("/");
+  if (slash <= 0 || slash === model.length - 1 || model.startsWith("openrouter/")) {
+    return model;
+  }
+  return model.slice(slash + 1);
+}
+
+// The name a helper gets when the student does not type one.
+export function autoName(chatUrl, model) {
+  const host = hostOf(chatUrl);
+  const base = host === "openrouter.ai" ? "OpenRouter" : host || "AI service";
+  const name = model === "" ? base : `${base} · ${shortModel(model)}`;
+  return name.length > MAX_LABEL ? name.slice(0, MAX_LABEL).trimEnd() : name;
+}
+
+// Adds " (2)", " (3)" ... until no other helper has the name. The name stays within MAX_LABEL.
+export function uniqueName(list, base, ignoreId = null) {
+  if (!nameTaken(list, base, ignoreId)) {
+    return base;
+  }
+  for (let n = 2; n < 1000; n += 1) {
+    const suffix = ` (${n})`;
+    const candidate = `${base.slice(0, MAX_LABEL - suffix.length).trimEnd()}${suffix}`;
+    if (!nameTaken(list, candidate, ignoreId)) {
+      return candidate;
+    }
+  }
+  return base;
 }
 
 export function removeService(list, id) {
@@ -128,8 +180,16 @@ export function normalizeServices(data) {
       // Only a helper saved with "Save it anyway" is marked as not checked; older saved helpers count as checked.
       checked: s.checked !== false,
     }));
+  // Damaged or hand-edited data could repeat an id, a name, or an address with the same AI. Keep the first.
+  const unique = [];
+  for (const s of services) {
+    const clash = unique.some((u) => u.id === s.id || u.label.toLowerCase() === s.label.toLowerCase() || (u.url === s.url && u.model !== "" && u.model === s.model));
+    if (!clash) {
+      unique.push(s);
+    }
+  }
   return {
-    services,
+    services: unique,
     chosenId: typeof data.chosenId === "string" ? data.chosenId : null,
   };
 }
