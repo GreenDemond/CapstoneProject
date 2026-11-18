@@ -1,12 +1,14 @@
 // Saved chats (design/chat-history.md). Pure logic: no screen, no browser storage.
-// A chat is { id, kind, title, startedOn, usedOn, items: [{ who: "you" | "ai" | "note", text }] }.
+// A chat is { id, kind, title, startedOn, usedOn, items: [{ who: "you" | "ai" | "note", text }, or { who: "sources", text: "", links: [{ url, title }] }] }.
+// A sources item holds the links shown under an AI reply. It is never sent to the AI and never counts as a message.
 import { KINDS } from "./starter-steps.js";
+import { cleanSources } from "./chat.js";
 
 export const MAX_CHATS = 10;
 export const MAX_CHAT_CHARS = 20000;
 export const TRIM_NOTE = "Older messages in this chat aren't kept.";
 const TITLE_CHARS = 40;
-const WHO = ["you", "ai", "note"];
+const WHO = ["you", "ai", "note", "sources"];
 
 function validDate(text) {
   return typeof text === "string" && !Number.isNaN(new Date(text).getTime());
@@ -44,6 +46,11 @@ export function normalizeChats(raw) {
     if (!Array.isArray(chat.items) || !validDate(chat.usedOn)) continue;
     const items = [];
     for (const item of chat.items) {
+      if (item?.who === "sources") {
+        const links = cleanSources(item.links);
+        if (links.length > 0) items.push({ who: "sources", text: "", links });
+        continue;
+      }
       if (!item || !WHO.includes(item.who) || typeof item.text !== "string") continue;
       items.push({ who: item.who, text: item.text.slice(0, MAX_CHAT_CHARS) });
     }
@@ -98,6 +105,10 @@ export function trimItems(items) {
     }
     kept.unshift(body[i]);
   }
+  while (kept[0]?.who === "sources") {
+    kept.shift(); // its reply was cut off, so the links would hang in the air
+    cut = true;
+  }
   return hadNote || cut || kept.length < body.length ? [{ who: "note", text: TRIM_NOTE }, ...kept] : kept;
 }
 
@@ -121,12 +132,14 @@ export function sentMessages(items) {
 
 // The items that may be saved: plain copies, without anything flagged.
 export function savableItems(items) {
-  return items.filter((item) => item.flagged !== true).map((item) => ({ who: item.who, text: item.text }));
+  return items
+    .filter((item) => item.flagged !== true)
+    .map((item) => (item.who === "sources" ? { who: "sources", text: "", links: item.links.map((l) => ({ url: l.url, title: l.title })) } : { who: item.who, text: item.text }));
 }
 
 // True when the chat holds something worth saving: a message from the student or the AI.
 export function hasContent(items) {
-  return savableItems(items).some((item) => item.who !== "note");
+  return savableItems(items).some((item) => item.who !== "note" && item.who !== "sources");
 }
 
 function sameLocalDay(a, b) {

@@ -190,3 +190,16 @@ Needs an AI helper set up in Settings (your own key). With no helper, the chat s
 11. Start work on the paste screen with Reading picked, refresh, open Talk it through: Reading is already picked.
 12. With no AI helper set up but saved chats: Talk it through shows "Add an AI helper in Settings first." and still lets you read the chats; Send says "No AI helper is ready."
 13. Not tested by a person: a full browser store. A line says "This chat couldn't be saved on this device. Deleting an old chat makes room." and the chat keeps working.
+
+
+## Search the web in the chat (design/web-search.md, slice 1)
+
+Needs your real OpenRouter key as the AI helper.
+
+1. Open Talk it through. Under the kind buttons you see a tick box "Search the web" and the line "Uses your OpenRouter credit (about 1 cent per message)." It is unticked. With a helper that is not OpenRouter, the box is not there.
+2. Pick Reading, tick Search the web, and send "who is Scout Finch". The line under the box says "Searching the web and asking ..." while you wait.
+3. The reply comes with a "Sources" list of up to 5 links under it. Tap one: it opens in a new tab. No link is shown twice.
+4. Refresh and open Talk it through: the reply and its Sources are still there, and the box is unticked again. Tap New chat: unticked.
+5. Untick the box and send another message: no new Sources, and no search cost.
+6. With no credit on the OpenRouter account, tick the box and send: the line says "Web search needs credit on your OpenRouter account. Untick Search the web to keep chatting for free." and your words are back in the box. Unticked, the chat works as before.
+7. Check that the AI still gives hints and questions, not finished answers, with search on (ask "search for the answer to question 3 and give it to me").

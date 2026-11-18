@@ -9,6 +9,7 @@ import { readKey } from "../keystore.js";
 import { askChat } from "../ai-direct.js";
 import { MAX_MESSAGE, OPENING_QUESTION, TRUSTED_ADULT_LINE } from "../logic/chat.js";
 import { MAX_CHATS, titleFor, isPlaceholderTitle, upsertChat, deleteChat, trimItems, sentMessages, savableItems, hasContent, dateLabel, isToday } from "../logic/chat-store.js";
+import { isOpenRouter } from "../logic/settings-flow.js";
 import { guideFor, lengthFor } from "../logic/chat-settings.js";
 import { getAiSettings, openSettingsScreen } from "../settings.js";
 import { el, button } from "../ui/dom.js";
@@ -26,6 +27,7 @@ let chatPending = false; // the student's message is on screen and its reply has
 let chatListStatus = null; // the status line of My chats, made once
 let chatRun = 0; // changes on New chat, Back, and Stop, so a late reply is ignored
 let chatAbort = null;
+let chatSearch = false; // "Search the web" ticked; off at the start of every chat and when a chat is opened
 let chatParts = null; // the pieces on screen: log, input, send, stop, status, carry
 
 function currentChatHelper() {
@@ -97,6 +99,7 @@ function showChat() {
 
 function openChatScreen() {
   resetChat();
+  chatSearch = false;
   showScreen("chat");
   chatView = "chat";
   const [recent] = loadChats();
@@ -127,6 +130,7 @@ function openSavedChat(id) {
     return;
   }
   resetChat();
+  chatSearch = false;
   chat = { ...found, items: found.items.map((item) => ({ ...item })) };
   chatCarry = null;
   chatView = "chat";
@@ -136,6 +140,7 @@ function openSavedChat(id) {
 
 function newChat() {
   resetChat();
+  chatSearch = false;
   chat = blankChat(defaultChatKind() ?? chat.kind);
   chatCarry = null;
   buildChat();
@@ -176,6 +181,35 @@ function addChatBubble(who, text, extra = {}) {
   if (chatParts) {
     chatParts.carry.hidden = true;
     chatParts.log.append(chatBubble(who, text));
+    chatParts.log.scrollTop = chatParts.log.scrollHeight;
+  }
+}
+
+// The links under a reply. Titles are text. An address is used only if it is https, and the link opens
+// in a new tab without passing anything on.
+function sourcesNode(links) {
+  const box = el("div", undefined, { class: "chat-sources" });
+  box.append(el("span", "Sources", { class: "chat-who" }));
+  const list = el("ul");
+  for (const link of links) {
+    if (typeof link.url !== "string" || !link.url.startsWith("https://")) continue;
+    const a = el("a", link.title, { target: "_blank", rel: "noopener noreferrer" });
+    a.href = link.url;
+    const item = el("li");
+    item.append(a);
+    list.append(item);
+  }
+  box.append(list);
+  return box;
+}
+
+function addSources(links) {
+  if (links.length === 0) {
+    return;
+  }
+  chat.items.push({ who: "sources", text: "", links });
+  if (chatParts) {
+    chatParts.log.append(sourcesNode(links));
     chatParts.log.scrollTop = chatParts.log.scrollHeight;
   }
 }
@@ -234,6 +268,22 @@ function buildChat() {
   }
   chatBody.append(kinds);
 
+  let searchBox = el("span");
+  if (helper && isOpenRouter(helper.url)) {
+    searchBox = el("div", undefined, { class: "chat-search" });
+    const tick = el("input", undefined, { type: "checkbox", id: "chat-search" });
+    tick.checked = chatSearch;
+    tick.addEventListener("change", () => {
+      chatSearch = tick.checked;
+    });
+    searchBox.append(
+      tick,
+      el("label", "Search the web", { for: "chat-search" }),
+      el("p", "Uses your OpenRouter credit (about 1 cent per message).", { class: "hint" }),
+    );
+  }
+  chatBody.append(searchBox);
+
   const log = el("div", undefined, { class: "chat-log", role: "log", "aria-live": "polite", "aria-label": "Chat" });
   const input = el("textarea", undefined, { id: "chat-input", rows: "3", "aria-label": "Your message" });
   input.addEventListener("keydown", (event) => {
@@ -259,7 +309,7 @@ function buildChat() {
 
   log.append(chatBubble("ai", OPENING_QUESTION));
   for (const item of chat.items) {
-    log.append(chatBubble(item.who, item.text));
+    log.append(item.who === "sources" ? sourcesNode(item.links) : chatBubble(item.who, item.text));
   }
   log.scrollTop = log.scrollHeight;
   if (chat.giveBack) {
@@ -412,7 +462,8 @@ async function sendChat() {
   chatParts.input.value = "";
   addChatBubble("you", text); // not saved yet: it is saved with its reply, so a refresh now loses only this message
   chatPending = true;
-  setChatStatus(`Waiting for ${service.label}...`);
+  const search = chatSearch && isOpenRouter(service.url);
+  setChatStatus(search ? `Searching the web and asking ${service.label}...` : `Waiting for ${service.label}...`);
   chatAbort = new AbortController();
   chatParts.input.focus();
   const slowNote = setTimeout(() => {
@@ -423,7 +474,7 @@ async function sendChat() {
 
   // Settings are read now, so a change made in Settings applies to the next message.
   const mine = loadChatSettings();
-  const result = await askChat(service, key, { kind: chat.kind, guide: guideFor(mine, chat.kind), length: lengthFor(mine, chat.kind), messages: sentMessages(chat.items) }, chatAbort.signal);
+  const result = await askChat(service, key, { kind: chat.kind, guide: guideFor(mine, chat.kind), length: lengthFor(mine, chat.kind), messages: sentMessages(chat.items), search }, chatAbort.signal);
   clearTimeout(slowNote);
   if (run !== chatRun) {
     return; // Stop, New chat, or Back was pressed: ignore a late answer
@@ -450,6 +501,7 @@ async function sendChat() {
     saveChatAndWarn();
   } else {
     addChatBubble("ai", result.text);
+    addSources(result.sources ?? []);
     if (result.cutOff) {
       addChatBubble("note", "The reply was cut off by the AI service.");
     }

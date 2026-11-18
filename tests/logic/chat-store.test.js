@@ -197,3 +197,33 @@ test("isToday uses the local date", () => {
   assert.equal(isToday(new Date(2026, 10, 16, 23, 59).toISOString(), now), false);
   assert.equal(isToday("junk", now), false);
 });
+
+const withSources = (links) => ({ who: "sources", text: "", links });
+const chatWith = (items) => ({ id: "c1", kind: "essay", title: "T", startedOn: new Date().toISOString(), usedOn: new Date().toISOString(), items });
+
+test("sources items are kept, and bad links are dropped one by one", () => {
+  const [chat] = normalizeChats([chatWith([
+    { who: "you", text: "q" }, { who: "ai", text: "a" },
+    withSources([{ url: "https://a.test/", title: "A" }, { url: "http://b.test/", title: "B" }, { url: "https://a.test/", title: "dup" }, null, { url: 3 }]),
+    withSources([{ url: "http://only-bad.test/" }]),
+    { who: "sources", text: "", links: "nope" },
+  ])]);
+  assert.equal(chat.items.length, 3);
+  assert.deepEqual(chat.items[2], withSources([{ url: "https://a.test/", title: "A" }]));
+});
+
+test("sources are never sent to the AI, never make a title, and do not count as content", () => {
+  const items = [{ who: "ai", text: "a" }, withSources([{ url: "https://a.test/", title: "A" }]), { who: "you", text: "q" }];
+  assert.deepEqual(sentMessages(items), [{ role: "assistant", text: "a" }, { role: "user", text: "q" }]);
+  assert.equal(titleFor("essay", [withSources([{ url: "https://a.test/", title: "A" }])]), "Chat · Essay");
+  assert.equal(hasContent([withSources([{ url: "https://a.test/", title: "A" }])]), false);
+});
+
+test("savableItems copies the links, and trimItems never starts on orphaned sources", () => {
+  const links = [{ url: "https://a.test/", title: "A" }];
+  assert.deepEqual(savableItems([{ who: "ai", text: "a" }, withSources(links)])[1], withSources(links));
+  const long = "x".repeat(MAX_CHAT_CHARS - 1);
+  const trimmed = trimItems([{ who: "ai", text: "old" }, withSources(links), { who: "you", text: long }]);
+  assert.equal(trimmed[0].who, "note");
+  assert.equal(trimmed[1].who, "you");
+});

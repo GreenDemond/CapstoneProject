@@ -104,9 +104,11 @@ export async function askService(service, key, text, kind, signal) {
   return reply;
 }
 
+export const SEARCH_NEEDS_CREDIT = "Web search needs credit on your OpenRouter account. Untick Search the web to keep chatting for free.";
+
 // One chat turn. Returns { text, cutOff }, { empty, cutOff }, { trustedAdult }, { aborted }, or { error }.
-export async function askChat(service, key, { kind, guide, length, messages }, signal) {
-  const result = await postJson(service, key, buildChatRequest({ model: service.model, kind, guide, length, messages }), signal);
+export async function askChat(service, key, { kind, guide, length, messages, search = false }, signal) {
+  const result = await postJson(service, key, buildChatRequest({ model: service.model, kind, guide, length, messages, search }), signal);
   if (result.failed === "aborted") {
     return { aborted: true };
   }
@@ -117,6 +119,9 @@ export async function askChat(service, key, { kind, guide, length, messages }, s
     return { error: COULDNT_REACH };
   }
   if (!result.response.ok) {
+    if (search && result.response.status === 402) {
+      return { error: SEARCH_NEEDS_CREDIT };
+    }
     return { error: plainFailure(result.response.status) };
   }
   if (result.badBody) {
