@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   createWork,
+  normalizeWork,
   currentIndex,
   doneCount,
   allDone,
@@ -87,4 +88,12 @@ test("secondsUntil reads the clock and never goes below zero", () => {
   assert.equal(secondsUntil(60000, 59500), 1); // part of a second still counts as a second
   assert.equal(secondsUntil(60000, 60000), 0);
   assert.equal(secondsUntil(60000, 900000), 0); // a laptop that slept past the end
+});
+
+test("the kind of work survives a drifted step and is checked when read back", () => {
+  const work = { ...createWork(["Find sources", "Write"]), kind: "essay" };
+  assert.equal(applyChoice(work, "drifted", "Open one source").kind, "essay");
+  assert.equal(applyChoice(work, "done").kind, "essay");
+  assert.equal(normalizeWork({ ...work, kind: "essay" }).kind, "essay");
+  assert.equal("kind" in normalizeWork({ ...work, kind: "nope" }), false);
 });

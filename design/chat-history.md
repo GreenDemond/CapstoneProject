@@ -17,7 +17,7 @@ Made on the device: the kind's label plus the first 40 characters of the student
 
 ## The trusted-adult line in a saved chat
 
-The student's message that made the AI send its safety word is **not saved** (it shows on screen for this visit only) and is never used for the title. Only the line "If something serious is going on, please talk to an adult you trust." is saved. Devices are often shared, and the list says so. Nothing marks a chat as flagged, and nothing is reported (rule 5).
+The student's message that made the AI send its safety word is **not saved** (it shows on screen for this visit only; no message is saved before its reply has arrived) and is never used for the title. Only the line "If something serious is going on, please talk to an adult you trust." is saved. Devices are often shared, and the list says so. Nothing marks a chat as flagged, and nothing is reported (rule 5).
 
 ## What is stored, and where
 
@@ -36,7 +36,7 @@ The student's message that made the AI send its safety word is **not saved** (it
 
 ## Distracted, stuck, or back after a week
 
-- Refresh or swipe away mid-chat: today's chat reopens with everything up to the last saved item. A reply that was still coming is lost; the student's message stays, and Send works again.
+- Refresh or swipe away mid-chat: today's chat reopens with everything up to the last saved item. A reply that was still coming is lost, and so is the one message it was answering: a message is saved only together with a usable reply (so a message that would be flagged is never in storage). The student types it again. Tapping New chat, My chats, Carry on, or Back while a reply is coming takes that message out too; if the student comes back to the same chat in this visit, its words are in the box.
 - Back after a week: home is unchanged (the pick-up card). Talk it through opens a fresh chat with the Carry on line.
 - Double tap on Delete: the first tap asks, the second confirms; nothing else is deleted.
 

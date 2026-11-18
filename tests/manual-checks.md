@@ -173,3 +173,20 @@ Needs an AI helper set up in Settings (your own key). With no helper, the chat s
 7. Day view: each hour label sits at its own height.
 8. Dark mode: the text on the coloured rows is easy to read.
 9. With nothing finished yet, there is no "Finished so far: 0" line.
+
+
+## Saved chats (design/chat-history.md)
+
+1. Open Talk it through, pick Essay, and send "how do I start my intro". The top line says "Your chats are saved on this device only" and names the AI service.
+2. Refresh the page and tap Talk it through again: the same chat is there, with Essay picked. No "Carry on" line.
+3. Tap Back to home, then Talk it through: the chat is still there.
+4. Tap New chat: the log is empty. Send another message. Tap My chats: two rows, newest first, each with a title like "Essay · how do I start my intro" and the date "Today". No "days ago" anywhere.
+5. Tap the older row: that chat opens with its messages and its kind picked. Tap My chats, then Back to the chat.
+6. In My chats tap Delete on a row: it asks "Yes, delete" / "Keep it". Keep it changes nothing. Delete again and Yes, delete removes just that row. Each Delete button is easy to tap on a phone.
+7. Tap Delete all my chats, then Keep it (nothing happens), then again and Yes, delete: "No saved chats yet." The lines "Keeps your 10 most recent chats." and "Anyone using this browser can see these." show while there are chats.
+8. Send a message that makes the AI answer with its safety word (real AI: describe something serious). You see the adult line and your message. Refresh: the adult line is there, but your message is gone. Also: send a message and refresh before the reply comes. That one message is gone and nothing about it is saved.
+9. Come back on another day (or ask me to set a chat to yesterday): Talk it through opens an empty chat with one line "Carry on: <title>". Tap it: the old chat opens.
+10. Make an 11th chat: the oldest one disappears from My chats.
+11. Start work on the paste screen with Reading picked, refresh, open Talk it through: Reading is already picked.
+12. With no AI helper set up but saved chats: Talk it through shows "Add an AI helper in Settings first." and still lets you read the chats; Send says "No AI helper is ready."
+13. Not tested by a person: a full browser store. A line says "This chat couldn't be saved on this device. Deleting an old chat makes room." and the chat keeps working.

@@ -35,7 +35,7 @@ test("a saved Essay guide and length are used by the chat, and Reading keeps the
   expect(system.indexOf("Never give the answer")).toBeLessThan(system.indexOf("Ask me what I think"));
   expect(system.trimEnd()).toMatch(/never the answer/);
 
-  await page.getByRole("button", { name: "Start over" }).click();
+  await page.getByRole("button", { name: "New chat" }).click(); // was Start over
   await page.getByRole("button", { name: "Reading" }).click();
   await page.getByLabel("Your message").fill("hi");
   await page.getByRole("button", { name: "Send", exact: true }).click();

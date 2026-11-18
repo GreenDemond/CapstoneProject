@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {
   loadProfileState, saveProfile, saveCalendarItems, loadCalendarItems, STORAGE_KEY, BACKUP_KEY,
   saveCompletionCounts, loadCompletionCounts, saveAiSettings, loadAiSettings, saveWork, loadWork,
-  saveChatSettings, loadChatSettings,
+  saveChatSettings, loadChatSettings, loadChats, saveChats, deleteAllChats, CHATS_KEY, CHATS_BACKUP_KEY,
 } from "../../js/storage.js";
 import { emptyProfile, setGoals } from "../../js/logic/profile.js";
 
@@ -12,6 +12,7 @@ function fakeStorage(initial = {}) {
   return {
     getItem: (key) => (data.has(key) ? data.get(key) : null),
     setItem: (key, value) => data.set(key, String(value)),
+    removeItem: (key) => data.delete(key),
     _data: data,
   };
 }
@@ -303,4 +304,101 @@ test("a usable store with no profile yet still saves and loads the other section
   assert.equal(loadCalendarItems(storage).length, 1);
   assert.equal(saveProfile(emptyProfile(), storage), true);
   assert.equal(loadCalendarItems(storage).length, 1);
+});
+
+// Saved chats (design/chat-history.md): their own key, so they never touch the main one.
+const oneChat = { id: "a", kind: "essay", title: "Essay · hi", startedOn: "2026-11-17T10:00:00.000Z", usedOn: "2026-11-17T10:00:00.000Z", items: [{ who: "you", text: "hi" }] };
+
+test("chats are saved under their own key and the main key is not touched", () => {
+  const storage = fakeStorage();
+  saveProfile(setGoals(emptyProfile(), { today: "Read" }), storage);
+  const before = storage._data.get(STORAGE_KEY);
+  assert.equal(saveChats([oneChat], storage), true);
+  assert.equal(storage._data.get(STORAGE_KEY), before);
+  assert.equal(JSON.parse(storage._data.get(CHATS_KEY)).schemaVersion, 1);
+  assert.deepEqual(loadChats(storage), [oneChat]);
+  assert.equal(loadProfileState(storage).profile.goals.today, "Read");
+});
+
+test("nothing saved, no storage, or a failing read gives no chats", () => {
+  assert.deepEqual(loadChats(fakeStorage()), []);
+  assert.deepEqual(loadChats(null), []);
+  const throwing = { getItem() { throw new Error("blocked"); }, setItem() { throw new Error("blocked"); } };
+  assert.deepEqual(loadChats(throwing), []);
+  assert.equal(saveChats([oneChat], throwing), false);
+  assert.equal(saveChats([oneChat], null), false);
+});
+
+test("a chat save the browser does not confirm is reported as not saved, and a full store does not stop the main save", () => {
+  const storage = fakeStorage();
+  const setItem = storage.setItem;
+  storage.setItem = (key, value) => {
+    if (key === CHATS_KEY) throw new Error("quota");
+    setItem(key, value);
+  };
+  assert.equal(saveChats([oneChat], storage), false);
+  assert.equal(saveProfile(emptyProfile(), storage), true);
+  storage.setItem = (key, value) => (key === CHATS_KEY ? undefined : setItem(key, value));
+  assert.equal(saveChats([oneChat], storage), false);
+});
+
+test("damaged chat text is backed up once under its own backup key and a fresh object is saved", () => {
+  const storage = fakeStorage({ [CHATS_KEY]: "{not json" });
+  assert.deepEqual(loadChats(storage), []);
+  assert.equal(storage._data.get(CHATS_BACKUP_KEY), "{not json");
+  assert.equal(storage._data.has(BACKUP_KEY), false);
+  assert.equal(saveChats([oneChat], storage), true);
+  assert.deepEqual(loadChats(storage), [oneChat]);
+  assert.equal(storage._data.get(CHATS_BACKUP_KEY), "{not json");
+  storage._data.set(CHATS_KEY, "[also bad");
+  assert.equal(saveChats([], storage), true);
+  assert.equal(storage._data.get(CHATS_BACKUP_KEY), "{not json"); // the first copy is kept
+});
+
+test("chats from another version are backed up, not lost, and reading them gives none", () => {
+  const other = JSON.stringify({ schemaVersion: 9, chats: [oneChat] });
+  const storage = fakeStorage({ [CHATS_KEY]: other });
+  assert.deepEqual(loadChats(storage), []);
+  assert.equal(storage._data.get(CHATS_BACKUP_KEY), other);
+});
+
+test("bad chats inside good data are dropped one by one", () => {
+  const storage = fakeStorage({ [CHATS_KEY]: JSON.stringify({ schemaVersion: 1, chats: [oneChat, { id: 3 }, "x", null] }) });
+  assert.deepEqual(loadChats(storage), [oneChat]);
+  assert.deepEqual(loadChats(fakeStorage({ [CHATS_KEY]: JSON.stringify({ schemaVersion: 1, chats: "nope" }) })), []);
+});
+
+test("the kind of work is saved with the steps and read back; a bad kind is ignored", () => {
+  const storage = fakeStorage();
+  assert.equal(saveWork({ ...workValue, kind: "essay" }, "2026-11-17T10:00:00.000Z", storage), true);
+  assert.equal(loadWork(storage).work.kind, "essay");
+  saveWork({ ...workValue, kind: "bogus" }, "2026-11-17T10:00:00.000Z", storage);
+  assert.equal("kind" in loadWork(storage).work, false);
+  saveWork(workValue, "2026-11-17T10:00:00.000Z", storage);
+  assert.deepEqual(loadWork(storage).work, workValue);
+});
+
+test("chats from another version are overwritten even when a different backup already exists", () => {
+  const other = JSON.stringify({ schemaVersion: 9, chats: [oneChat] });
+  const storage = fakeStorage({ [CHATS_KEY]: other, [CHATS_BACKUP_KEY]: "an older copy" });
+  assert.equal(saveChats([oneChat], storage), true);
+  assert.deepEqual(loadChats(storage), [oneChat]);
+  assert.equal(storage._data.get(CHATS_BACKUP_KEY), "an older copy");
+});
+
+test("the main key still refuses to overwrite other-version data when its backup is taken", () => {
+  const other = JSON.stringify({ schemaVersion: 9, profile: {} });
+  const storage = fakeStorage({ [STORAGE_KEY]: other, [BACKUP_KEY]: "an older copy" });
+  assert.equal(saveProfile(emptyProfile(), storage), false);
+  assert.equal(storage._data.get(STORAGE_KEY), other);
+});
+
+test("deleteAllChats empties the list and removes the chats backup", () => {
+  const storage = fakeStorage({ [CHATS_KEY]: "{not json" });
+  loadChats(storage); // makes the backup
+  assert.equal(storage._data.has(CHATS_BACKUP_KEY), true);
+  assert.equal(deleteAllChats(storage), true);
+  assert.deepEqual(loadChats(storage), []);
+  assert.equal(storage._data.has(CHATS_BACKUP_KEY), false);
+  assert.equal(deleteAllChats(null), false);
 });

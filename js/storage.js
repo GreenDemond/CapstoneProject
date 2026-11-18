@@ -5,9 +5,12 @@ import { emptyProfile, normalizeProfile } from "./logic/profile.js";
 import { normalizeServices } from "./logic/ai-services.js";
 import { normalizeWork } from "./logic/work.js";
 import { normalizeChatSettings } from "./logic/chat-settings.js";
+import { normalizeChats } from "./logic/chat-store.js";
 
 export const STORAGE_KEY = "focusapp.v1";
 export const BACKUP_KEY = "focusapp.v1.backup";
+export const CHATS_KEY = "focusapp.v1.chats";
+export const CHATS_BACKUP_KEY = "focusapp.v1.chats.backup";
 export const SCHEMA_VERSION = 1;
 
 function defaultStorage() {
@@ -22,10 +25,10 @@ function defaultStorage() {
 // "ok" (usable), "empty" (nothing saved), "damaged" (not JSON, or not an object),
 // "other-version" (an object with a different or missing schemaVersion),
 // "unavailable" (the browser refused the read). raw is the stored text, if any.
-function readAll(storage) {
+function readAll(storage, key = STORAGE_KEY) {
   let raw;
   try {
-    raw = storage.getItem(STORAGE_KEY);
+    raw = storage.getItem(key);
   } catch {
     return { data: null, state: "unavailable", raw: null };
   }
@@ -49,12 +52,12 @@ function readAll(storage) {
 
 // Keeps the first unreadable copy. A later one must not overwrite it.
 // Returns true when the raw text is safely in the backup (just written, or already there).
-function backUpOnce(storage, raw) {
+function backUpOnce(storage, raw, backupKey = BACKUP_KEY) {
   try {
-    const existing = storage.getItem(BACKUP_KEY);
+    const existing = storage.getItem(backupKey);
     if (existing === null) {
-      storage.setItem(BACKUP_KEY, raw);
-      return storage.getItem(BACKUP_KEY) === raw;
+      storage.setItem(backupKey, raw);
+      return storage.getItem(backupKey) === raw;
     }
     return existing === raw;
   } catch {
@@ -72,24 +75,25 @@ function readSection(storage, name) {
 // Returns true only if the browser confirmed the save. Readable data from another
 // version is never overwritten unless it is safely in the backup first. Unparseable
 // text is overwritten even if it could not be backed up, so saving never gets stuck.
-function saveSection(name, value, storage) {
+// overwriteOtherVersion (chats only) allows the same for other-version data, so a student can always save a chat.
+function saveSection(name, value, storage, key = STORAGE_KEY, backupKey = BACKUP_KEY, overwriteOtherVersion = false) {
   if (!storage) {
     return false;
   }
   try {
-    const { data, state, raw } = readAll(storage);
+    const { data, state, raw } = readAll(storage, key);
     if (state === "unavailable") {
       return false;
     }
     let base = { schemaVersion: SCHEMA_VERSION };
     if (state === "damaged") {
       // Unreadable text: keep the first copy as a backup, then start fresh.
-      backUpOnce(storage, raw);
+      backUpOnce(storage, raw, backupKey);
     } else if (state === "other-version") {
       // Readable data this version does not understand. Only one version of the app
       // exists, so start fresh, but only once it is safely in the backup. If another
       // backup is already there, refuse rather than lose either copy.
-      if (!backUpOnce(storage, raw)) {
+      if (!backUpOnce(storage, raw, backupKey) && !overwriteOtherVersion) {
         return false;
       }
     } else if (state === "ok") {
@@ -98,8 +102,8 @@ function saveSection(name, value, storage) {
     delete base[name];
     const next = value === null ? base : { ...base, [name]: value };
     const text = JSON.stringify(next);
-    storage.setItem(STORAGE_KEY, text);
-    return storage.getItem(STORAGE_KEY) === text;
+    storage.setItem(key, text);
+    return storage.getItem(key) === text;
   } catch {
     return false;
   }
@@ -244,7 +248,7 @@ export function loadWork(storage = defaultStorage()) {
 }
 
 export function saveWork(work, savedOn = new Date().toISOString(), storage = defaultStorage()) {
-  return saveSection("work", work === null ? null : { steps: work.steps, nextId: work.nextId, savedOn }, storage);
+  return saveSection("work", work === null ? null : { steps: work.steps, nextId: work.nextId, savedOn, ...(work.kind ? { kind: work.kind } : {}) }, storage);
 }
 
 // The student's own chat guides and reply lengths, in their own section. Damaged entries are dropped one by one.
@@ -261,4 +265,39 @@ export function loadChatSettings(storage = defaultStorage()) {
 
 export function saveChatSettings(settings, storage = defaultStorage()) {
   return saveSection("chat", { guides: settings.guides, lengths: settings.lengths }, storage);
+}
+
+// Saved chats live in their own key, so a full chat store can never stop the steps, profile,
+// or calendar from saving (design/chat-history.md). Bad chats and items are dropped one by one.
+export function loadChats(storage = defaultStorage()) {
+  if (!storage) {
+    return [];
+  }
+  try {
+    const { data, state, raw } = readAll(storage, CHATS_KEY);
+    if (state === "damaged" || state === "other-version") {
+      backUpOnce(storage, raw, CHATS_BACKUP_KEY);
+    }
+    return state === "ok" ? normalizeChats(data.chats) : [];
+  } catch {
+    return [];
+  }
+}
+
+// Returns true only if the browser confirmed the save.
+export function saveChats(chats, storage = defaultStorage()) {
+  return saveSection("chats", chats, storage, CHATS_KEY, CHATS_BACKUP_KEY, true);
+}
+
+// Delete all my chats: an empty list, and the backup copy goes too. Returns true only if both are confirmed.
+export function deleteAllChats(storage = defaultStorage()) {
+  if (!saveChats([], storage)) {
+    return false;
+  }
+  try {
+    storage.removeItem(CHATS_BACKUP_KEY);
+    return storage.getItem(CHATS_BACKUP_KEY) === null;
+  } catch {
+    return false;
+  }
 }

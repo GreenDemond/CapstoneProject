@@ -14,6 +14,7 @@ Each step below: implemented by a cheaper model where possible, then `npm run ch
 - Step 5 done, with the calendar parts of step 11 (form kept and behind Add something, Delete confirm, double-tap guard, reward only after a confirmed save, calm "Time has passed" group, hour labels fixed, form styling, readable rows in dark mode, 44 px buttons, role fixes, zero totals hidden).
 - Step 7 done (merged imports, dead variable and shadowed names gone, stale design status lines fixed, shared test helper).
 - Step 8 done (timeout and Stop cover the whole reply; an already-cancelled request sends nothing; the guide is one quoted line that cannot imitate or close the app's markers, even nested or split; TRUSTED_ADULT detected anywhere in both paths; the master key is created atomically and a missing master means no helper is shown as ready; short keys show no hint; server/suggest.js marked parked).
+- Steps 9 and 10 done (several chats saved on the device in their own storage key: today's chat reopens, Carry on line, New chat, My chats with Delete and Delete all; a message is saved only with its reply, so a flagged message never reaches storage; kind saved with the steps; Opus review fixes applied).
 
 ## Phase 1: keep data safe, one screen at a time
 

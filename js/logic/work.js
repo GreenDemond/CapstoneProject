@@ -1,6 +1,7 @@
 // The work screen's rules (design/work-screen.md). Pure logic: no browser APIs.
 // Done, and the first part of a Drifted step, count the same (DECISIONS P5).
 // Still working and Stuck never change the steps. Later moves a step to the end.
+import { KINDS } from "./starter-steps.js";
 
 export const STUCK_HINTS = [
   "Re-read the instructions and underline the verb.",
@@ -52,7 +53,7 @@ export function applyChoice(work, choice, splitText = "") {
     }
     steps[cur].done = true;
     steps.splice(cur + 1, 0, { id: work.nextId, text, done: false });
-    return { steps, nextId: work.nextId + 1 };
+    return { ...work, steps, nextId: work.nextId + 1 };
   }
 
   if (choice === "later") {
@@ -117,5 +118,7 @@ export function normalizeWork(raw) {
   }
   const highest = Math.max(...steps.map((step) => step.id));
   const nextId = Number.isInteger(raw.nextId) && raw.nextId > highest ? raw.nextId : highest + 1;
-  return { steps, nextId };
+  // The kind of work is optional: it lets the chat pre-select it after a refresh.
+  const kind = KINDS.some((k) => k.id === raw.kind) ? raw.kind : undefined;
+  return kind ? { steps, nextId, kind } : { steps, nextId };
 }

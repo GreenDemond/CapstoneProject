@@ -215,20 +215,22 @@ test("a very long message is refused and kept in the box", async ({ page }) => {
   expect(seen.chat).toHaveLength(0);
 });
 
-// Start over clears the chat; Back to home leaves it and nothing is kept.
-test("Start over clears the chat, and Back to home leaves nothing behind", async ({ page }) => {
+// New chat replaces Start over (chats are now saved: design/chat-history.md).
+// Back to home no longer forgets the chat, so the last two lines changed from "nothing is kept" to "today's chat reopens".
+test("New chat starts an empty chat, and Back to home keeps today's chat", async ({ page }) => {
   await openChat(page, { content: "reply" });
   await page.getByRole("button", { name: "Essay" }).click();
   await say(page, "hi");
   await expect(page.locator(".chat-ai")).toHaveCount(2);
-  await page.getByRole("button", { name: "Start over" }).click();
+  await page.getByRole("button", { name: "New chat" }).click();
   await expect(page.locator(".chat-you")).toHaveCount(0);
   await expect(page.locator(".chat-ai")).toHaveCount(1);
   await say(page, "again");
   await expect(page.locator(".chat-ai")).toHaveCount(2);
   await page.getByRole("button", { name: "Back to home" }).click();
   await page.getByRole("button", { name: "Talk it through" }).click();
-  await expect(page.locator(".chat-you")).toHaveCount(0);
+  await expect(page.locator(".chat-you")).toHaveCount(1);
+  await expect(page.locator(".chat-you")).toContainText("again");
 });
 
 // Long unbroken words do not push the page sideways (works at phone width too).
