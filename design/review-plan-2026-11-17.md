@@ -13,6 +13,7 @@ Each step below: implemented by a cheaper model where possible, then `npm run ch
 - Steps 4 and 6 done (profile keeps typed text, warns about a note not yet added, local dates; Start uses the steps shown with a "Showing 5 of N" line; reward line only on a real change; countdown from the clock; focus kept, including when time runs out; "Time's up" goes on Still working; leftover developer text removed).
 - Step 5 done, with the calendar parts of step 11 (form kept and behind Add something, Delete confirm, double-tap guard, reward only after a confirmed save, calm "Time has passed" group, hour labels fixed, form styling, readable rows in dark mode, 44 px buttons, role fixes, zero totals hidden).
 - Step 7 done (merged imports, dead variable and shadowed names gone, stale design status lines fixed, shared test helper).
+- Step 8 done (timeout and Stop cover the whole reply; an already-cancelled request sends nothing; the guide is one quoted line that cannot imitate or close the app's markers, even nested or split; TRUSTED_ADULT detected anywhere in both paths; the master key is created atomically and a missing master means no helper is shown as ready; short keys show no hint; server/suggest.js marked parked).
 
 ## Phase 1: keep data safe, one screen at a time
 

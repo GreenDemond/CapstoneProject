@@ -20,9 +20,10 @@ export function checkKey(text) {
   return { ok: true, key };
 }
 
-// The last four characters, shown as "Key saved: ••••abcd". Safe to keep beside the service name.
+// The last four characters, shown as "Key saved: ••••abcd". Only for keys of 16 or more characters,
+// so a short key never has half of itself shown. Shorter keys get no hint.
 export function keyHint(key) {
-  return key.slice(-4);
+  return key.length >= 16 ? key.slice(-4) : "";
 }
 
 export function maskedKey(hint) {

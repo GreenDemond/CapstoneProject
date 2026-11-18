@@ -27,9 +27,13 @@ export function plainFailure(status) {
   return "The service couldn't answer. Try again later.";
 }
 
-// One request. Returns { response } or { failed: "aborted" | "timeout" | "network" }.
-// An optional signal lets the caller cancel (Cancel, Stop, leaving the screen).
+// One request. Returns { response, data } (data is the parsed JSON body of an ok answer; badBody is
+// true if it was not JSON) or { failed: "aborted" | "timeout" | "network" }. The timer and the
+// caller's signal cover the whole exchange, body included, so Stop and the timeout work on a slow body.
 async function request(url, init, signal) {
+  if (signal?.aborted) {
+    return { failed: "aborted" };
+  }
   const controller = new AbortController();
   let timedOut = false;
   const timer = setTimeout(() => {
@@ -46,7 +50,17 @@ async function request(url, init, signal) {
       referrerPolicy: "no-referrer",
       redirect: "error",
     });
-    return { response };
+    if (!response.ok) {
+      return { response };
+    }
+    try {
+      return { response, data: await response.json() };
+    } catch (error) {
+      if (signal?.aborted || timedOut || error?.name !== "SyntaxError") {
+        throw error;
+      }
+      return { response, badBody: true };
+    }
   } catch {
     return { failed: signal?.aborted ? "aborted" : timedOut ? "timeout" : "network" };
   } finally {
@@ -79,12 +93,10 @@ export async function askService(service, key, text, kind, signal) {
   if (!result.response.ok) {
     return { error: plainFailure(result.response.status) };
   }
-  let data;
-  try {
-    data = await result.response.json();
-  } catch {
+  if (result.badBody) {
     return { error: "The service answered in a way the app doesn't understand." };
   }
+  const data = result.data;
   const reply = readReply(data?.choices?.[0]?.message?.content);
   if (!reply) {
     return { error: "The service didn't suggest any steps." };
@@ -107,12 +119,10 @@ export async function askChat(service, key, { kind, guide, length, messages }, s
   if (!result.response.ok) {
     return { error: plainFailure(result.response.status) };
   }
-  let data;
-  try {
-    data = await result.response.json();
-  } catch {
+  if (result.badBody) {
     return { error: "The service answered in a way the app doesn't understand." };
   }
+  const data = result.data;
   return readChatReply(data);
 }
 
@@ -136,12 +146,7 @@ export async function testService(service, key, signal) {
   if (!result.response.ok) {
     return { ok: false, kind: failureKindForStatus(result.response.status) };
   }
-  let data;
-  try {
-    data = await result.response.json();
-  } catch {
-    return { ok: false, kind: "emptyReply" };
-  }
+  const data = result.data;
   const content = data?.choices?.[0]?.message?.content;
   if (typeof content !== "string" || content.trim() === "") {
     return { ok: false, kind: "emptyReply" };
@@ -163,12 +168,10 @@ export async function listModels(key, modelsUrl, readIds, signal) {
   if (!result.response.ok) {
     return { error: plainFailure(result.response.status), kind: failureKindForStatus(result.response.status) === "key" ? "key" : "listFailed" };
   }
-  let data;
-  try {
-    data = await result.response.json();
-  } catch {
+  if (result.badBody) {
     return { error: "The model list isn't in a form the app understands.", kind: "listFailed" };
   }
+  const data = result.data;
   const models = readIds(data);
   if (models.length === 0) {
     return { error: "The service didn't list any models.", kind: "listFailed" };

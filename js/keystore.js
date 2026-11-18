@@ -37,14 +37,32 @@ async function withStore(mode, action) {
   }
 }
 
+// Gets the master key, or creates it. The check and the save happen in one readwrite transaction,
+// so two saves at once (or two tabs) end up using the same stored key.
 async function masterKey() {
-  const existing = await withStore("readonly", (store) => store.get(MASTER_ID));
-  if (existing) {
-    return existing;
+  const fresh = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+  const db = await openDb();
+  try {
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, "readwrite");
+      const store = tx.objectStore(STORE);
+      let stored = null;
+      const get = store.get(MASTER_ID);
+      get.onsuccess = () => {
+        if (get.result) {
+          stored = get.result;
+        } else {
+          stored = fresh;
+          store.put(fresh, MASTER_ID);
+        }
+      };
+      tx.oncomplete = () => resolve(stored);
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error);
+    });
+  } finally {
+    db.close();
   }
-  const key = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
-  await withStore("readwrite", (store) => store.put(key, MASTER_ID));
-  return key;
 }
 
 // Returns true only if the key was saved. Nothing is thrown to the screen.
@@ -63,7 +81,8 @@ export async function saveKey(serviceId, plainKey) {
 export async function hasKey(serviceId) {
   try {
     const record = await withStore("readonly", (store) => store.get(serviceId));
-    return Boolean(record);
+    const master = await withStore("readonly", (store) => store.get(MASTER_ID));
+    return Boolean(record && master);
   } catch {
     return false;
   }

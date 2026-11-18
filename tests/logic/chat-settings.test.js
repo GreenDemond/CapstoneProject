@@ -92,7 +92,7 @@ test("damaged or missing storage gives the defaults and never throws", () => {
 
 test("the student's guide and length go inside the system message, after the rules", () => {
   const system = buildChatSystem("Be gentle.", "essay", "long");
-  assert.match(system, /Student's preferences: Be gentle\. You may reply in a few short paragraphs/);
+  assert.match(system, /Student's preferences: "Be gentle\." You may reply in a few short paragraphs/);
   assert.ok(system.indexOf("Never give the answer") < system.indexOf("Be gentle."));
   assert.match(buildChatSystem("x", "essay", "nonsense"), new RegExp(LENGTHS.short.text));
 });

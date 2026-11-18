@@ -18,3 +18,10 @@ test("only the last four characters are shown", () => {
   assert.equal(keyHint("sk-or-abcdef1234567890"), "7890");
   assert.equal(maskedKey("7890"), "••••7890");
 });
+
+test("a short key shows no hint, so half of it is never revealed", () => {
+  assert.equal(keyHint("abcd1234"), "");
+  assert.equal(keyHint("abcdefghijklmno"), "");
+  assert.equal(keyHint("abcdefghijklmnop"), "mnop");
+  assert.equal(maskedKey(keyHint("abcd1234")), "••••");
+});

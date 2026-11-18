@@ -37,3 +37,7 @@ test("each status code gets a plain line that names what to check", () => {
   assert.match(plainFailure(503), /busy or out of credit/);
   assert.match(plainFailure(418), /couldn't answer/);
 });
+
+test("a steps reply that has TRUSTED_ADULT anywhere gives the trusted-adult answer", () => {
+  assert.deepEqual(readReply(`1. Start\n${TRUSTED_ADULT}`), { trustedAdult: true });
+});

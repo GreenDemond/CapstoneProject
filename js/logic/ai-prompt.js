@@ -29,7 +29,7 @@ export function parseSteps(content) {
 
 // Turns the model's reply into { trustedAdult: true } or { steps }, or null if there is nothing usable.
 export function readReply(content) {
-  if (typeof content === "string" && content.trim().startsWith(TRUSTED_ADULT)) {
+  if (typeof content === "string" && content.includes(TRUSTED_ADULT)) {
     return { trustedAdult: true };
   }
   const steps = parseSteps(content);

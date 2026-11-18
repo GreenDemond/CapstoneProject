@@ -24,6 +24,7 @@ Nothing.
 
 ## Known gaps
 
+- server/suggest.js is parked: the app does not use it (the browser calls the student's chosen service directly). Kept for a possible parent-run endpoint; its rate limiter trusts x-forwarded-for and has no timeout, so fix those before ever deploying it.
 - The intake answers and card are still lost on refresh. Saving them is the next small step.
 - The profile does not yet use its goals or notes for suggestions. That is a later slice.
 - Not built from the home screen note: the margin note ("From last time"), a smaller next step after a long gap, and a full-width week calendar. See `design/home-screen.md`.
