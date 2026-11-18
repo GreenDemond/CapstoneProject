@@ -10,6 +10,8 @@ export const GROUPS = [
   { id: "notUrgent", label: "Not urgent", hint: "Due in the next 2 days" },
   { id: "insignificant", label: "Can wait", hint: "Can wait until the end of the week" },
   { id: "later", label: "Later", hint: "More than 5 days away" },
+  // Calm, neutral group for dates already gone. No urgency, no count (rule 2).
+  { id: "passed", label: "Time has passed", hint: "Mark it done or delete it. No rush." },
 ];
 
 export const CATEGORIES = [
@@ -31,8 +33,11 @@ function sameLocalDay(a, b) {
 // Which group an item belongs in, from its due time and the current time.
 export function bucketFor(due, now) {
   const diff = due.getTime() - now.getTime();
+  if (diff < 0) {
+    return "passed"; // a calm group, not the urgent one
+  }
   if (diff <= HOUR) {
-    return "urgent"; // includes times already passed, shown neutrally
+    return "urgent";
   }
   if (sameLocalDay(due, now)) {
     return "significant";

@@ -160,3 +160,16 @@ Needs an AI helper set up in Settings (your own key). With no helper, the chat s
 4. Paste an assignment and press Show my steps. If more steps exist, a line says "Showing 5 of N". Press Start: the work screen says "Step 1 of 5". After Show more steps and Start it says the full count.
 5. On the work screen press Done, then Stuck: the green "Step done." line is gone. Press Drifted then Start this part without changing the box: no green line.
 6. Turn on the countdown and press 25 minutes: the keyboard focus stays on that button.
+
+
+## Calendar after the 2026-11-17 review
+
+1. Open My calendar. Your list comes first. Tap Add something to open the form; Back is at the top and the bottom.
+2. Type a title and notes, then switch to Week and back to List. Your typing is still in the form. Complete an item: the form still has your typing.
+3. Tap Delete on an item: it asks "Yes, delete" or "Keep it". Keep it does nothing. A quick double-click deletes nothing.
+4. Double-click Complete: only that item is completed, never the one below it.
+5. Complete an item: "Fire it Up" shows once. Delete something afterwards: it does not show again.
+6. Add an item due in the past. It goes under "Time has passed" (grey, "Mark it done or delete it. No rush."), not under Urgent.
+7. Day view: each hour label sits at its own height.
+8. Dark mode: the text on the coloured rows is easy to read.
+9. With nothing finished yet, there is no "Finished so far: 0" line.

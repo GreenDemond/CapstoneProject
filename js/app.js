@@ -915,79 +915,156 @@ function dueText(due) {
   return date.toLocaleString([], { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
 }
 
-function renderCalendar(draft = { title: "", day: "", time: "" }, message = "") {
-  calendarBody.replaceChildren();
+const CAL_GUARD_MS = 400; // a quick second tap must not act on the item that moves up under the cursor
+let celebrateText = ""; // shown once, for the render right after a confirmed Complete
+let calFormOpen = false;
+let calDraft = blankDraft();
+let confirmDeleteId = null;
+let confirmArmedAt = 0;
+let lastCalAction = 0;
 
+function blankDraft() {
+  return { title: "", kind: "task", day: "", end: "", time: "", notes: "", links: "", category: "other" };
+}
+
+// The add form's current values, or null when the form is closed.
+function readCalendarDraft() {
+  if (!document.getElementById("cal-title")) {
+    return null;
+  }
+  const value = (id) => document.getElementById(id).value;
+  return {
+    kind: value("cal-kind"),
+    title: value("cal-title"),
+    day: value("cal-day"),
+    end: value("cal-end"),
+    time: value("cal-time"),
+    notes: value("cal-notes"),
+    links: value("cal-links"),
+    category: value("cal-category"),
+  };
+}
+
+function field(label, control) {
+  const wrap = el("div", undefined, { class: "field" });
+  wrap.append(label, control);
+  return wrap;
+}
+
+function buildCalendarForm(draft) {
   const form = el("div", undefined, { class: "calendar-form" });
   const titleBox = el("input", undefined, { type: "text", id: "cal-title", maxlength: "200" });
   titleBox.value = draft.title;
   const kindBox = el("select", undefined, { id: "cal-kind" });
   kindBox.append(el("option", "A task, due at a time", { value: "task" }), el("option", "A trip or event, over several days", { value: "event" }));
-  kindBox.value = draft.kind ?? "task";
+  kindBox.value = draft.kind;
   const dayBox = el("input", undefined, { type: "date", id: "cal-day" });
   dayBox.value = draft.day;
   const endBox = el("input", undefined, { type: "date", id: "cal-end" });
-  endBox.value = draft.end ?? "";
+  endBox.value = draft.end;
   const timeBox = el("input", undefined, { type: "time", id: "cal-time" });
   timeBox.value = draft.time;
-  const dayLabel = el("label", kindBox.value === "event" ? "From date" : "Due date", { for: "cal-day" });
+  const dayLabel = el("label", "Due date", { for: "cal-day" });
   const endLabel = el("label", "Ends on (optional)", { for: "cal-end" });
   const timeLabel = el("label", "Due time", { for: "cal-time" });
+  const timeField = field(timeLabel, timeBox);
   const applyKind = () => {
     const isTrip = kindBox.value === "event";
     dayLabel.textContent = isTrip ? "From date" : "Due date";
     endLabel.textContent = isTrip ? "To date" : "Ends on (optional, for items over several days)";
-    endBox.hidden = false;
-    endLabel.hidden = false;
-    timeBox.hidden = isTrip;
-    timeLabel.hidden = isTrip;
+    timeField.hidden = isTrip;
   };
+  applyKind();
   kindBox.addEventListener("change", applyKind);
-  form.append(...labelled("What is it?", titleBox, "cal-title"));
-  form.append(...labelled("Type", kindBox, "cal-kind"));
-  form.append(dayLabel, dayBox, endLabel, endBox, timeLabel, timeBox);
-  queueMicrotask(applyKind);
   const notesBox = el("textarea", undefined, { id: "cal-notes", rows: "8", maxlength: "2000", class: "big-notes" });
-  notesBox.value = draft.notes ?? "";
+  notesBox.value = draft.notes;
   const linksBox = el("textarea", undefined, { id: "cal-links", rows: "3", placeholder: "https://" });
-  linksBox.value = draft.links ?? "";
+  linksBox.value = draft.links;
   const catBox = el("select", undefined, { id: "cal-category" });
   for (const c of CATEGORIES) {
-    const option = el("option", c.label, { value: c.id });
-    if ((draft.category ?? "other") === c.id) option.selected = true;
-    catBox.append(option);
+    catBox.append(el("option", c.label, { value: c.id }));
   }
-  form.append(...labelled("What part of life is it?", catBox, "cal-category"));
-  form.append(...labelled("Notes (as much as you want)", notesBox, "cal-notes"));
-  form.append(...labelled("Web links, one per line (must start with https://)", linksBox, "cal-links"));
+  catBox.value = draft.category;
+  form.append(
+    field(el("label", "What is it?", { for: "cal-title" }), titleBox),
+    field(el("label", "Type", { for: "cal-kind" }), kindBox),
+    field(dayLabel, dayBox),
+    field(endLabel, endBox),
+    timeField,
+    field(el("label", "What part of life is it?", { for: "cal-category" }), catBox),
+    field(el("label", "Notes (as much as you want)", { for: "cal-notes" }), notesBox),
+    field(el("label", "Web links, one per line (must start with https://)", { for: "cal-links" }), linksBox),
+  );
   form.append(button("Add to my calendar", () => addCalendarItem(), "primary"));
-  form.append(el("p", message, { class: "message", role: "status" }));
-  calendarBody.append(form);
+  return form;
+}
 
-  if (celebrateText) {
+// Buttons for deleting one item: the first tap asks, the second tap deletes.
+function deleteButtons(item) {
+  const box = el("span", undefined, { class: "delete-box" });
+  if (confirmDeleteId === item.id) {
+    const yes = button("Yes, delete", () => confirmDelete(item.id), "small");
+    yes.dataset.yes = item.id;
+    box.append(yes, button("Keep it", () => keepItem(item.id), "small"));
+  } else {
+    const del = button("Delete", () => askDelete(item.id), "small");
+    del.dataset.delete = item.id;
+    box.append(del);
+  }
+  return box;
+}
+
+// opts.resetDraft: show a blank form (after Add). opts.focus: a selector to focus afterwards.
+function renderCalendar(message = "", opts = {}) {
+  if (!opts.resetDraft) {
+    calDraft = readCalendarDraft() ?? calDraft;
+  }
+  const celebrate = celebrateText;
+  celebrateText = "";
+  calendarBody.replaceChildren();
+
+  calendarBody.append(button("Back", backFromCalendar));
+
+  const addButton = button("Add something", () => {
+    calFormOpen = !calFormOpen;
+    renderCalendar("", { focus: calFormOpen ? "#cal-title" : "#cal-open" });
+  });
+  addButton.id = "cal-open";
+  addButton.setAttribute("aria-expanded", String(calFormOpen));
+  calendarBody.append(addButton);
+  if (calFormOpen) {
+    calendarBody.append(buildCalendarForm(calDraft));
+  }
+  calendarBody.append(el("p", message, { class: "message", role: "status", id: "cal-message", tabindex: "-1" }));
+
+  if (celebrate) {
     const line = el("p", undefined, { class: "celebrate", role: "status" });
-    line.append(el("span", "✓ ", { class: "check", "aria-hidden": "true" }), celebrateText);
+    line.append(el("span", "✓ ", { class: "check", "aria-hidden": "true" }), celebrate);
     calendarBody.append(line);
   }
   const count = totals(completionCounts, new Date());
-  const log = el("div", undefined, { class: "log", role: "status" });
-  log.append(el("p", `Finished so far: today ${count.today} · this week ${count.week} · this month ${count.month} · this year ${count.year} · all time ${count.all}`));
-  calendarBody.append(log);
-
-  renderViewBar();
-  if (calView !== "list") {
-    if (calendarItems.length === 0) {
-      calendarBody.append(el("p", "Nothing planned yet. Add something when you're ready.", { class: "hint" }));
-    }
-    renderTimeView();
-    calendarBody.append(button("Back", backFromCalendar));
-    return;
+  if (count.all > 0) {
+    const log = el("div", undefined, { class: "log", role: "status" });
+    log.append(el("p", `Finished so far: today ${count.today} · this week ${count.week} · this month ${count.month} · this year ${count.year} · all time ${count.all}`));
+    calendarBody.append(log);
   }
 
+  renderViewBar();
   if (calendarItems.length === 0) {
     calendarBody.append(el("p", "Nothing planned yet. Add something when you're ready.", { class: "hint" }));
   }
+  if (calView === "list") {
+    renderCalendarList();
+  } else {
+    renderTimeView();
+  }
+  calendarBody.append(button("Back", backFromCalendar));
+  if (opts.focus) {
+    calendarBody.querySelector(opts.focus)?.focus();
+  }
+}
 
+function renderCalendarList() {
   const groups = groupItems(calendarItems, new Date());
   for (const group of GROUPS) {
     const heading = el("h3", group.label, { tabindex: "-1" });
@@ -997,12 +1074,9 @@ function renderCalendar(draft = { title: "", day: "", time: "" }, message = "") 
       list.append(el("li", "Nothing here.", { class: "hint" }));
     }
     for (const item of groups[group.id]) {
-      const row = el("li");
-      const due = group.id === "urgent" && new Date(item.due) < new Date() ? `${dueText(item.due)} · Due time has passed` : dueText(item.due);
-      row.append(el("span", `${item.title}, ${due}`), " ");
+      const row = el("li", undefined, { tabindex: "-1", "data-id": item.id });
+      row.append(el("span", `${item.title}, ${dueText(item.due)}`), " ");
       row.append(el("span", ` · ${categoryLabel(item.category)} · ${statusLabel(item.status)}`, { class: "tag" }));
-      row.append(...statusButtons(item));
-      row.append(button("Delete", () => deleteCalendarItem(item.id), "small"));
       if (item.notes) {
         row.append(el("p", item.notes, { class: "item-notes" }));
       }
@@ -1015,6 +1089,9 @@ function renderCalendar(draft = { title: "", day: "", time: "" }, message = "") 
         }
         row.append(linkList);
       }
+      const actions = el("div", undefined, { class: "row-actions" });
+      actions.append(...statusButtons(item), deleteButtons(item));
+      row.append(actions);
       list.append(row);
     }
     calendarBody.append(list);
@@ -1025,9 +1102,11 @@ function renderCalendar(draft = { title: "", day: "", time: "" }, message = "") 
     calendarBody.append(el("h3", "Trips and events", { tabindex: "-1" }));
     const tripList = el("ul", undefined, { class: "cal-list" });
     for (const trip of trips) {
-      const row = el("li");
+      const row = el("li", undefined, { tabindex: "-1", "data-id": trip.id });
       row.append(el("span", `${trip.title}, ${trip.start} to ${trip.end}`), " ");
-      row.append(button("Delete", () => deleteCalendarItem(trip.id), "small"));
+      const actions = el("div", undefined, { class: "row-actions" });
+      actions.append(deleteButtons(trip));
+      row.append(actions);
       tripList.append(row);
     }
     calendarBody.append(tripList);
@@ -1038,16 +1117,15 @@ function renderCalendar(draft = { title: "", day: "", time: "" }, message = "") 
     calendarBody.append(el("h3", "Completed", { tabindex: "-1" }));
     const list = el("ul", undefined, { class: "cal-list completed" });
     for (const item of done) {
-      const row = el("li");
+      const row = el("li", undefined, { tabindex: "-1", "data-id": item.id });
       row.append(el("span", `${item.title}, finished ${item.completedOn}`), " ");
-      row.append(button("Reopen", () => changeStatus(item.id, "open"), "small"));
-      row.append(button("Delete", () => deleteCalendarItem(item.id), "small"));
+      const actions = el("div", undefined, { class: "row-actions" });
+      actions.append(button("Reopen", () => changeStatus(item.id, "open"), "small"), deleteButtons(item));
+      row.append(actions);
       list.append(row);
     }
     calendarBody.append(list);
   }
-
-  calendarBody.append(button("Back", backFromCalendar));
 }
 
 function categoryLabel(id) {
@@ -1063,26 +1141,49 @@ function todayIso() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-let celebrateText = "";
-
+// Counts are saved first. If the items then fail to save, the counts are put back, so the
+// two never disagree. A reward shows only when both saved.
 function changeStatus(id, status) {
+  const now = Date.now();
+  // Only a repeat tap on the same item is ignored; a quick tap on another item goes through.
+  // One guard for every item: after a tap the list redraws and the next item can slide under
+  // the pointer, so a quick second tap anywhere is ignored rather than acting on the wrong item.
+  if (now - lastCalAction < CAL_GUARD_MS) {
+    return;
+  }
   const item = calendarItems.find((i) => i.id === id);
+  if (!item) {
+    return;
+  }
   const next = setStatus(calendarItems, id, status, todayIso());
   const nextCounts =
     status === "completed"
       ? addCompletion(completionCounts, todayIso())
-      : item?.status === "completed"
+      : item.status === "completed"
         ? removeCompletion(completionCounts, item.completedOn)
         : completionCounts;
-  if (saveCalendarItems(next)) {
-    calendarItems = next;
-    if (saveCompletionCounts(nextCounts)) {
-      completionCounts = nextCounts;
-    }
+  const countsChanged = nextCounts !== completionCounts;
+  confirmDeleteId = null;
+  if (countsChanged && !saveCompletionCounts(nextCounts)) {
+    renderCalendar("Couldn't save in this browser.");
+    return;
   }
+  if (!saveCalendarItems(next)) {
+    if (countsChanged) {
+      saveCompletionCounts(completionCounts);
+    }
+    renderCalendar("Couldn't save in this browser.");
+    return;
+  }
+  calendarItems = next;
+  completionCounts = nextCounts;
+  lastCalAction = now;
   celebrateText = status === "completed" ? "Fire it Up" : "";
   if (status === "completed") confetti();
   renderCalendar();
+  // The pressed button was rebuilt, so put focus back on the item's row (or the message if the row moved off screen).
+  const row = calendarBody.querySelector(`li[data-id="${id}"]`);
+  (row ?? document.getElementById("cal-message"))?.focus();
 }
 
 function statusButtons(item) {
@@ -1098,46 +1199,60 @@ function statusButtons(item) {
 }
 
 function addCalendarItem() {
-  const draft = {
-    kind: document.getElementById("cal-kind").value,
-    title: document.getElementById("cal-title").value,
-    day: document.getElementById("cal-day").value,
-    end: document.getElementById("cal-end").value,
-    time: document.getElementById("cal-time").value,
-    notes: document.getElementById("cal-notes").value,
-    links: document.getElementById("cal-links").value,
-    category: document.getElementById("cal-category").value,
-  };
+  const draft = readCalendarDraft();
   // A trip, or a task with an "Ends on" date, becomes a spanning item drawn as a bar.
   const spans = draft.kind === "event" || (draft.kind === "task" && draft.end !== "");
   const result = spans
     ? makeEvent({ title: draft.title, start: draft.day, end: draft.end, notes: draft.notes, links: draft.links, category: draft.category }, calendarId())
     : makeItem(draft, calendarId());
   if (!result.ok) {
-    renderCalendar(draft, result.reason);
+    renderCalendar(result.reason);
     return;
   }
   const next = [...calendarItems, result.item];
-  const saved = saveCalendarItems(next);
-  if (!saved) {
-    renderCalendar(draft, "Couldn't save in this browser.");
+  if (!saveCalendarItems(next)) {
+    renderCalendar("Couldn't save in this browser.");
     return;
   }
   calendarItems = next;
-  renderCalendar({ title: "", day: "", time: "", notes: "", links: "", category: "other" }, "Added.");
-  document.getElementById("cal-title").focus();
+  calDraft = blankDraft();
+  calFormOpen = false;
+  confirmDeleteId = null;
+  renderCalendar("Added.", { resetDraft: true });
+  (calendarBody.querySelector(`[data-id="${result.item.id}"]`) ?? document.getElementById("cal-message")).focus();
 }
 
-function deleteCalendarItem(id) {
-  const next = removeItem(calendarItems, id);
-  if (saveCalendarItems(next)) {
-    calendarItems = next;
+// Delete asks first. The Yes button ignores a tap that comes straight after the first one.
+function askDelete(id) {
+  confirmDeleteId = id;
+  confirmArmedAt = Date.now();
+  renderCalendar("", { focus: `[data-yes="${id}"]` });
+}
+
+function keepItem(id) {
+  confirmDeleteId = null;
+  renderCalendar("", { focus: `[data-delete="${id}"]` });
+}
+
+function confirmDelete(id) {
+  if (confirmDeleteId !== id || Date.now() - confirmArmedAt < CAL_GUARD_MS) {
+    return;
   }
+  confirmDeleteId = null;
+  const next = removeItem(calendarItems, id);
+  if (!saveCalendarItems(next)) {
+    renderCalendar("Couldn't save in this browser.");
+    return;
+  }
+  calendarItems = next;
   renderCalendar();
+  calendarScreen.querySelector("h2").focus();
 }
 
 function openCalendarScreen() {
   showScreen("calendar");
+  confirmDeleteId = null;
+  celebrateText = "";
   renderCalendar();
   calendarScreen.querySelector("h2").focus();
 }
@@ -1164,7 +1279,7 @@ const VIEWS = [
 function renderViewBar() {
   const bar = el("div", undefined, { class: "view-bar", role: "group", "aria-label": "Calendar view" });
   for (const view of VIEWS) {
-    const b = button(view.label, () => { calView = view.id; renderCalendar(); }, "kind");
+    const b = button(view.label, () => { calView = view.id; confirmDeleteId = null; renderCalendar(); }, "kind");
     b.setAttribute("aria-pressed", String(calView === view.id));
     bar.append(b);
   }
@@ -1222,9 +1337,11 @@ function renderTimeView() {
     for (const trip of eventsCovering(calendarItems, calAnchor)) {
       calendarBody.append(el("p", `Trip or event: ${trip.title} (${trip.start} to ${trip.end})`, { class: "event-band" }));
     }
-    const grid = el("div", undefined, { class: "day-grid", "aria-label": "Day timeline" });
+    const grid = el("div", undefined, { class: "day-grid", role: "group", "aria-label": "Day timeline" });
     for (const hour of hourLabels()) {
-      grid.append(el("div", `${hour}:00`, { class: "hour", style: `top:${((hour - 7) / 15) * 100}%` }));
+      const label = el("div", `${hour}:00`, { class: "hour" });
+      label.style.top = `${((hour - 7) / 15) * 100}%`; // set here: the page's security rules block a style attribute
+      grid.append(label);
     }
     const outside = [];
     for (const item of itemsOnDay(calendarItems, calAnchor).filter((i) => !isEvent(i))) {
@@ -1250,7 +1367,7 @@ function renderTimeView() {
   if (calView === "week") {
     const { weekdays, weekend } = splitWeek(calAnchor);
     const weekDaysAll = [...weekdays, ...weekend];
-    const strip = el("div", undefined, { class: "bar-strip", "aria-label": "Spanning items" });
+    const strip = el("div", undefined, { class: "bar-strip", role: "group", "aria-label": "Spanning items" });
     for (const bar of spanBarsFor(weekDaysAll)) strip.append(bar);
     if (strip.childElementCount > 0) calendarBody.append(strip);
     for (const [title, days] of [["Weekdays", weekdays], ["Weekend", weekend]]) {
@@ -1270,9 +1387,9 @@ function renderTimeView() {
   }
 
   // Month
-  const grid = el("div", undefined, { class: "month-grid", role: "table", "aria-label": "Month" });
+  const grid = el("div", undefined, { class: "month-grid", role: "group", "aria-label": "Month" });
   for (const name of ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]) {
-    grid.append(el("div", name, { class: "month-head", role: "columnheader" }));
+    grid.append(el("div", name, { class: "month-head" }));
   }
   for (const week of monthGrid(calAnchor)) {
     const real = week.filter(Boolean);

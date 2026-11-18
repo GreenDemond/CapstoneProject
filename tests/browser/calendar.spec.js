@@ -1,15 +1,10 @@
 import { test, expect } from "@playwright/test";
-
-function dayFromNow(days) {
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  const pad = (n) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-}
+import { dayFromNow, openForm, addItem, deleteWithConfirm } from "./helpers/calendar.js";
 
 async function openCalendar(page) {
   await page.goto("/");
   await page.getByRole("button", { name: "My calendar" }).click();
+  await openForm(page);
 }
 
 // Main path: add an item three days away, and it sits in "Can wait".
@@ -56,7 +51,7 @@ test("items survive a reload and can be deleted", async ({ page }) => {
   await page.reload();
   await page.getByRole("button", { name: "My calendar" }).click();
   await expect(page.locator("ul.cal-list").getByText("Lab report")).toBeVisible();
-  await page.getByRole("button", { name: "Delete" }).first().click();
+  await deleteWithConfirm(page.locator("ul.cal-list li", { hasText: "Lab report" }));
   await expect(page.locator("ul.cal-list").getByText("Lab report")).toHaveCount(0);
   await expect(page.getByText("Nothing planned yet.")).toBeVisible();
 });
@@ -83,7 +78,6 @@ test("notes and https links are saved, and a plain-web link is refused", async (
 // Completion: an item moves to Completed, the weekly log counts it, and Reopen brings it back.
 test("completing an item moves it to Completed and counts in the weekly log", async ({ page }) => {
   await openCalendar(page);
-  await expect(page.getByText("Finished so far: today 0")).toBeVisible();
   await page.getByLabel("What is it?").fill("Maths worksheet");
   await page.getByLabel("What part of life is it?").selectOption("school");
   await page.getByLabel("Due date").fill(dayFromNow(3));
@@ -91,11 +85,33 @@ test("completing an item moves it to Completed and counts in the weekly log", as
   await page.getByRole("button", { name: "Add to my calendar" }).click();
   await page.locator("ul.cal-list li", { hasText: "Maths worksheet" }).getByRole("button", { name: "Start" }).click();
   await expect(page.locator("ul.cal-list li", { hasText: "Maths worksheet" }).locator(".tag")).toContainText("In progress");
+  await page.waitForTimeout(500); // taps closer than 0.4 s apart are ignored on purpose
   await page.locator("ul.cal-list li", { hasText: "Maths worksheet" }).getByRole("button", { name: "Complete" }).click();
   await expect(page.locator("ul.completed li", { hasText: "Maths worksheet" })).toBeVisible();
   await expect(page.getByText("this week 1")).toBeVisible();
+  await page.waitForTimeout(500);
   await page.locator("ul.completed li", { hasText: "Maths worksheet" }).getByRole("button", { name: "Reopen" }).click();
   await expect(page.locator("ul.completed")).toHaveCount(0);
+});
+
+// After Complete the pressed button is rebuilt; keyboard focus must land on the item, not on the page body.
+test("after Complete, keyboard focus stays inside the calendar", async ({ page }) => {
+  await openCalendar(page);
+  await addItem(page, { title: "Focus check", days: 3 });
+  await page.waitForTimeout(500); // taps closer than 0.4 s apart are ignored on purpose
+  await page.locator("ul.cal-list li", { hasText: "Focus check" }).getByRole("button", { name: "Complete" }).click();
+  await expect(page.locator("ul.completed li", { hasText: "Focus check" })).toBeVisible();
+  await expect(page.locator("#calendar-screen :focus")).toHaveCount(1);
+});
+
+// Two different items completed one after another, with no wait between them: both count.
+test("a double-click on Complete completes only that item, never the one that slides up", async ({ page }) => {
+  await openCalendar(page);
+  await addItem(page, { title: "First quick", days: 3 });
+  await addItem(page, { title: "Second quick", days: 4 });
+  await page.locator("ul.cal-list li", { hasText: "First quick" }).getByRole("button", { name: "Complete" }).dblclick();
+  await expect(page.locator("ul.completed li", { hasText: "First quick" })).toBeVisible();
+  await expect(page.locator("ul.completed li", { hasText: "Second quick" })).toHaveCount(0);
 });
 
 // Completing an item shows "Fire it Up".
@@ -120,7 +136,7 @@ test("running totals survive a reload and deleting a finished item", async ({ pa
   await page.reload();
   await page.getByRole("button", { name: "My calendar" }).click();
   await expect(page.getByText("all time 1")).toBeVisible();
-  await page.locator("ul.completed li", { hasText: "History notes" }).getByRole("button", { name: "Delete" }).click();
+  await deleteWithConfirm(page.locator("ul.completed li", { hasText: "History notes" }));
   await expect(page.getByText("all time 1")).toBeVisible();
 });
 
@@ -230,4 +246,126 @@ test("no confetti when the device asks for reduced motion", async ({ page }) => 
   await page.locator("ul.cal-list li", { hasText: "Piano" }).getByRole("button", { name: "Complete" }).click();
   await expect(page.locator(".celebrate")).toBeVisible();
   await expect(page.locator(".confetti-piece")).toHaveCount(0);
+});
+
+// ---- Fixes from the 2026-11-17 review ----
+
+test("the list comes first and the form opens with Add something", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "My calendar" }).click();
+  await expect(page.getByLabel("What is it?")).toHaveCount(0);
+  await page.getByRole("button", { name: "Add something" }).click();
+  await expect(page.getByLabel("What is it?")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Back" })).toHaveCount(2);
+  await page.getByRole("button", { name: "Add something" }).click();
+  await expect(page.getByLabel("What is it?")).toHaveCount(0);
+});
+
+test("after Add the form closes and the new item gets focus", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "My calendar" }).click();
+  await addItem(page, { title: "Focus me" });
+  await expect(page.getByLabel("What is it?")).toHaveCount(0);
+  await expect(page.locator("ul.cal-list li", { hasText: "Focus me" })).toBeFocused();
+});
+
+test("what was typed in the form survives a view switch, navigation and a Complete", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "My calendar" }).click();
+  await addItem(page, { title: "Existing" });
+  await openForm(page);
+  await page.getByLabel("What is it?").fill("Half typed");
+  await page.getByLabel("Due date").fill(dayFromNow(5));
+  await page.getByLabel("Due time").fill("14:30");
+  await page.getByLabel("Notes (as much as you want)").fill("some notes");
+  await page.getByLabel("What part of life is it?").selectOption("family");
+  await page.getByRole("button", { name: "Week", exact: true }).click();
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await page.getByRole("button", { name: "Today", exact: true }).click();
+  await page.getByRole("button", { name: "List", exact: true }).click();
+  await page.locator("ul.cal-list li", { hasText: "Existing" }).getByRole("button", { name: "Complete" }).click();
+  await expect(page.getByLabel("What is it?")).toHaveValue("Half typed");
+  await expect(page.getByLabel("Due date")).toHaveValue(dayFromNow(5));
+  await expect(page.getByLabel("Due time")).toHaveValue("14:30");
+  await expect(page.getByLabel("Notes (as much as you want)")).toHaveValue("some notes");
+  await expect(page.getByLabel("What part of life is it?")).toHaveValue("family");
+  await page.getByRole("button", { name: "Add to my calendar" }).click();
+  await expect(page.locator("ul.cal-list li", { hasText: "Half typed" })).toBeVisible();
+  await openForm(page);
+  await expect(page.getByLabel("What is it?")).toHaveValue("");
+});
+
+test("Delete needs two taps, Keep it cancels, and a double click deletes nothing else", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "My calendar" }).click();
+  await addItem(page, { title: "First one", days: 3, time: "09:00" });
+  await addItem(page, { title: "Second one", days: 3, time: "10:00" });
+  const first = page.locator("ul.cal-list li", { hasText: "First one" });
+  await first.getByRole("button", { name: "Delete" }).click();
+  await expect(first.getByRole("button", { name: "Yes, delete" })).toBeVisible();
+  await first.getByRole("button", { name: "Keep it" }).click();
+  await expect(first).toBeVisible();
+  await expect(first.getByRole("button", { name: "Delete" })).toBeVisible();
+  // A fast double click: the second tap must not confirm anything.
+  await first.getByRole("button", { name: "Delete" }).dblclick();
+  await expect(page.locator("ul.cal-list li", { hasText: "First one" })).toHaveCount(1);
+  await expect(page.locator("ul.cal-list li", { hasText: "Second one" })).toHaveCount(1);
+  await page.waitForTimeout(500);
+  await first.getByRole("button", { name: "Yes, delete" }).click();
+  await expect(page.locator("ul.cal-list li", { hasText: "First one" })).toHaveCount(0);
+  await expect(page.locator("ul.cal-list li", { hasText: "Second one" })).toHaveCount(1);
+});
+
+test("Fire it Up shows only right after a Complete, not after a later Delete", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "My calendar" }).click();
+  await addItem(page, { title: "Done soon" });
+  await addItem(page, { title: "Delete me" });
+  await page.locator("ul.cal-list li", { hasText: "Done soon" }).getByRole("button", { name: "Complete" }).click();
+  await expect(page.locator("p.celebrate")).toBeVisible();
+  await page.waitForTimeout(500);
+  await deleteWithConfirm(page.locator("ul.cal-list li", { hasText: "Delete me" }));
+  await expect(page.locator("ul.cal-list li", { hasText: "Delete me" })).toHaveCount(0);
+  await expect(page.locator("p.celebrate")).toHaveCount(0);
+});
+
+test("a past item sits under Time has passed, not Urgent", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "My calendar" }).click();
+  await addItem(page, { title: "Old task", days: -3 });
+  const passed = page.locator("h3", { hasText: "Time has passed" }).locator("xpath=following-sibling::ul[1]");
+  await expect(passed).toContainText("Old task");
+  const urgent = page.getByRole("heading", { name: "Urgent", exact: true }).locator("xpath=following-sibling::ul[1]");
+  await expect(urgent).not.toContainText("Old task");
+  await expect(page.getByText("Mark it done or delete it. No rush.")).toBeVisible();
+  await expect(page.getByText(/Due time has passed/)).toHaveCount(0);
+});
+
+test("zero totals are hidden until something is finished", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "My calendar" }).click();
+  await expect(page.getByText("Finished so far")).toHaveCount(0);
+  await addItem(page, { title: "Count me" });
+  await expect(page.getByText("Finished so far")).toHaveCount(0);
+  await page.locator("ul.cal-list li", { hasText: "Count me" }).getByRole("button", { name: "Complete" }).click();
+  await expect(page.getByText("all time 1")).toBeVisible();
+});
+
+test("Day view hour labels are in order and no security-policy errors appear", async ({ page }) => {
+  const problems = [];
+  page.on("console", (msg) => {
+    if (msg.text().includes("Content Security Policy")) problems.push(msg.text());
+  });
+  page.on("pageerror", (err) => problems.push(err.message));
+  await page.goto("/");
+  await page.getByRole("button", { name: "My calendar" }).click();
+  await addItem(page, { title: "Timed", days: 0, time: "10:00" });
+  await page.getByRole("button", { name: "Day", exact: true }).click();
+  const seven = await page.getByText("7:00", { exact: true }).boundingBox();
+  const eight = await page.getByText("8:00", { exact: true }).boundingBox();
+  expect(eight.y).toBeGreaterThan(seven.y + 5);
+  await page.getByRole("button", { name: "Week", exact: true }).click();
+  await page.getByRole("button", { name: "Month", exact: true }).click();
+  await page.waitForTimeout(300);
+  expect(problems).toEqual([]);
 });

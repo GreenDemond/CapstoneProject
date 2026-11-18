@@ -11,6 +11,7 @@ Each step below: implemented by a cheaper model where possible, then `npm run ch
 - Step 2 done (local server: malformed address no longer crashes it; only `index.html`, `js/` and `css/` are served).
 - Step 3 done (one `showScreen` for every screen, including Settings; the steps preview survives a visit elsewhere; the home AI request is cancelled when the student leaves; focusable headings; 12 navigation tests).
 - Steps 4 and 6 done (profile keeps typed text, warns about a note not yet added, local dates; Start uses the steps shown with a "Showing 5 of N" line; reward line only on a real change; countdown from the clock; focus kept, including when time runs out; "Time's up" goes on Still working; leftover developer text removed).
+- Step 5 done, with the calendar parts of step 11 (form kept and behind Add something, Delete confirm, double-tap guard, reward only after a confirmed save, calm "Time has passed" group, hour labels fixed, form styling, readable rows in dark mode, 44 px buttons, role fixes, zero totals hidden).
 
 ## Phase 1: keep data safe, one screen at a time
 

@@ -4,6 +4,10 @@ Status: **first part built 2026-11-17.** Built: adding items with a due date and
 
 **Priority groups (built, as Ben asked):** Urgent (due within the hour, or already passed, shown neutrally); Significant (due later today); Not urgent (due within 2 days); Can wait (due within 5 days); Later (more than 5 days away, so nothing is forced into the wrong group). The "5 days after the day entered" rule is built as the due date the student chooses, not an automatic date from the day they add it. Ben to confirm.
 
+## Changes after the whole-app review (2026-11-17)
+
+List first, form behind Add something (typing kept across every redraw); Delete needs a second tap; a quick second tap anywhere in the list is ignored, so a double-click never acts on the item that slides up; "Fire it Up" only after a confirmed Complete; past-due tasks go to a calm grey "Time has passed" group (rule 2), not Urgent; hour labels positioned within the page's security rules; readable text on coloured rows in dark mode; 44 px buttons; "Finished so far" hidden while it is all zeros.
+
 ## Scope
 
 - A calendar the student keeps **on their own device**: day, week, and month views.

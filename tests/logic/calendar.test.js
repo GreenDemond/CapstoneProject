@@ -1,12 +1,26 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { bucketFor, parseDue, makeItem, groupItems, removeItem, parseLinks, MAX_LINKS, MAX_NOTES, makeEvent, isEvent } from "../../js/logic/calendar.js";
+import { bucketFor, parseDue, makeItem, groupItems, removeItem, parseLinks, MAX_LINKS, MAX_NOTES, makeEvent, isEvent, GROUPS } from "../../js/logic/calendar.js";
 
 const NOW = new Date(2026, 10, 17, 10, 0); // 17 Nov 2026, 10:00 local
 
-test("due within the hour is urgent, including a time that has passed", () => {
+test("due within the hour is urgent; a time that has passed goes to the calm group", () => {
   assert.equal(bucketFor(new Date(2026, 10, 17, 10, 30), NOW), "urgent");
-  assert.equal(bucketFor(new Date(2026, 10, 17, 9, 0), NOW), "urgent");
+  assert.equal(bucketFor(new Date(2026, 10, 17, 9, 0), NOW), "passed");
+  assert.equal(bucketFor(new Date(2026, 10, 1, 9, 0), NOW), "passed");
+});
+
+test("the passed group comes last and has calm wording", () => {
+  const last = GROUPS[GROUPS.length - 1];
+  assert.equal(last.id, "passed");
+  assert.equal(last.label, "Time has passed");
+  assert.equal(last.hint, "Mark it done or delete it. No rush.");
+});
+
+test("a past-due task is grouped under passed, not urgent", () => {
+  const groups = groupItems([{ id: "p", title: "Old", due: "2026-11-10T09:00" }], NOW);
+  assert.deepEqual(groups.passed.map((i) => i.id), ["p"]);
+  assert.equal(groups.urgent.length, 0);
 });
 
 test("due later today is significant", () => {
