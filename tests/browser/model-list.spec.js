@@ -25,6 +25,12 @@ test("OpenRouter's pull-down starts on openrouter/free and can be changed", asyn
   expect(seen.models.length).toBeGreaterThan(0);
   expect(seen.models[0].auth).toBeNull();
 
+  // A typed free model with web search (":free:online") still gets the free-model note.
+  await page.getByText("I know the name already").click();
+  await page.getByLabel("The AI's name").fill("openai/gpt-oss-20b:free:online");
+  await expect(page.locator("#free-note")).toContainText("Free AIs may keep or learn from what you send");
+  await page.getByLabel("The AI's name").fill("");
+
   await pick.selectOption("vendor/model-03");
   await expect(page.locator("#free-note")).toHaveText("");
   await nextButton(page).click();

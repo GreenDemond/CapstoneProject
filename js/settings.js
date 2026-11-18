@@ -487,7 +487,7 @@ function renderPickStep() {
 
   const showFreeNote = () => {
     const chosen = typed.value.trim() || flow.pick;
-    freeNote.textContent = isOpenRouter(flow.url) && (chosen === "openrouter/free" || chosen.endsWith(":free"))
+    freeNote.textContent = isOpenRouter(flow.url) && (chosen.startsWith("openrouter/free") || /:free(:|$)/.test(chosen))
       ? "Free AIs may keep or learn from what you send, unless you turned that off in your OpenRouter account. Pick a paid one for private work."
       : "";
   };
