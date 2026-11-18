@@ -1,12 +1,5 @@
 import { test, expect } from "@playwright/test";
-
-async function startWork(page, text = "1. Find three sources\n2. Take notes\n3. Write a draft") {
-  await page.goto("/");
-  await page.getByLabel("Assignment text").fill(text);
-  await page.getByRole("button", { name: "Essay" }).click();
-  await page.getByRole("button", { name: "Show my steps" }).click();
-  await page.getByRole("button", { name: "Start", exact: true }).click();
-}
+import { startWork } from "./helpers/work.js";
 
 // Main path: do one step, refresh, and the app opens on the next step.
 test("after a refresh the app opens on the next step and Start this step continues", async ({ page }) => {

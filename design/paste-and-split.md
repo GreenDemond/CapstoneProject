@@ -1,6 +1,6 @@
 # Design: paste and split
 
-Status: **proposed, waiting for Ben's go-ahead.** Not built yet.
+Status: **built.** Paste, the six kinds of work, starter steps, the two-minute start, and Start opens the work screen. Editing the steps is not built yet.
 
 ## What the student sees and does
 

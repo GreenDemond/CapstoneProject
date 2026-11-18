@@ -5,21 +5,18 @@ import { cleanPastedText, limitPaste } from "./logic/clean-text.js";
 import { KINDS, DEFAULT_STEP_COUNT, starterStepsFor, withTwoMinuteStart, showingLine } from "./logic/starter-steps.js";
 import { QUESTIONS, cardLines } from "./logic/focus-intake.js";
 import { GOAL_KEYS, MAX_TEXT, emptyProfile, setGoals, addNote, deleteNote, notesNewestFirst } from "./logic/profile.js";
-import { loadProfileState, saveProfile, loadWork, saveWork } from "./storage.js";
+import { loadProfileState, saveProfile, loadWork, saveWork, loadChatSettings, loadCalendarItems, saveCalendarItems, loadCompletionCounts, saveCompletionCounts } from "./storage.js";
 import { pickupLine, listLabel } from "./logic/home.js";
 import { inUseHelper, usableServices, pasteStatus, isReady, hostOf } from "./logic/ai-services.js";
 import { readKey } from "./keystore.js";
 import { askService, askChat } from "./ai-direct.js";
 import { MAX_MESSAGE, OPENING_QUESTION, TRUSTED_ADULT_LINE } from "./logic/chat.js";
-import { loadChatSettings } from "./storage.js";
 import { guideFor, lengthFor } from "./logic/chat-settings.js";
 import { initSettings, getAiSettings, onAiChange, setChosenHelper, openSettingsScreen } from "./settings.js";
 import { confetti } from "./confetti.js";
-import { GROUPS, CATEGORIES, groupItems, makeItem, makeEvent, isEvent, removeItem, parseDue, setStatus, completedItems } from "./logic/calendar.js";
-import { loadCalendarItems, saveCalendarItems, loadCompletionCounts, saveCompletionCounts } from "./storage.js";
+import { GROUPS, CATEGORIES, groupItems, makeItem, makeEvent, isEvent, removeItem, parseDue, setStatus, completedItems, bucketFor } from "./logic/calendar.js";
 import { addCompletion, removeCompletion, totals } from "./logic/counter.js";
 import { addDays, addMonths, splitWeek, monthGrid, itemsOnDay, eventsCovering, blockPlacement, hourLabels, mondayOf } from "./logic/views.js";
-import { bucketFor, parseDue as parseDueCal } from "./logic/calendar.js";
 import { createWork, currentIndex, doneCount, allDone, applyChoice, hintAt, ringFraction, formatTime, secondsUntil } from "./logic/work.js";
 
 const textBox = document.getElementById("assignment-text");
@@ -35,7 +32,6 @@ const ready = document.getElementById("ready");
 
 let chosenKind = null;
 let allSteps = [];
-let pastedText = "";
 
 // One place decides which screen is showing. Home is the paste screen, plus the steps preview
 // below it when the student has one open.
@@ -131,8 +127,7 @@ showButton.addEventListener("click", async () => {
     return;
   }
 
-  pastedText = cleanPastedText(text);
-  allSteps = starterStepsFor(chosenKind, pastedText);
+  allSteps = starterStepsFor(chosenKind, cleanPastedText(text));
   ready.textContent = "";
   renderSteps(DEFAULT_STEP_COUNT);
   message.textContent = truncated
@@ -818,10 +813,10 @@ function refreshAiStatus() {
     options.unshift(none);
   }
   aiChoice.replaceChildren(...options);
-  const ready = current !== null && isReady(current);
-  aiBox.hidden = !ready;
+  const helperReady = current !== null && isReady(current);
+  aiBox.hidden = !helperReady;
   refreshPasteHint();
-  if (ready) {
+  if (helperReady) {
     aiUseLabel.textContent = `Use ${current.label} to suggest steps`;
     aiPrivacy.textContent = `If this is ticked, pressing Show my steps sends this text to the AI service ${where(current)} to suggest steps. Don't paste your name or anything private.`;
   }
@@ -883,7 +878,6 @@ async function suggestWithChosenService(text) {
     allSteps = starterStepsFor(chosenKind, cleanPastedText(text));
     message.textContent = `${result.error} Here are the starter steps instead.`;
   }
-  pastedText = cleanPastedText(text);
   ready.textContent = "";
   renderSteps(DEFAULT_STEP_COUNT);
   openStepsPreview();
@@ -1015,7 +1009,7 @@ function deleteButtons(item) {
 }
 
 // opts.resetDraft: show a blank form (after Add). opts.focus: a selector to focus afterwards.
-function renderCalendar(message = "", opts = {}) {
+function renderCalendar(notice = "", opts = {}) {
   if (!opts.resetDraft) {
     calDraft = readCalendarDraft() ?? calDraft;
   }
@@ -1035,7 +1029,7 @@ function renderCalendar(message = "", opts = {}) {
   if (calFormOpen) {
     calendarBody.append(buildCalendarForm(calDraft));
   }
-  calendarBody.append(el("p", message, { class: "message", role: "status", id: "cal-message", tabindex: "-1" }));
+  calendarBody.append(el("p", notice, { class: "message", role: "status", id: "cal-message", tabindex: "-1" }));
 
   if (celebrate) {
     const line = el("p", undefined, { class: "celebrate", role: "status" });
@@ -1320,7 +1314,7 @@ function blockFor(item, now) {
     band.addEventListener("click", () => { calAnchor = new Date(item.start + "T12:00"); calView = "day"; renderCalendar(); });
     return band;
   }
-  const due = parseDueCal(item.due.slice(0, 10), item.due.slice(11, 16));
+  const due = parseDue(item.due.slice(0, 10), item.due.slice(11, 16));
   const group = item.status === "completed" ? "done" : due ? bucketFor(due, now) : "later";
   const time = item.due.slice(11, 16);
   const block = el("button", undefined, { type: "button", class: "block", "data-group": group });
@@ -1630,15 +1624,15 @@ function buildChat() {
   );
 
   const kinds = el("div", undefined, { class: "kind-buttons", role: "group", "aria-label": "What kind of work is this?" });
-  const kindButtons = [];
+  const chatKindButtons = [];
   for (const kind of KINDS) {
     const b = button(kind.label, () => {
       chatKind = kind.id;
-      kindButtons.forEach((other, i) => other.setAttribute("aria-pressed", String(KINDS[i].id === chatKind)));
+      chatKindButtons.forEach((other, i) => other.setAttribute("aria-pressed", String(KINDS[i].id === chatKind)));
       chatParts.input.focus();
     }, "kind");
     b.setAttribute("aria-pressed", String(kind.id === chatKind));
-    kindButtons.push(b);
+    chatKindButtons.push(b);
     kinds.append(b);
   }
   chatBody.append(kinds);

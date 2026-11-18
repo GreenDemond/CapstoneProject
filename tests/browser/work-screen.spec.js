@@ -1,12 +1,5 @@
 import { test, expect } from "@playwright/test";
-
-async function startWork(page, text = "1. Find three sources\n2. Take notes\n3. Write a draft") {
-  await page.goto("/");
-  await page.getByLabel("Assignment text").fill(text);
-  await page.getByRole("button", { name: "Essay" }).click();
-  await page.getByRole("button", { name: "Show my steps" }).click();
-  await page.getByRole("button", { name: "Start", exact: true }).click();
-}
+import { startWork } from "./helpers/work.js";
 
 // Main path: Done moves through the steps one at a time, and the count goes up.
 test("Done moves to the next step, one at a time", async ({ page }) => {

@@ -1,6 +1,6 @@
 # AI step 3: calling the chosen service from the browser
 
-Status: **revised after advisor review (2026-11-17). Not ready to build until the parent decides the page rule (below) and Ben answers the open questions.** Nothing here is built yet. Uncommitted changes from an earlier attempt are in the working tree; they are not kept unless they match this note.
+Status: **built.** The app calls the AI service the student chose, directly from the browser. The parent approved the page rule on 2026-11-17 (DECISIONS.md change log).
 
 Builds on `design/ai-endpoints.md` (parent decision 2026-11-17: students bring their own keys, kept encrypted in their browser; Ben's own endpoints run on the parent's bill, local only).
 

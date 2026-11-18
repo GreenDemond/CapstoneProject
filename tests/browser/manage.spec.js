@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { KEY, standIn, openSettings, addOther, nextButton } from "./helpers/ai.js";
+import { standIn, openSettings, addOther, nextButton } from "./helpers/ai.js";
 
 test("Rename, Change the AI, Test it again, and Remove with a confirmation", async ({ page }) => {
   const seen = await standIn(page);
@@ -34,7 +34,6 @@ test("Rename, Change the AI, Test it again, and Remove with a confirmation", asy
   await page.getByRole("button", { name: "Yes, remove" }).click();
   await expect(page.getByText("Removed Home AI.")).toBeVisible();
   await expect(page.locator(".helper-card")).toHaveCount(0);
-  void KEY;
 });
 
 // Keyboard only: the whole add flow can be done without a mouse.
