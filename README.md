@@ -10,6 +10,7 @@ A school project for Ben: a tool that helps students with ADHD stay on task whil
 | `CLAUDE.md` | One-line file that imports `AGENTS.md`, because Claude Code reads `CLAUDE.md` |
 | `DECISIONS.md` | Technical and product choices made in advance, with reasons, so agents do not re-ask; also lists what is still Ben's or a parent's to decide |
 | `PROGRESS.md` | What is built, what is waiting on whom, and the ordered list of what to build next |
+| `ROADMAP.md` | Plan for the next stage: chat, search, web app or Apple app, on-device AI, and the interface clean-up, with the decisions each needs |
 | `00-knowledge-summary.md` | **Start here.** What the research supports, design principles, things to avoid, honest claims, privacy rules, and how to test, independent of what gets built |
 | `01-evidence.md` | What the research says about each part of the idea, with confidence ratings and sources |
 | `02-platform-and-privacy.md` | What a Chrome extension and an iOS app can and cannot do; privacy rules; existing products |

@@ -35,6 +35,9 @@ Nothing. The whole-app review plan (`design/review-plan-2026-11-17.md`) is finis
 
 ## Broken or worrying
 
+- **One browser test is flaky** (found 2026-11-20): `tests/browser/ai-choice.spec.js:44` failed 2 of 6 repeats; after a reload the status line read "Using: a.example.test", not "isn't ready yet". Cause not yet known (`ROADMAP.md` item G1).
+- **Browser tests cannot run as configured on this Mac**: Playwright's own browser is not installed. On 2026-11-20 they were run through installed Chrome (364 passed, 1 skipped, the 1 flaky failure above). `npm ci` needs `--registry=https://registry.npmjs.org/` here.
+- **OpenRouter search uses a deprecated feature** (`plugins: web`); the replacement is in `ROADMAP.md` item S1.
 - **`web-app/` is a leftover** (React and TypeScript, not allowed by T1). Excluded from git and lint. Ben decides whether to delete it. Ignore `SETUP.md` step 6.
 - **Editing the steps before starting is not built** (P1). With the AI turned on, this is the biggest gap against the research: the student should make the plan. Next #1.
 - Starter steps are not yet tested with students.
@@ -58,6 +61,8 @@ Nothing. The whole-app review plan (`design/review-plan-2026-11-17.md`) is finis
 - Hosting (T7). Teacher approval and written parent permission before classmates use the app.
 
 ## Next
+
+**`ROADMAP.md` (2026-11-20) lays out the next stage**: interface clean-up, a more interactive chat, search, and an Apple shell with on-device AI. It needs answers from the parent and Ben first (its section 8). Until they answer, the list below stands.
 
 1. **Editing the steps before Start** (P1): edit words, delete, reorder, add. Design note first.
 2. **Recall question** on the "All your steps are done" screen (P9, Moderate evidence).
