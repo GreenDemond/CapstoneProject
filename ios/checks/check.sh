@@ -46,8 +46,11 @@ xcodebuild build-for-testing -project App/FocusApp.xcodeproj -scheme FocusApp -s
 echo "ran: xcodebuild build-for-testing (generic iOS device: app and UI tests compile)"
 
 echo "== 4. UI tests =="
-if xcrun simctl list devices available 2>/dev/null | grep -q "iPhone"; then
-  DEST=$(xcrun simctl list devices available | grep -m1 "iPhone" | sed -E 's/^ *(.*) \(([0-9A-F-]{36})\).*/\2/')
+# Only simulators running iOS 26 or later work with this Xcode; skip older runtimes (e.g. iOS 18).
+DEST=$(xcrun simctl list devices available 2>/dev/null | awk '
+  /^-- .* --$/ { v = 0; if ($2 == "iOS") { split($3, a, "."); v = a[1] + 0 } ; next }
+  v >= 26 && /iPhone/ { if (match($0, /\([0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}\)/)) { print substr($0, RSTART + 1, 36); exit } }')
+if [ -n "$DEST" ]; then
   xcodebuild test -project App/FocusApp.xcodeproj -scheme FocusApp \
     -destination "id=$DEST" CODE_SIGNING_ALLOWED=NO > /tmp/focusapp-uitests.log 2>&1 \
     || { tail -n 30 /tmp/focusapp-uitests.log; echo "FAILED: UI tests"; exit 1; }
