@@ -23,8 +23,13 @@ public final class FileStore: Store, @unchecked Sendable {
     defer { lock.unlock() }
     do {
       try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-      try data.write(
-        to: folder.appendingPathComponent(name), options: [.atomic, .completeFileProtection])
+      // File protection exists on the phone. On a Mac it can be refused, so it is phone-only.
+      #if os(iOS)
+        let options: Data.WritingOptions = [.atomic, .completeFileProtection]
+      #else
+        let options: Data.WritingOptions = [.atomic]
+      #endif
+      try data.write(to: folder.appendingPathComponent(name), options: options)
     } catch {
       throw StoreError.writeFailed
     }

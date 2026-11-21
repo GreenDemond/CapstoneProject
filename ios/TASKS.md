@@ -12,7 +12,7 @@ A task is `ready` when every task it depends on is `done` and everything on its 
 | T01 Skeleton | done | | 2026-11-20 | check.sh: FocusKit passed; `SKIPPED: no iOS simulator`, exit 3 |
 | T02 Content and logic | done | T01 | 2026-11-20 | check.sh: FocusKit passed (27 tests, all 8 case files named `cases/<file>.json`); `SKIPPED: no iOS simulator`, exit 3. Checker: same model as Builder |
 | T03 Storage | done | T02 | 2026-11-20 | check.sh: FocusKit passed (48 tests); `SKIPPED: no iOS simulator`, exit 3. Checker: same model as Builder. Advisor gate 2 owed |
-| T04 App shell | waiting | T03, T00 | | |
+| T04 App shell | done (compile-checked) | T03, T00 | 2026-11-20 | check.sh: FocusKit passed (67 tests); app and UI tests compile for generic iOS; `SKIPPED: no iOS simulator`, exit 3. UI tests written, not run. No Advisor or Checker agent: self-review only. Advisor gate 2 owed |
 | T05 Assignment and editor | waiting | T04 | | |
 | T06 Today and the work screen | waiting | T05 | | |
 | T07 Stuck ladder, without AI | waiting | T06 | | |

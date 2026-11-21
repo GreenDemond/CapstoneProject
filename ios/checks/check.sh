@@ -22,21 +22,39 @@ swift test --disable-sandbox 2>&1 | grep -v '^warning: .*swiftpm' | tail -n 15
 [ "${PIPESTATUS[0]}" -eq 0 ] || { echo "FAILED: swift test"; exit 1; }
 echo "ran: swift build, swift test"
 
-echo "== 3. App build and UI tests =="
+echo "== 3. App compile check (generic iOS device, no signing) =="
 cd "$ROOT" || exit 1
+if [ ! -d App/FocusApp.xcodeproj ]; then
+  echo "SKIPPED: App/FocusApp.xcodeproj does not exist yet"
+  exit 3
+fi
+DD=$(mktemp -d /tmp/focusapp-dd.XXXXXX)
+EXTRA=()
+# Inside an OS sandbox (some agent tools) Swift cannot start its own sandbox for macros and
+# SwiftPM cannot write its caches. These flags are only added there; Xcode on a normal Mac needs none.
+if ! sandbox-exec -p '(version 1)(allow default)' /usr/bin/true >/dev/null 2>&1; then
+  mkdir -p /tmp/focus-home
+  EXTRA=(-clonedSourcePackagesDirPath "$DD/sp" -packageCachePath "$DD/pc"
+    -IDEPackageSupportDisableManifestSandbox=1 -skipMacroValidation
+    'OTHER_SWIFT_FLAGS=$(inherited) -disable-sandbox')
+  export HOME=/tmp/focus-home CFFIXED_USER_HOME=/tmp/focus-home
+fi
+xcodebuild build-for-testing -project App/FocusApp.xcodeproj -scheme FocusApp -sdk iphoneos \
+  -destination 'generic/platform=iOS' -derivedDataPath "$DD" CODE_SIGNING_ALLOWED=NO \
+  ${EXTRA[@]+"${EXTRA[@]}"} > /tmp/focusapp-xcodebuild.log 2>&1 \
+  || { grep -E "error:" /tmp/focusapp-xcodebuild.log | sort -u | head -30; echo "FAILED: app compile check"; exit 1; }
+echo "ran: xcodebuild build-for-testing (generic iOS device: app and UI tests compile)"
+
+echo "== 4. UI tests =="
 if xcrun simctl list devices available 2>/dev/null | grep -q "iPhone"; then
-  if [ ! -d App/FocusApp.xcodeproj ]; then
-    echo "SKIPPED: App/FocusApp.xcodeproj does not exist yet"
-    exit 3
-  fi
   DEST=$(xcrun simctl list devices available | grep -m1 "iPhone" | sed -E 's/^ *(.*) \(([0-9A-F-]{36})\).*/\2/')
-  xcodebuild build test -project App/FocusApp.xcodeproj -scheme FocusApp \
-    -destination "id=$DEST" CODE_SIGNING_ALLOWED=NO > /tmp/focusapp-xcodebuild.log 2>&1 \
-    || { tail -n 30 /tmp/focusapp-xcodebuild.log; echo "FAILED: xcodebuild"; exit 1; }
-  echo "ran: xcodebuild build and test"
+  xcodebuild test -project App/FocusApp.xcodeproj -scheme FocusApp \
+    -destination "id=$DEST" CODE_SIGNING_ALLOWED=NO > /tmp/focusapp-uitests.log 2>&1 \
+    || { tail -n 30 /tmp/focusapp-uitests.log; echo "FAILED: UI tests"; exit 1; }
+  echo "ran: UI tests on the simulator"
   echo "ALL CHECKS PASSED"
   exit 0
 fi
 echo "SKIPPED: no iOS simulator"
-echo "Ran: swift-format lint, swift build, swift test. Not run: app build and UI tests."
+echo "Ran: swift-format lint, swift build, swift test, app compile check. Not run: UI tests."
 exit 3

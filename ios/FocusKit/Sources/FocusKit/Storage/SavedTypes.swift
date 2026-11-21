@@ -11,11 +11,28 @@ public struct SavedWork: Storable {
   public var kindId: String?
   /// When the student last used the steps. Used for the welcome line only.
   public var savedOn: Date?
+  /// The optional "How will I know it's done?" line, by step number.
+  public var doneLines: [String: String]
 
-  public init(work: Work, kindId: String? = nil, savedOn: Date? = nil) {
+  public init(
+    work: Work, kindId: String? = nil, savedOn: Date? = nil, doneLines: [String: String] = [:]
+  ) {
     self.work = work
     self.kindId = kindId
     self.savedOn = savedOn
+    self.doneLines = doneLines
+  }
+
+  private enum CodingKeys: String, CodingKey {
+    case work, kindId, savedOn, doneLines
+  }
+
+  public init(from decoder: Decoder) throws {
+    let values = try decoder.container(keyedBy: CodingKeys.self)
+    work = try values.decode(Work.self, forKey: .work)
+    kindId = try values.decodeIfPresent(String.self, forKey: .kindId)
+    savedOn = try values.decodeIfPresent(Date.self, forKey: .savedOn)
+    doneLines = try values.decodeIfPresent([String: String].self, forKey: .doneLines) ?? [:]
   }
 
   /// Drops steps that are blank or have a bad or repeated number, cuts long steps, keeps at most
@@ -32,6 +49,9 @@ public struct SavedWork: Storable {
     let nextId = work.nextId > highest ? work.nextId : highest + 1
     var copy = self
     copy.work = Work(steps: steps, nextId: nextId)
+    let ids = Set(steps.map { String($0.id) })
+    copy.doneLines = doneLines.filter { ids.contains($0.key) }
+      .mapValues { Text.cut($0, to: limits.stepLength) }
     return copy
   }
 }
@@ -233,5 +253,20 @@ public struct RecallAnswers: Storable {
         return text.isEmpty
           ? nil : RecallAnswer(id: item.id, stepId: item.stepId, answer: text, date: item.date)
       })
+  }
+}
+
+/// Small facts about the app itself. No personal detail.
+public struct Flags: Storable {
+  public static let fileName = "flags.json"
+
+  /// The student has seen the first-run screen.
+  public var welcomed: Bool
+  /// The student was on the work screen when the app closed.
+  public var inStep: Bool
+
+  public init(welcomed: Bool = false, inStep: Bool = false) {
+    self.welcomed = welcomed
+    self.inStep = inStep
   }
 }
