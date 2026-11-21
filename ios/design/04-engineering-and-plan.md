@@ -121,7 +121,7 @@ Later, each with its own design note and decision: calendar list and reminders; 
 | 2 | ~~Install the iOS simulator~~ **Answered 2026-11-20:** the work moves to another computer that already has it. The first session there confirms with `xcrun simctl list devices available` | |
 | 3 | Sign in to Xcode with the developer account and set the team and bundle identifier yourself | Needed by T17a. Agents never handle account details |
 | 4 | The "what leaves the phone" rows in `03-ai-search-privacy.md` section 3.7 | Yes |
-| 5 | Should the phone's own backup include the app's data? | No: exclude it, so "stays on this iPhone" is exactly true |
+| 5 | Should the phone's own backup include the app's data? | Decided 2026-11-21 (parent): a switch, on by default. The key is never backed up |
 | 6 | Safety: add the two extra signals in `03` section 3.5 (with Ben) | Yes |
 | 7 | Microphone use by students, on-device only, no recordings kept | Yes |
 | 8 | Who may receive a build after T17b: Ben only, or classmates through TestFlight | Ben only until T14 passes, the teacher approves, and parents give written permission |

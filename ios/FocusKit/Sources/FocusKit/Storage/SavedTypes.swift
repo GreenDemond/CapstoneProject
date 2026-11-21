@@ -121,12 +121,24 @@ public struct Settings: Storable {
   public var lengths: [String: String]
   /// Answers to the "How I like to work" questions, by question id.
   public var howILikeToWork: [String: String]
+  /// "Include in my iPhone backup". On unless the student turns it off, and on for settings saved
+  /// before this existed (DECISIONS: Backup, 2026-11-21).
+  public var includeInBackup: Bool
+  /// "Use my own AI service": off unless the student turns it on. The key is NOT here; it is only
+  /// in the Keychain (`KeyStore`). The address and the model's name are not secret.
+  public var ownAIOn: Bool
+  public var ownAIEndpoint: String
+  public var ownAIModelId: String
+  /// When the own service is on, which AI is in use right now: true = the student's own service,
+  /// false = the AI on this iPhone. The student flips it with a visible switch on the Talk screen.
+  public var ownAIChosen: Bool
 
   public init(
     readAloud: Bool = false, talk: Bool = false, headphonesOnly: Bool = true,
     voiceId: String? = nil,
     speechRate: Double = 0.5, guides: [String: String] = [:], lengths: [String: String] = [:],
-    howILikeToWork: [String: String] = [:]
+    howILikeToWork: [String: String] = [:], includeInBackup: Bool = true, ownAIOn: Bool = false,
+    ownAIEndpoint: String = "", ownAIModelId: String = "", ownAIChosen: Bool = false
   ) {
     self.readAloud = readAloud
     self.talk = talk
@@ -136,11 +148,17 @@ public struct Settings: Storable {
     self.guides = guides
     self.lengths = lengths
     self.howILikeToWork = howILikeToWork
+    self.includeInBackup = includeInBackup
+    self.ownAIOn = ownAIOn
+    self.ownAIEndpoint = ownAIEndpoint
+    self.ownAIModelId = ownAIModelId
+    self.ownAIChosen = ownAIChosen
   }
 
   private enum CodingKeys: String, CodingKey {
     case readAloud, talk, voiceMode, headphonesOnly, voiceId, speechRate, guides, lengths
-    case howILikeToWork
+    case howILikeToWork, includeInBackup, ownAIOn, ownAIEndpoint, ownAIModelId
+    case ownAIChosen
   }
 
   /// Reads the two switches. Settings saved before D7 have a single `voiceMode` word instead:
@@ -160,6 +178,11 @@ public struct Settings: Storable {
     self.lengths = try c.decodeIfPresent([String: String].self, forKey: .lengths) ?? [:]
     self.howILikeToWork =
       try c.decodeIfPresent([String: String].self, forKey: .howILikeToWork) ?? [:]
+    self.includeInBackup = (try? c.decodeIfPresent(Bool.self, forKey: .includeInBackup)) ?? true
+    self.ownAIOn = (try? c.decodeIfPresent(Bool.self, forKey: .ownAIOn)) ?? false
+    self.ownAIEndpoint = (try? c.decodeIfPresent(String.self, forKey: .ownAIEndpoint)) ?? ""
+    self.ownAIModelId = (try? c.decodeIfPresent(String.self, forKey: .ownAIModelId)) ?? ""
+    self.ownAIChosen = (try? c.decodeIfPresent(Bool.self, forKey: .ownAIChosen)) ?? false
   }
 
   public func encode(to encoder: Encoder) throws {
@@ -172,6 +195,11 @@ public struct Settings: Storable {
     try c.encode(guides, forKey: .guides)
     try c.encode(lengths, forKey: .lengths)
     try c.encode(howILikeToWork, forKey: .howILikeToWork)
+    try c.encode(includeInBackup, forKey: .includeInBackup)
+    try c.encode(ownAIOn, forKey: .ownAIOn)
+    try c.encode(ownAIEndpoint, forKey: .ownAIEndpoint)
+    try c.encode(ownAIModelId, forKey: .ownAIModelId)
+    try c.encode(ownAIChosen, forKey: .ownAIChosen)
   }
 
   public func limited(by limits: Content.Limits) -> Settings {
@@ -179,6 +207,8 @@ public struct Settings: Storable {
     copy.speechRate = speechRate.isFinite ? min(1, max(0, speechRate)) : 0.5
     copy.guides = guides.mapValues { Text.cut($0, to: limits.guide) }
     copy.howILikeToWork = howILikeToWork.mapValues { Text.cut($0, to: 100) }
+    copy.ownAIEndpoint = Text.cut(ownAIEndpoint, to: OwnAIConfig.addressLimit)
+    copy.ownAIModelId = Text.cut(ownAIModelId, to: OwnAIConfig.modelLimit)
     return copy
   }
 }

@@ -40,6 +40,8 @@ public final class ChatModel {
   public private(set) var chats: [Chat]
   public private(set) var saveNote: String?
   public private(set) var cutNote: String?
+  /// A calm line about the student's own AI service (key not accepted, busy). Never from the service.
+  public private(set) var serviceNote: String?
   /// A chat the student asked to delete and has not confirmed yet.
   public private(set) var pendingDelete: String?
   public private(set) var pendingDeleteAll = false
@@ -48,6 +50,8 @@ public final class ChatModel {
   public var onUseSteps: ([String], String?) -> Void = { _, _ in }
   /// The current settings (guide, reply length). Set by the app.
   public var settings: () -> Settings = { Settings() }
+  /// Whether the student's own AI service is the one in use. Set by the app.
+  public var usingOwnService: () -> Bool = { false }
 
   private let content: Content
   private let store: any Store
@@ -79,6 +83,9 @@ public final class ChatModel {
   public var openingLine: String { content.chat.openingQuestion }
 
   public var isAvailable: Bool { availability == .available }
+
+  /// The line at the top of the screen: where the messages go.
+  public var privacyLine: String { usingOwnService() ? Words.talkPrivacyOwn : Words.talkPrivacy }
 
   public var unavailableLine: String? {
     availability == .available ? nil : Words.aiUnavailable(availability)
@@ -158,6 +165,7 @@ public final class ChatModel {
     let cut = Text.cut(Text.trimmed(draft), to: content.limits.message)
     guard isAvailable, !isReplying, !cut.isEmpty else { return }
     cutNote = Text.trimmed(draft).utf16.count > content.limits.message ? Words.messageCut : nil
+    serviceNote = nil
     draft = ""
     turns.append(ChatTurn(role: .user, text: cut))
     turns.append(ChatTurn(role: .assistant, text: "", inProgress: true))
@@ -237,6 +245,14 @@ public final class ChatModel {
       turns[index] = ChatTurn(role: .assistant, text: Words.aiTooLong, kind: .notice)
       finishRun()
       saveChat()
+    case .keyNotAccepted, .busy:
+      serviceNote = event == .busy ? Words.ownAIBusy : Words.ownAIKeyNotAccepted
+      turns.removeLast()
+      if let last = turns.last, last.role == .user {
+        draft = last.text
+        turns.removeLast()
+      }
+      finishRun()
     case .unavailable(let reason):
       availability = reason
       turns.removeLast()
@@ -283,6 +299,7 @@ public final class ChatModel {
     turns = []
     draft = ""
     cutNote = nil
+    serviceNote = nil
     cancelDeletes()
   }
 

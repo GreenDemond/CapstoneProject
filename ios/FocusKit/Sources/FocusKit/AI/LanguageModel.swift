@@ -20,6 +20,10 @@ public enum ModelFailure: Error, Equatable, Sendable {
   case guardrail
   case refusal
   case unavailable
+  /// The student's own AI service did not accept the key (HTTP 401 or 403).
+  case keyNotAccepted
+  /// The student's own AI service is busy (HTTP 429).
+  case busy
   case other
 }
 

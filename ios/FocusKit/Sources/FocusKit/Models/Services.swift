@@ -8,17 +8,29 @@ public struct Services {
   public var speechOutput: any SpeechOutput
   public var headphones: any HeadphoneStatus
   public var languageModel: any LanguageModel
+  /// Where the student's own AI key is kept.
+  public var keys: any KeyStore
+  /// How requests to the student's own AI service are sent.
+  public var transport: any HTTPTransport
+  /// Includes or excludes the app's data folder from the phone's backup.
+  public var backup: any BackupFlag
 
   public init(
     speechInput: any SpeechInput = UnavailableSpeechInput(),
     speechOutput: any SpeechOutput = SilentSpeechOutput(),
     headphones: any HeadphoneStatus = NoHeadphones(),
-    languageModel: any LanguageModel = UnavailableLanguageModel()
+    languageModel: any LanguageModel = UnavailableLanguageModel(),
+    keys: any KeyStore = FakeKeyStore(),
+    transport: any HTTPTransport = FakeHTTPTransport(),
+    backup: any BackupFlag = NoBackupFlag()
   ) {
     self.speechInput = speechInput
     self.speechOutput = speechOutput
     self.headphones = headphones
     self.languageModel = languageModel
+    self.keys = keys
+    self.transport = transport
+    self.backup = backup
   }
 
   public static var none: Services { Services() }

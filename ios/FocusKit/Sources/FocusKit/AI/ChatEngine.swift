@@ -34,6 +34,10 @@ public enum ChatEvent: Equatable, Sendable {
   case couldNotAnswer
   /// "This chat got long. Start a new chat to keep going."
   case tooLong
+  /// The student's own AI service did not accept the key.
+  case keyNotAccepted
+  /// The student's own AI service is busy.
+  case busy
   case unavailable(ModelAvailability)
 }
 
@@ -135,6 +139,10 @@ public struct ChatEngine: Sendable {
         continuation.yield(latest.isEmpty ? .trustedAdult : .couldNotAnswer)
       case .unavailable:
         continuation.yield(.unavailable(.other))
+      case .keyNotAccepted:
+        continuation.yield(.keyNotAccepted)
+      case .busy:
+        continuation.yield(.busy)
       case .refusal, .other:
         continuation.yield(.couldNotAnswer)
       }

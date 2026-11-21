@@ -2,7 +2,7 @@ import Foundation
 
 /// Words for the phone's AI. Plain, kind, and never a finished answer.
 extension Words {
-  public static let aiCouldNotAnswer = "The AI on this iPhone couldn't answer that one."
+  public static let aiCouldNotAnswer = "The AI couldn't answer that one."
   public static let aiHintsOnly =
     "I can give hints, not the finished answer. What have you tried so far?"
   public static let aiTooLong = "This chat got long. Start a new chat to keep going."
@@ -25,6 +25,8 @@ extension Words {
 extension Words {
   public static let talkPrivacy =
     "This AI runs on this iPhone. Your messages don't leave it. It can still be wrong."
+  public static let talkPrivacyOwn =
+    "Your messages go to the AI service you chose in Me, and its own privacy rules apply. It can still be wrong."
   public static let talkPlaceholder = "Say or type what you're stuck on"
   public static let talkSend = "Send"
   public static let talkStop = "Stop"
@@ -41,14 +43,14 @@ extension Words {
 }
 
 extension Words {
-  public static let aiSuggestedLabel = "Suggested by the AI on this iPhone. Change any you like."
+  public static let aiSuggestedLabel = "Suggested by the AI. Change any you like."
   public static let coachFallback =
     "The AI's steps weren't usable, so these are starter steps. Change any you like."
   public static let coachThinking = "Thinking of some steps"
   public static let giveIdea = "Give me an idea"
   public static let ideaUse = "Use it"
   public static let ideaNo = "No thanks"
-  public static let ideaFromAI = "An idea from the AI on this iPhone:"
+  public static let ideaFromAI = "An idea from the AI:"
   public static let ideaFromStarter = "An idea for this kind of work:"
   public static let ideaNone = "You have all the starter ideas. Add your own."
 }
@@ -111,11 +113,58 @@ extension Words {
   public static let privacyLines: [String] = [
     "Stored only on this iPhone, in this app's own private folder: your steps and progress, your goals and notes, your answers to How I like to work, your settings, up to 10 chats, your recall answers and parked thoughts.",
     "Never stored: audio, a name, an age, a school, a diagnosis, contacts, or location.",
-    "No account and no sync. The app does not back your things up anywhere.",
+    "No account and no sync. Your things stay on this iPhone and, when \"Include in my iPhone backup\" is on (it starts on), in your own iPhone backup, in iCloud or on your computer. You can switch that off in Me. Delete everything clears this iPhone; an older backup keeps its copy until your iPhone makes a new one.",
     "Your voice is turned into words on this iPhone. It is never recorded and never leaves it.",
-    "The AI runs on this iPhone. Your messages to it do not leave it.",
+    "The AI runs on this iPhone unless you switch on Use my own AI service. Messages to the AI on this iPhone do not leave it.",
     "Leaves this iPhone only when you ask: Look it up sends the words you search for to Wikipedia. Opening a source is a normal visit to that website.",
+    "Only if you switch on Use my own AI service (it starts off): your chat messages, the step and assignment text the step coach uses, and this app's rules (with your AI guide) are sent to the address you entered, and that service's own privacy rules apply. Your key is kept only in this iPhone's Keychain, is never in a backup, and is sent only to that address. Check connection sends one short test message, not your words.",
     "Nothing else. No analytics, no crash reports, no ads, and no code from anyone else.",
     "Asked only when first needed, with one sentence each: the microphone.",
   ]
+}
+
+/// Words for "Use my own AI service" and the backup switch. Nothing here quotes the service.
+extension Words {
+  public static let ownAITitle = "Use my own AI service"
+  public static let ownAISwitch = "Use my own AI service"
+  public static let ownAIAddress = "Address"
+  public static let ownAIAddressPlaceholder = "https://api.openai.com/v1/chat/completions"
+  public static let ownAIAddressNote = "An OpenAI-compatible chat address. It must start with https://"
+  public static let ownAIAddressBad =
+    "That address can't be used. It must be a full address that starts with https://"
+  public static let ownAIKey = "Key"
+  public static let ownAIKeyPlaceholder = "Paste your key"
+  public static let ownAIKeySave = "Save key"
+  public static let ownAIKeySaved = "A key is saved on this iPhone."
+  public static let ownAIKeyNone = "No key saved."
+  public static let ownAIKeyRemove = "Remove key"
+  public static let ownAIKeyNote =
+    "The key stays in this iPhone's Keychain. It is not in your backup and is sent only to the address above."
+  public static let ownAIKeyCouldNotSave = "The key couldn't be saved just now."
+  public static let ownAIModel = "Model name"
+  public static let ownAIModelPlaceholder = "For example gpt-4o-mini"
+  public static let ownAICheck = "Check connection"
+  public static let ownAIChecking = "Checking…"
+  public static let ownAICheckWorks = "It works."
+  public static let ownAIKeyNotAccepted =
+    "The key wasn't accepted. You can check it in Me, under Use my own AI service."
+  public static let ownAIBusy = "That service is busy. Try again in a moment."
+  public static let ownAICheckProblem =
+    "Couldn't get an answer. Check the address and the model name, and your connection."
+  public static let ownAINeedsFirst =
+    "To switch this on: read the line above, enter an address and a model name, and save a key."
+  public static let ownAIWhichAI = "Which AI"
+  public static let ownAIThisPhone = "On this iPhone"
+  public static let ownAIMine = "My service"
+
+  /// Shown before the service can be switched on, with the address the student entered.
+  public static func ownAIDisclosure(address: String) -> String {
+    let place = Text.trimmed(address).isEmpty ? "the address you enter below" : Text.trimmed(address)
+    return
+      "When this is on, your chat messages, the step and assignment text the step coach uses, and this app's rules (with your AI guide) are sent to \(place). That service's own privacy rules apply to them. While it is off, nothing is sent."
+  }
+
+  public static let meBackup = "Include in my iPhone backup"
+  public static let meBackupNote =
+    "On: your things are also in your own iPhone backup (iCloud or your computer). Off: they stay only on this iPhone. Your AI key is never in a backup."
 }

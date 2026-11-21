@@ -15,7 +15,9 @@ struct MeView: View {
         notes
         howILikeToWork
         howTheAITalks
+        OwnAISection(model: model)
         voice
+        backup
         Section {
           NavigationLink(Words.meAbout) { AboutView(model: model) }
             .accessibilityIdentifier("me-about")
@@ -201,6 +203,21 @@ struct MeView: View {
     .listRowBackground(Theme.Palette.card)
   }
 
+  // MARK: Backup
+
+  private var backup: some View {
+    Section {
+      Toggle(
+        Words.meBackup,
+        isOn: Binding(get: { me.includeInBackup }, set: { me.setIncludeInBackup($0) })
+      )
+      .accessibilityIdentifier("backup-switch")
+    } footer: {
+      Text(Words.meBackupNote)
+    }
+    .listRowBackground(Theme.Palette.card)
+  }
+
   private var modeNote: String {
     let s = model.settings
     switch (s.readAloud, s.talk) {
@@ -247,5 +264,104 @@ struct AboutView: View {
     .navigationTitle(Words.meAbout)
     .accessibilityElement(children: .contain)
     .accessibilityIdentifier("about-screen")
+  }
+}
+
+/// "Use my own AI service": off by default. The line about what is sent is always shown above the
+/// switch, and the switch needs it to have been shown.
+struct OwnAISection: View {
+  let model: AppModel
+  @State private var keyDraft = ""
+
+  private var own: OwnAIModel { model.ownAI }
+
+  var body: some View {
+    Section {
+      Text(verbatim: own.disclosure)
+        .font(Theme.Typography.small)
+        .foregroundStyle(Theme.Palette.ink)
+        .onAppear { own.noteDisclosureShown() }
+        .accessibilityIdentifier("own-ai-disclosure")
+      VStack(alignment: .leading, spacing: Theme.Space.tiny) {
+        Text(Words.ownAIAddress).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
+        TextField(
+          Words.ownAIAddressPlaceholder,
+          text: Binding(get: { own.address }, set: { own.setAddress($0) })
+        )
+        .textInputAutocapitalization(.never)
+        .autocorrectionDisabled()
+        .keyboardType(.URL)
+        .font(Theme.Typography.body)
+        .accessibilityLabel(Words.ownAIAddress)
+        .accessibilityIdentifier("own-ai-address")
+        if let problem = own.addressProblem {
+          Text(verbatim: problem).font(Theme.Typography.small)
+            .foregroundStyle(Theme.Palette.quiet)
+            .accessibilityIdentifier("own-ai-address-problem")
+        } else {
+          Text(Words.ownAIAddressNote).font(Theme.Typography.small)
+            .foregroundStyle(Theme.Palette.quiet)
+        }
+      }
+      VStack(alignment: .leading, spacing: Theme.Space.tiny) {
+        Text(Words.ownAIKey).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
+        Text(own.keyLine).font(Theme.Typography.body).foregroundStyle(Theme.Palette.ink)
+          .accessibilityIdentifier("own-ai-key-line")
+        SecureField(Words.ownAIKeyPlaceholder, text: $keyDraft)
+          .textInputAutocapitalization(.never)
+          .autocorrectionDisabled()
+          .font(Theme.Typography.body)
+          .accessibilityLabel(Words.ownAIKey)
+          .accessibilityIdentifier("own-ai-key")
+        Button(Words.ownAIKeySave) {
+          own.saveKey(keyDraft)
+          keyDraft = ""
+        }
+        .disabled(keyDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        .accessibilityIdentifier("own-ai-key-save")
+        if own.hasKey {
+          Button(Words.ownAIKeyRemove, role: .destructive) { own.removeKey() }
+            .accessibilityIdentifier("own-ai-key-remove")
+        }
+        if let note = own.keyNote {
+          Text(note).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
+        }
+        Text(Words.ownAIKeyNote).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
+      }
+      VStack(alignment: .leading, spacing: Theme.Space.tiny) {
+        Text(Words.ownAIModel).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
+        TextField(
+          Words.ownAIModelPlaceholder,
+          text: Binding(get: { own.modelName }, set: { own.setModelName($0) })
+        )
+        .textInputAutocapitalization(.never)
+        .autocorrectionDisabled()
+        .font(Theme.Typography.body)
+        .accessibilityLabel(Words.ownAIModel)
+        .accessibilityIdentifier("own-ai-model")
+      }
+      Button(own.checkState == .checking ? Words.ownAIChecking : Words.ownAICheck) {
+        Task { await own.checkConnection() }
+      }
+      .disabled(!own.canCheck)
+      .accessibilityIdentifier("own-ai-check")
+      if let line = own.checkLine {
+        Text(verbatim: line).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
+          .accessibilityIdentifier("own-ai-check-line")
+      }
+      Toggle(
+        Words.ownAISwitch,
+        isOn: Binding(get: { own.isOn }, set: { own.setOn($0) })
+      )
+      .disabled(!own.isOn && !own.canSwitchOn)
+      .accessibilityIdentifier("own-ai-switch")
+      if !own.isOn && !own.canSwitchOn {
+        Text(Words.ownAINeedsFirst).font(Theme.Typography.small)
+          .foregroundStyle(Theme.Palette.quiet)
+      }
+    } header: {
+      Text(Words.ownAITitle)
+    }
+    .listRowBackground(Theme.Palette.card)
   }
 }

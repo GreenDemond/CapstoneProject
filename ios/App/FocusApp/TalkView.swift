@@ -26,7 +26,21 @@ struct ChatScreen: View {
 
   var body: some View {
     VStack(alignment: .leading, spacing: 0) {
-      Text(Words.talkPrivacy)
+      if model.ownAI.isReady {
+        Picker(
+          Words.ownAIWhichAI,
+          selection: Binding(
+            get: { model.ownAI.isInUse }, set: { model.ownAI.use(own: $0) })
+        ) {
+          Text(Words.ownAIThisPhone).tag(false)
+          Text(Words.ownAIMine).tag(true)
+        }
+        .pickerStyle(.segmented)
+        .padding(.horizontal, Theme.Space.medium)
+        .padding(.top, Theme.Space.small)
+        .accessibilityIdentifier("talk-which-ai")
+      }
+      Text(talk.privacyLine)
         .font(Theme.Typography.small)
         .foregroundStyle(Theme.Palette.quiet)
         .padding(.horizontal, Theme.Space.medium)
@@ -155,6 +169,10 @@ struct ChatScreen: View {
         .accessibilityIdentifier("talk-hints")
         lookUpLink
       } else {
+        if let note = talk.serviceNote {
+          Text(verbatim: note).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
+            .accessibilityIdentifier("talk-service-note")
+        }
         if let cut = talk.cutNote {
           Text(cut).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
         }

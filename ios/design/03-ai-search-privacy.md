@@ -4,7 +4,9 @@
 
 **What it is.** Apple's on-device language model, reached through the `FoundationModels` framework. **Verified** by reading the interface in the iOS 27.2 kit on this Mac: chat sessions with separate instructions, streamed replies, tools the model can call, replies shaped as typed data (`@Generable`), an availability check, the model's context size (iOS 26.0), token counting (iOS 26.4 and later only, so not on Ben's iOS 26.2), and named error kinds.
 
-**Why it suits this project.** No key, no account, no cost, works offline, and the student's words do not leave the phone. That removes the adult-and-money step every other AI path needs, and uses no exception to "data stays on the device".
+**Own AI service (decided 2026-11-21, D6).** Apple's on-device model is the default and nothing changes for a student who never opens the setting. Under Me, **Use my own AI service** (off by default) lets the student give an https address of an OpenAI-compatible Chat Completions endpoint, a key and a model name. It is a second `LanguageModel`, so the safety word, the trusted-adult line and the answer guard apply to it exactly as to Apple's. While it is on and ready, a visible switch on Talk chooses between "On this iPhone" and "My service". The key is kept only in the Keychain. **When this AI is used, messages do leave the phone** (see 3.7). The answer-giving checks in 3.4 must be run against each AI service used, not only Apple's. A larger web model may be better or worse at hints-only; that is unknown until the checks run.
+
+**Why Apple's model is the default.** No key, no account, no cost, works offline, and the student's words do not leave the phone. That removes the adult-and-money step every other AI path needs, and uses no exception to "data stays on the device".
 
 **Its limits. Say these to Ben and in any write-up.**
 
@@ -80,7 +82,9 @@ In every case the student sees only: "If something serious is going on, please t
 - Recall answers and parked thoughts.
 - **Never stored:** audio, a name, an age, a school, a diagnosis, contacts, location.
 
-**Not backed up or synced by the app.** No iCloud sync in version 1. Whether the phone's own backup includes the app's folder is a setting to decide (`04-engineering-and-plan.md` section 4.7); the proposal is to exclude it, so the data truly stays on the device.
+**Backup (decided 2026-11-21, D13).** The app does no sync of its own. A switch under Me, **Include in my iPhone backup**, is on by default; it sets or clears the data folder's exclude-from-backup flag at launch and when changed. When on, the saved data is in the student's own iPhone backup (iCloud or computer). **The AI key is never in a backup.** Delete everything clears this iPhone; an older backup keeps its copy until the iPhone makes a new one.
+
+**The AI key.** Stored only in the iOS Keychain, readable while the phone is unlocked, this device only (`kSecAttrAccessibleWhenUnlockedThisDeviceOnly`, not synchronised). Never in the settings files, logs, error text, accessibility labels or tests. Delete everything removes it. It is sent only in the Authorization header to the address the student entered. Requests do not follow redirects.
 
 **Leaves the phone, only when the student acts:**
 
@@ -89,7 +93,10 @@ In every case the student sees only: "If something serious is going on, please t
 | Look it up | The look-up words | Wikipedia |
 | The AI looks something up | The search words the AI chose | Wikipedia |
 | Opening a source | A normal web page visit | That website |
-| Later, an own-key helper | The conversation, the guide, the kind of work | The service the student chose |
+| The student has switched on Use my own AI service and chosen it on Talk, and chats or uses the step coach | Chat messages, the step text and assignment text the step coach uses, the app's rules (with the student's AI guide and the kind of work), the model name, and the key in the Authorization header | The address the student entered. Its own privacy rules apply |
+| The student taps Check connection | One short fixed test message, the model name, the key in the Authorization header | The address the student entered |
+| The backup switch is on (the default) | The app's saved data, never the key | The student's own iPhone backup (iCloud or computer) |
+| Later, other own-key helpers (search) | Their own design note | The service the student chose |
 
 **Nothing else.** No analytics, no crash reporting service, no advertising, no third-party code. The App Store privacy label is "Data Not Collected", and that must stay true.
 

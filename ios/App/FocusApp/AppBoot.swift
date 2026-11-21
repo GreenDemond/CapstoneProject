@@ -15,15 +15,25 @@ enum AppBoot {
     guard let content = try? Content.bundled() else { return nil }
     let folder = dataFolder()
     let store = FileStore(folder: folder, limits: content.limits)
-    if let fake = fakeServices() {
+    let fresh = CommandLine.arguments.contains(freshArgument)
+    // UI tests never touch the real Keychain or the network.
+    let keys: any KeyStore = fresh ? FakeKeyStore() : KeychainKeyStore()
+    let transport: any HTTPTransport = fresh ? FakeHTTPTransport() : LiveHTTPTransport()
+    let backup = FolderBackupFlag(folder: folder)
+    if var fake = fakeServices() {
+      fake.keys = keys
+      fake.transport = transport
+      fake.backup = backup
       return AppModel(content: content, store: store, services: fake)
     }
     if CommandLine.arguments.contains(noAIArgument) {
-      return AppModel(content: content, store: store, services: .none)
+      let none = Services(keys: keys, transport: transport, backup: backup)
+      return AppModel(content: content, store: store, services: none)
     }
     let services = Services(
       speechInput: AppleSpeechInput(), speechOutput: AppleSpeechOutput(),
-      headphones: AppleHeadphones(), languageModel: AppleLanguageModel())
+      headphones: AppleHeadphones(), languageModel: AppleLanguageModel(), keys: keys,
+      transport: transport, backup: backup)
     return AppModel(content: content, store: store, services: services)
   }
 
@@ -56,12 +66,9 @@ enum AppBoot {
       (try? manager.url(
         for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true))
       ?? manager.temporaryDirectory
-    var folder = base.appendingPathComponent("FocusData", isDirectory: true)
+    let folder = base.appendingPathComponent("FocusData", isDirectory: true)
     try? manager.createDirectory(at: folder, withIntermediateDirectories: true)
-    // Keep the student's words out of the phone's own backup, so "stays on this iPhone" is true.
-    var values = URLResourceValues()
-    values.isExcludedFromBackup = true
-    try? folder.setResourceValues(values)
+    // Whether the folder is in the phone's backup follows the student's switch (set by AppModel).
     return folder
   }
 }

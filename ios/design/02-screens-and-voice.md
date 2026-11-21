@@ -64,7 +64,7 @@ Details that matter:
 
 ## 2.3 First run
 
-1. One screen: what the app does in two sentences, "Your work stays on this iPhone", and **Start**.
+1. One screen: what the app does in two sentences, "Your work stays on this iPhone, and in your own iPhone backup if that is on", and **Start**.
 2. No account, no name, no age, no diagnosis question, no permission requests. Permissions are asked only at the moment each is first needed.
 3. It goes straight to **Today**, which asks for the first assignment.
 
@@ -147,7 +147,7 @@ Tapping Stuck never adds work, resets progress, or changes anything for the wors
 ## 2.9 Talk
 
 - The screen is the conversation. The message box and microphone stay at the bottom, above the keyboard.
-- One line at the top, always visible: "This AI runs on this iPhone. Your messages don't leave it. It can still be wrong." (The wording changes if a web helper is in use; see `03-ai-search-privacy.md`.)
+- One line at the top, always visible: "This AI runs on this iPhone. Your messages don't leave it. It can still be wrong." When the student's own AI service is in use it reads "Your messages go to the AI service you chose in Me, and its own privacy rules apply. It can still be wrong." While the own service is on and ready, a segmented switch above it, **On this iPhone | My service**, shows which AI is in use. (The wording changes if a web helper is in use; see `03-ai-search-privacy.md`.)
 - The app's opening line is fixed text, not from the AI: "What are you working on, and what's the first thing you're not sure about?"
 - Replies appear as they are written. When Read aloud is on they are spoken sentence by sentence once each sentence is complete and has passed the safety check.
 - Under the latest AI message, when it contains a list: **Use these as my steps**, which opens the editor (section 2.5), never the work screen.
@@ -161,7 +161,9 @@ Tapping Stuck never adds work, resets progress, or changes anything for the wors
 - **What got in the way?**: private notes, newest first. Fixed line beneath: "If something serious is getting in the way, talk to an adult you trust."
 - **How I like to work**: four taps and a first-guess card, saved this time, labelled as a guess.
 - **How the AI talks**: one guide in the student's own words, and reply length (short, medium, long).
+- **Use my own AI service** (off by default): the line about what is sent and to which address (always shown first), Address (https only), Key (secure field; only "a key is saved" is ever shown; Remove key), Model name, **Check connection** (a calm success or problem line), and the switch. The switch needs the line to have been shown, a good address, a model name and a key.
 - **Voice**: Read aloud switch, Talk switch; headphones only; which voice; speed.
+- **Include in my iPhone backup**: a switch, on by default.
 - **About and privacy**: what is stored, what leaves the phone and when, **Delete everything on this iPhone** (second tap to confirm).
 
 ## 2.11 The awkward cases
@@ -177,7 +179,8 @@ Tapping Stuck never adds work, resets progress, or changes anything for the wors
 | Noise, or the student stops talking | Listening ends when the button is released; nothing is sent by a pause alone |
 | A phone call or another app takes the audio | Speaking stops; text stays; nothing is lost |
 | The phone's AI is off, not ready, or the phone is not eligible | One line saying which, and what to do. Everything that does not need AI still works |
-| The AI refuses or its guardrail stops a reply | "The AI on this iPhone couldn't answer that one." |
+| The own service says the key was not accepted, or is busy | "The key wasn't accepted. You can check it in Me, under Use my own AI service." or "That service is busy. Try again in a moment." The message returns to the box |
+| The AI refuses or its guardrail stops a reply | "The AI couldn't answer that one." |
 | No network | Everything works except Look it up, which says "You're offline. Try again later." |
 | Away for a week | Today shows "Welcome back" and the next step. Nothing about the gap |
 | Saved data unreadable | It is set aside as a backup and the app starts fresh, as on the web |

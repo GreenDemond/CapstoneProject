@@ -286,6 +286,9 @@ import Testing
     #expect(text.contains("never recorded"))
     #expect(text.contains("No analytics"))
     #expect(text.contains("audio, a name, an age, a school, a diagnosis"))
-    #expect(!text.lowercased().contains("cloud"))
+    // Apple's own cloud model is never used. "iCloud" is the student's own backup (D8).
+    #expect(!text.lowercased().contains("private cloud"))
+    #expect(text.contains("Use my own AI service"))
+    #expect(text.contains("Keychain"))
   }
 }

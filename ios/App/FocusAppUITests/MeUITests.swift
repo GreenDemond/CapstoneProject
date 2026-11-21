@@ -64,4 +64,34 @@ final class MeUITests: XCTestCase {
     app.buttons["delete-everything-confirm"].tap()
     XCTAssertTrue(app.element("welcome-screen").waitForExistence(timeout: 5))
   }
+
+  /// The backup switch is there and starts on.
+  func testBackupSwitchIsOnByDefault() {
+    let app = launch()
+    let backup = app.switches["backup-switch"]
+    app.scrollTo(backup)
+    XCTAssertTrue(backup.waitForExistence(timeout: 5))
+    XCTAssertEqual(backup.value as? String, "1")
+  }
+
+  /// The line about what is sent is shown before the switch can be used, the switch cannot be
+  /// turned on yet, and an http address is refused with a calm line.
+  func testOwnAIShowsTheDisclosureFirstAndRejectsHttp() {
+    let app = launch()
+    let disclosure = app.element("own-ai-disclosure")
+    app.scrollTo(disclosure)
+    XCTAssertTrue(disclosure.waitForExistence(timeout: 5))
+    XCTAssertTrue(disclosure.label.contains("privacy rules"))
+    let own = app.switches["own-ai-switch"]
+    app.scrollTo(own)
+    XCTAssertEqual(own.value as? String, "0")
+    XCTAssertFalse(own.isEnabled)
+
+    let address = app.textFields["own-ai-address"]
+    app.scrollTo(address)
+    address.tap()
+    address.typeText("http://example.com/v1/chat/completions")
+    XCTAssertTrue(app.element("own-ai-address-problem").waitForExistence(timeout: 5))
+    XCTAssertFalse(own.isEnabled)
+  }
 }

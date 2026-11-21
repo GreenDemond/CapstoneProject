@@ -11,13 +11,14 @@ Choices already made for the iPhone app, with reasons, so agents do not re-ask. 
 | D3 | Everything the student enters is stored on the phone only. No account, no sign-in, no sync | Rule 4; no data about minors held anywhere | Decided |
 | D4 | The app never asks for a name, age, school, or diagnosis | Rules 3 and 4 | Decided |
 | D5 | The app is fully usable with no AI | Not every phone has the AI, and the no-AI path must always exist | Decided |
-| D6 | Version 1 uses only the AI that runs on the phone. Apple's cloud model is never used. No AI keys in version 1 | Keeps every word on the device; needs no adult, account or money | **(waiting: parent)**. T11 to T13 are built on this recommendation (2026-11-20), pending confirmation: on-device AI only, no keys, no cloud model |
+| D6 | The AI is Apple's on-device model by default. Apple's cloud model is never used. A student may switch on **Use my own AI service** (off by default) and give an https address, a key and a model name. The key lives only in the iOS Keychain (this iPhone only, never in a backup). While it is on, a visible switch on Talk chooses between the two | Keeps every word on the phone for a student who never opens the setting; lets the parent's own service be used when wanted. Every reply from either AI passes the same safety word, trusted-adult line and answer checks | **Decided (parent, 2026-11-21):** "For the AI default to Apple, but allow a setting for providing an endpoint/key." The answer-giving checks (T14) must be run against each AI service used, not only Apple's |
 | D7 | Voice: speech is turned into text on the phone; the microphone is on only while the student holds or taps the button; recordings are never kept; the app is silent unless the student turns its voice on | Rules 4 and 5; "no sound by default" | **Parent decided 2026-11-20:** the microphone is used for voice interaction. Voice is two separate switches under Me: **Read aloud** (the app speaks) and **Talk** (the student speaks into the microphone). Either, both, or neither may be on. This replaces the three-way Quiet / I talk / We talk setting, which still needs changing in code. Still Ben's: whether both start off at first launch (recommended) |
-| D8 | What may leave the phone: see the table below. Nothing else, ever | Rule 4 stated openly | **(draft: parent to confirm before classmates)** |
+| D8 | What may leave the phone: see the table below. Nothing else, ever | Rule 4 stated openly | **(draft: parent to confirm before classmates).** Rows added 2026-11-21 by the parent's decisions on the own AI service and the backup switch |
 | D9 | Ben never runs a command or edits a file. The parent does every Apple account step (sign-in, signing, TestFlight, App Store). Agents never handle account details | Ben does not code; the account is the parent's | Decided |
 | D10 | One check command, `checks/check.sh`. A skipped part is reported as skipped | A wrong "it works" cannot be caught by anyone | Decided |
 | D11 | Work is done by a Builder, with an Advisor (strongest model, read-only) at fixed gates and a Checker (fresh context) before "done" (`AGENTS.md` sections 2 to 4) | Nobody reviews the code; the roles are the review | Decided |
 | D12 | Engineering choices I1 to I13 in `design/04-engineering-and-plan.md` section 4.1 | Chosen so the next agent does not have to | Decided. I3 is iOS 26.0, set from Ben's phone; classmates' phones are not yet known |
+| D13 | **Backup.** "Include in my iPhone backup" is a switch under Me, on by default. It sets or clears the data folder's exclude-from-backup flag, at launch and when changed. Existing installs with no saved value get on. The Keychain key stays device-only whatever the switch says | The parent chose a switch, defaulting to backed up, so a lost phone does not lose the student's steps | **Decided (parent, 2026-11-21):** "backup: switch, default to backed up" |
 
 ### D8. What may leave the phone
 
@@ -26,8 +27,11 @@ Choices already made for the iPhone app, with reasons, so agents do not re-ask. 
 | The student taps Look it up | The look-up words | Wikipedia |
 | The AI looks something up (only if the answer-giving checks pass) | The search words the AI chose | Wikipedia |
 | The student opens a source | A normal web page visit | That website |
+| The student has switched on Use my own AI service (off by default), has chosen it on Talk, and chats or uses the step coach | The student's chat messages, the step text and assignment text the step coach uses, the app's rules (with the student's AI guide and the kind of work), the model name, and the student's key in the Authorization header | The address the student entered. That service's own privacy rules apply |
+| The student taps Check connection | One short fixed test message (no student words), the model name, and the key in the Authorization header | The address the student entered |
+| The backup switch is on (it starts on) | The app's saved data. Never the AI key, which stays on this iPhone only | The student's own iPhone backup (iCloud or computer), when the backup switch is on |
 
-No analytics, crash reporting, advertising, or sync. Audio never leaves and is never stored.
+No analytics, crash reporting, advertising, or sync. Audio never leaves and is never stored. The AI key is stored only in the Keychain and goes nowhere except in the Authorization header to the student's chosen address.
 
 ## Product defaults
 
@@ -52,7 +56,7 @@ Chosen from the research so that work can start. Ben can change any of them.
 
 The questions, options and recommendations are in `design/04-engineering-and-plan.md` section 4.7. Task T00 records the answers here.
 
-**Parent:** sign in to Xcode and set the team; confirm D8; exclude the app's data from phone backup; the two extra safety signals; who may receive a build.
+**Parent:** sign in to Xcode and set the team; confirm D8; the two extra safety signals; who may receive a build.
 
 **Ben:** whether Apple Intelligence is on; voice at first launch; which way of making steps comes first; whether a suggested step must be changed before Start; the four places; what waits until after version 1; the app's name, the words for drifting and stuck, and how progress is shown.
 
@@ -62,6 +66,7 @@ Already answered:
 - Ben would prefer to talk to the app (reported by the parent, 2026-11-20).
 - Ben's phone is an iPhone 15 Pro Max on iOS 26.2 (parent, 2026-11-20). Whether Apple Intelligence is switched on is not yet known.
 - The work will move to another computer that already has the iOS simulator (parent, 2026-11-20).
+- Ben is 18 (parent, 2026-11-21). He can be an internal TestFlight tester. Classmates in a later beta may be minors, so the parent-permission rule for them stays.
 
 ## Change log
 
@@ -73,4 +78,6 @@ Already answered:
 | 2026-11-20 | T09 to T13 and T15 built on the recommendations for D6 and D7 without changing their status. They stay waiting for the parent (and Ben for D7). If either answer differs, the voice and AI parts switch off by setting Voice to Quiet and by `Services.none` | The parent asked for a complete working app; no answer had been given | Agent, on the parent's request |
 | 2026-11-20 | D7 and parent question 7 decided: the microphone is used for voice interaction (on-device speech to text, nothing recorded). Voice becomes two independent switches, Read aloud and Talk, instead of Quiet / I talk / We talk. Needs a code change to the voice setting and the Me screen, done as its own task | The parent wants reading aloud and talking to be separately toggleable | Parent |
 | 2026-11-20 | Bundle identifier set to `com.craighagan.focusapp` (tests: `com.craighagan.focusapp.UITests`) and signing team to ANA76MNRSN, automatic signing | The parent owns the Apple developer account and confirmed these | Parent |
-| 2026-11-21 | App name "Ben's Steps" for now (home screen and App Store Connect). Bundle identifier changed to `com.craighagan.benssteps` (tests `.UITests`) before any App Store Connect record existed. Staircase placeholder icon. The Xcode project and target keep the internal name FocusApp | "Focus" was taken in App Store Connect. A name with "ADHD" or "Focus" would read as a treatment or attention claim (rule 8) and would tell others the student has ADHD (rule 3). Ben may still choose the final name | Parent |
+| 2026-11-21 | App name "Ben's Steps" for now (home screen and App Store Connect). Bundle identifier changed to `com.craighagan.benssteps` (tests `.UITests`) before any App Store Connect record existed. Staircase placeholder icon. The Xcode project and target keep the internal name FocusApp | "Focus" was taken in App Store Connect. A name with "ADHD" or "Focus" would read as a treatment or attention claim (rule 8) and would tell others the student has ADHD (rule 3). Ben may still choose the final name | Parent || 2026-11-21 | D6 changed: Apple's on-device model stays the default; a setting **Use my own AI service** (address, key, model name) is allowed. Built as a second `LanguageModel`, so the safety word, trusted-adult handling and answer guard apply as before. Key only in the Keychain. Three D8 rows added. T14 checks must be run against each AI service used. The old "No AI keys in version 1" is withdrawn | The parent asked for the AI default to be Apple's, with a setting for providing an endpoint and key | Parent |
+| 2026-11-21 | Added decision D13, Backup: a switch "Include in my iPhone backup", on by default. This replaces the earlier recommendation to exclude the data folder from backup. The privacy wording now says the work stays on this iPhone and, when the switch is on, in the student's own iPhone backup. D8 row added | The parent chose "switch, default to backed up" | Parent |
+| 2026-11-21 | A visible switch on Talk between "On this iPhone" and "My service" appears while the own service is on and ready. Turning the service on makes it the one in use | The parent asked that when an additional AI is enabled there is a visible switch between them | Parent |

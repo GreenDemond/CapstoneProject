@@ -29,6 +29,7 @@ public final class AppModel {
   public let speaker: SpeakerModel
   public let talk: ChatModel
   public let me: MeModel
+  public let ownAI: OwnAIModel
 
   public private(set) var welcomed: Bool
   /// The student is on the work screen.
@@ -47,6 +48,10 @@ public final class AppModel {
 
   private let store: any Store
   private let clock: any AppClock
+  private let phoneModel: any LanguageModel
+  private let switcher: SwitchableLanguageModel
+  private let backup: any BackupFlag
+  private var backupApplied: Bool?
   private var lastTap: Date?
   private var ladders: [Int: LadderModel] = [:]
 
@@ -68,19 +73,28 @@ public final class AppModel {
     self.planning = draft.hasContent
     self.inStep = flags.inStep && (saved?.work.currentIndex != nil)
     self.settings = store.load(Settings.self).value ?? Settings()
+    self.phoneModel = services.languageModel
+    let switcher = SwitchableLanguageModel(services.languageModel)
+    self.switcher = switcher
+    self.backup = services.backup
+    self.ownAI = OwnAIModel(keys: services.keys, transport: services.transport)
     self.dictation = DictationModel(
       input: services.speechInput, store: store, clock: clock, limit: content.limits.pasteLength)
     self.speaker = SpeakerModel(output: services.speechOutput, headphones: services.headphones)
     self.talk = ChatModel(
-      content: content, store: store, clock: clock, model: services.languageModel,
+      content: content, store: store, clock: clock, model: switcher,
       speaker: self.speaker)
     self.me = MeModel(content: content, store: store, clock: clock)
     self.planner = PlannerModel(content: content, store: store, clock: clock, draft: draft)
-    self.planner.coach = StepCoach(model: services.languageModel, content: content)
+    self.planner.coach = StepCoach(model: switcher, content: content)
     self.planner.onStart = { [weak self] saved in self?.began(saved) }
     self.me.settings = { [weak self] in self?.settings ?? Settings() }
     self.me.change = { [weak self] change in self?.updateSettings(change) }
     self.me.erase = { [weak self] in self?.eraseEverything() ?? false }
+    self.ownAI.settings = { [weak self] in self?.settings ?? Settings() }
+    self.ownAI.change = { [weak self] change in self?.updateSettings(change) }
+    self.ownAI.onChoiceChanged = { [weak self] in self?.chooseModel() }
+    self.talk.usingOwnService = { [weak self] in self?.ownAI.isInUse ?? false }
     self.talk.settings = { [weak self] in self?.settings ?? Settings() }
     self.talk.onUseSteps = { [weak self] steps, kind in
       guard let self, self.planner.importSteps(steps, kindId: kind) else { return }
@@ -92,6 +106,8 @@ public final class AppModel {
     }
     self.speaker.settings = { [weak self] in self?.settings ?? Settings() }
     self.dictation.willListen = { [weak self] in self?.speaker.interrupted() }
+    chooseModel()
+    applyBackup()
   }
 
   // MARK: Reading
@@ -288,6 +304,25 @@ public final class AppModel {
     change(&copy)
     settings = copy.limited(by: content.limits)
     save(settings)
+    applyBackup()
+  }
+
+  /// Uses the student's own AI service when it is on, ready and chosen; otherwise the phone's own.
+  /// Every reply from either goes through the same safety and answer checks.
+  private func chooseModel() {
+    if ownAI.isInUse, let own = ownAI.makeModel() {
+      switcher.use(own)
+    } else {
+      switcher.use(phoneModel)
+    }
+    talk.refreshAvailability()
+  }
+
+  /// Makes the data folder follow "Include in my iPhone backup". Only when it changed.
+  private func applyBackup() {
+    let excluded = !settings.includeInBackup
+    guard backupApplied != excluded else { return }
+    backupApplied = backup.setExcluded(excluded) ? excluded : nil
   }
 
   // MARK: Delete everything
@@ -297,6 +332,11 @@ public final class AppModel {
   /// the folder stays empty. Returns false, changing nothing, if the files could not be removed.
   @discardableResult
   public func eraseEverything() -> Bool {
+    // The key goes first. If it cannot be removed, nothing is reported as deleted.
+    guard ownAI.eraseKey() else {
+      saveNote = Words.couldNotErase
+      return false
+    }
     do {
       try store.deleteAll()
     } catch {
@@ -317,6 +357,9 @@ public final class AppModel {
     planner.reset()
     talk.reset()
     me.reset()
+    ownAI.reset()
+    chooseModel()
+    applyBackup()
     dictation.reset()
     speaker.stop()
     return true

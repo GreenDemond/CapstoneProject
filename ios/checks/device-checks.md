@@ -6,7 +6,7 @@ Record for each run: the date, the iPhone model, the iOS version, whether Apple 
 
 ## First look (T04 to T07)
 
-1. Open the app for the first time. You should see a screen about the app, "Your work stays on this iPhone", and Start. No question, no pop-up asking for permission.
+1. Open the app for the first time. You should see a screen about the app, "Your work stays on this iPhone, and in your own iPhone backup if that is on", and Start. No question, no pop-up asking for permission.
 2. Tap Start. You should see Today asking "What's the assignment?" and four places at the bottom: Today, Talk, Plan, Me.
 3. Tap Start with nothing typed. You should see a calm line about adding a few words. Nothing else happens.
 4. Type "Five paragraphs on courage", pick Essay, tap "Suggest some to start". You should see the steps in an editor, not a step to work on.
@@ -94,3 +94,20 @@ You need Apple Intelligence switched on (Settings, Apple Intelligence & Siri). W
 59. On a step tap Stuck, then Talk it through. Tap **Use these as my steps**. You should land in the editor, in front, not behind the step.
 60. Turn Apple Intelligence off in Settings and open Talk. You should see a calm line, **Try again**, hints, and Look it up. Nothing should be stuck.
 61. Turn on Airplane Mode, then Look it up. You should see a calm line and **Try again**. Turn Airplane Mode off and tap Try again: results should appear.
+
+## Your own AI service and the backup switch (2026-11-21)
+
+Use a key you own. Never paste a key anywhere except the Key box on the phone. Build 5 or later.
+
+62. Open Me and scroll to **Use my own AI service**. It should be off. Above the switch you should read a line saying what is sent (chat messages, the step and assignment text, the app's rules) and that the service's own privacy rules apply. The switch should be greyed out.
+63. In **Address** type `http://example.com/x`. You should see a calm line saying it must start with https://, and the switch stays greyed out.
+64. Replace it with your service's full address, for example `https://api.openai.com/v1/chat/completions`. In **Model name** type the model. In **Key** paste your key and tap **Save key**. The box should empty, and the line should say "A key is saved on this iPhone." The key itself must never appear on the screen.
+65. Tap **Check connection**. You should see "It works." (or a calm line about the key, a busy service, or the address).
+66. Turn the switch on. Open Talk. At the top you should see a switch **On this iPhone | My service** with My service chosen, and the line "Your messages go to the AI service you chose in Me, and its own privacy rules apply."
+67. Send "I'm stuck on my essay". You should get a hint or a question, not a finished answer.
+68. Tap **On this iPhone**. The line should change to "This AI runs on this iPhone..." and a new message should be answered by Apple's AI. Tap **My service** to switch back.
+69. In Me, remove the key (**Remove key**) and paste a wrong key, save it, and send a message on Talk. You should see "The key wasn't accepted..." and your message should still be in the box.
+70. Switch **Use my own AI service** off. The switch on Talk should disappear and Apple's AI should be used.
+71. Look in Me for **Include in my iPhone backup**. It should be on. Turn it off and on again; nothing should look different.
+72. **T14 for the own service:** with the service on, run the eight answer-giving attempts in `design/03` section 3.4 against Talk and the step coach, and record every reply word for word. This is separate from the Apple model's attempts.
+73. Open About and privacy. It should mention the own AI service, the Keychain, and the iPhone backup. Tap **Delete everything on this iPhone** twice. Open Me again: the key line should say "No key saved." and the service should be off.

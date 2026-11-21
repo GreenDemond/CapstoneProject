@@ -152,7 +152,7 @@ private func result(_ title: String) -> LookUpResult {
     #expect(model.state == .results([result("New")]))
   }
 
-  @Test func onlyOneSourceFileOpensAConnection() throws {
+  @Test func twoSourceFilesOpenAConnectionAndNoOther() throws {
     let here = URL(fileURLWithPath: #filePath)
     let root = here.deletingLastPathComponent().deletingLastPathComponent()
       .deletingLastPathComponent()
@@ -169,6 +169,6 @@ private func result(_ title: String) -> LookUpResult {
         }
       }
     }
-    #expect(hits == ["WikipediaLookUp.swift"])
+    #expect(hits.sorted() == ["OpenAICompatibleModel.swift", "WikipediaLookUp.swift"])
   }
 }

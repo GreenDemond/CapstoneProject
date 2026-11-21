@@ -128,6 +128,11 @@ public final class MeModel {
   public func setVoice(_ id: String?) { change { $0.voiceId = id } }
   public func setSpeechRate(_ rate: Double) { change { $0.speechRate = rate } }
 
+  // MARK: Backup
+
+  public var includeInBackup: Bool { settings().includeInBackup }
+  public func setIncludeInBackup(_ on: Bool) { change { $0.includeInBackup = on } }
+
   // MARK: Delete everything
 
   /// The first tap. Nothing is deleted yet.
