@@ -70,7 +70,7 @@ Reasons:
 | N | Apple shell and on-device AI | 5 to 6 | Parent agrees to change T1; Ben's iPhone model |
 | B | Before classmates: checks, permissions | 1 to 2 | Parent, teacher |
 
-That is roughly 22 to 26 sessions. **It does not fit in what is left of a three-week, hour-a-day build.** If time is short, the order to cut from the end is: N, then S3, then C4. Phases G, U and C1 to C3 give the largest visible gain. Phase N can be shown as a working demo on Ben's own phone without being part of the beta.
+That is roughly 22 to 26 sessions. **It does not fit in what is left of a three-week, hour-a-day build.** If time is short, the order to cut from the end is: S3, then C4, then N4 and N6. (Changed 2026-11-20: with a paid developer account available, the shell and on-device AI can reach classmates' iPhones, so N1 to N3 are no longer the first thing to cut.) Phases G, U and C1 to C3 give the largest visible gain. Chromebook and non-Apple testers still depend on the web app, so it stays first.
 
 The existing `PROGRESS.md` list still stands. **Editing the steps before Start (P1)** is the largest gap against the research and is placed inside phase C (item C4 depends on it). The recall question, save to file, and the weekly goal are not in this roadmap and should not be dropped silently: Ben decides where they go.
 
@@ -176,7 +176,7 @@ Rule 1 is the live risk in this whole phase. Search makes finished essays and wo
 | Option | Reaches | Own AI on the device | Cost and approvals | Verdict |
 |---|---|---|---|---|
 | Web app (today) | Chromebooks, any phone, any computer | No, in practice (below) | None beyond hosting (parent, T7) | **Keep as the product** |
-| Thin Apple shell around the same files | iPhone, iPad, Mac | **Yes** | Free on Ben's own devices with a free Apple account (reinstall every 7 days, per `SETUP.md`); sharing with classmates needs the paid developer program, about $99 a year, held by an adult (**Unverified**, marked "confirm" in `02-platform-and-privacy.md`) | **Build second, as an add-on** |
+| Thin Apple shell around the same files | iPhone, iPad, Mac | **Yes** | The parent has a paid developer account and Ben may publish through it (decided 2026-11-20), so classmates with iPhones can be reached through TestFlight. The parent does every account step | **Build second, as an add-on** |
 | Native rewrite in Swift | iPhone, iPad, Mac | Yes | Same, plus a second codebase nobody can maintain | No |
 | Separate Mac app | Mac | Yes | Extra work for a device the web app already serves | No; the shell covers it |
 
@@ -206,7 +206,7 @@ What it does not give, to be said plainly to Ben and in any write-up:
 
 ### Items
 
-**N0. Decisions before any code** (section 8): the parent agrees to change T1; Ben's device is checked for eligibility; the parent decides whether the paid developer account is in scope (only needed for classmates).
+**N0. Decisions before any code** (section 8): the parent agrees to change T1; Ben's device is checked for eligibility; the paid developer account is settled (the parent has one, 2026-11-20); the parent signs in to Xcode on this Mac (`SETUP.md` step 5), because agents never handle Apple account details.
 
 **N1. Web side of the bridge.** One file, `js/native.js`, that reports whether the shell is present and what it offers. In a browser it reports nothing and the app behaves exactly as today. Browser tests use a fake bridge. (Slice 1 in `design/iphone-app.md`.)
 
@@ -229,7 +229,9 @@ What it does not give, to be said plainly to Ben and in any write-up:
 
 **N4. Search and page reading in the shell.** The shell can call any search server directly (no CORS limits) and can fetch a page and hand back its plain text for `read_page`. With the device's AI, keep results very short and prefer Wikipedia summaries.
 
-**N5. Later, each needing its own decision:** local reminders (a parent item in `PROGRESS.md`), app name and icon (Ben), TestFlight for classmates (parent, paid account).
+**N5. Later, each needing its own decision:** local reminders (a parent item in `PROGRESS.md`), app name and icon (Ben), TestFlight for classmates (below).
+
+**N6. TestFlight for the beta group.** Now possible, because the parent has a paid account. Still required first: the answer-giving checks pass on the device's AI, teacher approval, and written parent permission. The parent uploads the build and invites testers; the agent prepares the build and a plain checklist. **Unverified, check before promising it to classmates:** TestFlight's minimum age for testers, whether invited testers need Apple's beta review, and Apple's review rules for apps with AI chat that minors will use. A public App Store release is a separate decision (`DECISIONS.md`, the parent's item 3).
 
 ### Parked: Chrome's built-in AI
 
@@ -300,7 +302,7 @@ Agents: ask these in plain words, with a recommendation, and record the answers 
 | # | Decision | Recommendation |
 |---|---|---|
 | 1 | Change T1 to allow a small Swift shell in `ios/` that shows the unchanged web app. The web app itself stays plain files with no build step | Yes, after phases G, U and C |
-| 2 | Paid Apple developer account (about $99 a year, **confirm the price**), needed only for classmates to install the iPhone app | Not now. A free account covers Ben's own phone. Decide after the shell works |
+| 2 | ~~Paid Apple developer account~~ **Answered 2026-11-20:** the parent has one and Ben may publish through it. Still open: TestFlight for the beta group only, or the public App Store as well | TestFlight only for now |
 | 3 | Confirm the draft T8 rows already waiting (chat sends the conversation and the guide; OpenRouter search) | Needed before classmates use either |
 | 4 | New T8 rows: the step's text in a chat (C3); look-up words sent to Wikipedia (S2) | Yes; both are the student's own typed words, sent only when they act |
 | 5 | On-device AI: nothing leaves the device. Apple's Private Cloud Compute model stays off | Yes to on-device; keep the cloud model off |

@@ -58,6 +58,7 @@ Nothing. The whole-app review plan (`design/review-plan-2026-11-17.md`) is finis
 **Parent**
 
 - Confirm the draft T8/T6 rows (chat sends the conversation and the guide; resumed chats send older messages again) before classmates use the chat.
+- `ROADMAP.md` section 8: agree to a Swift shell in `ios/` (T1); TestFlight only or the public App Store; sign in to Xcode with the developer account (the parent has a paid one, 2026-11-20).
 - Hosting (T7). Teacher approval and written parent permission before classmates use the app.
 
 ## Next
