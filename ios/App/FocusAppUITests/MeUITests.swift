@@ -27,6 +27,7 @@ final class MeUITests: XCTestCase {
     XCTAssertTrue(row.waitForExistence(timeout: 5))
     row.swipeLeft()
     app.buttons["Delete"].tap()
+    app.buttons["note-delete-confirm"].firstMatch.tap()
     XCTAssertFalse(app.element("note-row").exists)
   }
 
@@ -93,7 +94,7 @@ final class MeUITests: XCTestCase {
     let address = app.textFields["own-ai-address"]
     XCTAssertTrue(address.waitForExistence(timeout: 5))
     address.tap()
-    address.typeText("ftp://example.com/v1/chat/completions")
+    address.clearAndType("ftp://example.com/v1/chat/completions")
     XCTAssertTrue(app.element("own-ai-address-problem").waitForExistence(timeout: 5))
     address.clearAndType("http://example.com/v1/chat/completions")
     XCTAssertTrue(app.element("own-ai-address-http").waitForExistence(timeout: 5))
@@ -116,13 +117,13 @@ final class MeUITests: XCTestCase {
     let label = app.textFields["own-ai-label"]
     XCTAssertTrue(label.waitForExistence(timeout: 5))
     label.tap()
-    label.typeText("Alpha")
+    label.clearAndType("Alpha")
     let address = app.textFields["own-ai-address"]
     address.tap()
-    address.typeText("https://example.com/v1/chat/completions")
+    address.clearAndType("https://example.com/v1/chat/completions")
     let model = app.textFields["own-ai-model"]
     model.tap()
-    model.typeText("test-model")
+    model.clearAndType("test-model")
     let key = app.secureTextFields["own-ai-key"]
     key.tap()
     key.typeText("test-key-123")

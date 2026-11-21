@@ -37,6 +37,8 @@ extension Words {
   public static let talkStop = "Stop"
   public static let talkNewChat = "New chat"
   public static let talkKeyboardDone = "Done"
+  public static let talkingAbout = "Talking about"
+  public static let talkClearStep = "Clear"
   public static let talkMyChats = "My chats"
   public static let talkNoChats = "No saved chats yet."
   public static let talkDelete = "Delete"

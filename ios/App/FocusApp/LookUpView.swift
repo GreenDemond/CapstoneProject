@@ -34,9 +34,12 @@ struct LookUpView: View {
             .onSubmit { lookUp.search() }
             .accessibilityLabel(Words.lookUpPlaceholder)
             .accessibilityIdentifier("lookup-words")
-          Button(Words.lookUpButton) { lookUp.search() }
-            .buttonStyle(MainButtonStyle())
-            .accessibilityIdentifier("lookup-search")
+          Button(lookUp.state == .loading ? Words.lookUpSearching : Words.lookUpButton) {
+            lookUp.search()
+          }
+          .buttonStyle(MainButtonStyle())
+          .disabled(lookUp.state == .loading)
+          .accessibilityIdentifier("lookup-search")
           stateView
           if lookUp.canTryAgain {
             Button(Words.tryAgain) { lookUp.search() }

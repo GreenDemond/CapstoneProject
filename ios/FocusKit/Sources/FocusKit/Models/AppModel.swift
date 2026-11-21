@@ -311,6 +311,18 @@ public final class AppModel {
     return true
   }
 
+  /// Removes one parked thought. The student confirms first (in the view).
+  public func deleteParked(_ id: String) {
+    parked.items.removeAll { $0.id == id }
+    save(parked)
+  }
+
+  /// Removes one recall answer. The student confirms first (in the view).
+  public func deleteRecall(_ id: String) {
+    recall.items.removeAll { $0.id == id }
+    save(recall)
+  }
+
   // MARK: Settings
 
   public var readAloudOn: Bool { settings.readAloud }

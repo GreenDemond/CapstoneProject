@@ -171,6 +171,26 @@ import Testing
     }
   }
 
+  @Test func savedThoughtsAndAnswersCanBeDeletedOneAtATime() throws {
+    let model = try app(steps: ["A", "B"])
+    #expect(model.park("Buy milk"))
+    #expect(model.park("Ask about the trip"))
+    #expect(model.saveRecall("The water cycle has four stages", stepId: nil))
+    let thought = try #require(model.parked.items.last?.id)
+    let answer = try #require(model.recall.items.first?.id)
+    model.deleteParked(thought)
+    #expect(model.parked.items.map(\.text) == ["Ask about the trip"])
+    model.deleteRecall(answer)
+    #expect(model.recall.items.isEmpty)
+    // Deleting an id that is not there changes nothing.
+    model.deleteParked("missing")
+    #expect(model.parked.items.count == 1)
+    // The change is saved: a fresh model reads the same list.
+    let reopened = AppModel(content: content, store: store, clock: clock)
+    #expect(reopened.parked.items.map(\.text) == ["Ask about the trip"])
+    #expect(reopened.recall.items.isEmpty)
+  }
+
   @Test func parkingAThoughtKeepsTheStepOnScreen() throws {
     let model = try app(steps: ["A", "B"])
     let id = try #require(model.currentStep?.id)

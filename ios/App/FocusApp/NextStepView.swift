@@ -56,24 +56,64 @@ struct NextStepView: View {
 /// All the steps of the current assignment, in order. Nothing about time or misses.
 struct PlanListView: View {
   let model: AppModel
+  @State private var pendingDelete: String?
+  /// Kept apart from `pendingDelete`: the dialog clears that before its buttons run.
+  @State private var chosenDelete: String?
+
+  private var steps: [Step] { model.work?.steps ?? [] }
+  private var hasThoughts: Bool { !model.parked.items.isEmpty || !model.recall.items.isEmpty }
 
   var body: some View {
     Group {
-      if let steps = model.work?.steps, !steps.isEmpty {
-        List(steps, id: \.id) { step in
-          HStack {
-            Image(systemName: step.done ? "checkmark.circle.fill" : "circle")
-              .foregroundStyle(step.done ? Theme.Palette.moss : Theme.Palette.quiet)
-              .accessibilityHidden(true)
-            Text(step.text)
-              .font(Theme.Typography.body)
-              .foregroundStyle(step.done ? Theme.Palette.quiet : Theme.Palette.ink)
+      if !steps.isEmpty || hasThoughts {
+        List {
+          if !steps.isEmpty {
+            Section {
+              ForEach(steps, id: \.id) { step in
+                HStack {
+                  Image(systemName: step.done ? "checkmark.circle.fill" : "circle")
+                    .foregroundStyle(step.done ? Theme.Palette.moss : Theme.Palette.quiet)
+                    .accessibilityHidden(true)
+                  Text(step.text)
+                    .font(Theme.Typography.body)
+                    .foregroundStyle(step.done ? Theme.Palette.quiet : Theme.Palette.ink)
+                }
+                .accessibilityElement(children: .combine)
+                .accessibilityValue(step.done ? Words.stepDoneMark : "")
+                .listRowBackground(Theme.Palette.card)
+              }
+            }
           }
-          .accessibilityElement(children: .combine)
-          .accessibilityValue(step.done ? Words.stepDoneMark : "")
-          .listRowBackground(Theme.Palette.card)
+          if hasThoughts {
+            Section {
+              ForEach(model.parked.items) { item in
+                thoughtRow(id: item.id, text: item.text, date: item.date)
+              }
+              ForEach(model.recall.items) { item in
+                thoughtRow(id: item.id, text: item.answer, date: item.date)
+              }
+            } header: {
+              Text(Words.savedThoughtsTitle)
+            }
+          }
         }
         .scrollContentBackground(.hidden)
+        // One dialog for the list, so it is not attached to a row that the delete removes.
+        .confirmationDialog(
+          Words.savedThoughtConfirm,
+          isPresented: Binding(
+            get: { pendingDelete != nil },
+            set: { if !$0 { pendingDelete = nil } })
+        ) {
+          Button(Words.savedThoughtDelete, role: .destructive) {
+            if let id = chosenDelete {
+              model.deleteParked(id)
+              model.deleteRecall(id)
+            }
+            chosenDelete = nil
+          }
+          Button(Words.savedThoughtKeep, role: .cancel) { pendingDelete = nil }
+        }
       } else {
         VStack(alignment: .leading, spacing: Theme.Space.medium) {
           Text(Words.planEmpty)
@@ -92,5 +132,27 @@ struct PlanListView: View {
     .pageBackground()
     .accessibilityElement(children: .contain)
     .accessibilityIdentifier("plan-list")
+  }
+
+  /// One saved thought or answer. Deleting asks first, and a full swipe does not delete.
+  private func thoughtRow(id: String, text: String, date: Date) -> some View {
+    VStack(alignment: .leading, spacing: Theme.Space.tiny) {
+      Text(verbatim: text)
+        .font(Theme.Typography.body)
+        .foregroundStyle(Theme.Palette.ink)
+      Text(date, style: .date)
+        .font(Theme.Typography.small)
+        .foregroundStyle(Theme.Palette.quiet)
+    }
+    .accessibilityElement(children: .combine)
+    .accessibilityIdentifier("saved-thought-row")
+    .listRowBackground(Theme.Palette.card)
+    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+      Button(Words.savedThoughtDelete, role: .destructive) {
+        chosenDelete = id
+        pendingDelete = id
+      }
+      .accessibilityIdentifier("saved-thought-delete")
+    }
   }
 }

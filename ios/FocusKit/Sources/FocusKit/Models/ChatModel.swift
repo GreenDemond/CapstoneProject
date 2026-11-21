@@ -126,6 +126,9 @@ public final class ChatModel {
   /// starts a fresh chat when this is true, so an old step does not steer a new conversation.
   public var isAboutAStep: Bool { step != nil }
 
+  /// The step this chat is about, for the "Talking about" line. Nil for a general chat.
+  public var stepText: String? { step }
+
   /// "Talk it through" from Stuck: a new chat that knows the step and the kind of work.
   public func begin(stepText: String, kindId: String?) {
     stopAndKeep()

@@ -44,6 +44,21 @@ struct ChatScreen: View {
         .padding(.horizontal, Theme.Space.medium)
         .padding(.vertical, Theme.Space.small)
         .accessibilityIdentifier("talk-privacy")
+      if let about = talk.stepText {
+        HStack(spacing: Theme.Space.small) {
+          Text(verbatim: "\(Words.talkingAbout): \(about)")
+            .font(Theme.Typography.small)
+            .foregroundStyle(Theme.Palette.ink)
+            .lineLimit(2)
+            .accessibilityIdentifier("talk-about-step")
+          Spacer(minLength: 0)
+          Button(Words.talkClearStep) { talk.newChat() }
+            .buttonStyle(LinkButtonStyle())
+            .accessibilityIdentifier("talk-clear-step")
+        }
+        .padding(.horizontal, Theme.Space.medium)
+        .padding(.vertical, Theme.Space.small)
+      }
       conversation
       bottom
     }
@@ -168,9 +183,21 @@ struct ChatScreen: View {
         .stroke(Theme.Palette.line, lineWidth: Theme.Space.line)
     )
     .accessibilityElement(children: .combine)
-    .accessibilityLabel(mine ? "You: \(turn.text)" : "AI: \(turn.text)")
+    .accessibilityLabel(bubbleLabel(turn, mine: mine))
     .accessibilityIdentifier(bubbleIdentifier(turn, mine: mine))
+    .accessibilityAction(named: Text(Words.stopReading)) { model.speaker.stop() }
     .onTapGesture { model.speaker.stop() }
+  }
+
+  /// Says who wrote the line. Only the model's own replies are "AI"; the safety line and the app's
+  /// notices came from the app.
+  private func bubbleLabel(_ turn: ChatTurn, mine: Bool) -> String {
+    if mine { return "You: \(turn.text)" }
+    switch turn.kind {
+    case .trustedAdult: return turn.text
+    case .notice: return "App message: \(turn.text)"
+    default: return "AI: \(turn.text)"
+    }
   }
 
   /// The combined bubble hides inner identifiers, so the trusted-adult line is named on the bubble.

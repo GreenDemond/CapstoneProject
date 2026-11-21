@@ -99,6 +99,7 @@ public enum Words {
     "The words you search for are sent to Wikipedia. Nothing else is sent."
   public static let lookUpPlaceholder = "What do you want to look up?"
   public static let lookUpButton = "Search"
+  public static let lookUpSearching = "Searching"
   public static let lookUpOffline = "You're offline. Try again later."
   public static let lookUpNone = "Nothing found. Try different words."
   public static let lookUpSlow = "That's taking a while. Try again in a moment."
@@ -112,6 +113,13 @@ public enum Words {
   public static let tabPlan = "Plan"
   public static let tabMe = "Me"
   public static let planEmpty = "No steps yet."
+  public static let savedThoughtsTitle = "Saved thoughts"
+  public static let savedThoughtsEmpty =
+    "Thoughts you park and answers you save during a step appear here."
+  public static let savedThoughtDelete = "Delete"
+  public static let savedThoughtConfirm = "Delete this one?"
+  public static let savedThoughtKeep = "Keep"
+  public static let recallSection = "Answers you saved"
   public static let planMakeSteps = "Make some steps"
 
   // Ways out

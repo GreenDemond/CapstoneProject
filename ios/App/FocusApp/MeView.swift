@@ -5,6 +5,9 @@ import SwiftUI
 struct MeView: View {
   let model: AppModel
   @State private var note = ""
+  @State private var pendingNote: String?
+  /// Kept apart from `pendingNote`: the dialog clears that before its buttons run.
+  @State private var chosenNote: String?
 
   private var me: MeModel { model.me }
 
@@ -78,9 +81,13 @@ struct MeView: View {
           Text(item.date, style: .date).font(Theme.Typography.small).foregroundStyle(
             Theme.Palette.quiet)
         }
-        .swipeActions {
-          Button(Words.talkDelete, role: .destructive) { me.deleteNote(item.id) }
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+          Button(Words.talkDelete, role: .destructive) {
+            chosenNote = item.id
+            pendingNote = item.id
+          }
         }
+
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("note-row")
       }
@@ -95,6 +102,20 @@ struct MeView: View {
         .accessibilityIdentifier("me-trusted-adult")
     }
     .listRowBackground(Theme.Palette.card)
+    // One dialog for the whole section, so it is not attached to a row that is removed by the delete.
+    .confirmationDialog(
+      Words.savedThoughtConfirm,
+      isPresented: Binding(
+        get: { pendingNote != nil },
+        set: { if !$0 { pendingNote = nil } })
+    ) {
+      Button(Words.savedThoughtDelete, role: .destructive) {
+        if let id = chosenNote { me.deleteNote(id) }
+        chosenNote = nil
+      }
+      .accessibilityIdentifier("note-delete-confirm")
+      Button(Words.savedThoughtKeep, role: .cancel) { pendingNote = nil }
+    }
   }
 
   // MARK: How I like to work

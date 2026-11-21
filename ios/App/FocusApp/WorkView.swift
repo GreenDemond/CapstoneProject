@@ -18,6 +18,33 @@ struct WorkView: View {
   var body: some View {
     VStack(alignment: .leading, spacing: Theme.Space.medium) {
       header
+      ScrollView {
+        VStack(alignment: .leading, spacing: Theme.Space.medium) {
+          content
+        }
+      }
+      .scrollDismissesKeyboard(.interactively)
+    }
+    .padding(Theme.Space.large)
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    .pageBackground()
+    .accessibilityElement(children: .contain)
+    .accessibilityIdentifier("work-screen")
+    .sheet(item: $stuckStep) { target in
+      StuckView(model: model, target: target)
+    }
+    .sheet(
+      isPresented: Binding(
+        get: { recallStepId != nil && model.currentStep != nil },
+        set: { if !$0 { finishRecall() } })
+    ) {
+      recallCard.padding(Theme.Space.large).presentationDetents([.medium])
+    }
+  }
+
+  @ViewBuilder
+  private var content: some View {
+    Group {
       if let step = model.currentStep {
         stepCard(step)
         readButton(step)
@@ -35,22 +62,6 @@ struct WorkView: View {
       } else {
         Color.clear.onAppear { model.leaveStep() }
       }
-      Spacer(minLength: 0)
-    }
-    .padding(Theme.Space.large)
-    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-    .pageBackground()
-    .accessibilityElement(children: .contain)
-    .accessibilityIdentifier("work-screen")
-    .sheet(item: $stuckStep) { target in
-      StuckView(model: model, target: target)
-    }
-    .sheet(
-      isPresented: Binding(
-        get: { recallStepId != nil && model.currentStep != nil },
-        set: { if !$0 { finishRecall() } })
-    ) {
-      recallCard.padding(Theme.Space.large).presentationDetents([.medium])
     }
   }
 
