@@ -1,5 +1,7 @@
 # Design: the iPhone app (a thin native shell around the web app)
 
+> **Superseded on 2026-11-20** by the native app design in `ios/`. Kept for the record.
+
 Status: **draft for review, 2026-11-17. Not built.** Ben asked for the design to be laid out, documented and reviewed first; building is decided after. Would change DECISIONS T1 (not recorded until Ben says go).
 
 ## Why

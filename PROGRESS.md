@@ -63,6 +63,8 @@ Nothing. The whole-app review plan (`design/review-plan-2026-11-17.md`) is finis
 
 ## Next
 
+**The iPhone app has its own self-contained folder, `ios/`** (2026-11-20): design, rules for agents, task list, decisions, research copy, and starting content. Nothing is built. It replaces the thin-shell draft in `design/iphone-app.md` and phase N of `ROADMAP.md`. It does not change this web app, and T1 here is unchanged until the parent answers `ios/DECISIONS.md` D1.
+
 **`ROADMAP.md` (2026-11-20) lays out the next stage**: interface clean-up, a more interactive chat, search, and an Apple shell with on-device AI. It needs answers from the parent and Ben first (its section 8). Until they answer, the list below stands.
 
 1. **Editing the steps before Start** (P1): edit words, delete, reorder, add. Design note first.

@@ -1,0 +1,607 @@
+{
+  "function": "applyChoice(work, choice, splitText) applied in order",
+  "cases": [
+    {
+      "name": "done moves on",
+      "start": {
+        "steps": [
+          {
+            "id": 0,
+            "text": "Read the question",
+            "done": false
+          },
+          {
+            "id": 1,
+            "text": "Write one sentence",
+            "done": false
+          },
+          {
+            "id": 2,
+            "text": "Check it",
+            "done": false
+          }
+        ],
+        "nextId": 3
+      },
+      "moves": [
+        [
+          "done"
+        ]
+      ],
+      "result": {
+        "steps": [
+          {
+            "id": 0,
+            "text": "Read the question",
+            "done": true
+          },
+          {
+            "id": 1,
+            "text": "Write one sentence",
+            "done": false
+          },
+          {
+            "id": 2,
+            "text": "Check it",
+            "done": false
+          }
+        ],
+        "nextId": 3
+      },
+      "currentIndex": 1,
+      "doneCount": 1,
+      "allDone": false
+    },
+    {
+      "name": "still working changes nothing",
+      "start": {
+        "steps": [
+          {
+            "id": 0,
+            "text": "Read the question",
+            "done": false
+          },
+          {
+            "id": 1,
+            "text": "Write one sentence",
+            "done": false
+          },
+          {
+            "id": 2,
+            "text": "Check it",
+            "done": false
+          }
+        ],
+        "nextId": 3
+      },
+      "moves": [
+        [
+          "still"
+        ]
+      ],
+      "result": {
+        "steps": [
+          {
+            "id": 0,
+            "text": "Read the question",
+            "done": false
+          },
+          {
+            "id": 1,
+            "text": "Write one sentence",
+            "done": false
+          },
+          {
+            "id": 2,
+            "text": "Check it",
+            "done": false
+          }
+        ],
+        "nextId": 3
+      },
+      "currentIndex": 0,
+      "doneCount": 0,
+      "allDone": false
+    },
+    {
+      "name": "stuck changes nothing",
+      "start": {
+        "steps": [
+          {
+            "id": 0,
+            "text": "Read the question",
+            "done": false
+          },
+          {
+            "id": 1,
+            "text": "Write one sentence",
+            "done": false
+          },
+          {
+            "id": 2,
+            "text": "Check it",
+            "done": false
+          }
+        ],
+        "nextId": 3
+      },
+      "moves": [
+        [
+          "stuck"
+        ]
+      ],
+      "result": {
+        "steps": [
+          {
+            "id": 0,
+            "text": "Read the question",
+            "done": false
+          },
+          {
+            "id": 1,
+            "text": "Write one sentence",
+            "done": false
+          },
+          {
+            "id": 2,
+            "text": "Check it",
+            "done": false
+          }
+        ],
+        "nextId": 3
+      },
+      "currentIndex": 0,
+      "doneCount": 0,
+      "allDone": false
+    },
+    {
+      "name": "drifted with a smaller step splits it",
+      "start": {
+        "steps": [
+          {
+            "id": 0,
+            "text": "Read the question",
+            "done": false
+          },
+          {
+            "id": 1,
+            "text": "Write one sentence",
+            "done": false
+          },
+          {
+            "id": 2,
+            "text": "Check it",
+            "done": false
+          }
+        ],
+        "nextId": 3
+      },
+      "moves": [
+        [
+          "drifted",
+          "Read the first line"
+        ]
+      ],
+      "result": {
+        "steps": [
+          {
+            "id": 0,
+            "text": "Read the question",
+            "done": true
+          },
+          {
+            "id": 3,
+            "text": "Read the first line",
+            "done": false
+          },
+          {
+            "id": 1,
+            "text": "Write one sentence",
+            "done": false
+          },
+          {
+            "id": 2,
+            "text": "Check it",
+            "done": false
+          }
+        ],
+        "nextId": 4
+      },
+      "currentIndex": 1,
+      "doneCount": 1,
+      "allDone": false
+    },
+    {
+      "name": "drifted with a blank box changes nothing",
+      "start": {
+        "steps": [
+          {
+            "id": 0,
+            "text": "Read the question",
+            "done": false
+          },
+          {
+            "id": 1,
+            "text": "Write one sentence",
+            "done": false
+          },
+          {
+            "id": 2,
+            "text": "Check it",
+            "done": false
+          }
+        ],
+        "nextId": 3
+      },
+      "moves": [
+        [
+          "drifted",
+          "   "
+        ]
+      ],
+      "result": {
+        "steps": [
+          {
+            "id": 0,
+            "text": "Read the question",
+            "done": false
+          },
+          {
+            "id": 1,
+            "text": "Write one sentence",
+            "done": false
+          },
+          {
+            "id": 2,
+            "text": "Check it",
+            "done": false
+          }
+        ],
+        "nextId": 3
+      },
+      "currentIndex": 0,
+      "doneCount": 0,
+      "allDone": false
+    },
+    {
+      "name": "drifted with the same words changes nothing",
+      "start": {
+        "steps": [
+          {
+            "id": 0,
+            "text": "Read the question",
+            "done": false
+          },
+          {
+            "id": 1,
+            "text": "Write one sentence",
+            "done": false
+          },
+          {
+            "id": 2,
+            "text": "Check it",
+            "done": false
+          }
+        ],
+        "nextId": 3
+      },
+      "moves": [
+        [
+          "drifted",
+          " Read the question "
+        ]
+      ],
+      "result": {
+        "steps": [
+          {
+            "id": 0,
+            "text": "Read the question",
+            "done": false
+          },
+          {
+            "id": 1,
+            "text": "Write one sentence",
+            "done": false
+          },
+          {
+            "id": 2,
+            "text": "Check it",
+            "done": false
+          }
+        ],
+        "nextId": 3
+      },
+      "currentIndex": 0,
+      "doneCount": 0,
+      "allDone": false
+    },
+    {
+      "name": "later moves the step to the end",
+      "start": {
+        "steps": [
+          {
+            "id": 0,
+            "text": "Read the question",
+            "done": false
+          },
+          {
+            "id": 1,
+            "text": "Write one sentence",
+            "done": false
+          },
+          {
+            "id": 2,
+            "text": "Check it",
+            "done": false
+          }
+        ],
+        "nextId": 3
+      },
+      "moves": [
+        [
+          "later"
+        ]
+      ],
+      "result": {
+        "steps": [
+          {
+            "id": 1,
+            "text": "Write one sentence",
+            "done": false
+          },
+          {
+            "id": 2,
+            "text": "Check it",
+            "done": false
+          },
+          {
+            "id": 0,
+            "text": "Read the question",
+            "done": false
+          }
+        ],
+        "nextId": 3
+      },
+      "currentIndex": 0,
+      "doneCount": 0,
+      "allDone": false
+    },
+    {
+      "name": "later with nothing else left changes nothing",
+      "start": {
+        "steps": [
+          {
+            "id": 0,
+            "text": "Read the question",
+            "done": false
+          },
+          {
+            "id": 1,
+            "text": "Write one sentence",
+            "done": false
+          },
+          {
+            "id": 2,
+            "text": "Check it",
+            "done": false
+          }
+        ],
+        "nextId": 3
+      },
+      "moves": [
+        [
+          "done"
+        ],
+        [
+          "done"
+        ],
+        [
+          "later"
+        ]
+      ],
+      "result": {
+        "steps": [
+          {
+            "id": 0,
+            "text": "Read the question",
+            "done": true
+          },
+          {
+            "id": 1,
+            "text": "Write one sentence",
+            "done": true
+          },
+          {
+            "id": 2,
+            "text": "Check it",
+            "done": false
+          }
+        ],
+        "nextId": 3
+      },
+      "currentIndex": 2,
+      "doneCount": 2,
+      "allDone": false
+    },
+    {
+      "name": "all done ignores further choices",
+      "start": {
+        "steps": [
+          {
+            "id": 0,
+            "text": "Read the question",
+            "done": false
+          },
+          {
+            "id": 1,
+            "text": "Write one sentence",
+            "done": false
+          },
+          {
+            "id": 2,
+            "text": "Check it",
+            "done": false
+          }
+        ],
+        "nextId": 3
+      },
+      "moves": [
+        [
+          "done"
+        ],
+        [
+          "done"
+        ],
+        [
+          "done"
+        ],
+        [
+          "done"
+        ]
+      ],
+      "result": {
+        "steps": [
+          {
+            "id": 0,
+            "text": "Read the question",
+            "done": true
+          },
+          {
+            "id": 1,
+            "text": "Write one sentence",
+            "done": true
+          },
+          {
+            "id": 2,
+            "text": "Check it",
+            "done": true
+          }
+        ],
+        "nextId": 3
+      },
+      "currentIndex": -1,
+      "doneCount": 3,
+      "allDone": true
+    },
+    {
+      "name": "drifted twice then done",
+      "start": {
+        "steps": [
+          {
+            "id": 0,
+            "text": "Read the question",
+            "done": false
+          },
+          {
+            "id": 1,
+            "text": "Write one sentence",
+            "done": false
+          },
+          {
+            "id": 2,
+            "text": "Check it",
+            "done": false
+          }
+        ],
+        "nextId": 3
+      },
+      "moves": [
+        [
+          "drifted",
+          "a"
+        ],
+        [
+          "drifted",
+          "b"
+        ],
+        [
+          "done"
+        ]
+      ],
+      "result": {
+        "steps": [
+          {
+            "id": 0,
+            "text": "Read the question",
+            "done": true
+          },
+          {
+            "id": 3,
+            "text": "a",
+            "done": true
+          },
+          {
+            "id": 4,
+            "text": "b",
+            "done": true
+          },
+          {
+            "id": 1,
+            "text": "Write one sentence",
+            "done": false
+          },
+          {
+            "id": 2,
+            "text": "Check it",
+            "done": false
+          }
+        ],
+        "nextId": 5
+      },
+      "currentIndex": 3,
+      "doneCount": 3,
+      "allDone": false
+    },
+    {
+      "name": "unknown choice changes nothing",
+      "start": {
+        "steps": [
+          {
+            "id": 0,
+            "text": "Read the question",
+            "done": false
+          },
+          {
+            "id": 1,
+            "text": "Write one sentence",
+            "done": false
+          },
+          {
+            "id": 2,
+            "text": "Check it",
+            "done": false
+          }
+        ],
+        "nextId": 3
+      },
+      "moves": [
+        [
+          "nonsense"
+        ]
+      ],
+      "result": {
+        "steps": [
+          {
+            "id": 0,
+            "text": "Read the question",
+            "done": false
+          },
+          {
+            "id": 1,
+            "text": "Write one sentence",
+            "done": false
+          },
+          {
+            "id": 2,
+            "text": "Check it",
+            "done": false
+          }
+        ],
+        "nextId": 3
+      },
+      "currentIndex": 0,
+      "doneCount": 0,
+      "allDone": false
+    }
+  ]
+}

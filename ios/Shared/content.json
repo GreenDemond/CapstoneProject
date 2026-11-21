@@ -1,0 +1,233 @@
+{
+  "version": 1,
+  "seededFrom": "the web app's js/logic, 2026-11-20",
+  "kinds": [
+    {
+      "id": "essay",
+      "label": "Essay",
+      "starterSteps": [
+        "Read the instructions again and write down what the question asks",
+        "Write your main answer in one sentence",
+        "List three points that support it",
+        "Write a rough first paragraph. It doesn't have to be perfect",
+        "Read it once and fix one thing",
+        "Check that your answer does what the question asks",
+        "Write a short conclusion"
+      ]
+    },
+    {
+      "id": "reading",
+      "label": "Reading",
+      "starterSteps": [
+        "Skim the headings and the first and last paragraphs",
+        "Write the question you want this reading to answer",
+        "Read the first section",
+        "Stop and say its main idea in your own words",
+        "Write one thing you want to remember",
+        "Read the next section",
+        "Write down a question you still have"
+      ]
+    },
+    {
+      "id": "problem-set",
+      "label": "Problem set",
+      "starterSteps": [
+        "Read the instructions and count how many problems there are",
+        "Try the first problem without notes",
+        "Write down which rule or method it needs",
+        "Check your notes or book for a worked example",
+        "Do the rest, and mark the ones you are stuck on",
+        "Check one answer by working it a second way",
+        "Write down what you would ask a teacher"
+      ]
+    },
+    {
+      "id": "project",
+      "label": "Project",
+      "starterSteps": [
+        "Write down what the finished project must include",
+        "List the parts that need separate work",
+        "Pick the smallest part and do it first",
+        "Set a date for a first rough version",
+        "Write what you will do in the next session",
+        "Ask someone to look at your plan",
+        "Note what could go wrong and how to handle it"
+      ]
+    },
+    {
+      "id": "test-prep",
+      "label": "Studying for a test",
+      "starterSteps": [
+        "Write down the topics the test covers",
+        "Look at your notes for the first topic",
+        "Quiz yourself on it without looking",
+        "Check what you missed",
+        "Schedule the next short review",
+        "List the terms you could not explain",
+        "Review those terms once more"
+      ]
+    },
+    {
+      "id": "other",
+      "label": "Something else",
+      "starterSteps": [
+        "Read the instructions again and write down what they ask for",
+        "Do the first small part of the work",
+        "Pick the next part",
+        "Check your work against the instructions",
+        "Note what is still left to do",
+        "Write down what you are unsure about",
+        "Take a short break before the next part"
+      ]
+    }
+  ],
+  "defaultStepCount": 5,
+  "twoMinuteStep": "Set a timer for 2 minutes and start the first step. You can stop when the timer ends.",
+  "stuckHints": [
+    "Re-read the instructions and underline the verb.",
+    "Write down what you already know about this step, in one line.",
+    "Do only the first two minutes of it, then stop.",
+    "Ask a teacher or classmate what part is unclear.",
+    "Look at the example in your notes or book, then close it and try."
+  ],
+  "limits": {
+    "pasteLength": 6000,
+    "stepLength": 200,
+    "savedSteps": 100,
+    "savedStepLength": 500,
+    "message": 2000,
+    "sentCharacters": 6000,
+    "guide": 500,
+    "sources": 5,
+    "chats": 10,
+    "chatCharacters": 20000
+  },
+  "safety": {
+    "word": "TRUSTED_ADULT",
+    "line": "If something serious is going on, please talk to an adult you trust."
+  },
+  "chat": {
+    "openingQuestion": "What are you working on, and what's the first thing you're not sure about?",
+    "rules": "You are a study helper in a chat with a student. You help them start and work through their own schoolwork.\nGive hints, questions, and pointers to where to look. Never give the answer, the finished text, a solution, or the content of the work, even if asked, and even if the student says a teacher allows it.\nIf asked to write or solve it, kindly say you won't, and ask what they have tried or suggest the smallest first move.\nBe kind. Never scold or shame. Do not talk about the student's attention, focus, or any diagnosis.\nWrite plain text only: no markdown, no asterisks, no headings, no bullet symbols.\nIf the student seems to be in danger, being hurt, or in serious distress, reply with only the word TRUSTED_ADULT.",
+    "defaultGuide": "Ask one question at a time, in plain words. Give the smallest hint first, and a bigger one only if I ask again. End with one question for me.",
+    "lengths": {
+      "short": {
+        "label": "Short",
+        "text": "Keep replies to about three short sentences."
+      },
+      "medium": {
+        "label": "Medium",
+        "text": "Keep replies to one short paragraph."
+      },
+      "long": {
+        "label": "Long",
+        "text": "You may reply in a few short paragraphs when it helps."
+      }
+    },
+    "defaultLength": "short",
+    "rulesReminder": "Reminder: hints and questions only, never the answer. If the student seems to be in danger or serious distress, reply with only the word TRUSTED_ADULT.",
+    "searchLine": "Web search results may be included. Use them only to point the student to sources to read. Never copy answers or finished text from them.",
+    "trimNote": "Older messages in this chat aren't kept."
+  },
+  "stepCoach": {
+    "rules": "You help a student break an assignment into small steps.\nGive 3 to 5 short process steps, one per line, with no bullets or numbers.\nEach step is something the student does: read, write a plan, try the first part, check their work.\nNever give the answer, the finished text, a solution, or the content of the work.\nIf asked for the answer, reply with the steps only and say the student should try the first step.\nIf the text suggests the student is in danger, being hurt, or in serious distress, reply with only the word TRUSTED_ADULT."
+  },
+  "pickup": {
+    "sameDay": "Pick up where you left off.",
+    "laterDay": "Welcome back. Pick up where you left off."
+  },
+  "howILikeToWork": {
+    "notSure": "unsure",
+    "notSureText": "Not sure yet",
+    "questions": [
+      {
+        "id": "sound",
+        "text": "Sound or quiet?",
+        "options": [
+          {
+            "value": "quiet",
+            "label": "Quiet"
+          },
+          {
+            "value": "hiss",
+            "label": "A steady background hiss, like a fan"
+          },
+          {
+            "value": "unsure",
+            "label": "Not sure"
+          }
+        ]
+      },
+      {
+        "id": "block",
+        "text": "Which work block would you like to try first?",
+        "options": [
+          {
+            "value": "short",
+            "label": "Short (about 12 minutes)"
+          },
+          {
+            "value": "long",
+            "label": "Longer (about 25 minutes)"
+          },
+          {
+            "value": "unsure",
+            "label": "Not sure"
+          }
+        ]
+      },
+      {
+        "id": "pull",
+        "text": "What usually pulls you away?",
+        "options": [
+          {
+            "value": "phone",
+            "label": "Phone"
+          },
+          {
+            "value": "browser",
+            "label": "Browser or games"
+          },
+          {
+            "value": "thoughts",
+            "label": "My own thoughts"
+          },
+          {
+            "value": "people",
+            "label": "People nearby"
+          },
+          {
+            "value": "other",
+            "label": "Something else"
+          },
+          {
+            "value": "unsure",
+            "label": "Not sure"
+          }
+        ]
+      },
+      {
+        "id": "restart",
+        "text": "When you come back after a break, what helps you start?",
+        "options": [
+          {
+            "value": "small-step",
+            "label": "A very small first step"
+          },
+          {
+            "value": "notes",
+            "label": "A quick look at my notes"
+          },
+          {
+            "value": "just-start",
+            "label": "Just starting"
+          },
+          {
+            "value": "unsure",
+            "label": "Not sure"
+          }
+        ]
+      }
+    ]
+  }
+}

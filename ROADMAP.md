@@ -171,6 +171,8 @@ Rule 1 is the live risk in this whole phase. Search makes finished essays and wo
 
 ## 6. Phase N: the Apple shell and on-device AI
 
+> **Superseded on 2026-11-20.** The parent asked for a native Swift app with voice. The design, plan and rules for it are in `ios/`, which stands on its own. The platform comparison and the on-device AI findings below still hold; the thin-shell items N1 to N4 are no longer the plan.
+
 ### The platform choice, with the evidence
 
 | Option | Reaches | Own AI on the device | Cost and approvals | Verdict |

@@ -1,0 +1,25 @@
+{
+  "function": "hintAt(index)",
+  "cases": [
+    {
+      "index": 0,
+      "result": "Re-read the instructions and underline the verb."
+    },
+    {
+      "index": 1,
+      "result": "Write down what you already know about this step, in one line."
+    },
+    {
+      "index": 4,
+      "result": "Look at the example in your notes or book, then close it and try."
+    },
+    {
+      "index": 5,
+      "result": null
+    },
+    {
+      "index": 99,
+      "result": null
+    }
+  ]
+}

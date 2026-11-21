@@ -1,0 +1,86 @@
+{
+  "function": "cleanSources(list): https only, no duplicates, at most 5, title falls back to the site name",
+  "cases": [
+    {
+      "list": [
+        {
+          "url": "https://example.org/a",
+          "title": "A"
+        },
+        {
+          "url": "https://example.org/a",
+          "title": "dup"
+        },
+        {
+          "url": "http://plain.example/x",
+          "title": "http"
+        },
+        {
+          "url": "javascript:alert(1)",
+          "title": "bad"
+        },
+        {
+          "url": "https://b.example/page"
+        },
+        {
+          "url": "https://c.example/",
+          "title": "   "
+        },
+        {
+          "url": "https://d.example/",
+          "title": "tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt"
+        },
+        {
+          "url": "https://e.example/"
+        },
+        {
+          "url": "https://f.example/"
+        }
+      ],
+      "result": [
+        {
+          "url": "https://example.org/a",
+          "title": "A"
+        },
+        {
+          "url": "https://b.example/page",
+          "title": "b.example"
+        },
+        {
+          "url": "https://c.example/",
+          "title": "c.example"
+        },
+        {
+          "url": "https://d.example/",
+          "title": "tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt"
+        },
+        {
+          "url": "https://e.example/",
+          "title": "e.example"
+        }
+      ]
+    },
+    {
+      "list": [],
+      "result": []
+    },
+    {
+      "list": null,
+      "result": []
+    },
+    {
+      "list": "text",
+      "result": []
+    },
+    {
+      "list": [
+        null,
+        5,
+        {
+          "title": "no url"
+        }
+      ],
+      "result": []
+    }
+  ]
+}
