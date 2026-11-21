@@ -4,13 +4,16 @@ The memory between sessions. Rewrite it each session; do not let it grow into a 
 
 ## Working
 
-- T01 to T03: `FocusKit` (content, logic matching all eight shared case files, versioned storage). 
-- T04 app shell: hand-written `App/FocusApp.xcodeproj` (no signing team, placeholder bundle id `example.focusapp`), four tabs, `Theme`, first-run screen. Builds for a generic iOS device.
-- T05 assignment and editor: paste or type, kind, 3/5/8 steps, "I'll say my steps" (typing), "Suggest some to start", editor (edit, reorder, delete, add, split, join, done-when line, Get ready, Put it away), the "two steps?" nudge, Start only from the editor. Draft survives closing the app.
-- T06 Today and the work screen: welcome line, next step, five equal buttons, double tap counted once, park a thought, recall question, optional silent timer, state saved after every tap.
-- T07 stuck ladder without AI: hints in order, Ask a person with a copyable three-part question.
-- T08 Look it up: Wikipedia search, plain-text results, in-app Safari page with a way back, offline and other calm lines. On (`LookUpModel.isOn`).
-- 97 FocusKit tests pass. `checks/check.sh` compile-checks the app and its UI tests for a generic iOS device.
+- T01 to T03: `FocusKit` (content, logic matching all eight shared case files, versioned storage).
+- T04 to T08: app shell, assignment and editor, Today and the work screen, stuck ladder, Look it up (Wikipedia). See `TASKS.md`.
+- T09 voice in: microphone button (hold, or tap to start and stop), one-sentence explanation before the first permission request, denied, unsupported-language and download states; on-device `SpeechAnalyzer`. Off until the student picks I talk or We talk.
+- T10 voice out: Read this step, voice policy (Quiet never speaks; headphones only by default), sentence splitter, headphones removed or a call stops the voice.
+- T11 the phone's AI: `LanguageModel` protocol, scriptable fake, `AppleLanguageModel` (on-device model only, no cloud model, no keys), safety word and guardrail handling, whole-sentence release, finished-answer guard, trimming with one context retry, availability-guarded token counting (iOS 26.4+).
+- T12 Talk: chat with Stop, ten saved chats with two-tap delete, Talk it through from Stuck, Use these as my steps (into the editor), calm no-AI state with hints and Look it up. A message that triggers the trusted-adult line is never saved.
+- T13 step coach: AI steps open in the editor with a label and fall back to starter steps; Give me an idea (one step); works with no AI.
+- T15 Me: goals, private notes, How I like to work with a first-guess card, AI guide and length, voice settings, About and privacy, Delete everything (second tap, leaves no file).
+- 247 FocusKit tests pass. `checks/check.sh` compile-checks the app and its UI tests for a generic iOS device (exit 3: no simulator).
+- Info.plist usage strings for the microphone and speech recognition are set in the project's build settings.
 
 ## In progress
 
@@ -18,21 +21,25 @@ Nothing.
 
 ## Broken or worrying
 
-- **Nothing in the app has been run.** This computer has Xcode 27.2 but no usable iOS simulator (`xcrun simctl` fails). The app and the UI tests (`App/FocusAppUITests`, 8 tests) compile, but the UI tests were **written, not run**, and no screen has been seen. `checks/check.sh` exits 3 (`SKIPPED: no iOS simulator`). First thing on a computer with a simulator: run `checks/check.sh` and fix what the UI tests find; then work through `checks/device-checks.md` steps 1 to 18.
-- **No Advisor or Checker agent ran** for T04 to T08 (same model as Builder, self-review only). Advisor gate 2 is owed for T02 to T08 (storage, wording, the one network file). Words a student reads: all in `Models/Words.swift` and `Shared/content.json`.
-- **Look it up needs a real contact** in `WikipediaLookUp.userAgent` (currently `set-by-owner@example.invalid`) before anyone else uses the app. No search was run from the app; none could be run from this Mac's shell (no network). The two addresses were checked with a fetch tool on 2026-11-20.
-- Shared starter step "Check what you missed" (test practice) uses a word on the "never shame" list. Left as is; see `design/slices/T06`.
-- Ben's phone is on iOS 26.2; Apple Intelligence on or off is not yet known (T11).
-- The bundle identifier and signing team are the parent's to set in Xcode. The app's data folder is excluded from the phone's backup (the recommendation; the parent has not confirmed).
+- **Nothing in the app has been run.** No usable iOS simulator here. The app and its UI tests (`App/FocusAppUITests`: 8 earlier, plus Talk 3, step coach 2, Me 4) compile, but were **written, not run**, and no screen has been seen. First thing on a computer with a simulator: run `checks/check.sh`, fix what the UI tests find, then work through `checks/device-checks.md` steps 1 to 53.
+- **The AI is "built, not cleared".** Only a fake model ran. The real on-device model, the real microphone and speech, the real voice, headphones and silent switch were never run. The answer-giving checks (T14, `design/03` 3.4) need Ben's phone and are still owed. `AnswerGuard` and `ProcessStep` are heuristics, not the check.
+- **D6 and D7 are not answered.** T09 to T13 and T15 were built on the recommendations (on-device AI only, no keys, no cloud model; voice off by default, microphone only while held or tapped, nothing recorded). Both stay "waiting" in `DECISIONS.md`. If an answer differs, Voice set to Quiet and `Services.none` switch the parts off.
+- **Two things were added that the parent must look at:** (1) a guardrail stop on the student's own chat message shows the trusted-adult line (a proposal in `design/03` 3.5, not yet approved); the fixed phrase list is NOT built. (2) The microphone's language files are fetched from Apple when the student taps Download. Nothing of the student's is sent; it is not a D8 row. Confirm that reading.
+- No Advisor or Checker agent ran for T04 to T15 (same model as Builder, self-review only). Advisor gate 2 is owed for T02 to T15. The highest-value reads are `AI/`, `Voice/`, `Models/ChatModel.swift`, the words in `Models/Words*.swift`, and the About text vs D8.
+- **Look it up needs a real contact** in `WikipediaLookUp.userAgent` (currently `set-by-owner@example.invalid`) before anyone else uses the app.
+- Shared starter step "Check what you missed" uses a word on the "never shame" list. Left as is; see `design/slices/T06`.
+- Ben's phone is on iOS 26.2; whether Apple Intelligence is on is not yet known. The iOS 26 deprecation-style warnings for `GenerationError` in the iOS 27 SDK are expected (the minimum is iOS 26.0).
+- The bundle identifier (`example.focusapp`) and signing team are the parent's to set in Xcode. The app's data folder is excluded from phone backup (the recommendation; the parent has not confirmed).
 - Inside a sandboxed agent shell, Swift cannot start its macro plug-ins and SwiftPM cannot write its caches. `check.sh` detects this and adds the needed flags. Normal Macs need none.
-- Much of the research was read at abstract level; see the limits at the top of `research/01-evidence.md`.
+- Not done from the screens note: voice in on the editor rows, the Stuck boxes and the recall question (only the assignment, "say my steps", Talk and notes have the microphone); the AI looking things up (D8 row 2); the "test the guess" experiments.
 
 ## Waiting on
 
-See `DECISIONS.md`, "Waiting on". D1 is answered (2026-11-20). Other questions stay open; see `DECISIONS.md`.
+See `DECISIONS.md`, "Waiting on". Open: D6, D7, D8 confirmation, the trusted-adult proposals, and the parent's Apple steps for T17a (sign in to Xcode, set the team and bundle identifier, run on Ben's phone, then `design/04` section 4.7 questions).
 
 ## Next
 
-1. On a computer with a simulator: run `checks/check.sh`; fix UI test failures; look at every screen at the largest text size, in dark mode, on the smallest iPhone.
-2. Advisor gate 2 on T02 to T08, then the parent sets the User-Agent contact and confirms D8 row 1 (T08), D6 and D7 (T09 to T12).
-3. T09 voice in, T10 voice out, T11 the phone's AI, T12 Talk, T15 Me, T17a first build on Ben's phone (the parent does the Apple account steps).
+1. On a computer with a simulator: `checks/check.sh`; fix UI test failures; look at every screen at the largest text size, in dark mode, on the smallest iPhone.
+2. T17a: the parent builds to Ben's phone (numbered steps are to be written for the parent; no account details are ever handled by an agent). Ben works through `checks/device-checks.md`.
+3. T14: the eight answer-giving attempts against Talk and the step coach on the phone, recorded word for word; Advisor gate 4.
+4. Advisor gate 2 on T02 to T15, then T16 whole-app review.
