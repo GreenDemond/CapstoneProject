@@ -9,10 +9,16 @@ struct EditorView: View {
   var body: some View {
     List {
       Section {
-        Text(Words.suggestedBy)
-          .font(Theme.Typography.small)
-          .foregroundStyle(Theme.Palette.quiet)
-          .listRowBackground(Color.clear)
+        VStack(alignment: .leading, spacing: Theme.Space.tiny) {
+          Text(planner.draft.fromAI ? Words.aiSuggestedLabel : Words.suggestedBy)
+            .font(Theme.Typography.small)
+            .foregroundStyle(Theme.Palette.quiet)
+            .accessibilityIdentifier(planner.draft.fromAI ? "ai-label" : "starter-label")
+          if let note = planner.aiNote {
+            Text(verbatim: note).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
+          }
+        }
+        .listRowBackground(Color.clear)
       }
       Section {
         ForEach(planner.draft.steps) { step in

@@ -44,6 +44,35 @@ struct SayingView: View {
             .foregroundStyle(Theme.Palette.clay)
         }
 
+        if let idea = planner.idea {
+          VStack(alignment: .leading, spacing: Theme.Space.small) {
+            Text(idea.fromAI ? Words.ideaFromAI : Words.ideaFromStarter)
+              .font(Theme.Typography.small)
+              .foregroundStyle(Theme.Palette.quiet)
+            Text(verbatim: idea.text).font(Theme.Typography.body).foregroundStyle(Theme.Palette.ink)
+            HStack {
+              Button(Words.ideaUse) { planner.useIdea() }
+                .buttonStyle(QuietButtonStyle())
+                .accessibilityIdentifier("idea-use")
+              Button(Words.ideaNo) { planner.dismissIdea() }
+                .buttonStyle(LinkButtonStyle())
+                .accessibilityIdentifier("idea-no")
+            }
+          }
+          .cardStyle()
+          .accessibilityIdentifier("idea-card")
+        } else {
+          Button(planner.thinking ? Words.coachThinking : Words.giveIdea) {
+            Task { await planner.giveIdea() }
+          }
+          .buttonStyle(LinkButtonStyle())
+          .disabled(planner.thinking)
+          .accessibilityIdentifier("give-idea")
+        }
+        if let note = planner.aiNote {
+          Text(verbatim: note).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
+        }
+
         Button(Words.thatsAll) {
           if !words.isEmpty { add() }
           needOne = !planner.thatsAll()

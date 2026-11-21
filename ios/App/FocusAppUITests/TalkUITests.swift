@@ -56,3 +56,44 @@ final class TalkUITests: XCTestCase {
     XCTAssertTrue(app.buttons["talk-lookup"].exists)
   }
 }
+
+/// Step coach: with no AI both ways of making steps still work; with the scripted AI, steps carry
+/// the label and open in the editor. Written, not run.
+@MainActor
+final class StepCoachUITests: XCTestCase {
+  override func setUp() {
+    continueAfterFailure = false
+  }
+
+  func testWithNoAISuggestedStepsStillOpenInTheEditor() {
+    let app = XCUIApplication()
+    app.launchArguments = ["-focus-fresh-data"]
+    app.launch()
+    app.buttons["welcome-start"].tap()
+    let box = app.textViews["assignment-text"]
+    box.tap()
+    box.typeText("Five paragraphs on courage")
+    app.buttons["suggest-steps"].tap()
+    XCTAssertTrue(app.otherElements["editor-screen"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.staticTexts["starter-label"].exists)
+    XCTAssertFalse(app.staticTexts["ai-label"].exists)
+    app.buttons["start-steps"].tap()
+    XCTAssertTrue(app.otherElements["work-screen"].waitForExistence(timeout: 5))
+  }
+
+  func testGiveMeAnIdeaWorksWithNoAI() {
+    let app = XCUIApplication()
+    app.launchArguments = ["-focus-fresh-data"]
+    app.launch()
+    app.buttons["welcome-start"].tap()
+    let box = app.textViews["assignment-text"]
+    box.tap()
+    box.typeText("A project")
+    app.buttons["say-steps"].tap()
+    app.buttons["give-idea"].tap()
+    XCTAssertTrue(app.buttons["idea-use"].waitForExistence(timeout: 5))
+    app.buttons["idea-use"].tap()
+    app.buttons["thats-all"].tap()
+    XCTAssertTrue(app.otherElements["editor-screen"].waitForExistence(timeout: 5))
+  }
+}

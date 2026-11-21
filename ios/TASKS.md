@@ -21,7 +21,7 @@ A task is `ready` when every task it depends on is `done` and everything on its 
 | T10 Voice out | done (compile-checked) | T09 | 2026-11-20 | check.sh: FocusKit passed (135 tests); app compiles for generic iOS; UI tests not run (no simulator), exit 3. Built on D7's recommendation, pending confirmation. Real voice not run. Self-review only. Advisor gate 2 owed |
 | T11 The phone's AI | done (compile-checked, not cleared) | T03, T00 | 2026-11-20 | check.sh: FocusKit passed (164 tests); app compiles for generic iOS; UI tests not run (no simulator), exit 3. Fake model only: the real model was not run. Built on D6's recommendation, pending confirmation. Fixed phrase list not built (needs approval). Self-review only. Advisor gate 2 owed |
 | T12 Talk | done (compile-checked) | T11, T06 | 2026-11-20 | check.sh: FocusKit passed (196 tests); app and UI tests compile for generic iOS; UI tests written, not run (no simulator), exit 3. Fake model only. Built on D6 and D7 recommendations, pending confirmation. Not cleared until T14. Self-review only. Advisor gate 2 owed |
-| T13 Step coach | waiting | T12, T05 | | |
+| T13 Step coach | done (compile-checked, not cleared) | T12, T05 | 2026-11-20 | check.sh: FocusKit passed (223 tests); app and UI tests compile for generic iOS; UI tests written, not run (no simulator), exit 3. Fake model only. Built on D6's recommendation, pending confirmation. Not cleared until T14. Self-review only. Advisor gate 2 owed |
 | T14 Answer-giving checks on a real phone | waiting | T12, T13, T17a | | |
 | T15 Me | waiting | T06 | | |
 | T16 Whole-app review | waiting | T05 to T15 | | |

@@ -65,3 +65,10 @@ You need Apple Intelligence switched on (Settings, Apple Intelligence & Siri). W
 39. With We talk and headphones in, send a message: you should hear the reply sentence by sentence. Tap the reply: the voice should stop.
 40. In a step, tap Stuck, then Talk it through. You should be in the chat, and the AI's first hint should be about that step.
 41. Type a message that says you feel unsafe (a made-up sentence is fine). You should see only: "If something serious is going on, please talk to an adult you trust." and nothing else, and the message should not be in My chats. Write down what you typed and what you saw.
+
+## Step coach (T13)
+
+42. With Apple Intelligence on: type "Five paragraphs on courage in To Kill a Mockingbird, due Friday", choose Essay, tap "Suggest some to start". You should land in the editor (not on a step to work on) with a line saying the steps are suggested by the AI. Every step should be something to DO (read, write, list, check), never a sentence about courage. Write down the steps you got.
+43. Try it three times with different assignments. If any step contains finished content (a thesis, a fact, an answer), write it down word for word and tell the person helping you.
+44. Turn Apple Intelligence off (or use Airplane Mode is not enough; the AI is on the phone, so use Settings). Repeat step 42. You should get starter steps, with no line about the AI, and everything should still work to Start.
+45. Tap "I'll say my steps", then **Give me an idea**. You should see one possible step with Use it and No thanks. Use it: it should appear as your step.

@@ -74,6 +74,7 @@ public final class AppModel {
       content: content, store: store, clock: clock, model: services.languageModel,
       speaker: self.speaker)
     self.planner = PlannerModel(content: content, store: store, clock: clock, draft: draft)
+    self.planner.coach = StepCoach(model: services.languageModel, content: content)
     self.planner.onStart = { [weak self] saved in self?.began(saved) }
     self.talk.settings = { [weak self] in self?.settings ?? Settings() }
     self.talk.onUseSteps = { [weak self] steps, kind in

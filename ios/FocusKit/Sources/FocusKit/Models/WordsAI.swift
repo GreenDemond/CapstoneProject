@@ -40,3 +40,16 @@ extension Words {
   public static let messageCut = "That was long, so the end was cut off."
   public static let talkItThrough = "Talk it through"
 }
+
+extension Words {
+  public static let aiSuggestedLabel = "Suggested by the AI on this iPhone. Change any you like."
+  public static let coachFallback =
+    "The AI's steps weren't usable, so these are starter steps. Change any you like."
+  public static let coachThinking = "Thinking of some steps"
+  public static let giveIdea = "Give me an idea"
+  public static let ideaUse = "Use it"
+  public static let ideaNo = "No thanks"
+  public static let ideaFromAI = "An idea from the AI on this iPhone:"
+  public static let ideaFromStarter = "An idea for this kind of work:"
+  public static let ideaNone = "You have all the starter ideas. Add your own."
+}

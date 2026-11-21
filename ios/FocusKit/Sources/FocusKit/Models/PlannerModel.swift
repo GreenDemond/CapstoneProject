@@ -14,6 +14,20 @@ public final class PlannerModel {
   public private(set) var showEmptyNote = false
   /// Called when Start succeeds, with the saved steps.
   public var onStart: (SavedWork) -> Void = { _ in }
+  /// The step coach, when the phone has an AI. Without it everything uses the starter steps.
+  public var coach: StepCoach?
+  /// A calm line about what the AI did (for example, that starter steps were used instead).
+  public private(set) var aiNote: String?
+  /// The AI is working on a suggestion.
+  public private(set) var thinking = false
+  /// One idea for the next step, waiting for the student to use it or not.
+  public private(set) var idea: Idea?
+
+  /// One suggested step, from the AI or from the starter steps.
+  public struct Idea: Equatable, Sendable {
+    public let text: String
+    public let fromAI: Bool
+  }
 
   private let content: Content
   private let store: any Store
@@ -75,6 +89,81 @@ public final class PlannerModel {
     return true
   }
 
+  /// "Suggest some to start": the AI's steps when it is on and they pass every check, otherwise the
+  /// starter steps. Either way the steps open in the editor, never on the work screen.
+  public func suggest() async {
+    guard hasAssignmentText else {
+      showEmptyNote = true
+      return
+    }
+    guard !thinking else { return }
+    aiNote = nil
+    guard let coach, coach.isAvailable else {
+      makeSuggested()
+      return
+    }
+    thinking = true
+    let kindLabel = content.kinds.first { $0.id == draft.kindId }?.label ?? "Something else"
+    let outcome = await coach.suggest(
+      assignment: PastedText.clean(draft.text), kindLabel: kindLabel, count: draft.stepCount)
+    thinking = false
+    switch outcome {
+    case .steps(let steps):
+      importSteps(steps, kindId: draft.kindId)
+    case .trustedAdult:
+      // The words are not kept, and no steps are made. The fixed line is shown.
+      setText("")
+      aiNote = content.safety.line
+    case .fallback(let reason):
+      makeSuggested()
+      if reason != .unavailable { aiNote = Words.coachFallback }
+    }
+  }
+
+  /// "Give me an idea": one possible next step, never the whole list. With no AI, or when the
+  /// AI's idea is not usable, it is the next starter step the student does not have yet.
+  public func giveIdea() async {
+    guard !thinking else { return }
+    aiNote = nil
+    let kindLabel = content.kinds.first { $0.id == draft.kindId }?.label ?? "Something else"
+    let have = draft.steps.map { Text.trimmed($0.text) }
+    if let coach, coach.isAvailable {
+      thinking = true
+      let outcome = await coach.idea(
+        assignment: PastedText.clean(draft.text), kindLabel: kindLabel, stepsSoFar: have)
+      thinking = false
+      switch outcome {
+      case .idea(let text):
+        idea = Idea(text: text, fromAI: true)
+        return
+      case .trustedAdult:
+        aiNote = content.safety.line
+        return
+      case .fallback:
+        break
+      }
+    }
+    let starter = StarterSteps.steps(
+      for: draft.kindId, pastedText: PastedText.clean(draft.text), in: content)
+    let lowered = Set(have.map { $0.lowercased() })
+    idea = starter.first { !lowered.contains($0.lowercased()) }.map {
+      Idea(text: $0, fromAI: false)
+    }
+    if idea == nil { aiNote = Words.ideaNone }
+  }
+
+  /// The student took the idea: it becomes the next step they said.
+  public func useIdea() {
+    guard let idea else { return }
+    self.idea = nil
+    if addSaid(idea.text), idea.fromAI { draft.fromAI = true }
+    persist()
+  }
+
+  public func dismissIdea() {
+    idea = nil
+  }
+
   /// Steps from the AI (or from a chat) open in the editor with the AI label, never on the work
   /// screen. The kind is kept if it is one of ours.
   @discardableResult
@@ -104,6 +193,8 @@ public final class PlannerModel {
     draft.steps = []
     draft.nextId = 0
     draft.nudgeDismissed = []
+    draft.fromAI = false
+    idea = nil
     draft.stage = .saying
     showEmptyNote = false
     persist()

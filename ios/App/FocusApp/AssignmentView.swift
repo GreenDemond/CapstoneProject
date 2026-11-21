@@ -76,9 +76,18 @@ struct AssignmentView: View {
         Button(Words.saySteps) { planner.beginSaying() }
           .buttonStyle(MainButtonStyle())
           .accessibilityIdentifier("say-steps")
-        Button(Words.suggestSteps) { planner.makeSuggested() }
-          .buttonStyle(QuietButtonStyle())
-          .accessibilityIdentifier("suggest-steps")
+        Button(planner.thinking ? Words.coachThinking : Words.suggestSteps) {
+          Task { await planner.suggest() }
+        }
+        .buttonStyle(QuietButtonStyle())
+        .disabled(planner.thinking)
+        .accessibilityIdentifier("suggest-steps")
+        if let note = planner.aiNote {
+          Text(verbatim: note)
+            .font(Theme.Typography.body)
+            .foregroundStyle(Theme.Palette.ink)
+            .accessibilityIdentifier("ai-note")
+        }
 
         if model.hasSteps {
           Button(Words.allMySteps) { model.cancelPlanning() }
