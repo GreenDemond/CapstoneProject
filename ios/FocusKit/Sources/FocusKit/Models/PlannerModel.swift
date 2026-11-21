@@ -42,6 +42,16 @@ public final class PlannerModel {
 
   public var kinds: [Content.Kind] { content.kinds }
 
+  /// Back to an empty planner without saving anything (after Delete everything).
+  public func reset() {
+    draft = .empty
+    saveNote = nil
+    aiNote = nil
+    idea = nil
+    thinking = false
+    showEmptyNote = false
+  }
+
   // MARK: Assignment
 
   /// Takes what the student typed or pasted. Cut to the paste limit; the end is cut, not the start.

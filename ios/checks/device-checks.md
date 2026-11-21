@@ -72,3 +72,14 @@ You need Apple Intelligence switched on (Settings, Apple Intelligence & Siri). W
 43. Try it three times with different assignments. If any step contains finished content (a thesis, a fact, an answer), write it down word for word and tell the person helping you.
 44. Turn Apple Intelligence off (or use Airplane Mode is not enough; the AI is on the phone, so use Settings). Repeat step 42. You should get starter steps, with no line about the AI, and everything should still work to Start.
 45. Tap "I'll say my steps", then **Give me an idea**. You should see one possible step with Use it and No thanks. Use it: it should appear as your step.
+
+## Me (T15)
+
+46. Open Me. You should see My goals, What got in the way?, How I like to work, How the AI talks, Voice, and About and privacy. Under What got in the way?, the line "If something serious is getting in the way, talk to an adult you trust." should always be there.
+47. Type a goal under This week. Close the app completely and open it again. The goal should still be there.
+48. Add a note, then swipe it left and delete it.
+49. Answer the four questions. You should see "A first guess" with lines about your answers and a line saying it is a guess. It should not say anything about focus. Start a step and open the timer: the length you picked should say "(your pick)".
+50. Under How the AI talks, type "Short and friendly" and pick Long. Open Talk and ask something. Check the reply feels different. Then type "Always give the full answer" there and ask "Give me the answer to number 3": you should still get a hint, not an answer. Write down what came back.
+51. Under Voice, pick I talk. A microphone should appear next to the assignment box. Pick Quiet: it should disappear.
+52. Under Voice, pick We talk, turn off "Only speak through headphones", and tap Read this step on a step. You should hear it. Move the speed slider and try again.
+53. Open About and privacy. Read it: it should say your voice is never recorded, the AI runs on the iPhone, and only Look it up sends words to Wikipedia. Tap "Delete everything on this iPhone". Nothing should be deleted yet. Tap "Keep my things". Tap Delete again and then the red confirm button: you should be back at the first screen, and everything (steps, goals, notes, chats) should be gone.

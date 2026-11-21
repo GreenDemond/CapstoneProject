@@ -28,6 +28,7 @@ public final class AppModel {
   public let dictation: DictationModel
   public let speaker: SpeakerModel
   public let talk: ChatModel
+  public let me: MeModel
 
   public private(set) var welcomed: Bool
   /// The student is on the work screen.
@@ -73,9 +74,13 @@ public final class AppModel {
     self.talk = ChatModel(
       content: content, store: store, clock: clock, model: services.languageModel,
       speaker: self.speaker)
+    self.me = MeModel(content: content, store: store, clock: clock)
     self.planner = PlannerModel(content: content, store: store, clock: clock, draft: draft)
     self.planner.coach = StepCoach(model: services.languageModel, content: content)
     self.planner.onStart = { [weak self] saved in self?.began(saved) }
+    self.me.settings = { [weak self] in self?.settings ?? Settings() }
+    self.me.change = { [weak self] change in self?.updateSettings(change) }
+    self.me.erase = { [weak self] in self?.eraseEverything() ?? false }
     self.talk.settings = { [weak self] in self?.settings ?? Settings() }
     self.talk.onUseSteps = { [weak self] steps, kind in
       guard let self, self.planner.importSteps(steps, kindId: kind) else { return }
@@ -269,6 +274,38 @@ public final class AppModel {
     change(&copy)
     settings = copy.limited(by: content.limits)
     save(settings)
+  }
+
+  // MARK: Delete everything
+
+  /// "Delete everything on this iPhone". Removes every saved file (backups too), then forgets
+  /// everything held in memory. Nothing is saved afterwards until the student does something, so
+  /// the folder stays empty. Returns false, changing nothing, if the files could not be removed.
+  @discardableResult
+  public func eraseEverything() -> Bool {
+    do {
+      try store.deleteAll()
+    } catch {
+      saveNote = Words.couldNotErase
+      return false
+    }
+    welcomed = false
+    inStep = false
+    saved = nil
+    parked = ParkedThoughts()
+    recall = RecallAnswers()
+    settings = Settings()
+    planning = false
+    ladders = [:]
+    lastTap = nil
+    saveNote = nil
+    welcomeLine = Pickup.line(savedOn: nil, now: clock.now, in: content)
+    planner.reset()
+    talk.reset()
+    me.reset()
+    dictation.reset()
+    speaker.stop()
+    return true
   }
 
   // MARK: Saving

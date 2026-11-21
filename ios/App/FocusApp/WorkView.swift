@@ -65,8 +65,11 @@ struct WorkView: View {
       Spacer()
       Menu {
         Button(Words.timerOff) { timerEnds = nil }
-        Button("12 minutes") { timerEnds = Date().addingTimeInterval(12 * 60) }
-        Button("25 minutes") { timerEnds = Date().addingTimeInterval(25 * 60) }
+        ForEach([12, 25], id: \.self) { minutes in
+          Button(timerLabel(minutes)) {
+            timerEnds = Date().addingTimeInterval(Double(minutes) * 60)
+          }
+        }
       } label: {
         Image(systemName: "timer").frame(minWidth: Theme.Space.touch, minHeight: Theme.Space.touch)
       }
@@ -79,6 +82,12 @@ struct WorkView: View {
       .accessibilityLabel("Back to Today")
       .accessibilityIdentifier("leave-step")
     }
+  }
+
+  /// "12 minutes", with "(your pick)" on the one chosen under How I like to work.
+  private func timerLabel(_ minutes: Int) -> String {
+    let base = "\(minutes) minutes"
+    return model.me.startingCountdownMinutes == minutes ? "\(base) (\(Words.timerSuggested))" : base
   }
 
   private func stepCard(_ step: Step) -> some View {

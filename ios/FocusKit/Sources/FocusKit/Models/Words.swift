@@ -90,8 +90,6 @@ public enum Words {
   public static let askCopied = "Copied."
   public static let askNeedWords = "Write a little in at least one box first."
   public static let lookItUpLater = "Look it up"
-  public static let talkItThroughLater = "Talk it through"
-  public static let talkNotYet = "Not ready yet in this version."
   public static let backToStep = "Back to my step"
 
   // Look it up
@@ -112,9 +110,6 @@ public enum Words {
   public static let tabTalk = "Talk"
   public static let tabPlan = "Plan"
   public static let tabMe = "Me"
-  public static let talkNotReady =
-    "Talking it through isn't here yet. Hints and Look it up work now."
-  public static let meNotReady = "Settings, notes and goals are coming. Nothing is needed from you."
   public static let planEmpty = "No steps yet. Start on Today."
 }
 

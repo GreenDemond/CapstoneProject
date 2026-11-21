@@ -6,7 +6,6 @@ extension Words {
   public static let aiHintsOnly =
     "I can give hints, not the finished answer. What have you tried so far?"
   public static let aiTooLong = "This chat got long. Start a new chat to keep going."
-  public static let aiStopped = "Stopped."
 
   public static func aiUnavailable(_ reason: ModelAvailability) -> String {
     switch reason {
@@ -52,4 +51,70 @@ extension Words {
   public static let ideaFromAI = "An idea from the AI on this iPhone:"
   public static let ideaFromStarter = "An idea for this kind of work:"
   public static let ideaNone = "You have all the starter ideas. Add your own."
+}
+
+/// Words for the Me tab.
+extension Words {
+  public static let meGoals = "My goals"
+  public static let meGoalToday = "Today"
+  public static let meGoalWeek = "This week"
+  public static let meGoalMonth = "This month"
+  public static let meGoalYear = "This year"
+  public static let meGoalPlaceholder = "Optional"
+  public static let meGotInTheWay = "What got in the way?"
+  public static let meNotePlaceholder = "A private note"
+  public static let meAddNote = "Add note"
+  public static let meNoNotes = "No notes yet. Nobody else can see them."
+  public static let meTrustedAdult =
+    "If something serious is getting in the way, talk to an adult you trust."
+  public static let meHowILike = "How I like to work"
+  public static let meGuessTitle = "A first guess"
+  public static let meGuessNote =
+    "This is a starting guess from your answers, not a test result. Try it, and change it any time."
+  public static let guessQuiet = "You like it quiet while you work."
+  public static let guessHiss = "You'd like to try a steady background hiss, like a fan."
+  public static let guessShort = "You'll start with a short block: about 12 minutes."
+  public static let guessLong = "You'll start with a longer block: about 25 minutes."
+  public static let guessPull = "What usually pulls you away:"
+  public static let guessSmallStep = "To restart after a break, a very small first step helps."
+  public static let guessNotes = "To restart after a break, a quick look at your notes helps."
+  public static let guessJustStart = "To restart after a break, you just start."
+  public static let meHowTheAITalks = "How the AI talks"
+  public static let meGuidePlaceholder = "Tell the AI how you like to be helped"
+  public static let meGuideNote =
+    "This changes the tone and length. The AI still gives hints, never the answer."
+  public static let meReplyLength = "Reply length"
+  public static let meVoice = "Voice"
+  public static let meVoiceQuiet = "Quiet"
+  public static let meVoiceITalk = "I talk"
+  public static let meVoiceWeTalk = "We talk"
+  public static let meVoiceQuietNote = "Quiet: you tap and type. The app makes no sound."
+  public static let meVoiceITalkNote =
+    "I talk: you hold the microphone to speak. The app shows text."
+  public static let meVoiceWeTalkNote =
+    "We talk: you speak, and the app shows text and says it aloud."
+  public static let meHeadphonesOnly = "Only speak through headphones"
+  public static let meVoiceChoice = "Which voice"
+  public static let meVoiceDefault = "The phone's usual voice"
+  public static let meSpeed = "Speed"
+  public static let meAbout = "About and privacy"
+  public static let meDeleteAll = "Delete everything on this iPhone"
+  public static let meDeleteSure = "Tap again to delete everything"
+  public static let meDeleteExplain =
+    "This removes your steps, notes, goals, chats and settings from this iPhone. It can't be undone."
+  public static let meDeleteCancel = "Keep my things"
+  public static let couldNotErase = "That couldn't be deleted just now. Nothing was changed."
+  public static let timerSuggested = "your pick"
+
+  /// What the app stores and what leaves the phone: `design/03` section 3.7 and `DECISIONS.md` D8.
+  public static let privacyLines: [String] = [
+    "Stored only on this iPhone, in this app's own private folder: your steps and progress, your goals and notes, your answers to How I like to work, your settings, up to 10 chats, your recall answers and parked thoughts.",
+    "Never stored: audio, a name, an age, a school, a diagnosis, contacts, or location.",
+    "No account and no sync. The app does not back your things up anywhere.",
+    "Your voice is turned into words on this iPhone. It is never recorded and never leaves it.",
+    "The AI runs on this iPhone. Your messages to it do not leave it.",
+    "Leaves this iPhone only when you ask: Look it up sends the words you search for to Wikipedia. Opening a source is a normal visit to that website.",
+    "Nothing else. No analytics, no crash reports, no ads, and no code from anyone else.",
+    "Asked only when first needed, with one sentence each: the microphone.",
+  ]
 }

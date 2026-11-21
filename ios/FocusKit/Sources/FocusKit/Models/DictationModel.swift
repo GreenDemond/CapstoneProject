@@ -153,6 +153,15 @@ public final class DictationModel {
     }
   }
 
+  /// After Delete everything: forget that the microphone was explained.
+  public func reset() {
+    if state == .listening { stop() }
+    explained = false
+    state = .idle
+    liveText = nil
+    note = nil
+  }
+
   /// The app left the front. Listening stops at once; words so far stay.
   public func appWentToBackground() {
     if state == .listening || state == .starting {

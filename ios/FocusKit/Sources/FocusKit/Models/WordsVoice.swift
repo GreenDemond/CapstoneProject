@@ -28,5 +28,4 @@ extension Words {
   public static let readNoHeadphones =
     "Your voice setting only speaks through headphones. Plug some in to hear this."
   public static let stopReading = "Stop reading"
-  public static let speakingLabel = "Speaking"
 }

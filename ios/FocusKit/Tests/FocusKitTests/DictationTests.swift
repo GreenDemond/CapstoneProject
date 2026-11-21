@@ -235,4 +235,45 @@ func settle() async {
     let text = String(decoding: data, as: UTF8.self)
     #expect(text == "{\"micExplained\":true}")
   }
+
+  @Test func theVoiceAndAICodeNeverWritesFilesOrOpensAConnection() throws {
+    let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+      .deletingLastPathComponent()
+      .deletingLastPathComponent()
+    var hits: [String] = []
+    for folder in ["Sources/FocusKit/Voice", "Sources/FocusKit/AI"] {
+      let walker = FileManager.default.enumerator(
+        at: root.appendingPathComponent(folder), includingPropertiesForKeys: nil)
+      while let file = walker?.nextObject() as? URL {
+        guard file.pathExtension == "swift" else { continue }
+        let text = try String(contentsOf: file, encoding: .utf8)
+        for banned in [
+          "AVAudioFile", "URLSession", "URLRequest", ".write(to", "FileManager", "createFile",
+          "Data(contentsOf",
+        ] where text.contains(banned) {
+          hits.append("\(file.lastPathComponent): \(banned)")
+        }
+      }
+    }
+    #expect(hits.isEmpty, "\(hits)")
+  }
+
+  @Test func onlyTheDictationModelEverTurnsTheMicrophoneOn() throws {
+    let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+      .deletingLastPathComponent()
+      .deletingLastPathComponent().deletingLastPathComponent()
+    var callers: [String] = []
+    for folder in ["FocusKit/Sources", "App"] {
+      let walker = FileManager.default.enumerator(
+        at: root.appendingPathComponent(folder), includingPropertiesForKeys: nil)
+      while let file = walker?.nextObject() as? URL {
+        guard file.pathExtension == "swift" else { continue }
+        let text = try String(contentsOf: file, encoding: .utf8)
+        if text.contains("input.listen()") || text.contains("speechInput.listen()") {
+          callers.append(file.lastPathComponent)
+        }
+      }
+    }
+    #expect(callers == ["DictationModel.swift"])
+  }
 }

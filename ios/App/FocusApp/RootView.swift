@@ -37,7 +37,7 @@ struct MainTabs: View {
         PlanView(model: model)
       }
       Tab(Words.tabMe, systemImage: "person", value: Words.tabMe) {
-        MeView()
+        MeView(model: model)
       }
     }
     .onChange(of: model.showToday) { _, wanted in
