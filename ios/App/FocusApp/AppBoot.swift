@@ -11,7 +11,8 @@ enum AppBoot {
     guard let content = try? Content.bundled() else { return nil }
     let folder = dataFolder()
     let store = FileStore(folder: folder, limits: content.limits)
-    return AppModel(content: content, store: store)
+    let services = Services(speechInput: AppleSpeechInput())
+    return AppModel(content: content, store: store, services: services)
   }
 
   /// The app's own private folder. For UI tests a new empty folder is used each launch.

@@ -3,6 +3,7 @@ import SwiftUI
 
 /// "I'll say my steps", by typing for now: one small step at a time.
 struct SayingView: View {
+  let model: AppModel
   let planner: PlannerModel
   @State private var words = ""
   @State private var needOne = false
@@ -30,6 +31,8 @@ struct SayingView: View {
           .accessibilityLabel(Words.firstStepQuestion)
           .accessibilityIdentifier("said-step")
           .onSubmit(add)
+
+        MicButton(model: model, text: $words)
 
         Button(Words.addStepButton, action: add)
           .buttonStyle(QuietButtonStyle())

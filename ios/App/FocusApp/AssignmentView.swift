@@ -37,6 +37,10 @@ struct AssignmentView: View {
         }
         .cardStyle()
 
+        MicButton(
+          model: model,
+          text: Binding(get: { planner.draft.text }, set: { planner.setText($0) }))
+
         if planner.draft.truncated {
           Text(Words.pasteCut).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
         }

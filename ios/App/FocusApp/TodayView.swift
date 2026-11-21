@@ -30,7 +30,7 @@ struct PlannerFlow: View {
     case .assignment:
       AssignmentView(model: model, planner: planner)
     case .saying:
-      SayingView(planner: planner)
+      SayingView(model: model, planner: planner)
     case .editor:
       EditorView(planner: planner)
     }

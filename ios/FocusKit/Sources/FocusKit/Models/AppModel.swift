@@ -25,6 +25,7 @@ public final class AppModel {
 
   public let content: Content
   public let planner: PlannerModel
+  public let dictation: DictationModel
 
   public private(set) var welcomed: Bool
   /// The student is on the work screen.
@@ -37,13 +38,17 @@ public final class AppModel {
   /// The student asked for a new assignment (or the app reopened with one half planned).
   public private(set) var planning: Bool
   public private(set) var saveNote: String?
+  public private(set) var settings: Settings
 
   private let store: any Store
   private let clock: any AppClock
   private var lastTap: Date?
   private var ladders: [Int: LadderModel] = [:]
 
-  public init(content: Content, store: any Store, clock: any AppClock = SystemClock()) {
+  public init(
+    content: Content, store: any Store, clock: any AppClock = SystemClock(),
+    services: Services = .none
+  ) {
     self.content = content
     self.store = store
     self.clock = clock
@@ -57,6 +62,9 @@ public final class AppModel {
     self.welcomeLine = Pickup.line(savedOn: saved?.savedOn, now: clock.now, in: content)
     self.planning = draft.hasContent
     self.inStep = flags.inStep && (saved?.work.currentIndex != nil)
+    self.settings = store.load(Settings.self).value ?? Settings()
+    self.dictation = DictationModel(
+      input: services.speechInput, store: store, clock: clock, limit: content.limits.pasteLength)
     self.planner = PlannerModel(content: content, store: store, clock: clock, draft: draft)
     self.planner.onStart = { [weak self] saved in self?.began(saved) }
   }
@@ -227,6 +235,18 @@ public final class AppModel {
     recall.items.insert(RecallAnswer(stepId: stepId, answer: text, date: clock.now), at: 0)
     save(recall)
     return true
+  }
+
+  // MARK: Settings
+
+  public var voiceMode: VoiceMode { settings.voiceMode }
+
+  /// Changes the settings and saves them. The one place settings are written.
+  public func updateSettings(_ change: (inout Settings) -> Void) {
+    var copy = settings
+    change(&copy)
+    settings = copy.limited(by: content.limits)
+    save(settings)
   }
 
   // MARK: Saving

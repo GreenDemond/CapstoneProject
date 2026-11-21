@@ -27,3 +27,16 @@ Record for each run: the date, the iPhone model, the iOS version, whether Apple 
 16. Tap one. You should see the page, with "Back to results" above it. Tap it to return.
 17. From a step, tap Stuck, then Look it up. The box should already have some words from the step. Search, open a page, tap "Back to my step": you should be on the step.
 18. Turn on Airplane Mode and search. You should see "You're offline. Try again later." and nothing else.
+
+## Voice in (T09)
+
+Voice is off at first. First turn it on: Me, Voice, "I talk" (arrives in the Me task; until then ask the person helping you to set it).
+
+19. With voice off (Quiet), there is no microphone button anywhere. Turn on "I talk": a microphone button appears beside the assignment box.
+20. Tap the microphone for the first time. You should see one sentence about the microphone and two buttons, Okay and Not now. The iPhone's own permission question should not appear until you tap Okay. Tap Okay, allow it. You should see "Ready. Hold the microphone and talk."
+21. Hold the microphone and say "Five paragraphs on courage, due Friday." You should see "Listening" while you hold, and words appearing in the box. Let go. The words should stay, and you can fix them by typing.
+22. Say a word the app is likely to mishear. Check you can change the words before using them.
+23. Tap the microphone once quickly: it should keep listening. Tap again: it should stop. Hold and say nothing, then let go: nothing should change in the box.
+24. Listen for a phone call or a timer going off while listening: listening should stop and your words so far should stay.
+25. Go to iPhone Settings, find the app, turn the microphone off, come back, press the microphone. You should see a calm line about turning it on in Settings and the typing should still work.
+26. Close the app while listening (swipe up to Home). The orange microphone dot should disappear at once.
