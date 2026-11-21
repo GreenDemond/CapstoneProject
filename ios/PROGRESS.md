@@ -4,7 +4,7 @@ The memory between sessions. Rewrite it each session; do not let it grow into a 
 
 ## Working
 
-- Nothing is built. There is no Swift code and no Xcode project yet.
+- T01 skeleton: `FocusKit` package with the content loader and 7 passing tests; `checks/check.sh`; `.swift-format`; `.gitignore`. No Xcode project yet.
 - The design is written (`design/01` to `04`), with rules for agents (`AGENTS.md`), decisions (`DECISIONS.md`), a task list (`TASKS.md`), the research (`research/`), and starting content with test cases (`Shared/`).
 
 ## In progress
@@ -13,7 +13,7 @@ Nothing.
 
 ## Broken or worrying
 
-- **The computer this was written on has no iOS simulator** (2026-11-20). The parent says the work moves to a computer that has one. The first session there must confirm it and its Xcode version, and rewrite this line. The design's API facts were read from the iOS 27.2 kit; an older Xcode may differ.
+- **This computer has Xcode 27.2 (27B52) and Swift 6.4.2 but no usable iOS simulator** (`xcrun simctl` fails, 2026-11-20). `checks/check.sh` therefore exits 3 (`SKIPPED: no iOS simulator`) after the FocusKit checks pass. In this environment SwiftPM needs `--disable-sandbox` (check.sh passes it). The parent says the work may move to a computer that has a simulator; confirm there.
 - **Ben's phone is on iOS 26.2**, older than the kit the design was read from. Token counting (iOS 26.4) is not available on it; the design allows for that. Whether Apple Intelligence is switched on is not yet known.
 - The design has not been reviewed by an Advisor or seen by Ben. T00 covers both.
 - Nothing about the phone's AI or speech has been tried on a real iPhone. Every such claim in the design is marked verified (declaration read in the kit) or unverified.
@@ -21,7 +21,7 @@ Nothing.
 
 ## Waiting on
 
-See `DECISIONS.md`, "Waiting on". Nothing past T03 should be built before the parent answers D1.
+See `DECISIONS.md`, "Waiting on". D1 is answered (2026-11-20). Other questions stay open; see `DECISIONS.md`.
 
 ## Next
 
