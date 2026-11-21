@@ -40,7 +40,7 @@ One thing to know if you move it: today it sits inside the web project's git rep
 1. Open this folder as the project in your coding agent, with a mid-tier model as the main session. The agent reads `AGENTS.md` by itself (`CLAUDE.md` points to it).
 2. Give it the message below.
 3. Answer its questions. The first session asks you and Ben the questions in `design/04-engineering-and-plan.md` section 4.7.
-4. When a task needs you (installing the iOS simulator, signing in to Xcode, putting a build on Ben's phone), the agent gives numbered steps and waits.
+4. When a task needs you (signing in to Xcode, putting a build on Ben's phone), the agent gives numbered steps and waits.
 
 Message to start any session:
 
@@ -58,5 +58,5 @@ One task per session keeps each piece small enough to check. Repeat the same mes
 
 ## What only a person can do
 
-- **The parent:** decide the items listed as his in `DECISIONS.md`; install the iOS simulator; sign in to Xcode; put builds on a phone; anything involving TestFlight, the App Store, classmates, teachers, or money.
+- **The parent:** decide the items listed as his in `DECISIONS.md`; sign in to Xcode; put builds on a phone; anything involving TestFlight, the App Store, classmates, teachers, or money.
 - **Ben:** decide how the app looks, sounds and words things; try each build on his iPhone and say what he saw and heard. His report is the real test: nothing about the phone's AI or its voice can be checked without a real iPhone.

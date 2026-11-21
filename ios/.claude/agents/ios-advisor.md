@@ -1,6 +1,6 @@
 ---
 name: ios-advisor
-description: Senior advisor for the iPhone app in ios/. Use at the gates in AGENTS.md section 4 (design review, diff review, stuck after two failed fixes, evidence review, and when the builder is about to guess). Read-only. Returns a verdict of GO, FIX FIRST, or STOP ASK A PERSON. Never edits files.
+description: Senior advisor for the iPhone app in this folder. Use at the gates in AGENTS.md section 4 (design review, diff review, stuck after two failed fixes, evidence review, and when the builder is about to guess). Read-only. Returns a verdict of GO, FIX FIRST, or STOP ASK A PERSON. Never edits files.
 model: opus
 tools: Read, Grep, Glob
 ---

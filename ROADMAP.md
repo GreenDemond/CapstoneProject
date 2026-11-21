@@ -46,6 +46,8 @@ The repository is well past "nothing built". Requests 1 and 2 already exist in a
 
 ## 2. The recommendation in one page
 
+> **Changed on 2026-11-20, after this was written.** The parent has a paid developer account, Ben wants to talk to the app, and the parent asked for a native Swift app. The iPhone app is now a native app designed in `ios/`, not a thin shell. The web app stays the product for Chromebooks and other phones, and phases G, U, C and S below still apply to it. Read phase N and the shell wording in this section as history.
+
 **Keep one web app as the product. Add a thin Apple shell around the same files as a second way to run it. Do not rewrite it as a native app, and do not build a separate Mac app.**
 
 Reasons:
@@ -303,7 +305,7 @@ Agents: ask these in plain words, with a recommendation, and record the answers 
 
 | # | Decision | Recommendation |
 |---|---|---|
-| 1 | Change T1 to allow a small Swift shell in `ios/` that shows the unchanged web app. The web app itself stays plain files with no build step | Yes, after phases G, U and C |
+| 1 | ~~Allow a small Swift shell~~ Replaced by: go ahead with a native Swift app in `ios/` (`ios/DECISIONS.md` D1). Still waiting on the parent | Yes |
 | 2 | ~~Paid Apple developer account~~ **Answered 2026-11-20:** the parent has one and Ben may publish through it. Still open: TestFlight for the beta group only, or the public App Store as well | TestFlight only for now |
 | 3 | Confirm the draft T8 rows already waiting (chat sends the conversation and the guide; OpenRouter search) | Needed before classmates use either |
 | 4 | New T8 rows: the step's text in a chat (C3); look-up words sent to Wikipedia (S2) | Yes; both are the student's own typed words, sent only when they act |

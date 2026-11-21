@@ -1,6 +1,6 @@
 ---
 name: ios-checker
-description: Independent checker for the iPhone app in ios/. Use before any task is marked done (AGENTS.md gate 3). Runs the checks itself in a fresh context and reports exactly what happened. Never edits files and never fixes anything.
+description: Independent checker for the iPhone app in this folder. Use before any task is marked done (AGENTS.md gate 3). Runs the checks itself in a fresh context and reports exactly what happened. Never edits files and never fixes anything.
 model: haiku
 tools: Read, Grep, Glob, Bash
 ---
