@@ -181,7 +181,7 @@ public final class AppModel {
     switch choice {
     case .later:
       inStep = false
-    case .done where after.allDone:
+    case .done where after.allDone && !ask:
       inStep = false
     default:
       break

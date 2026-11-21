@@ -66,6 +66,17 @@ public enum Words {
   public static let recallSave = "Save"
   public static let recallSkip = "Skip"
 
+  public static let choiceDone = "Done"
+  public static let choiceStill = "Still working"
+  public static let choiceStuck = "Stuck"
+  public static let choiceDrifted = "Drifted"
+  public static let choiceLater = "Later"
+  public static let doneWhen = "Done when:"
+  public static let timerOff = "No timer"
+  public static let timerMenu = "Timer"
+  public static let allStepsTitle = "All my steps"
+  public static let stepDoneMark = "done"
+
   // Stuck
   public static let stuckTitle = "Stuck is okay."
   public static let anotherHint = "Another hint"
@@ -105,4 +116,17 @@ public enum Words {
     "Talking it through isn't here yet. Hints and Look it up work now."
   public static let meNotReady = "Settings, notes and goals are coming. Nothing is needed from you."
   public static let planEmpty = "No steps yet. Start on Today."
+}
+
+extension Words {
+  /// The label of one of the five buttons.
+  public static func label(for choice: Choice) -> String {
+    switch choice {
+    case .done: choiceDone
+    case .still: choiceStill
+    case .stuck: choiceStuck
+    case .drifted: choiceDrifted
+    case .later: choiceLater
+    }
+  }
 }

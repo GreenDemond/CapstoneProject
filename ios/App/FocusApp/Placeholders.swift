@@ -11,7 +11,8 @@ struct TalkView: View {
 struct PlanView: View {
   let model: AppModel
   var body: some View {
-    PlaceholderScreen(title: Words.tabPlan, line: Words.planEmpty, id: "plan-screen")
+    NavigationStack { PlanListView(model: model) }
+      .accessibilityIdentifier("plan-screen")
   }
 }
 

@@ -4,4 +4,18 @@ Things automation cannot show. Each task that adds something Ben can try adds nu
 
 Record for each run: the date, the iPhone model, the iOS version, whether Apple Intelligence is on, and what happened at each step.
 
-Nothing to try yet.
+## First look (T04 to T07)
+
+1. Open the app for the first time. You should see a screen about the app, "Your work stays on this iPhone", and Start. No question, no pop-up asking for permission.
+2. Tap Start. You should see Today asking "What's the assignment?" and four places at the bottom: Today, Talk, Plan, Me.
+3. Tap Start with nothing typed. You should see a calm line about adding a few words. Nothing else happens.
+4. Type "Five paragraphs on courage", pick Essay, tap "Suggest some to start". You should see the steps in an editor, not a step to work on.
+5. Change the words of one step. Add "This and that" as a step: you should see "This looks like two steps. Split it?" Tap No: the step stays.
+6. Swipe away the app (close it fully) and open it again. You should be back in the editor with your changes.
+7. Tap Start. You should see one step, "Step 1 of N", and five buttons the same size. No button is coloured differently.
+8. Tap Still working, then Stuck. The Stuck sheet shows a hint. Tap Another hint. Ask a person should appear. Fill one box and tap Copy my question, then paste somewhere (Notes) to check.
+9. Tap Drifted. Write a smaller piece and tap Split it. You should see "Good catch." and the smaller piece as the step.
+10. Tap Later. You should be on Today. Tap Start this step.
+11. Tap each Done until finished. You should see "That's today done." and nothing asking you to do more.
+12. Make text bigger (Settings, Display and Brightness, Text Size) and turn on dark mode. Every screen above should stay readable with nothing cut off.
+13. Close the app mid-step and open it again later (try the next day). You should see the same step, with "Welcome back." and nothing about how long.

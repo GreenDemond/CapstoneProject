@@ -14,8 +14,8 @@ A task is `ready` when every task it depends on is `done` and everything on its 
 | T03 Storage | done | T02 | 2026-11-20 | check.sh: FocusKit passed (48 tests); `SKIPPED: no iOS simulator`, exit 3. Checker: same model as Builder. Advisor gate 2 owed |
 | T04 App shell | done (compile-checked) | T03, T00 | 2026-11-20 | check.sh: FocusKit passed (67 tests); app and UI tests compile for generic iOS; `SKIPPED: no iOS simulator`, exit 3. UI tests written, not run. No Advisor or Checker agent: self-review only. Advisor gate 2 owed |
 | T05 Assignment and editor | done (compile-checked) | T04 | 2026-11-20 | check.sh: FocusKit passed (68 tests); app and UI tests compile; UI tests written, not run (no simulator), exit 3. Self-review only. Ben's two answers not yet given; recommendations used. Advisor gate 2 owed |
-| T06 Today and the work screen | waiting | T05 | | |
-| T07 Stuck ladder, without AI | waiting | T06 | | |
+| T06 Today and the work screen | done (compile-checked) | T05 | 2026-11-20 | check.sh: FocusKit passed (82 tests); app and UI tests compile; UI tests written, not run (no simulator), exit 3. Self-review only. Advisor gate 2 owed. Shared starter step "Check what you missed" noted in slice |
+| T07 Stuck ladder, without AI | done (compile-checked) | T06 | 2026-11-20 | Same run as T06 (one commit, the work screen opens the ladder). UI tests not run. Self-review only. Advisor gate 2 owed |
 | T08 Look it up | waiting | T07 | | |
 | T09 Voice in | waiting | T06 | | |
 | T10 Voice out | waiting | T09 | | |

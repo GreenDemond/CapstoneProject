@@ -1,0 +1,41 @@
+import XCTest
+
+/// Written but not run on this computer (no iOS simulator).
+final class StuckUITests: XCTestCase {
+  override func setUp() {
+    continueAfterFailure = false
+  }
+
+  /// Walks the ladder: hints, then a three-part question that can be copied.
+  func testLadderToACopiedQuestion() {
+    let app = XCUIApplication()
+    app.launchArguments = ["-focus-fresh-data"]
+    app.launch()
+    app.buttons["welcome-start"].tap()
+    let box = app.textViews["assignment-text"]
+    box.tap()
+    box.typeText("Some work")
+    app.buttons["say-steps"].tap()
+    let field = app.textFields["said-step"]
+    field.tap()
+    field.typeText("Write one line")
+    app.buttons["add-said"].tap()
+    app.buttons["thats-all"].tap()
+    app.buttons["start-steps"].tap()
+    app.buttons["choice-stuck"].tap()
+    XCTAssertTrue(app.otherElements["stuck-screen"].waitForExistence(timeout: 5))
+    // Ask a person is not offered until two hints have been shown.
+    XCTAssertFalse(app.buttons["ask-copy"].exists)
+    app.buttons["another-hint"].tap()
+    let tried = app.textFields["ask-tried"]
+    XCTAssertTrue(tried.waitForExistence(timeout: 5))
+    // An empty question cannot be copied.
+    XCTAssertFalse(app.buttons["ask-copy"].exists)
+    XCTAssertTrue(app.staticTexts["ask-need-words"].exists)
+    tried.tap()
+    tried.typeText("Reading the example")
+    XCTAssertTrue(app.buttons["ask-copy"].waitForExistence(timeout: 5))
+    app.buttons["ask-copy"].tap()
+    XCTAssertTrue(app.buttons["Copied."].waitForExistence(timeout: 5))
+  }
+}
