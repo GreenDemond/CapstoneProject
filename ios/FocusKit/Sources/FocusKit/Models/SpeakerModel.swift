@@ -33,7 +33,7 @@ public final class SpeakerModel {
   public func speak(_ text: String, kind: SpokenKind) -> VoicePolicy.Verdict {
     let current = settings()
     let verdict = VoicePolicy.verdict(
-      mode: current.voiceMode, headphonesOnly: current.headphonesOnly,
+      readAloud: current.readAloud, headphonesOnly: current.headphonesOnly,
       headphonesConnected: headphones.isConnected, kind: kind)
     note = nil
     guard verdict == .speak else {

@@ -104,17 +104,16 @@ public struct Profile: Storable {
   }
 }
 
-public enum VoiceMode: String, Codable, Equatable, Sendable {
-  case quiet
-  case iTalk
-  case weTalk
-}
-
 /// Settings. Reply length and guide are per kind of work; "all" is the fallback.
+///
+/// Voice is two independent switches (DECISIONS D7): `readAloud` (the app speaks) and `talk` (the
+/// student speaks into the microphone; speech becomes text on the phone and nothing is recorded).
+/// Both are off until the student turns them on.
 public struct Settings: Storable {
   public static let fileName = "settings.json"
 
-  public var voiceMode: VoiceMode
+  public var readAloud: Bool
+  public var talk: Bool
   public var headphonesOnly: Bool
   public var voiceId: String?
   public var speechRate: Double
@@ -124,17 +123,55 @@ public struct Settings: Storable {
   public var howILikeToWork: [String: String]
 
   public init(
-    voiceMode: VoiceMode = .quiet, headphonesOnly: Bool = true, voiceId: String? = nil,
+    readAloud: Bool = false, talk: Bool = false, headphonesOnly: Bool = true,
+    voiceId: String? = nil,
     speechRate: Double = 0.5, guides: [String: String] = [:], lengths: [String: String] = [:],
     howILikeToWork: [String: String] = [:]
   ) {
-    self.voiceMode = voiceMode
+    self.readAloud = readAloud
+    self.talk = talk
     self.headphonesOnly = headphonesOnly
     self.voiceId = voiceId
     self.speechRate = speechRate
     self.guides = guides
     self.lengths = lengths
     self.howILikeToWork = howILikeToWork
+  }
+
+  private enum CodingKeys: String, CodingKey {
+    case readAloud, talk, voiceMode, headphonesOnly, voiceId, speechRate, guides, lengths
+    case howILikeToWork
+  }
+
+  /// Reads the two switches. Settings saved before D7 have a single `voiceMode` word instead:
+  /// quiet is both off, iTalk is Talk only, weTalk is both on. A missing or unknown word means
+  /// both off (silent), never a crash and never a lost setting.
+  public init(from decoder: Decoder) throws {
+    let c = try decoder.container(keyedBy: CodingKeys.self)
+    let legacy = (try? c.decodeIfPresent(String.self, forKey: .voiceMode)) ?? nil
+    let legacyRead = legacy == "weTalk"
+    let legacyTalk = legacy == "iTalk" || legacy == "weTalk"
+    self.readAloud = (try? c.decodeIfPresent(Bool.self, forKey: .readAloud)) ?? legacyRead
+    self.talk = (try? c.decodeIfPresent(Bool.self, forKey: .talk)) ?? legacyTalk
+    self.headphonesOnly = try c.decodeIfPresent(Bool.self, forKey: .headphonesOnly) ?? true
+    self.voiceId = try c.decodeIfPresent(String.self, forKey: .voiceId)
+    self.speechRate = try c.decodeIfPresent(Double.self, forKey: .speechRate) ?? 0.5
+    self.guides = try c.decodeIfPresent([String: String].self, forKey: .guides) ?? [:]
+    self.lengths = try c.decodeIfPresent([String: String].self, forKey: .lengths) ?? [:]
+    self.howILikeToWork =
+      try c.decodeIfPresent([String: String].self, forKey: .howILikeToWork) ?? [:]
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var c = encoder.container(keyedBy: CodingKeys.self)
+    try c.encode(readAloud, forKey: .readAloud)
+    try c.encode(talk, forKey: .talk)
+    try c.encode(headphonesOnly, forKey: .headphonesOnly)
+    try c.encodeIfPresent(voiceId, forKey: .voiceId)
+    try c.encode(speechRate, forKey: .speechRate)
+    try c.encode(guides, forKey: .guides)
+    try c.encode(lengths, forKey: .lengths)
+    try c.encode(howILikeToWork, forKey: .howILikeToWork)
   }
 
   public func limited(by limits: Content.Limits) -> Settings {

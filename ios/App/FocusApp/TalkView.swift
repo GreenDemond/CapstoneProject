@@ -153,7 +153,7 @@ struct ChatScreen: View {
         MicButton(
           model: model,
           text: Binding(get: { talk.draft }, set: { talk.draft = $0 }),
-          onFinished: { if model.voiceMode == .weTalk { talk.send() } })
+          onFinished: { if model.talkOn && model.readAloudOn { talk.send() } })
         HStack(alignment: .bottom, spacing: Theme.Space.small) {
           TextField(
             Words.talkPlaceholder,

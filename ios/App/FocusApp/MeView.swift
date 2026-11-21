@@ -161,16 +161,16 @@ struct MeView: View {
 
   private var voice: some View {
     Section {
-      Picker(
-        Words.meVoice,
-        selection: Binding(get: { model.settings.voiceMode }, set: { me.setVoiceMode($0) })
-      ) {
-        Text(Words.meVoiceQuiet).tag(VoiceMode.quiet)
-        Text(Words.meVoiceITalk).tag(VoiceMode.iTalk)
-        Text(Words.meVoiceWeTalk).tag(VoiceMode.weTalk)
-      }
-      .pickerStyle(.segmented)
-      .accessibilityIdentifier("voice-mode")
+      Toggle(
+        Words.meReadAloud,
+        isOn: Binding(get: { model.settings.readAloud }, set: { me.setReadAloud($0) })
+      )
+      .accessibilityIdentifier("voice-read-aloud")
+      Toggle(
+        Words.meTalk,
+        isOn: Binding(get: { model.settings.talk }, set: { me.setTalk($0) })
+      )
+      .accessibilityIdentifier("voice-talk")
       Text(modeNote).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
       Toggle(
         Words.meHeadphonesOnly,
@@ -203,10 +203,12 @@ struct MeView: View {
   }
 
   private var modeNote: String {
-    switch model.settings.voiceMode {
-    case .quiet: Words.meVoiceQuietNote
-    case .iTalk: Words.meVoiceITalkNote
-    case .weTalk: Words.meVoiceWeTalkNote
+    let s = model.settings
+    switch (s.readAloud, s.talk) {
+    case (false, false): return Words.meVoiceOffNote
+    case (true, false): return Words.meReadAloudNote
+    case (false, true): return Words.meTalkNote
+    case (true, true): return Words.meReadAloudNote + " " + Words.meTalkNote
     }
   }
 }

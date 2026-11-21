@@ -13,7 +13,7 @@ import Testing
   let headphones = FakeHeadphones(connected: true)
   let speaker: SpeakerModel
   let chat: ChatModel
-  var settings = Settings(voiceMode: .quiet)
+  var settings = Settings()
 
   init() throws {
     content = try loadContent()
@@ -102,7 +102,7 @@ import Testing
   // MARK: Stop and leaving
 
   @Test func nothingIsShownOrSpokenWhileTheReplyIsStillArriving() async {
-    speaker.settings = { Settings(voiceMode: .weTalk, headphonesOnly: true) }
+    speaker.settings = { Settings(readAloud: true, talk: true, headphonesOnly: true) }
     model.enqueue(.init(["One sentence. Two sent"], neverEnds: true))
     chat.draft = "Help"
     chat.send()
@@ -118,7 +118,7 @@ import Testing
   }
 
   @Test func aFinishedLookingReplyIsNeitherShownNorSpoken() async {
-    speaker.settings = { Settings(voiceMode: .weTalk, headphonesOnly: true) }
+    speaker.settings = { Settings(readAloud: true, talk: true, headphonesOnly: true) }
     model.enqueue(
       .init(["Nice start. ", "Keep going. ", "Here is the finished essay: ", "Dogs are loyal."]))
     await say("write it")
@@ -182,7 +182,7 @@ import Testing
   }
 
   @Test func theLineIsSpokenOnlyInWeTalkWithHeadphones() async {
-    speaker.settings = { Settings(voiceMode: .weTalk, headphonesOnly: false) }
+    speaker.settings = { Settings(readAloud: true, talk: true, headphonesOnly: false) }
     headphones.set(connected: false)
     model.enqueue(.init(["TRUSTED_ADULT"]))
     await say("words")
@@ -300,7 +300,7 @@ import Testing
   }
 
   @Test func inWeTalkTheCheckedReplyIsSpokenOnceAfterItFinishes() async {
-    speaker.settings = { Settings(voiceMode: .weTalk, headphonesOnly: true) }
+    speaker.settings = { Settings(readAloud: true, talk: true, headphonesOnly: true) }
     model.enqueue(.init(["First idea. Sec", "ond idea. Third"]))
     await say("hi")
     #expect(output.spoken == ["First idea. Second idea. Third"])

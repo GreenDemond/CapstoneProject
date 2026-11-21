@@ -85,14 +85,14 @@ extension Words {
     "This changes the tone and length. The AI still gives hints, never the answer."
   public static let meReplyLength = "Reply length"
   public static let meVoice = "Voice"
-  public static let meVoiceQuiet = "Quiet"
-  public static let meVoiceITalk = "I talk"
-  public static let meVoiceWeTalk = "We talk"
-  public static let meVoiceQuietNote = "Quiet: you tap and type. The app makes no sound."
-  public static let meVoiceITalkNote =
-    "I talk: you hold the microphone to speak. The app shows text."
-  public static let meVoiceWeTalkNote =
-    "We talk: you speak, and the app shows text and says it aloud."
+  public static let meReadAloud = "Read aloud"
+  public static let meTalk = "Talk"
+  public static let meReadAloudNote =
+    "The app speaks. It reads your steps and the AI's replies out loud."
+  public static let meTalkNote =
+    "You speak. Your voice becomes text on this phone. Nothing is recorded."
+  public static let meVoiceOffNote =
+    "With both off, the app makes no sound and shows no microphone."
   public static let meHeadphonesOnly = "Only speak through headphones"
   public static let meVoiceChoice = "Which voice"
   public static let meVoiceDefault = "The phone's usual voice"

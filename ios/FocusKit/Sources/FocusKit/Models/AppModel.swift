@@ -266,7 +266,8 @@ public final class AppModel {
 
   // MARK: Settings
 
-  public var voiceMode: VoiceMode { settings.voiceMode }
+  public var readAloudOn: Bool { settings.readAloud }
+  public var talkOn: Bool { settings.talk }
 
   /// Changes the settings and saves them. The one place settings are written.
   public func updateSettings(_ change: (inout Settings) -> Void) {

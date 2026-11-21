@@ -13,7 +13,7 @@ struct MicButton: View {
   private var dictation: DictationModel { model.dictation }
 
   var body: some View {
-    if model.voiceMode != .quiet && dictation.isOffered {
+    if model.talkOn && dictation.isOffered {
       VStack(alignment: .leading, spacing: Theme.Space.small) {
         HStack(spacing: Theme.Space.small) {
           button

@@ -57,7 +57,7 @@ public enum SpokenKind: Equatable, Sendable {
   case trustedAdult
 }
 
-/// The rules for when the app may make a sound. One place, so Quiet can never be bypassed.
+/// The rules for when the app may make a sound. One place, so Read aloud off can never be bypassed.
 public enum VoicePolicy {
   public enum Verdict: Equatable, Sendable {
     case speak
@@ -68,16 +68,9 @@ public enum VoicePolicy {
   }
 
   public static func verdict(
-    mode: VoiceMode, headphonesOnly: Bool, headphonesConnected: Bool, kind: SpokenKind
+    readAloud: Bool, headphonesOnly: Bool, headphonesConnected: Bool, kind: SpokenKind
   ) -> Verdict {
-    switch mode {
-    case .quiet:
-      return .silent
-    case .iTalk:
-      if kind != .step { return .silent }
-    case .weTalk:
-      break
-    }
+    if !readAloud { return .silent }
     if kind == .trustedAdult && !headphonesConnected { return .silent }
     if headphonesOnly && !headphonesConnected { return .needsHeadphones }
     return .speak

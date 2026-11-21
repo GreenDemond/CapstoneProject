@@ -160,9 +160,11 @@ import Testing
 
   @Test func voiceSettingsAreSavedAndUsedAtOnce() {
     let a = app()
-    #expect(a.voiceMode == .quiet)
+    #expect(!a.readAloudOn)
+    #expect(!a.talkOn)
     #expect(a.speaker.speak("Hi.", kind: .step) == .silent)
-    a.me.setVoiceMode(.weTalk)
+    a.me.setReadAloud(true)
+    a.me.setTalk(true)
     a.me.setHeadphonesOnly(false)
     a.me.setVoice("voice-1")
     a.me.setSpeechRate(0.3)
@@ -170,13 +172,15 @@ import Testing
     #expect(output.lastVoiceId == "voice-1")
     #expect(output.lastRate == 0.3)
     let again = app()
-    #expect(again.settings.voiceMode == .weTalk)
+    #expect(again.settings.readAloud)
+    #expect(again.settings.talk)
     #expect(again.settings.speechRate == 0.3)
   }
 
   @Test func voiceStartsOffAndHeadphonesOnlyStartsOn() {
     let a = app()
-    #expect(a.settings.voiceMode == .quiet)
+    #expect(!a.settings.readAloud)
+    #expect(!a.settings.talk)
     #expect(a.settings.headphonesOnly)
   }
 
@@ -212,7 +216,7 @@ import Testing
     a.planner.start()
     a.me.addNote("a note")
     a.me.setGoal(.today, "A goal")
-    a.me.setVoiceMode(.iTalk)
+    a.me.setTalk(true)
     a.park("a thought")
     #expect(!store.fileNames.isEmpty)
 

@@ -112,7 +112,7 @@ struct WorkView: View {
 
   @ViewBuilder
   private func readButton(_ step: Step) -> some View {
-    if model.voiceMode != .quiet {
+    if model.readAloudOn {
       VStack(alignment: .leading, spacing: Theme.Space.tiny) {
         Button {
           if model.speaker.isSpeaking {

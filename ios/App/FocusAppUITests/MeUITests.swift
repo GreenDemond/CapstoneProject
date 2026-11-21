@@ -31,10 +31,10 @@ final class MeUITests: XCTestCase {
     XCTAssertFalse(app.otherElements["note-row"].exists)
   }
 
-  /// A changed setting is used: turning on I talk shows the microphone on Today.
+  /// A changed setting is used: turning on Talk shows the microphone on Today.
   func testChangingVoiceIsUsed() {
     let app = launch()
-    app.buttons["I talk"].tap()
+    app.switches["voice-talk"].tap()
     app.tabBars.buttons["Today"].tap()
     XCTAssertTrue(app.buttons["mic-button"].waitForExistence(timeout: 5))
   }

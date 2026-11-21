@@ -122,7 +122,8 @@ public final class MeModel {
 
   // MARK: Voice
 
-  public func setVoiceMode(_ mode: VoiceMode) { change { $0.voiceMode = mode } }
+  public func setReadAloud(_ on: Bool) { change { $0.readAloud = on } }
+  public func setTalk(_ on: Bool) { change { $0.talk = on } }
   public func setHeadphonesOnly(_ on: Bool) { change { $0.headphonesOnly = on } }
   public func setVoice(_ id: String?) { change { $0.voiceId = id } }
   public func setSpeechRate(_ rate: Double) { change { $0.speechRate = rate } }

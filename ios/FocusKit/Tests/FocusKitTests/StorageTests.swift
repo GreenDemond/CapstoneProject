@@ -221,7 +221,68 @@ import Testing
     let loaded = try #require(store.load(Settings.self).value)
     #expect(loaded.speechRate == 1)
     #expect(loaded.guides["all"]?.count == limits.guide)
-    #expect(Settings().voiceMode == .quiet)
+    #expect(!Settings().readAloud)
+    #expect(!Settings().talk)
+  }
+
+  private func loadSettings(json: String) throws -> Settings {
+    let store = MemoryStore(limits: limits)
+    try store.rawWrite(Settings.fileName, Data(json.utf8))
+    return try #require(store.load(Settings.self).value)
+  }
+
+  private func oldSettings(_ voice: String?) -> String {
+    let mode = voice.map { "\"voiceMode\":\"\($0)\"," } ?? ""
+    return """
+      {"version":1,"value":{\(mode)"headphonesOnly":false,"voiceId":"v9","speechRate":0.3,\
+      "guides":{"all":"Be brief."},"lengths":{},"howILikeToWork":{"sound":"quiet"}}}
+      """
+  }
+
+  @Test func oldQuietSettingsLoadAsBothOff() throws {
+    let loaded = try loadSettings(json: oldSettings("quiet"))
+    #expect(!loaded.readAloud && !loaded.talk)
+  }
+
+  @Test func oldITalkSettingsLoadAsTalkOnly() throws {
+    let loaded = try loadSettings(json: oldSettings("iTalk"))
+    #expect(!loaded.readAloud && loaded.talk)
+  }
+
+  @Test func oldWeTalkSettingsLoadAsBothOn() throws {
+    let loaded = try loadSettings(json: oldSettings("weTalk"))
+    #expect(loaded.readAloud && loaded.talk)
+  }
+
+  @Test func oldSettingsKeepEverythingElse() throws {
+    let loaded = try loadSettings(json: oldSettings("weTalk"))
+    #expect(!loaded.headphonesOnly)
+    #expect(loaded.voiceId == "v9")
+    #expect(loaded.speechRate == 0.3)
+    #expect(loaded.guides["all"] == "Be brief.")
+    #expect(loaded.howILikeToWork["sound"] == "quiet")
+  }
+
+  @Test func unknownOrMissingOldVoiceLoadsAsBothOffWithoutLosingData() throws {
+    for voice in ["shouting", "", "WETALK"] as [String?] + [nil] {
+      let loaded = try loadSettings(json: oldSettings(voice))
+      #expect(!loaded.readAloud && !loaded.talk)
+      #expect(loaded.voiceId == "v9")
+    }
+    let wrongType = try loadSettings(
+      json: #"{"version":1,"value":{"voiceMode":7,"headphonesOnly":true,"speechRate":0.5}}"#)
+    #expect(!wrongType.readAloud && !wrongType.talk)
+  }
+
+  @Test func newSwitchesWinAndAreSavedWithoutTheOldWord() throws {
+    let both = try loadSettings(
+      json: #"{"version":1,"value":{"voiceMode":"quiet","readAloud":true,"talk":false}}"#)
+    #expect(both.readAloud && !both.talk)
+    let store = MemoryStore(limits: limits)
+    try store.save(Settings(readAloud: true, talk: true))
+    let raw = try #require(store.rawRead(Settings.fileName))
+    #expect(!String(decoding: raw, as: UTF8.self).contains("voiceMode"))
+    #expect(try #require(store.load(Settings.self).value) == Settings(readAloud: true, talk: true))
   }
 
   @Test func blankNotesParkedThoughtsAndRecallAnswersAreDropped() throws {
@@ -314,7 +375,7 @@ struct SampleValues {
 
   var settings: Settings {
     Settings(
-      voiceMode: .weTalk, headphonesOnly: false, voiceId: "v1", speechRate: 0.4,
+      readAloud: true, talk: true, headphonesOnly: false, voiceId: "v1", speechRate: 0.4,
       guides: ["all": "Be brief."], lengths: ["essay": "long"], howILikeToWork: ["sound": "quiet"])
   }
 

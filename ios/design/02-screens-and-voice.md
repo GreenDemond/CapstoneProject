@@ -23,20 +23,28 @@ Rules for every screen:
 
 ## 2.2 Voice: how talking works
 
-**Three settings, chosen by the student under Me, changeable at any time:**
+**Two independent switches under Me, both off at first, changeable at any time (`DECISIONS.md` D7):**
 
-| Setting | The student | The app |
-|---|---|---|
-| **Quiet** (the default) | taps and types | shows text. No sound at all (`DECISIONS.md` P10) |
-| **I talk** | holds the microphone button and speaks; lets go to send | shows text |
-| **We talk** | speaks | shows text **and** says it aloud |
+| Switch | What it does |
+|---|---|
+| **Read aloud** | The app speaks: it reads steps and the AI's replies out loud. |
+| **Talk** | The student speaks into the microphone. Speech becomes text on the phone. Nothing is recorded. |
+
+| Read aloud | Talk | The student | The app |
+|---|---|---|---|
+| off | off (the default) | taps and types | shows text. No sound at all (`DECISIONS.md` P10), no microphone button |
+| off | on | holds the microphone button and speaks | shows text |
+| on | off | taps and types | shows text **and** says it aloud |
+| on | on | speaks | shows text **and** says it aloud; letting go sends in Talk it through |
+
+Older saved settings carry over: Quiet becomes both off, "I talk" becomes Talk only, "We talk" becomes both on. An unreadable value becomes both off.
 
 Details that matter:
 
 - **The microphone is on only while the student holds the button** (or taps once to start and once to stop, for students who find holding hard). A clear on-screen sign shows when it is listening. There is no wake word and no background listening.
-- **Words appear as they are spoken,** in the same box typing would use, and the student can fix them before sending. Nothing is sent until they let go and tap Send, except in We talk, where letting go sends.
+- **Words appear as they are spoken,** in the same box typing would use, and the student can fix them before sending. Nothing is sent until they let go and tap Send, except in Talk it through with both switches on, where letting go sends.
 - **Speech is turned into text on the phone.** The recording is never saved and never leaves the device. Only the text is kept, exactly as typed text would be.
-- **"Only speak through headphones"** is on by default in We talk. With no headphones connected the app shows text and stays silent, so it cannot speak up in a classroom or library. The student can turn this off.
+- **"Only speak through headphones"** is on by default and applies whenever Read aloud is on. With no headphones connected the app shows text and stays silent, so it cannot speak up in a classroom or library. The student can turn this off.
 - **Stop is always one tap.** Tapping anywhere on a spoken reply stops the voice at once.
 - **The first time** the student taps the microphone, the app explains in one sentence what the microphone is for, then iOS asks permission. If they say no, typing works and the microphone button shows a quiet "Turn on in Settings" line. The app never asks again by itself.
 - **The phone's own dictation key** on the keyboard keeps working in every text box, with no code at all. It is the fallback if the app's own speech feature is unavailable in the student's language.
@@ -48,9 +56,9 @@ Details that matter:
 |---|---|---|
 | Saying the assignment | Yes | Reads the app's one question |
 | Saying each step when planning | Yes | Reads steps back on request |
-| Work screen check-in | **No.** The five buttons stay one silent tap. This is the form the research tested, and a spoken check-in cannot be used in class | A "Read this step" button, any setting except Quiet |
+| Work screen check-in | **No.** The five buttons stay one silent tap. This is the form the research tested, and a spoken check-in cannot be used in class | A "Read this step" button, shown only when Read aloud is on |
 | Stuck | Yes: "say what you tried" | Reads the hint |
-| Talk it through | Yes | Yes, in We talk |
+| Talk it through | Yes | Yes, when Read aloud is on |
 | Recall question | Yes | Reads the question |
 | Goals and notes under Me | Yes | No |
 
@@ -141,7 +149,7 @@ Tapping Stuck never adds work, resets progress, or changes anything for the wors
 - The screen is the conversation. The message box and microphone stay at the bottom, above the keyboard.
 - One line at the top, always visible: "This AI runs on this iPhone. Your messages don't leave it. It can still be wrong." (The wording changes if a web helper is in use; see `03-ai-search-privacy.md`.)
 - The app's opening line is fixed text, not from the AI: "What are you working on, and what's the first thing you're not sure about?"
-- Replies appear as they are written. In We talk they are spoken sentence by sentence once each sentence is complete and has passed the safety check.
+- Replies appear as they are written. When Read aloud is on they are spoken sentence by sentence once each sentence is complete and has passed the safety check.
 - Under the latest AI message, when it contains a list: **Use these as my steps**, which opens the editor (section 2.5), never the work screen.
 - **New chat** and **My chats** (the 10 most recent, delete one or all) in the top corner.
 - **Look it up** is a small button by the message box. When the AI looks something up itself, the chat shows "Looking up: ___" and the sources appear as links under the reply.
@@ -153,7 +161,7 @@ Tapping Stuck never adds work, resets progress, or changes anything for the wors
 - **What got in the way?**: private notes, newest first. Fixed line beneath: "If something serious is getting in the way, talk to an adult you trust."
 - **How I like to work**: four taps and a first-guess card, saved this time, labelled as a guess.
 - **How the AI talks**: one guide in the student's own words, and reply length (short, medium, long).
-- **Voice**: Quiet, I talk, We talk; headphones only; which voice; speed.
+- **Voice**: Read aloud switch, Talk switch; headphones only; which voice; speed.
 - **About and privacy**: what is stored, what leaves the phone and when, **Delete everything on this iPhone** (second tap to confirm).
 
 ## 2.11 The awkward cases

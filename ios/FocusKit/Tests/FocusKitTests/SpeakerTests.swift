@@ -11,15 +11,15 @@ import Testing
 
   init() {
     speaker = SpeakerModel(output: output, headphones: headphones)
-    speaker.settings = { Settings(voiceMode: .weTalk, headphonesOnly: true) }
+    speaker.settings = { Settings(readAloud: true, talk: true, headphonesOnly: true) }
   }
 
   private func use(_ settings: Settings) {
     speaker.settings = { settings }
   }
 
-  @Test func inQuietNothingCanCallTheSpeaker() {
-    use(Settings(voiceMode: .quiet, headphonesOnly: false))
+  @Test func withReadAloudOffNothingCanCallTheSpeaker() {
+    use(Settings(readAloud: false, talk: false, headphonesOnly: false))
     for kind in [SpokenKind.step, .reply, .trustedAdult] {
       #expect(speaker.speak("Hello there.", kind: kind) == .silent)
     }
@@ -27,8 +27,8 @@ import Testing
     #expect(!speaker.isSpeaking)
   }
 
-  @Test func quietEvenWithHeadphonesIn() {
-    use(Settings(voiceMode: .quiet, headphonesOnly: true))
+  @Test func readAloudOffEvenWithHeadphonesIn() {
+    use(Settings(readAloud: false, talk: false, headphonesOnly: true))
     #expect(speaker.speak("Hello.", kind: .step) == .silent)
     #expect(output.spoken.isEmpty)
   }
@@ -44,20 +44,28 @@ import Testing
 
   @Test func headphonesOnlyOffSpeaksThroughThePhone() {
     headphones.set(connected: false)
-    use(Settings(voiceMode: .weTalk, headphonesOnly: false))
+    use(Settings(readAloud: true, talk: true, headphonesOnly: false))
     #expect(speaker.speak("Hello.", kind: .reply) == .speak)
     #expect(output.spoken == ["Hello."])
   }
 
-  @Test func iTalkSpeaksOnlyWhatTheStudentAskedToHear() {
-    use(Settings(voiceMode: .iTalk, headphonesOnly: false))
-    #expect(speaker.speak("Reply", kind: .reply) == .silent)
+  @Test func talkAloneNeverSpeaks() {
+    use(Settings(readAloud: false, talk: true, headphonesOnly: false))
+    for kind in [SpokenKind.step, .reply, .trustedAdult] {
+      #expect(speaker.speak("Hello.", kind: kind) == .silent)
+    }
+    #expect(output.spoken.isEmpty)
+  }
+
+  @Test func readAloudAloneSpeaksWithoutTalk() {
+    use(Settings(readAloud: true, talk: false, headphonesOnly: false))
+    #expect(speaker.speak("Reply", kind: .reply) == .speak)
     #expect(speaker.speak("Read this step", kind: .step) == .speak)
-    #expect(output.spoken == ["Read this step"])
+    #expect(output.spoken == ["Reply", "Read this step"])
   }
 
   @Test func theTrustedAdultLineIsSpokenOnlyWithHeadphonesIn() {
-    use(Settings(voiceMode: .weTalk, headphonesOnly: false))
+    use(Settings(readAloud: true, talk: true, headphonesOnly: false))
     headphones.set(connected: false)
     #expect(speaker.speak("Please talk to an adult.", kind: .trustedAdult) == .silent)
     #expect(output.spoken.isEmpty)
@@ -67,7 +75,9 @@ import Testing
   }
 
   @Test func theVoiceAndSpeedFromSettingsAreUsed() {
-    use(Settings(voiceMode: .weTalk, headphonesOnly: false, voiceId: "voice-1", speechRate: 0.4))
+    use(
+      Settings(
+        readAloud: true, talk: true, headphonesOnly: false, voiceId: "voice-1", speechRate: 0.4))
     speaker.speak("Hi.", kind: .reply)
     #expect(output.lastVoiceId == "voice-1")
     #expect(output.lastRate == 0.4)
@@ -120,7 +130,7 @@ import Testing
     let app = AppModel(
       content: content, store: MemoryStore(limits: content.limits),
       services: Services(speechInput: fake, speechOutput: output, headphones: headphones))
-    app.updateSettings { $0.voiceMode = .weTalk }
+    app.updateSettings { $0.readAloud = true }
     app.speaker.speak("Talking.", kind: .reply)
     await app.dictation.pressDown(existing: "")
     #expect(!app.speaker.isSpeaking)
