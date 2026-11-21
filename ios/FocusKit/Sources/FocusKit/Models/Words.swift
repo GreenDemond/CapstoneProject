@@ -110,7 +110,17 @@ public enum Words {
   public static let tabTalk = "Talk"
   public static let tabPlan = "Plan"
   public static let tabMe = "Me"
-  public static let planEmpty = "No steps yet. Start on Today."
+  public static let planEmpty = "No steps yet."
+  public static let planMakeSteps = "Make some steps"
+
+  // Ways out
+  public static let backToToday = "Back to Today"
+  public static let backToMySteps = "Back to my steps"
+  public static let back = "Back"
+  public static let tryAgain = "Try again"
+  public static let replaceTitle = "You already have steps here."
+  public static let replaceKeep = "Keep my steps"
+  public static let replaceGo = "Make new ones"
 }
 
 extension Words {

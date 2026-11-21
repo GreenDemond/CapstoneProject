@@ -3,6 +3,7 @@ import SwiftUI
 
 /// The editor: both ways of making steps end here. Suggested steps never skip it.
 struct EditorView: View {
+  let model: AppModel
   let planner: PlannerModel
   @State private var reordering = false
 
@@ -49,7 +50,18 @@ struct EditorView: View {
     .scrollContentBackground(.hidden)
     .environment(\.editMode, .constant(reordering ? .active : .inactive))
     .navigationTitle(Words.editorTitle)
+    .navigationBarBackButtonHidden(true)
     .toolbar {
+      ToolbarItem(placement: .topBarLeading) {
+        Button {
+          planner.backToAssignment()
+        } label: {
+          Label(Words.back, systemImage: "chevron.left")
+        }
+        .accessibilityLabel(Words.back)
+        .accessibilityHint("Your steps are kept.")
+        .accessibilityIdentifier("editor-back")
+      }
       ToolbarItem(placement: .topBarTrailing) {
         Button(reordering ? "Done moving" : "Move steps") { reordering.toggle() }
           .accessibilityIdentifier("move-steps")
@@ -67,10 +79,16 @@ struct EditorView: View {
           .buttonStyle(MainButtonStyle())
           .disabled(!planner.canStart)
           .accessibilityIdentifier("start-steps")
+        if model.canLeavePlanning {
+          Button(Words.backToToday) { model.cancelPlanning() }
+            .buttonStyle(LinkButtonStyle())
+            .accessibilityIdentifier("cancel-planning")
+        }
       }
       .padding(Theme.Space.medium)
       .background(Theme.Palette.sand)
     }
+    .accessibilityElement(children: .contain)
     .accessibilityIdentifier("editor-screen")
   }
 }

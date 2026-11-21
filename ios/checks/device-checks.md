@@ -83,3 +83,14 @@ You need Apple Intelligence switched on (Settings, Apple Intelligence & Siri). W
 51. Under Voice, turn on Talk. A microphone should appear next to the assignment box. Turn Talk off: it should disappear. With Read aloud off too, nothing should make a sound.
 52. Under Voice, turn on Read aloud, turn off "Only speak through headphones", and tap Read this step on a step. You should hear it. Move the speed slider and try again.
 53. Open About and privacy. Read it: it should say your voice is never recorded, the AI runs on the iPhone, and only Look it up sends words to Wikipedia. Tap "Delete everything on this iPhone". Nothing should be deleted yet. Tap "Keep my things". Tap Delete again and then the red confirm button: you should be back at the first screen, and everything (steps, goals, notes, chats) should be gone.
+
+## Ways back and ways out (navigation review, 2026-11-21)
+
+54. Start a step. Tap **Back to Today** at the top. You should see Today with the same step waiting. Tap it: you should be on the same step, not the first one.
+55. On a step, tap **Stuck**. Tap **Back**. You should be back on the same step.
+56. On Today, tap **New assignment**, type something, then tap **Back to Today**. Your old steps should still be there.
+57. Make steps with **Suggest some to start**. In the editor tap **Back**, then go forward again. The steps should still be there.
+58. With steps already made, go to New assignment and tap **Suggest some to start** again. You should be asked **Keep my steps** or **Make new ones**. Tap Keep my steps: nothing should change.
+59. On a step tap Stuck, then Talk it through. Tap **Use these as my steps**. You should land in the editor, in front, not behind the step.
+60. Turn Apple Intelligence off in Settings and open Talk. You should see a calm line, **Try again**, hints, and Look it up. Nothing should be stuck.
+61. Turn on Airplane Mode, then Look it up. You should see a calm line and **Try again**. Turn Airplane Mode off and tap Try again: results should appear.

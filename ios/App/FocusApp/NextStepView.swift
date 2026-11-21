@@ -48,6 +48,7 @@ struct NextStepView: View {
       }
     }
     .padding(Theme.Space.large)
+    .accessibilityElement(children: .contain)
     .accessibilityIdentifier("today-screen")
   }
 }
@@ -74,16 +75,22 @@ struct PlanListView: View {
         }
         .scrollContentBackground(.hidden)
       } else {
-        Text(Words.planEmpty)
-          .font(Theme.Typography.body)
-          .foregroundStyle(Theme.Palette.quiet)
-          .padding(Theme.Space.large)
-          .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        VStack(alignment: .leading, spacing: Theme.Space.medium) {
+          Text(Words.planEmpty)
+            .font(Theme.Typography.body)
+            .foregroundStyle(Theme.Palette.quiet)
+          Button(Words.planMakeSteps) { model.goToPlanning() }
+            .buttonStyle(MainButtonStyle())
+            .accessibilityIdentifier("plan-make-steps")
+        }
+        .padding(Theme.Space.large)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
       }
     }
     .navigationTitle(Words.allStepsTitle)
     .navigationBarTitleDisplayMode(.inline)
     .pageBackground()
+    .accessibilityElement(children: .contain)
     .accessibilityIdentifier("plan-list")
   }
 }

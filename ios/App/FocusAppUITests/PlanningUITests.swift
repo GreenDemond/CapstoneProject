@@ -1,6 +1,5 @@
 import XCTest
 
-/// Written but not run on this computer (no iOS simulator).
 @MainActor
 final class PlanningUITests: XCTestCase {
   override func setUp() {
@@ -9,10 +8,10 @@ final class PlanningUITests: XCTestCase {
 
   func launchPastWelcome() -> XCUIApplication {
     let app = XCUIApplication()
-    app.launchArguments = ["-focus-fresh-data"]
+    app.launchArguments = ["-focus-fresh-data", "-focus-no-ai"]
     app.launch()
     app.buttons["welcome-start"].tap()
-    XCTAssertTrue(app.otherElements["assignment-screen"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.element("assignment-screen").waitForExistence(timeout: 5))
     return app
   }
 
@@ -27,10 +26,10 @@ final class PlanningUITests: XCTestCase {
     let app = launchPastWelcome()
     typeAssignment(app, "Five paragraphs on courage")
     app.buttons["suggest-steps"].tap()
-    XCTAssertTrue(app.otherElements["editor-screen"].waitForExistence(timeout: 5))
-    XCTAssertFalse(app.otherElements["work-screen"].exists)
+    XCTAssertTrue(app.element("editor-screen").waitForExistence(timeout: 5))
+    XCTAssertFalse(app.element("work-screen").exists)
     app.buttons["start-steps"].tap()
-    XCTAssertTrue(app.otherElements["work-screen"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.element("work-screen").waitForExistence(timeout: 5))
   }
 
   /// The same by typing three steps.
@@ -38,7 +37,7 @@ final class PlanningUITests: XCTestCase {
     let app = launchPastWelcome()
     typeAssignment(app, "Read chapter three")
     app.buttons["say-steps"].tap()
-    XCTAssertTrue(app.otherElements["saying-screen"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.element("saying-screen").waitForExistence(timeout: 5))
     for words in ["Open the book", "Read page one", "Write one line"] {
       let field = app.textFields["said-step"]
       field.tap()
@@ -46,9 +45,9 @@ final class PlanningUITests: XCTestCase {
       app.buttons["add-said"].tap()
     }
     app.buttons["thats-all"].tap()
-    XCTAssertTrue(app.otherElements["editor-screen"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.element("editor-screen").waitForExistence(timeout: 5))
     app.buttons["start-steps"].tap()
-    XCTAssertTrue(app.otherElements["work-screen"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.element("work-screen").waitForExistence(timeout: 5))
   }
 
   /// Nothing entered: a calm line, nothing else happens.
@@ -56,6 +55,6 @@ final class PlanningUITests: XCTestCase {
     let app = launchPastWelcome()
     app.buttons["suggest-steps"].tap()
     XCTAssertTrue(app.staticTexts["empty-note"].waitForExistence(timeout: 5))
-    XCTAssertTrue(app.otherElements["assignment-screen"].exists)
+    XCTAssertTrue(app.element("assignment-screen").exists)
   }
 }

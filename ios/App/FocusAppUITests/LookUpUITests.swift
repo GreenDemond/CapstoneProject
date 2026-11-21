@@ -1,6 +1,6 @@
 import XCTest
 
-/// Written but not run on this computer (no iOS simulator). They never depend on the network.
+/// They never depend on the network.
 @MainActor
 final class LookUpUITests: XCTestCase {
   override func setUp() {
@@ -9,7 +9,7 @@ final class LookUpUITests: XCTestCase {
 
   func testPrivacyLineIsShownBeforeTheFirstSearchAndEmptyWordsGiveACalmLine() {
     let app = XCUIApplication()
-    app.launchArguments = ["-focus-fresh-data"]
+    app.launchArguments = ["-focus-fresh-data", "-focus-no-ai"]
     app.launch()
     app.buttons["welcome-start"].tap()
     app.tabBars.buttons["Talk"].tap()

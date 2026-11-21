@@ -19,6 +19,12 @@ struct StuckView: View {
       LadderBody(model: model, ladder: model.ladder(for: target.step), dismiss: { dismiss() })
         .navigationTitle(Words.stuckTitle)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+          ToolbarItem(placement: .topBarLeading) {
+            Button(Words.backToStep) { dismiss() }
+              .accessibilityIdentifier("stuck-close")
+          }
+        }
     }
     .presentationDetents([.large])
   }
@@ -27,7 +33,8 @@ struct StuckView: View {
 struct LadderBody: View {
   let model: AppModel
   let ladder: LadderModel
-  let dismiss: () -> Void
+  /// Closes the whole Stuck sheet. Nil when there is no step to go back to (the Talk tab).
+  let dismiss: (() -> Void)?
   @State private var copied = false
 
   var body: some View {
@@ -59,14 +66,17 @@ struct LadderBody: View {
 
         if ladder.canAskPerson { askPerson }
 
-        Button(Words.backToStep, action: dismiss)
-          .buttonStyle(LinkButtonStyle())
-          .accessibilityIdentifier("back-to-step")
+        if let dismiss {
+          Button(Words.backToStep, action: dismiss)
+            .buttonStyle(LinkButtonStyle())
+            .accessibilityIdentifier("back-to-step")
+        }
       }
       .padding(Theme.Space.large)
     }
     .pageBackground()
     .onAppear { if ladder.hintsShown.isEmpty { ladder.nextHint() } }
+    .accessibilityElement(children: .contain)
     .accessibilityIdentifier("stuck-screen")
   }
 
@@ -125,7 +135,7 @@ struct AnyButtonStyle: ButtonStyle {
 struct LookItUpRung: View {
   let model: AppModel
   let ladder: LadderModel
-  let dismiss: () -> Void
+  let dismiss: (() -> Void)?
 
   var body: some View {
     if LookUpModel.isOn {

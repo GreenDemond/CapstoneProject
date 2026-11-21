@@ -38,6 +38,11 @@ struct LookUpView: View {
             .buttonStyle(MainButtonStyle())
             .accessibilityIdentifier("lookup-search")
           stateView
+          if lookUp.canTryAgain {
+            Button(Words.tryAgain) { lookUp.search() }
+              .buttonStyle(QuietButtonStyle())
+              .accessibilityIdentifier("lookup-retry")
+          }
         }
         if let backToStep {
           Button(Words.backToStep, action: backToStep)
@@ -59,6 +64,7 @@ struct LookUpView: View {
         if let backToStep { backToStep() }
       }
     }
+    .accessibilityElement(children: .contain)
     .accessibilityIdentifier("lookup-screen")
   }
 

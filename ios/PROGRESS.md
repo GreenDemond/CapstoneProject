@@ -12,7 +12,8 @@ The memory between sessions. Rewrite it each session; do not let it grow into a 
 - T12 Talk: chat with Stop, ten saved chats with two-tap delete, Talk it through from Stuck, Use these as my steps (into the editor), calm no-AI state with hints and Look it up. A message that triggers the trusted-adult line is never saved.
 - T13 step coach: AI steps open in the editor with a label and fall back to starter steps; Give me an idea (one step); works with no AI.
 - T15 Me: goals, private notes, How I like to work with a first-guess card, AI guide and length, voice settings, About and privacy, Delete everything (second tap, leaves no file).
-- 264 FocusKit tests pass. `checks/check.sh` compile-checks the app and its UI tests for a generic iOS device (exit 3 from the agent sandbox: no reachable simulator).
+- 278 FocusKit tests pass. **UI tests: 27 of 27 pass** on the iOS 26.5 iPhone 15 Pro Max simulator (2026-11-21), including 9 navigation tests.
+- **Navigation (2026-11-21):** every screen has a way back and a way to Today; Back to Today on the work screen keeps the step; replacing steps asks first; Try again on Talk, Look it up and the microphone. See `design/slices/NAV-navigation-review.md` and device steps 54 to 61.
 - Info.plist usage strings for the microphone and speech recognition are set in the project's build settings.
 
 ## In progress
@@ -21,7 +22,7 @@ Nothing.
 
 ## Broken or worrying
 
-- **UI tests: 3 of 18 passed, 15 fail and are undiagnosed (FEAT-002 pending).** An iOS 26.5 simulator exists on the owner's Mac and works from a normal terminal, but not from the agent sandbox (CoreSimulatorService refuses the connection), so agents there can only compile the app and UI tests (`checks/check.sh` step 3). Run `checks/check.sh` in a normal terminal, diagnose the 15 failures, then work through `checks/device-checks.md`. The Voice UI test (`MeUITests.testChangingVoiceIsUsed`) was updated for the two switches and compiled, but not run.
+- **The simulator is reachable from the agent shell only some of the time.** When CoreSimulatorService refuses the connection, `checks/check.sh` can only compile the app and its UI tests (exit 3). Re-run when it is reachable.
 - **Voice is now two switches (D7, 2026-11-20): Read aloud and Talk,** both off at first. Old saved settings load: quiet = both off, iTalk = Talk only, weTalk = both on, unknown or missing = both off (tests in `StorageTests`). Talk it through sends on letting go only when both are on.
 - **The AI is "built, not cleared".** Only a fake model ran. The real on-device model, the real microphone and speech, the real voice, headphones and silent switch were never run. The answer-giving checks (T14, `design/03` 3.4) need Ben's phone and are still owed. `AnswerGuard` and `ProcessStep` are heuristics, not the check.
 - **D6 is not answered.** T09 to T13 and T15 were built on the recommendation (on-device AI only, no keys, no cloud model). If the answer differs, `Services.none` switches the parts off.
@@ -33,7 +34,7 @@ Nothing.
 - T16 was a self-review read-through only (no simulator, no Advisor or Checker, same model as Builder). It found no code defects. Still owed: simulator screen walk, `design/02` 2.11 row tests, `T16-strings.md`.
 - Shared starter step "Check what you missed" uses a word on the "never shame" list. Left as is; see `design/slices/T06`.
 - Ben's phone is on iOS 26.2; whether Apple Intelligence is on is not yet known. The iOS 26 deprecation-style warnings for `GenerationError` in the iOS 27 SDK are expected (the minimum is iOS 26.0).
-- The app is called **Ben's Steps** (name under the icon and the App Store Connect name, for now; Ben may rename it). Bundle identifier `com.craighagan.benssteps`, signing team ANA76MNRSN, automatic signing. App icon: a staircase (placeholder until Ben designs one). Build 0.1 (3) is archived for TestFlight; the parent uploads it from Xcode's Organizer. An earlier build under the old id `com.craighagan.focusapp` ran on the parent's iPhone on 2026-11-21 and can be deleted from that phone. The app's data folder is excluded from phone backup (the recommendation; the parent has not confirmed).
+- The app is called **Ben's Steps** (name under the icon and the App Store Connect name, for now; Ben may rename it). Bundle identifier `com.craighagan.benssteps`, signing team ANA76MNRSN, automatic signing. App icon: a staircase (placeholder until Ben designs one). Build 0.1 (4) is archived for TestFlight; the parent uploads it from Xcode's Organizer. An earlier build under the old id `com.craighagan.focusapp` ran on the parent's iPhone on 2026-11-21 and can be deleted from that phone. The app's data folder is excluded from phone backup (the recommendation; the parent has not confirmed).
 - Inside a sandboxed agent shell, Swift cannot start its macro plug-ins and SwiftPM cannot write its caches. `check.sh` detects this and adds the needed flags. Normal Macs need none.
 - Not done from the screens note: voice in on the editor rows, the Stuck boxes and the recall question (only the assignment, "say my steps", Talk and notes have the microphone); the AI looking things up (D8 row 2); the "test the guess" experiments.
 
@@ -45,8 +46,8 @@ See `DECISIONS.md`, "Waiting on". Open: D6, D8 confirmation, the trusted-adult p
 
 ## Next
 
-1. In a normal terminal on the owner's Mac: `checks/check.sh`; fix the 15 failing UI tests (FEAT-002); look at every screen at the largest text size, in dark mode, on the smallest iPhone.
-2. T17a: the parent builds to Ben's phone (numbered steps are to be written for the parent; no account details are ever handled by an agent). Ben works through `checks/device-checks.md`.
+1. The parent uploads build 4 to TestFlight and invites Ben. Ben works through `checks/device-checks.md`, including steps 54 to 61 (navigation). Look at every screen at the largest text size, in dark mode, on the smallest iPhone.
+2. Give `WikipediaLookUp.userAgent` a real contact before anyone but Ben uses the app.
 3. T14: the eight answer-giving attempts against Talk and the step coach on the phone, recorded word for word; Advisor gate 4.
 4. Advisor gate 2 on T02 to T15, and a real T16 pass (simulator walk, `T16-strings.md`, Advisor verdict on the strings).
 

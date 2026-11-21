@@ -1,6 +1,5 @@
 import XCTest
 
-/// Written but not run on this computer (no iOS simulator).
 @MainActor
 final class WorkUITests: XCTestCase {
   override func setUp() {
@@ -9,7 +8,7 @@ final class WorkUITests: XCTestCase {
 
   func launchWithSteps(_ steps: [String], kind: String? = nil) -> XCUIApplication {
     let app = XCUIApplication()
-    app.launchArguments = ["-focus-fresh-data"]
+    app.launchArguments = ["-focus-fresh-data", "-focus-no-ai"]
     app.launch()
     app.buttons["welcome-start"].tap()
     let box = app.textViews["assignment-text"]
@@ -25,7 +24,7 @@ final class WorkUITests: XCTestCase {
     }
     app.buttons["thats-all"].tap()
     app.buttons["start-steps"].tap()
-    XCTAssertTrue(app.otherElements["work-screen"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.element("work-screen").waitForExistence(timeout: 5))
     return app
   }
 
@@ -43,7 +42,7 @@ final class WorkUITests: XCTestCase {
     tap(app, "choice-still")
     XCTAssertTrue(app.staticTexts["work-step"].label == "Step A")
     tap(app, "choice-stuck")
-    XCTAssertTrue(app.otherElements["stuck-screen"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.element("stuck-screen").waitForExistence(timeout: 5))
     tap(app, "back-to-step")
     // Drifted: the first tap opens the box, the second splits.
     tap(app, "choice-drifted")
@@ -53,7 +52,7 @@ final class WorkUITests: XCTestCase {
     tap(app, "drifted-confirm")
     XCTAssertEqual(app.staticTexts["work-step"].label, "A small piece")
     tap(app, "choice-later")
-    XCTAssertTrue(app.otherElements["today-screen"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.element("today-screen").waitForExistence(timeout: 5))
     tap(app, "start-this-step")
     for _ in 0..<3 { tap(app, "choice-done") }
     XCTAssertTrue(app.staticTexts["today-done"].waitForExistence(timeout: 5))

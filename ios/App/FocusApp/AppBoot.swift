@@ -6,6 +6,8 @@ import Foundation
 enum AppBoot {
   /// Launch arguments used only by the UI tests.
   static let freshArgument = "-focus-fresh-data"
+  /// A phone with no AI, no microphone and no voice, whatever the simulator has.
+  static let noAIArgument = "-focus-no-ai"
   static let fakeAIArgument = "-focus-fake-ai"
   static let fakeAIDistressArgument = "-focus-fake-ai-distress"
 
@@ -16,6 +18,9 @@ enum AppBoot {
     if let fake = fakeServices() {
       return AppModel(content: content, store: store, services: fake)
     }
+    if CommandLine.arguments.contains(noAIArgument) {
+      return AppModel(content: content, store: store, services: .none)
+    }
     let services = Services(
       speechInput: AppleSpeechInput(), speechOutput: AppleSpeechOutput(),
       headphones: AppleHeadphones(), languageModel: AppleLanguageModel())
@@ -25,7 +30,9 @@ enum AppBoot {
   /// Used only by the UI tests: a scripted AI, so the chat can be driven without Apple's model.
   private static func fakeServices() -> Services? {
     let arguments = CommandLine.arguments
-    guard arguments.contains(fakeAIArgument) else { return nil }
+    guard arguments.contains(fakeAIArgument) || arguments.contains(fakeAIDistressArgument) else {
+      return nil
+    }
     let model = FakeLanguageModel()
     if arguments.contains(fakeAIDistressArgument) {
       model.enqueue(.init(["TRUSTED_ADULT"]))

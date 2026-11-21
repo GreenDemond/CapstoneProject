@@ -75,6 +75,7 @@ public struct Draft: Storable {
   /// True when there is something worth bringing back after the app was closed.
   public var hasContent: Bool {
     stage != .assignment || !Text.trimmed(text).isEmpty
+      || steps.contains { !Text.trimmed($0.text).isEmpty }
   }
 
   public func limited(by limits: Content.Limits) -> Draft {

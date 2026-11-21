@@ -1,6 +1,6 @@
 import XCTest
 
-/// Written but not run on this computer (no iOS simulator). The AI is a scripted fake, chosen by
+/// The AI is a scripted fake, chosen by
 /// a launch argument, so the chat can be driven without Apple's model.
 @MainActor
 final class TalkUITests: XCTestCase {
@@ -27,8 +27,8 @@ final class TalkUITests: XCTestCase {
     app.buttons["talk-send"].tap()
     XCTAssertTrue(app.buttons["talk-use-steps"].waitForExistence(timeout: 10))
     app.buttons["talk-use-steps"].tap()
-    XCTAssertTrue(app.otherElements["editor-screen"].waitForExistence(timeout: 5))
-    XCTAssertFalse(app.otherElements["work-screen"].exists)
+    XCTAssertTrue(app.element("editor-screen").waitForExistence(timeout: 5))
+    XCTAssertFalse(app.element("work-screen").exists)
   }
 
   /// The trusted-adult line replaces the reply, and the message is not in My chats.
@@ -38,7 +38,7 @@ final class TalkUITests: XCTestCase {
     input.tap()
     input.typeText("some private words")
     app.buttons["talk-send"].tap()
-    XCTAssertTrue(app.staticTexts["talk-trusted-adult"].waitForExistence(timeout: 10))
+    XCTAssertTrue(app.element("talk-trusted-adult").waitForExistence(timeout: 10))
     XCTAssertFalse(app.staticTexts["You: some private words"].exists)
     app.buttons["talk-chats"].tap()
     XCTAssertTrue(app.staticTexts["No saved chats yet."].waitForExistence(timeout: 5))
@@ -47,7 +47,7 @@ final class TalkUITests: XCTestCase {
   /// With no AI the screen says so calmly and still offers hints and Look it up.
   func testNoAIStillOffersHintsAndLookUp() {
     let app = XCUIApplication()
-    app.launchArguments = ["-focus-fresh-data"]
+    app.launchArguments = ["-focus-fresh-data", "-focus-no-ai"]
     app.launch()
     app.buttons["welcome-start"].tap()
     app.tabBars.buttons["Talk"].tap()
@@ -58,7 +58,7 @@ final class TalkUITests: XCTestCase {
 }
 
 /// Step coach: with no AI both ways of making steps still work; with the scripted AI, steps carry
-/// the label and open in the editor. Written, not run.
+/// the label and open in the editor.
 @MainActor
 final class StepCoachUITests: XCTestCase {
   override func setUp() {
@@ -67,23 +67,23 @@ final class StepCoachUITests: XCTestCase {
 
   func testWithNoAISuggestedStepsStillOpenInTheEditor() {
     let app = XCUIApplication()
-    app.launchArguments = ["-focus-fresh-data"]
+    app.launchArguments = ["-focus-fresh-data", "-focus-no-ai"]
     app.launch()
     app.buttons["welcome-start"].tap()
     let box = app.textViews["assignment-text"]
     box.tap()
     box.typeText("Five paragraphs on courage")
     app.buttons["suggest-steps"].tap()
-    XCTAssertTrue(app.otherElements["editor-screen"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.element("editor-screen").waitForExistence(timeout: 5))
     XCTAssertTrue(app.staticTexts["starter-label"].exists)
     XCTAssertFalse(app.staticTexts["ai-label"].exists)
     app.buttons["start-steps"].tap()
-    XCTAssertTrue(app.otherElements["work-screen"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.element("work-screen").waitForExistence(timeout: 5))
   }
 
   func testGiveMeAnIdeaWorksWithNoAI() {
     let app = XCUIApplication()
-    app.launchArguments = ["-focus-fresh-data"]
+    app.launchArguments = ["-focus-fresh-data", "-focus-no-ai"]
     app.launch()
     app.buttons["welcome-start"].tap()
     let box = app.textViews["assignment-text"]
@@ -94,6 +94,6 @@ final class StepCoachUITests: XCTestCase {
     XCTAssertTrue(app.buttons["idea-use"].waitForExistence(timeout: 5))
     app.buttons["idea-use"].tap()
     app.buttons["thats-all"].tap()
-    XCTAssertTrue(app.otherElements["editor-screen"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.element("editor-screen").waitForExistence(timeout: 5))
   }
 }

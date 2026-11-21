@@ -69,6 +69,7 @@ extension Words {
     "If something serious is getting in the way, talk to an adult you trust."
   public static let meHowILike = "How I like to work"
   public static let meGuessTitle = "A first guess"
+  public static let meChoose = "Choose one"
   public static let meGuessNote =
     "This is a starting guess from your answers, not a test result. Try it, and change it any time."
   public static let guessQuiet = "You like it quiet while you work."

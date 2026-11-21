@@ -230,9 +230,24 @@ public final class PlannerModel {
     return true
   }
 
+  /// Back one level. The steps already made stay in the draft, so nothing is lost.
   public func backToAssignment() {
     draft.stage = .assignment
     persist()
+  }
+
+  /// There are steps in the draft that making new ones would replace.
+  public var wouldReplaceSteps: Bool {
+    draft.steps.contains { !Text.trimmed($0.text).isEmpty }
+  }
+
+  /// Goes back to the steps already made. Does nothing when there are none.
+  @discardableResult
+  public func backToEditor() -> Bool {
+    guard wouldReplaceSteps else { return false }
+    draft.stage = .editor
+    persist()
+    return true
   }
 
   // MARK: Editor

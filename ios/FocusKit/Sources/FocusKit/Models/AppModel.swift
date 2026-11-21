@@ -85,6 +85,9 @@ public final class AppModel {
     self.talk.onUseSteps = { [weak self] steps, kind in
       guard let self, self.planner.importSteps(steps, kindId: kind) else { return }
       self.planning = true
+      // The editor lives on Today. If the chat was opened from the work screen, leave the step
+      // (it stays saved) so the editor is not hidden behind it.
+      self.leaveStep()
       self.showToday = true
     }
     self.speaker.settings = { [weak self] in self?.settings ?? Settings() }
@@ -143,9 +146,19 @@ public final class AppModel {
     planning = true
   }
 
+  /// Leaving the planner for Today is only possible when there are saved steps to show. What was
+  /// typed stays in the draft, so "New assignment" picks up where the student left off.
+  public var canLeavePlanning: Bool { hasSteps }
+
   public func cancelPlanning() {
     guard hasSteps else { return }
     planning = false
+  }
+
+  /// "Make steps" from the Plan tab: opens the planner on Today.
+  public func goToPlanning() {
+    planning = true
+    showToday = true
   }
 
   private func began(_ new: SavedWork) {

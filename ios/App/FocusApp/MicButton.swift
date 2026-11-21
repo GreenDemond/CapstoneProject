@@ -68,6 +68,12 @@ struct MicButton: View {
       .accessibilityIdentifier("mic-button")
   }
 
+  private var tryAgain: some View {
+    Button(Words.tryAgain) { Task { await dictation.refresh() } }
+      .buttonStyle(LinkButtonStyle())
+      .accessibilityIdentifier("mic-retry")
+  }
+
   @ViewBuilder
   private var status: some View {
     switch dictation.state {
@@ -93,8 +99,8 @@ struct MicButton: View {
           }
         }
         .buttonStyle(LinkButtonStyle())
+        tryAgain
       }
-      .accessibilityIdentifier("mic-denied")
     case .needsDownload:
       VStack(alignment: .leading, spacing: Theme.Space.small) {
         Text(Words.micNeedsDownload).font(Theme.Typography.body).foregroundStyle(
@@ -104,7 +110,10 @@ struct MicButton: View {
           .accessibilityIdentifier("mic-download")
       }
     case .unavailable:
-      Text(Words.micUnavailable).font(Theme.Typography.body).foregroundStyle(Theme.Palette.quiet)
+      VStack(alignment: .leading, spacing: Theme.Space.small) {
+        Text(Words.micUnavailable).font(Theme.Typography.body).foregroundStyle(Theme.Palette.quiet)
+        tryAgain
+      }
     default:
       if let note = dictation.note {
         Text(note).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)

@@ -53,6 +53,10 @@ public final class DictationModel {
     self.explained = store.load(VoiceFlags.self).value?.micExplained ?? false
   }
 
+  /// The microphone could not be used, so "Try again" makes sense (for example after the student
+  /// allowed it in Settings).
+  public var canTryAgain: Bool { state == .denied || state == .unavailable }
+
   /// The button is shown unless the language is not supported.
   public var isOffered: Bool { state != .unsupported }
   public var isListening: Bool { state == .listening }

@@ -60,6 +60,7 @@ struct SayingView: View {
             }
           }
           .cardStyle()
+          .accessibilityElement(children: .contain)
           .accessibilityIdentifier("idea-card")
         } else {
           Button(planner.thinking ? Words.coachThinking : Words.giveIdea) {
@@ -80,13 +81,20 @@ struct SayingView: View {
         .buttonStyle(MainButtonStyle())
         .accessibilityIdentifier("thats-all")
 
-        Button("Back") { planner.backToAssignment() }
+        Button(Words.back) { planner.backToAssignment() }
           .buttonStyle(LinkButtonStyle())
+          .accessibilityHint("Your steps are kept.")
           .accessibilityIdentifier("back-to-assignment")
+        if model.canLeavePlanning {
+          Button(Words.backToToday) { model.cancelPlanning() }
+            .buttonStyle(LinkButtonStyle())
+            .accessibilityIdentifier("cancel-planning")
+        }
       }
       .padding(Theme.Space.medium)
     }
     .scrollDismissesKeyboard(.interactively)
+    .accessibilityElement(children: .contain)
     .accessibilityIdentifier("saying-screen")
   }
 

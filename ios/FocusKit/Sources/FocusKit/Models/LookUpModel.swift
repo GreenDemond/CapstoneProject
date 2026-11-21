@@ -24,6 +24,14 @@ public final class LookUpModel {
   public static let timeLimit: Double = 10
 
   public var words: String
+
+  /// The last search did not get an answer, so "Try again" makes sense.
+  public var canTryAgain: Bool {
+    switch state {
+    case .offline, .slow, .trouble: true
+    default: false
+    }
+  }
   public private(set) var state: State = .idle
 
   private let lookUp: any LookUp

@@ -1,6 +1,5 @@
 import XCTest
 
-/// Written but not run on this computer (no iOS simulator).
 @MainActor
 final class MeUITests: XCTestCase {
   override func setUp() {
@@ -9,7 +8,7 @@ final class MeUITests: XCTestCase {
 
   private func launch() -> XCUIApplication {
     let app = XCUIApplication()
-    app.launchArguments = ["-focus-fresh-data"]
+    app.launchArguments = ["-focus-fresh-data", "-focus-no-ai"]
     app.launch()
     app.buttons["welcome-start"].tap()
     app.tabBars.buttons["Me"].tap()
@@ -24,17 +23,20 @@ final class MeUITests: XCTestCase {
     field.tap()
     field.typeText("Too noisy at home")
     app.buttons["note-add"].tap()
-    let row = app.otherElements["note-row"]
+    let row = app.element("note-row")
     XCTAssertTrue(row.waitForExistence(timeout: 5))
     row.swipeLeft()
     app.buttons["Delete"].tap()
-    XCTAssertFalse(app.otherElements["note-row"].exists)
+    XCTAssertFalse(app.element("note-row").exists)
   }
 
   /// A changed setting is used: turning on Talk shows the microphone on Today.
   func testChangingVoiceIsUsed() {
     let app = launch()
-    app.switches["voice-talk"].tap()
+    let talkSwitch = app.switches["voice-talk"]
+    app.scrollTo(talkSwitch)
+    // Tap the switch itself, at the right of the row, as a student would.
+    talkSwitch.switches.firstMatch.tap()
     app.tabBars.buttons["Today"].tap()
     XCTAssertTrue(app.buttons["mic-button"].waitForExistence(timeout: 5))
   }
@@ -42,18 +44,24 @@ final class MeUITests: XCTestCase {
   /// The first-guess card appears after an answer and says it is a guess.
   func testFirstGuessCard() {
     let app = launch()
-    app.buttons["how-block"].tap()
+    let question = app.buttons["how-block"]
+    app.scrollTo(question)
+    question.tap()
     app.buttons["Short (about 12 minutes)"].tap()
-    XCTAssertTrue(app.otherElements["first-guess"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.element("first-guess").waitForExistence(timeout: 5))
   }
 
   /// Delete everything needs a second tap, and then the app is back at the first-run screen.
   func testDeleteEverything() {
     let app = launch()
-    app.buttons["me-about"].tap()
-    app.buttons["delete-everything"].tap()
+    let about = app.element("me-about")
+    app.scrollTo(about)
+    about.tap()
+    let delete = app.buttons["delete-everything"]
+    app.scrollTo(delete)
+    delete.tap()
     XCTAssertTrue(app.buttons["delete-everything-confirm"].waitForExistence(timeout: 5))
     app.buttons["delete-everything-confirm"].tap()
-    XCTAssertTrue(app.otherElements["welcome-screen"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.element("welcome-screen").waitForExistence(timeout: 5))
   }
 }

@@ -27,7 +27,6 @@ struct MeView: View {
       .navigationTitle(Words.tabMe)
       .scrollDismissesKeyboard(.interactively)
     }
-    .accessibilityIdentifier("me-screen")
   }
 
   // MARK: Goals
@@ -109,7 +108,7 @@ struct MeView: View {
               get: { me.answer(question.id) ?? "" },
               set: { me.setAnswer(question.id, $0) })
           ) {
-            Text("").tag("").accessibilityHidden(true)
+            Text(Words.meChoose).tag("")
             ForEach(question.options, id: \.value) { Text($0.label).tag($0.value) }
           }
           .pickerStyle(.menu)
@@ -246,6 +245,7 @@ struct AboutView: View {
     .scrollContentBackground(.hidden)
     .pageBackground()
     .navigationTitle(Words.meAbout)
+    .accessibilityElement(children: .contain)
     .accessibilityIdentifier("about-screen")
   }
 }

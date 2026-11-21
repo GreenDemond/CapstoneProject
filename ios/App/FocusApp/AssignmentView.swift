@@ -6,6 +6,10 @@ import SwiftUI
 struct AssignmentView: View {
   let model: AppModel
   let planner: PlannerModel
+  /// Which button asked to replace the steps already made, while the question is showing.
+  @State private var replacing: Replacing?
+
+  private enum Replacing { case suggest, say }
 
   var body: some View {
     ScrollView {
@@ -73,11 +77,17 @@ struct AssignmentView: View {
             .accessibilityIdentifier("empty-note")
         }
 
-        Button(Words.saySteps) { planner.beginSaying() }
-          .buttonStyle(MainButtonStyle())
-          .accessibilityIdentifier("say-steps")
+        Button(Words.saySteps) {
+          if planner.wouldReplaceSteps { replacing = .say } else { planner.beginSaying() }
+        }
+        .buttonStyle(MainButtonStyle())
+        .accessibilityIdentifier("say-steps")
         Button(planner.thinking ? Words.coachThinking : Words.suggestSteps) {
-          Task { await planner.suggest() }
+          if planner.wouldReplaceSteps {
+            replacing = .suggest
+          } else {
+            Task { await planner.suggest() }
+          }
         }
         .buttonStyle(QuietButtonStyle())
         .disabled(planner.thinking)
@@ -89,8 +99,13 @@ struct AssignmentView: View {
             .accessibilityIdentifier("ai-note")
         }
 
-        if model.hasSteps {
-          Button(Words.allMySteps) { model.cancelPlanning() }
+        if planner.wouldReplaceSteps {
+          Button(Words.backToMySteps) { planner.backToEditor() }
+            .buttonStyle(LinkButtonStyle())
+            .accessibilityIdentifier("back-to-editor")
+        }
+        if model.canLeavePlanning {
+          Button(Words.backToToday) { model.cancelPlanning() }
             .buttonStyle(LinkButtonStyle())
             .accessibilityIdentifier("cancel-planning")
         }
@@ -101,6 +116,26 @@ struct AssignmentView: View {
       .padding(Theme.Space.medium)
     }
     .scrollDismissesKeyboard(.interactively)
+    .confirmationDialog(
+      Words.replaceTitle,
+      isPresented: Binding(get: { replacing != nil }, set: { if !$0 { replacing = nil } }),
+      titleVisibility: .visible
+    ) {
+      Button(Words.replaceKeep) {
+        replacing = nil
+        planner.backToEditor()
+      }
+      Button(Words.replaceGo) {
+        let which = replacing
+        replacing = nil
+        if which == .say {
+          planner.beginSaying()
+        } else {
+          Task { await planner.suggest() }
+        }
+      }
+    }
+    .accessibilityElement(children: .contain)
     .accessibilityIdentifier("assignment-screen")
   }
 }

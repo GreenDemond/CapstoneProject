@@ -1,6 +1,5 @@
 import XCTest
 
-/// Written but not run on this computer (no iOS simulator). They run with checks/check.sh where one exists.
 @MainActor
 final class AppShellUITests: XCTestCase {
   override func setUp() {
@@ -9,14 +8,14 @@ final class AppShellUITests: XCTestCase {
 
   func launch() -> XCUIApplication {
     let app = XCUIApplication()
-    app.launchArguments = ["-focus-fresh-data"]
+    app.launchArguments = ["-focus-fresh-data", "-focus-no-ai"]
     app.launch()
     return app
   }
 
   func testFirstRunScreenThenFourTabs() {
     let app = launch()
-    XCTAssertTrue(app.otherElements["welcome-screen"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.element("welcome-screen").waitForExistence(timeout: 5))
     XCTAssertTrue(app.buttons["Start"].exists)
     app.buttons["Start"].tap()
     for name in ["Today", "Talk", "Plan", "Me"] {

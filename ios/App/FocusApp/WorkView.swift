@@ -56,13 +56,22 @@ struct WorkView: View {
 
   private var header: some View {
     HStack {
+      Button {
+        model.leaveStep()
+      } label: {
+        Label(Words.backToToday, systemImage: "chevron.left")
+      }
+      .buttonStyle(LinkButtonStyle())
+      .accessibilityLabel(Words.backToToday)
+      .accessibilityHint("Your step is saved. You can pick it up again from Today.")
+      .accessibilityIdentifier("leave-step")
+      Spacer()
       if let position = model.stepPosition {
         Text("Step \(position.number) of \(position.total)")
           .font(Theme.Typography.small)
           .foregroundStyle(Theme.Palette.quiet)
           .accessibilityIdentifier("step-position")
       }
-      Spacer()
       Menu {
         Button(Words.timerOff) { timerEnds = nil }
         ForEach([12, 25], id: \.self) { minutes in
@@ -74,13 +83,7 @@ struct WorkView: View {
         Image(systemName: "timer").frame(minWidth: Theme.Space.touch, minHeight: Theme.Space.touch)
       }
       .accessibilityLabel(Words.timerMenu)
-      Button {
-        model.leaveStep()
-      } label: {
-        Image(systemName: "xmark").frame(minWidth: Theme.Space.touch, minHeight: Theme.Space.touch)
-      }
-      .accessibilityLabel("Back to Today")
-      .accessibilityIdentifier("leave-step")
+      .accessibilityIdentifier("timer-menu")
     }
   }
 
@@ -203,6 +206,7 @@ struct WorkView: View {
     }
     .font(Theme.Typography.body)
     .foregroundStyle(Theme.Palette.ink)
+    .accessibilityElement(children: .contain)
     .accessibilityIdentifier("park-thought")
   }
 

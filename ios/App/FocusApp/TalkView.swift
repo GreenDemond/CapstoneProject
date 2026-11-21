@@ -10,7 +10,6 @@ struct TalkView: View {
       ChatScreen(model: model)
         .navigationBarTitleDisplayMode(.inline)
     }
-    .accessibilityIdentifier("talk-screen")
   }
 }
 
@@ -121,8 +120,14 @@ struct ChatScreen: View {
     )
     .accessibilityElement(children: .combine)
     .accessibilityLabel(mine ? "You: \(turn.text)" : "AI: \(turn.text)")
-    .accessibilityIdentifier(mine ? "talk-you" : "talk-ai")
+    .accessibilityIdentifier(bubbleIdentifier(turn, mine: mine))
     .onTapGesture { model.speaker.stop() }
+  }
+
+  /// The combined bubble hides inner identifiers, so the trusted-adult line is named on the bubble.
+  private func bubbleIdentifier(_ turn: ChatTurn, mine: Bool) -> String {
+    if turn.kind == .trustedAdult { return "talk-trusted-adult" }
+    return mine ? "talk-you" : "talk-ai"
   }
 
   // MARK: The bottom
@@ -135,8 +140,11 @@ struct ChatScreen: View {
           .font(Theme.Typography.body)
           .foregroundStyle(Theme.Palette.quiet)
           .accessibilityIdentifier("talk-unavailable")
+        Button(Words.tryAgain) { talk.refreshAvailability() }
+          .buttonStyle(LinkButtonStyle())
+          .accessibilityIdentifier("talk-retry")
         NavigationLink {
-          if let hints { LadderBody(model: model, ladder: hints, dismiss: {}) }
+          if let hints { LadderBody(model: model, ladder: hints, dismiss: nil) }
         } label: {
           Label(Words.talkHints, systemImage: "lightbulb")
             .font(Theme.Typography.button)
