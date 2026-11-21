@@ -20,6 +20,7 @@ struct WorkView: View {
       header
       if let step = model.currentStep {
         stepCard(step)
+        readButton(step)
         ChoiceGrid(choices: ChoiceGrid.layout) { choice in choose(choice, step: step) }
         if askingSmaller { smallerBox(step) }
         if let message {
@@ -100,7 +101,33 @@ struct WorkView: View {
     .cardStyle()
   }
 
+  @ViewBuilder
+  private func readButton(_ step: Step) -> some View {
+    if model.voiceMode != .quiet {
+      VStack(alignment: .leading, spacing: Theme.Space.tiny) {
+        Button {
+          if model.speaker.isSpeaking {
+            model.speaker.stop()
+          } else {
+            model.speaker.speak(step.text, kind: .step)
+          }
+        } label: {
+          Label(
+            model.speaker.isSpeaking ? Words.stopReading : Words.readThisStep,
+            systemImage: model.speaker.isSpeaking ? "speaker.slash" : "speaker.wave.2")
+        }
+        .buttonStyle(LinkButtonStyle())
+        .accessibilityIdentifier("read-step")
+        if let note = model.speaker.note {
+          Text(note).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
+            .accessibilityIdentifier("read-note")
+        }
+      }
+    }
+  }
+
   private func choose(_ choice: Choice, step: Step) {
+    model.speaker.stop()
     if choice == .drifted && !askingSmaller {
       askingSmaller = true
       return

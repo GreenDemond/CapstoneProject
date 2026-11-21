@@ -26,6 +26,7 @@ public final class AppModel {
   public let content: Content
   public let planner: PlannerModel
   public let dictation: DictationModel
+  public let speaker: SpeakerModel
 
   public private(set) var welcomed: Bool
   /// The student is on the work screen.
@@ -65,8 +66,11 @@ public final class AppModel {
     self.settings = store.load(Settings.self).value ?? Settings()
     self.dictation = DictationModel(
       input: services.speechInput, store: store, clock: clock, limit: content.limits.pasteLength)
+    self.speaker = SpeakerModel(output: services.speechOutput, headphones: services.headphones)
     self.planner = PlannerModel(content: content, store: store, clock: clock, draft: draft)
     self.planner.onStart = { [weak self] saved in self?.began(saved) }
+    self.speaker.settings = { [weak self] in self?.settings ?? Settings() }
+    self.dictation.willListen = { [weak self] in self?.speaker.interrupted() }
   }
 
   // MARK: Reading

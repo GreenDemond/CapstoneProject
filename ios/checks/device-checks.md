@@ -40,3 +40,15 @@ Voice is off at first. First turn it on: Me, Voice, "I talk" (arrives in the Me 
 24. Listen for a phone call or a timer going off while listening: listening should stop and your words so far should stay.
 25. Go to iPhone Settings, find the app, turn the microphone off, come back, press the microphone. You should see a calm line about turning it on in Settings and the typing should still work.
 26. Close the app while listening (swipe up to Home). The orange microphone dot should disappear at once.
+
+## Voice out (T10)
+
+Turn on Me, Voice, "I talk" or "We talk" first.
+
+27. Start a step. You should see **Read this step**. With headphones in, tap it: you should hear the step, calmly. The button should say **Stop reading**; tap it and the voice should stop at once.
+28. Take the headphones out while it is speaking. The voice should stop and not move to the speaker.
+29. With no headphones and "Only speak through headphones" on, tap Read this step. You should hear nothing and see the line about headphones.
+30. Turn "Only speak through headphones" off and tap Read this step. You should hear it through the phone. Flip the silent switch: it should go quiet.
+31. Turn on Quiet. The Read this step button should be gone.
+32. While it is reading, tap Done. The voice should stop.
+33. While it is reading, play music in another app, or get a call. Note what happens (it should stop on a call).

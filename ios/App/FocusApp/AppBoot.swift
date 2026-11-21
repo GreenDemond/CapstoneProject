@@ -11,7 +11,9 @@ enum AppBoot {
     guard let content = try? Content.bundled() else { return nil }
     let folder = dataFolder()
     let store = FileStore(folder: folder, limits: content.limits)
-    let services = Services(speechInput: AppleSpeechInput())
+    let services = Services(
+      speechInput: AppleSpeechInput(), speechOutput: AppleSpeechOutput(),
+      headphones: AppleHeadphones())
     return AppModel(content: content, store: store, services: services)
   }
 
