@@ -19,3 +19,11 @@ Record for each run: the date, the iPhone model, the iOS version, whether Apple 
 11. Tap each Done until finished. You should see "That's today done." and nothing asking you to do more.
 12. Make text bigger (Settings, Display and Brightness, Text Size) and turn on dark mode. Every screen above should stay readable with nothing cut off.
 13. Close the app mid-step and open it again later (try the next day). You should see the same step, with "Welcome back." and nothing about how long.
+
+## Look it up (T08)
+
+14. Open Talk, tap Look it up. You should see a line saying your words go to Wikipedia, before you search anything.
+15. Type "courage" and tap Search. You should see up to five pages, each a title and one line, with no strange symbols or tags in the text.
+16. Tap one. You should see the page, with "Back to results" above it. Tap it to return.
+17. From a step, tap Stuck, then Look it up. The box should already have some words from the step. Search, open a page, tap "Back to my step": you should be on the step.
+18. Turn on Airplane Mode and search. You should see "You're offline. Try again later." and nothing else.

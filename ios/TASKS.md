@@ -16,7 +16,7 @@ A task is `ready` when every task it depends on is `done` and everything on its 
 | T05 Assignment and editor | done (compile-checked) | T04 | 2026-11-20 | check.sh: FocusKit passed (68 tests); app and UI tests compile; UI tests written, not run (no simulator), exit 3. Self-review only. Ben's two answers not yet given; recommendations used. Advisor gate 2 owed |
 | T06 Today and the work screen | done (compile-checked) | T05 | 2026-11-20 | check.sh: FocusKit passed (82 tests); app and UI tests compile; UI tests written, not run (no simulator), exit 3. Self-review only. Advisor gate 2 owed. Shared starter step "Check what you missed" noted in slice |
 | T07 Stuck ladder, without AI | done (compile-checked) | T06 | 2026-11-20 | Same run as T06 (one commit, the work screen opens the ladder). UI tests not run. Self-review only. Advisor gate 2 owed |
-| T08 Look it up | waiting | T07 | | |
+| T08 Look it up | done (compile-checked) | T07 | 2026-11-20 | check.sh: FocusKit passed (97 tests); app and UI tests compile; UI tests written, not run (no simulator), exit 3. No real search from this Mac (no network in its shell); addresses checked with a fetch tool. Contact address in the User-Agent still to be set. Self-review only. Advisor gate 2 owed |
 | T09 Voice in | waiting | T06 | | |
 | T10 Voice out | waiting | T09 | | |
 | T11 The phone's AI | waiting | T03, T00 | | |

@@ -142,7 +142,8 @@ import Testing
     let banned = try Regex("(?i)\\b(missed|behind|late|overdue|failed|failure|days?)\\b")
     var files = [URL]()
     let here = URL(fileURLWithPath: #filePath)
-    let root = here.deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+    let root = here.deletingLastPathComponent().deletingLastPathComponent()
+      .deletingLastPathComponent()
       .deletingLastPathComponent()
     files.append(root.appendingPathComponent("FocusKit/Sources/FocusKit/Models/Words.swift"))
     let appFolder = root.appendingPathComponent("App/FocusApp")
@@ -154,7 +155,9 @@ import Testing
       let text = try String(contentsOf: file, encoding: .utf8)
       for match in text.matches(of: literal) {
         let words = String(text[match.range])
-        #expect(words.firstMatch(of: banned) == nil, Comment(rawValue: "\(file.lastPathComponent): \(words)"))
+        #expect(
+          words.firstMatch(of: banned) == nil,
+          Comment(rawValue: "\(file.lastPathComponent): \(words)"))
       }
     }
     // The shared words and hints too.

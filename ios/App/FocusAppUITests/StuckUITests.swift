@@ -1,6 +1,7 @@
 import XCTest
 
 /// Written but not run on this computer (no iOS simulator).
+@MainActor
 final class StuckUITests: XCTestCase {
   override func setUp() {
     continueAfterFailure = false

@@ -6,7 +6,7 @@ import UIKit
 struct WorkView: View {
   let model: AppModel
   @State private var message: String?
-  @State private var stuckStep: Step?
+  @State private var stuckStep: StuckTarget?
   @State private var askingSmaller = false
   @State private var smallerPiece = ""
   @State private var recallStepId: Int?
@@ -41,8 +41,8 @@ struct WorkView: View {
     .pageBackground()
     .accessibilityElement(children: .contain)
     .accessibilityIdentifier("work-screen")
-    .sheet(item: $stuckStep) { step in
-      StuckView(model: model, step: step)
+    .sheet(item: $stuckStep) { target in
+      StuckView(model: model, target: target)
     }
     .sheet(
       isPresented: Binding(
@@ -110,7 +110,7 @@ struct WorkView: View {
     case .ignored:
       return
     case .stuck:
-      stuckStep = step
+      stuckStep = StuckTarget(step: step)
     case .done(let text, let ask), .allDone(let text, let ask):
       message = text
       if ask { recallStepId = step.id }

@@ -1,6 +1,7 @@
 import XCTest
 
 /// Written but not run on this computer (no iOS simulator). They run with checks/check.sh where one exists.
+@MainActor
 final class AppShellUITests: XCTestCase {
   override func setUp() {
     continueAfterFailure = false

@@ -1,18 +1,22 @@
 import FocusKit
 import SwiftUI
 
-extension Step: @retroactive Identifiable {}
+/// The step the Stuck sheet is open for.
+struct StuckTarget: Identifiable {
+  let step: Step
+  var id: Int { step.id }
+}
 
 /// Stuck is a ladder, not an answer. Hints first, then help wording a question for a person.
 /// Look it up and Talk it through are rungs too (T08, T12).
 struct StuckView: View {
   let model: AppModel
-  let step: Step
+  let target: StuckTarget
   @Environment(\.dismiss) private var dismiss
 
   var body: some View {
     NavigationStack {
-      LadderBody(model: model, ladder: model.ladder(for: step), dismiss: { dismiss() })
+      LadderBody(model: model, ladder: model.ladder(for: target.step), dismiss: { dismiss() })
         .navigationTitle(Words.stuckTitle)
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -49,7 +53,7 @@ struct LadderBody: View {
           Text(Words.noMoreHints).font(Theme.Typography.body).foregroundStyle(Theme.Palette.quiet)
         }
 
-        LookItUpRung(model: model, ladder: ladder)
+        LookItUpRung(model: model, ladder: ladder, dismiss: dismiss)
 
         Text(Words.talkItThroughLater).font(Theme.Typography.body).foregroundStyle(
           Theme.Palette.quiet)
@@ -119,15 +123,24 @@ struct AnyButtonStyle: ButtonStyle {
   }
 }
 
-/// Placeholder rung until T08 fills it in.
+/// The Look it up rung: opens the search with the step's key words already in the box.
 struct LookItUpRung: View {
   let model: AppModel
   let ladder: LadderModel
+  let dismiss: () -> Void
 
   var body: some View {
-    VStack(alignment: .leading, spacing: Theme.Space.tiny) {
-      Text(Words.lookItUpLater).font(Theme.Typography.body).foregroundStyle(Theme.Palette.quiet)
-      Text(Words.talkNotYet).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
+    if LookUpModel.isOn {
+      NavigationLink {
+        LookUpView(words: LookUpText.keyWords(from: ladder.onStep), backToStep: dismiss)
+      } label: {
+        Label(Words.lookItUpLater, systemImage: "magnifyingglass")
+          .font(Theme.Typography.button)
+          .foregroundStyle(Theme.Palette.ink)
+          .frame(maxWidth: .infinity, minHeight: Theme.Space.touch, alignment: .leading)
+          .cardStyle()
+      }
+      .accessibilityIdentifier("lookup-rung")
     }
   }
 }
