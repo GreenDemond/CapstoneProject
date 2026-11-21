@@ -20,10 +20,10 @@ public struct ChatContext: Equatable, Sendable {
 }
 
 /// What the screen is told, in order. Nothing the model says reaches the screen except through
-/// `partial` and `finished`, and both have passed `Safety` and `AnswerGuard`.
+/// `finished`, and only after the whole reply has passed `Safety` and `AnswerGuard`. Nothing is
+/// shown or spoken while the reply is still arriving, because the answer check can only judge the
+/// whole text.
 public enum ChatEvent: Equatable, Sendable {
-  /// Everything that may be shown so far (whole sentences only). Each one extends the one before.
-  case partial(String)
   /// The whole reply, after every check.
   case finished(String)
   /// Show the trusted-adult line instead of any reply. The message is not saved.
@@ -104,7 +104,6 @@ public struct ChatEngine: Sendable {
   ) async -> Outcome {
     let word = content.safety.word
     var latest = ""
-    var released = ""
 
     /// True when the text was stopped and the screen has been told.
     func blocked(_ text: String) -> Bool {
@@ -123,12 +122,8 @@ public struct ChatEngine: Sendable {
       for try await snapshot in model.stream(instructions: instructions, messages: messages) {
         if Task.isCancelled { return .finished }
         latest = snapshot
+        // Stop early on the safety word or a finished-looking reply, but show nothing yet.
         if blocked(latest) { return .finished }
-        let safe = Safety.releasable(latest, word: word)
-        if safe.utf16.count > released.utf16.count {
-          released = safe
-          continuation.yield(.partial(safe))
-        }
       }
     } catch is CancellationError {
       return .finished

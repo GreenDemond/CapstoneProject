@@ -31,6 +31,7 @@ You need: a Mac with Xcode (current release, with the iOS 26 SDK), your paid App
 
 ## D. A week of real use (T17b)
 
+16. Note for step 15: the AI's reply now appears all at once after a short wait, because the app checks the whole reply before showing or speaking any of it. Tell Ben this is on purpose. If the wait feels too long on the phone, report it; do not ask for the check to be removed.
 17. Only after the AI checks in step 15 are reviewed and cleared, and the whole-app review is done by a stronger model (see `PROGRESS.md`): let Ben use the app for real homework for a week.
 18. Collect what he says: what helped, what annoyed him, what he stopped using.
 

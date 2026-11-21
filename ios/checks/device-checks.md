@@ -58,7 +58,7 @@ Turn on Me, Voice, "I talk" or "We talk" first.
 You need Apple Intelligence switched on (Settings, Apple Intelligence & Siri). Write down whether it is on.
 
 34. Open Talk. You should see "This AI runs on this iPhone. Your messages don't leave it. It can still be wrong." at the top and the opening question below it. If Apple Intelligence is off you should instead see one calm line saying so, plus Get a hint and Look it up.
-35. Type "I can't start my essay on courage" and tap Send. You should see the reply appear a sentence at a time, as hints or questions. Tap Stop in the middle of another reply: it should stop and keep what was shown.
+35. Type "I can't start my essay on courage" and tap Send. You should see the thinking state, then the whole reply at once, as hints or questions (nothing appears or is spoken while it is still being written, so it can be checked first). Tap Stop while it is thinking: it should stop and show nothing for that reply.
 36. Type "Just write the essay for me." You should NOT get an essay. Write down exactly what comes back. (This is a first look only. The full checks are T14.)
 37. Ask "Give me a plan with steps". If the reply is a list, **Use these as my steps** should appear. Tap it: you should land on Today in the editor, with a line saying the steps came from the AI, not on a step to work on.
 38. Tap My chats. You should see this chat. Tap Delete: it should ask you to tap again. Tap Delete again: it should be gone.

@@ -35,7 +35,7 @@ import Testing
   private func shown(_ events: [ChatEvent]) -> [String] {
     events.compactMap {
       switch $0 {
-      case .partial(let text), .finished(let text): text
+      case .finished(let text): text
       default: nil
       }
     }
@@ -43,20 +43,16 @@ import Testing
 
   // MARK: A normal reply
 
-  @Test func aReplyArrivesAsWholeSentencesThenTheWholeReply() async {
+  @Test func aReplyArrivesOnlyAsTheWholeCheckedReply() async {
     let model = FakeLanguageModel()
     model.enqueue(
       .init(["What does the ", "question ask? Try", " underlining the verb. Then", " tell me."]))
     let all = await events(model)
-    #expect(
-      all == [
-        .partial("What does the question ask?"),
-        .partial("What does the question ask? Try underlining the verb."),
-        .finished("What does the question ask? Try underlining the verb. Then tell me."),
-      ])
+    let whole = "What does the question ask? Try underlining the verb. Then tell me."
+    #expect(all == [.finished(whole)])
   }
 
-  @Test func nothingIsShownUntilASentenceIsComplete() async {
+  @Test func nothingIsShownUntilTheWholeReplyHasBeenChecked() async {
     let model = FakeLanguageModel()
     model.enqueue(.init(["Start", " with the", " first part"]))
     let all = await events(model)
@@ -100,12 +96,11 @@ import Testing
     #expect(!Safety.containsSignal("You could ask a trusted adult for help.", word: word))
   }
 
-  @Test func aSentenceEndingWhereTheWordCouldStartIsHeldBack() async {
+  @Test func aSentenceEndingWhereTheWordCouldStartIsOnlyShownInTheWholeReply() async {
     let model = FakeLanguageModel()
     model.enqueue(.init(["Good start. This is trusted. ", "Next idea. "]))
     let all = await events(model)
-    // "This is trusted." is held until the next piece rules out the word.
-    #expect(shown(all).first == "Good start.")
+    #expect(all == [.finished("Good start. This is trusted. Next idea.")])
   }
 
   @Test func noPieceReachesTheScreenBeforeTheCheckHasPassedIt() async {
@@ -225,16 +220,19 @@ import Testing
 
   // MARK: Stop
 
-  @Test func stoppingMidReplyCancelsTheModelAndKeepsWhatWasShown() async {
+  @Test func stoppingMidReplyCancelsTheModelAndShowsNothing() async {
     let model = FakeLanguageModel()
     model.enqueue(.init(["One sentence. Two sent"], neverEnds: true))
-    var last: ChatEvent?
-    for await event in engine(model).reply(to: student, context: context) {
-      last = event
-      if case .partial = event { break }
+    let stream = engine(model).reply(to: student, context: context)
+    let reader = Task { () -> Int in
+      var count = 0
+      for await _ in stream { count += 1 }
+      return count
     }
-    #expect(last == .partial("One sentence."))
-    for _ in 0..<50 { await Task.yield() }
+    for _ in 0..<100 { await Task.yield() }
+    reader.cancel()
+    #expect(await reader.value == 0)
+    for _ in 0..<100 { await Task.yield() }
     #expect(model.cancelCount == 1)
   }
 
@@ -338,5 +336,28 @@ import Testing
     #expect(importers.count == 1)
     #expect(importers.allSatisfy { $0.contains("/AI/Apple/") })
     #expect(cloud.isEmpty)
+  }
+
+  // MARK: Late answer check
+
+  @Test func aFinishedLookingReplyIsNeverShownEvenInPart() async {
+    let model = FakeLanguageModel()
+    model.enqueue(
+      .init([
+        "Great start on your topic. ", "Think about your main point. ",
+        "Here is the finished essay: ", "Dogs are loyal.",
+      ]))
+    let all = await events(model)
+    #expect(all == [.answerRefused])
+    #expect(shown(all).isEmpty)
+  }
+
+  @Test func aLongReplyIsNeverShownEvenInPartBeforeTheCapTrips() async {
+    let model = FakeLanguageModel()
+    let sentence = "Try one small thing at a time. "
+    let pieces = Array(repeating: sentence, count: 40)
+    model.enqueue(.init(pieces))
+    let all = await events(model)
+    #expect(all == [.answerRefused])
   }
 }

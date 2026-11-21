@@ -101,20 +101,30 @@ import Testing
 
   // MARK: Stop and leaving
 
-  @Test func stopKeepsWhatWasShownAndNothingMoreArrives() async {
+  @Test func nothingIsShownOrSpokenWhileTheReplyIsStillArriving() async {
+    speaker.settings = { Settings(voiceMode: .weTalk, headphonesOnly: true) }
     model.enqueue(.init(["One sentence. Two sent"], neverEnds: true))
     chat.draft = "Help"
     chat.send()
     for _ in 0..<200 { await Task.yield() }
-    #expect(chat.turns.last?.text == "One sentence.")
+    #expect(chat.turns.last?.text == "")
+    #expect(chat.turns.last?.inProgress == true)
+    #expect(output.spoken.isEmpty)
     chat.stop()
     #expect(!chat.isReplying)
-    #expect(chat.turns.last?.text == "One sentence.")
-    #expect(chat.turns.last?.inProgress == false)
-    for _ in 0..<200 { await Task.yield() }
-    #expect(chat.turns.last?.text == "One sentence.")
-    #expect(savedChats().first?.messages.last?.text == "One sentence.")
+    #expect(chat.turns.map(\.role) == [.user])
+    #expect(output.spoken.isEmpty)
     #expect(model.cancelCount == 1)
+  }
+
+  @Test func aFinishedLookingReplyIsNeitherShownNorSpoken() async {
+    speaker.settings = { Settings(voiceMode: .weTalk, headphonesOnly: true) }
+    model.enqueue(
+      .init(["Nice start. ", "Keep going. ", "Here is the finished essay: ", "Dogs are loyal."]))
+    await say("write it")
+    #expect(chat.turns.last?.kind == .notice)
+    #expect(!chat.turns.contains { $0.text.contains("Nice start") })
+    #expect(output.spoken.isEmpty)
   }
 
   @Test func stoppingBeforeAnyTextDropsTheEmptyReply() async {
@@ -193,10 +203,11 @@ import Testing
     #expect(!everythingSaved().contains("Courage is brave"))
   }
 
-  @Test func aReplyCutOffKeepsWhatWasShownAndAddsACalmLine() async {
+  @Test func aReplyCutOffShowsOnlyTheCalmLine() async {
     model.enqueue(.init(["Start here. Then"], failure: .refusal))
     await say("help")
-    #expect(chat.turns.map(\.text).suffix(2) == ["Start here.", Words.aiCouldNotAnswer])
+    #expect(chat.turns.map(\.text).suffix(2) == ["help", Words.aiCouldNotAnswer])
+    #expect(!chat.turns.contains { $0.text.contains("Start here") })
     #expect(!chat.isReplying)
   }
 
@@ -288,11 +299,11 @@ import Testing
     #expect(text.contains(content.chat.lengths.long.text))
   }
 
-  @Test func inWeTalkRepliesAreSpokenASentenceAtATimeAndNeverTwice() async {
+  @Test func inWeTalkTheCheckedReplyIsSpokenOnceAfterItFinishes() async {
     speaker.settings = { Settings(voiceMode: .weTalk, headphonesOnly: true) }
     model.enqueue(.init(["First idea. Sec", "ond idea. Third"]))
     await say("hi")
-    #expect(output.spoken == ["First idea.", "Second idea.", "Third"])
+    #expect(output.spoken == ["First idea. Second idea. Third"])
   }
 
   @Test func inQuietNothingIsSpoken() async {

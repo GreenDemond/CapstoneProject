@@ -59,7 +59,6 @@ public final class ChatModel {
   private var step: String?
   private var task: Task<Void, Never>?
   private var run = 0
-  private var spoken = 0
 
   public init(
     content: Content, store: any Store, clock: any AppClock, model: any LanguageModel,
@@ -163,7 +162,6 @@ public final class ChatModel {
     turns.append(ChatTurn(role: .user, text: cut))
     turns.append(ChatTurn(role: .assistant, text: "", inProgress: true))
     isReplying = true
-    spoken = 0
     run += 1
     let mine = run
     let history = turns.dropLast().filter { $0.kind != .trustedAdult }
@@ -181,7 +179,7 @@ public final class ChatModel {
     }
   }
 
-  /// Stop mid-reply: what was shown stays, and nothing more arrives.
+  /// Stop mid-reply: nothing more arrives. Nothing is shown until the whole reply has been checked.
   public func stop() {
     guard isReplying else { return }
     stopAndKeep()
@@ -206,13 +204,10 @@ public final class ChatModel {
   private func handle(_ event: ChatEvent) {
     guard let index = turns.indices.last, turns[index].role == .assistant else { return }
     switch event {
-    case .partial(let text):
-      turns[index].text = text
-      say(text)
     case .finished(let text):
       turns[index].text = text
       turns[index].inProgress = false
-      say(text)
+      speaker.speak(text, kind: .reply)
       finishRun()
       saveChat()
     case .trustedAdult:
@@ -279,14 +274,6 @@ public final class ChatModel {
         turns[index].inProgress = false
       }
     }
-  }
-
-  /// Speaks only what has not been spoken yet. Text arrives as whole sentences, already checked.
-  private func say(_ text: String) {
-    guard text.count > spoken else { return }
-    let delta = String(text.dropFirst(spoken))
-    spoken = text.count
-    speaker.speak(delta, kind: .reply)
   }
 
   private func startFresh(kind: String?, step: String?) {
