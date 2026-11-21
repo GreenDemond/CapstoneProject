@@ -80,8 +80,16 @@ import Testing
     #expect(model.makeSuggested())
   }
 
+  @Test func sayingStepsNeedsSomeWordsAboutTheAssignment() {
+    let model = planner()
+    #expect(!model.beginSaying())
+    #expect(model.showEmptyNote)
+    #expect(model.draft.stage == .assignment)
+  }
+
   @Test func sayingStepsByTyping() {
     let model = planner()
+    model.setText("Essay")
     model.beginSaying()
     #expect(!model.addSaid("   "))
     #expect(!model.thatsAll())
@@ -98,6 +106,7 @@ import Testing
 
   @Test func nudgeAppearsForAndAndNoLeavesTheStepAlone() throws {
     let model = planner()
+    model.setText("Essay")
     model.beginSaying()
     model.addSaid("Read the chapter and answer the questions")
     model.addSaid("Check it")
@@ -113,6 +122,7 @@ import Testing
 
   @Test func splitAtAndAndJoinBack() throws {
     let model = planner()
+    model.setText("Essay")
     model.beginSaying()
     model.addSaid("Read the chapter and answer the questions")
     let id = try #require(model.draft.steps.first?.id)
@@ -125,6 +135,7 @@ import Testing
 
   @Test func oneWordCannotBeSplit() throws {
     let model = planner()
+    model.setText("Essay")
     model.beginSaying()
     model.addSaid("Read")
     let id = try #require(model.draft.steps.first?.id)
@@ -134,6 +145,7 @@ import Testing
 
   @Test func reorderDeleteAndAdd() throws {
     let model = planner()
+    model.setText("Essay")
     model.beginSaying()
     for word in ["A one", "B two", "C three"] { model.addSaid(word) }
     model.thatsAll()
@@ -161,6 +173,7 @@ import Testing
 
   @Test func aStepOfOnlySpacesIsDroppedOnStart() throws {
     let model = planner()
+    model.setText("Essay")
     model.beginSaying()
     model.addSaid("Real step")
     let id = try #require(model.addStep("   "))
@@ -174,16 +187,17 @@ import Testing
 
   @Test func onlyBlankStepsCannotStart() {
     let model = planner()
+    model.setText("Essay")
     model.beginSaying()
     model.addSaid("x")
     model.setStepText(model.draft.steps[0].id, "  ")
-    model.draft.stage == .saying ? () : ()
     #expect(!model.thatsAll())
     #expect(!model.start())
   }
 
   @Test func getReadyAndPutAwayCanBeAddedOnceAndRemoved() {
     let model = planner()
+    model.setText("Essay")
     model.beginSaying()
     model.addSaid("Middle")
     model.thatsAll()
@@ -198,6 +212,7 @@ import Testing
 
   @Test func doneLineTravelsToTheSavedWork() throws {
     let model = planner()
+    model.setText("Essay")
     model.beginSaying()
     model.addSaid("First")
     model.addSaid("Second")

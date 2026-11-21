@@ -75,13 +75,19 @@ public final class PlannerModel {
   }
 
   /// "I'll say my steps": one small step at a time.
-  public func beginSaying() {
+  @discardableResult
+  public func beginSaying() -> Bool {
+    guard hasAssignmentText else {
+      showEmptyNote = true
+      return false
+    }
     draft.steps = []
     draft.nextId = 0
     draft.nudgeDismissed = []
     draft.stage = .saying
     showEmptyNote = false
     persist()
+    return true
   }
 
   /// Adds one said step. Blank words add nothing.

@@ -1,13 +1,6 @@
 import FocusKit
 import SwiftUI
 
-struct TodayView: View {
-  let model: AppModel
-  var body: some View {
-    PlaceholderScreen(title: Words.tabToday, line: Words.assignmentTitle, id: "today-screen")
-  }
-}
-
 struct TalkView: View {
   let model: AppModel
   var body: some View {
@@ -26,11 +19,6 @@ struct MeView: View {
   var body: some View {
     PlaceholderScreen(title: Words.tabMe, line: Words.meNotReady, id: "me-screen")
   }
-}
-
-struct WorkView: View {
-  let model: AppModel
-  var body: some View { Text("") }
 }
 
 struct PlaceholderScreen: View {
