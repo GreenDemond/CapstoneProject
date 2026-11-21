@@ -51,7 +51,8 @@ T01 to T03 need no simulator and no decisions, so they may be done while T00 wai
   1. Brief the Advisor (gate 1) on the whole design: `design/01` to `04`. Fix every must-fix in the design files.
   2. Put the questions in `design/04-engineering-and-plan.md` section 4.7 to the parent, then to Ben, in plain words, a few at a time, each with its recommendation.
   3. Record every answer in `DECISIONS.md`: update the Status column, clear answered items from "Waiting on", add change-log lines. Update the design files where an answer changes them.
-  4. Ask which iPhone Ben has, its iOS version, and whether Apple Intelligence is on. Fix I3 (minimum iOS) from the answer.
+  4. Ask whether Apple Intelligence is switched on on Ben's iPhone 15 Pro Max (iOS 26.2), and record it.
+  5. On a new computer: confirm Xcode's version and that an iOS simulator is installed, and rewrite the first item under "Broken or worrying" in `PROGRESS.md` with what you find.
 - **Done when:**
   1. `DECISIONS.md` has no "(waiting: parent)" left on D1, D6, D7, or it names exactly what is still open.
   2. The Advisor's verdict line on the design is at the end of `design/04-engineering-and-plan.md`.
@@ -206,9 +207,9 @@ T01 to T03 need no simulator and no decisions, so they may be done while T00 wai
 
 ## T11 The phone's AI
 
-- **Needs:** D6 decided; Ben's phone model known.
+- **Needs:** D6 decided.
 - **Read:** `design/03` sections 3.1 to 3.5. Then the `FoundationModels` interface file: `SystemLanguageModel`, `Availability`, `LanguageModelSession`, `streamResponse`, `contextSize`, `tokenCount`, `LanguageModelError`, `Generable`, `Tool`.
-- **Build:** `LanguageModel` protocol and a scriptable fake (can stream in pieces, refuse, hit the guardrail, run out of context, be unavailable for each of the three reasons); the Apple implementation in `AI/Apple/`; the instructions builder (reusing T02); the **safety check**, including holding back a streamed reply until it cannot be the safety word, replacing the whole reply if the word appears later, treating a guardrail stop on the student's message as the same signal, and the fixed phrase list if the parent and Ben approved it; trimming by the model's own token count with one retry.
+- **Build:** `LanguageModel` protocol and a scriptable fake (can stream in pieces, refuse, hit the guardrail, run out of context, be unavailable for each of the three reasons); the Apple implementation in `AI/Apple/`; the instructions builder (reusing T02); the **safety check**, including holding back a streamed reply until it cannot be the safety word, replacing the whole reply if the word appears later, treating a guardrail stop on the student's message as the same signal, and the fixed phrase list if the parent and Ben approved it; trimming by the model's own token count where available (iOS 26.4 and later) and by a cautious character estimate otherwise, with one retry on the context-full error in both its iOS 26 and iOS 27 forms. Every use of an API newer than iOS 26.0 sits behind an availability check with a tested fallback.
 - **Write the safety tests before the code.**
 - **Awkward cases:** the safety word split across two pieces; the word in the middle of a reply; the word in different letter case or with punctuation; the AI unavailable for each reason; context exceeded twice; a refusal; a reply of nothing; Stop mid-reply; the student's guide trying to override the rules (cases 4 and 5 in `Shared/cases/guide.json`).
 - **Done when:**
@@ -218,6 +219,7 @@ T01 to T03 need no simulator and no decisions, so they may be done while T00 wai
   4. `grep -rn "PrivateCloudCompute" .` finds nothing in Swift sources.
   5. `import FoundationModels` appears only under `AI/Apple/`.
   6. The slice note says plainly whether the real model could be run in the simulator.
+  7. The app builds with a minimum of iOS 26.0, and a test covers the path with no token counting.
 - **Gates:** 2 (always). 5 for any API that is not as the design assumes.
 
 ## T12 Talk

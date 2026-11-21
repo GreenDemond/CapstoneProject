@@ -8,7 +8,7 @@ Written for the agent who builds it. Ben and the parent need only sections 4.6 a
 |---|---|---|
 | I1 | Swift 6 and SwiftUI. No web view. No UIKit unless SwiftUI cannot do the job | One obvious way to build each screen |
 | I2 | **No third-party packages**, not for the app and not for tooling | Nothing can break that nobody here can repair. `swift-format` ships with Xcode and is allowed |
-| I3 | Minimum iOS 26.4 | The first version with the model's context size and token counting. **Check the testers' phones before fixing this** |
+| I3 | Minimum iOS 26.0. Ben's phone is an iPhone 15 Pro Max on iOS 26.2 | The on-device model, its context size, and on-device speech are all declared from iOS 26.0 (verified in the kit). **Token counting is iOS 26.4 and later**, so on older versions the app estimates length from characters, conservatively, and relies on the context-full error with one retry. The context-full error has an older form (iOS 26) and a newer one (iOS 27); handle both |
 | I4 | iPhone only in version 1. iPad and Mac later, from the same code | Smaller surface to test |
 | I5 | Storage is plain `Codable` structs saved as JSON files in the app's Application Support folder, through **one** type, `Store` | Boring, readable, easy to test, easy to migrate. No SwiftData or Core Data |
 | I6 | Every piece of saved data carries a version number. Unreadable data is set aside as a backup and the app starts fresh | A damaged file must never stop the app from opening or saving |
@@ -118,7 +118,7 @@ Later, each with its own design note and decision: calendar list and reminders; 
 | # | Question | Recommendation |
 |---|---|---|
 | 1 | Go ahead with a native Swift iPhone app, with no third-party code, alongside the unchanged web app. (This sets aside the web project's own rule that it has no native code.) | Yes |
-| 2 | Install the iOS simulator in Xcode (a download of several GB, outside the project folder) | Yes. Without it only the logic can be checked automatically |
+| 2 | ~~Install the iOS simulator~~ **Answered 2026-11-20:** the work moves to another computer that already has it. The first session there confirms with `xcrun simctl list devices available` | |
 | 3 | Sign in to Xcode with the developer account and set the team and bundle identifier yourself | Needed by T17a. Agents never handle account details |
 | 4 | The "what leaves the phone" rows in `03-ai-search-privacy.md` section 3.7 | Yes |
 | 5 | Should the phone's own backup include the app's data? | No: exclude it, so "stays on this iPhone" is exactly true |
@@ -136,13 +136,14 @@ Later, each with its own design note and decision: calendar list and reminders; 
 | 4 | The four places | Today, Talk, Plan, Me (recommended); or three, with Plan inside Today |
 | 5 | What waits until after version 1 | The proposal in `01-what-it-is.md` section 1.3 |
 | 6 | Name, words for drifting and stuck, how progress is shown | His. Rule 8 applies to the name on the App Store |
-| 7 | Which iPhone he has, its iOS version, and whether Apple Intelligence is on | Needed to fix I3 |
+| 7 | ~~Which iPhone he has~~ **Answered 2026-11-20:** iPhone 15 Pro Max, iOS 26.2. Still to ask: is Apple Intelligence switched on (Settings, Apple Intelligence & Siri)? | Needed before T11 |
 
 ## 4.8 Unverified, to check at the task that depends on it
 
 | Claim | Check at |
 |---|---|
-| Which iPhones are eligible for Apple Intelligence; whether child accounts can use it | T00, T11 |
+| Whether Ben's iPhone 15 Pro Max is eligible for Apple Intelligence (believed yes, from memory, not from a source read), whether it is switched on, and whether a child's Apple account can use it. The app's own availability check on the phone is the real answer | T00, T17a |
+| Whether iOS 26.2 behaves like the iOS 27.2 kit the design was read from. Anything marked iOS 26.4 or 27 in the kit must not be assumed on Ben's phone | T09, T11 |
 | The on-device model's real context size and speed on Ben's phone | T11 |
 | Whether the on-device model and on-device speech work in the simulator | T09, T11 |
 | Which languages on-device speech supports, and whether it needs a download first | T09 |

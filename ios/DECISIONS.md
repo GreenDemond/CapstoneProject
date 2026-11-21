@@ -17,7 +17,7 @@ Choices already made for the iPhone app, with reasons, so agents do not re-ask. 
 | D9 | Ben never runs a command or edits a file. The parent does every Apple account step (sign-in, signing, TestFlight, App Store). Agents never handle account details | Ben does not code; the account is the parent's | Decided |
 | D10 | One check command, `checks/check.sh`. A skipped part is reported as skipped | A wrong "it works" cannot be caught by anyone | Decided |
 | D11 | Work is done by a Builder, with an Advisor (strongest model, read-only) at fixed gates and a Checker (fresh context) before "done" (`AGENTS.md` sections 2 to 4) | Nobody reviews the code; the roles are the review | Decided |
-| D12 | Engineering choices I1 to I13 in `design/04-engineering-and-plan.md` section 4.1 | Chosen so the next agent does not have to | Decided, except I3 (minimum iOS), which waits on the testers' phones |
+| D12 | Engineering choices I1 to I13 in `design/04-engineering-and-plan.md` section 4.1 | Chosen so the next agent does not have to | Decided. I3 is iOS 26.0, set from Ben's phone; classmates' phones are not yet known |
 
 ### D8. What may leave the phone
 
@@ -52,17 +52,20 @@ Chosen from the research so that work can start. Ben can change any of them.
 
 The questions, options and recommendations are in `design/04-engineering-and-plan.md` section 4.7. Task T00 records the answers here.
 
-**Parent:** go-ahead for a native app (D1); install the iOS simulator; sign in to Xcode and set the team; confirm D8; exclude the app's data from phone backup; the two extra safety signals; microphone use by students; who may receive a build.
+**Parent:** go-ahead for a native app (D1); sign in to Xcode and set the team; confirm D8; exclude the app's data from phone backup; the two extra safety signals; microphone use by students; who may receive a build.
 
-**Ben:** voice at first launch; which way of making steps comes first; whether a suggested step must be changed before Start; the four places; what waits until after version 1; the app's name, the words for drifting and stuck, and how progress is shown; which iPhone he has.
+**Ben:** whether Apple Intelligence is on; voice at first launch; which way of making steps comes first; whether a suggested step must be changed before Start; the four places; what waits until after version 1; the app's name, the words for drifting and stuck, and how progress is shown.
 
 Already answered:
 
 - The parent has a paid Apple developer account and Ben may publish through it (2026-11-20).
 - Ben would prefer to talk to the app (reported by the parent, 2026-11-20).
+- Ben's phone is an iPhone 15 Pro Max on iOS 26.2 (parent, 2026-11-20). Whether Apple Intelligence is switched on is not yet known.
+- The work will move to another computer that already has the iOS simulator (parent, 2026-11-20).
 
 ## Change log
 
 | Date | Change | Reason | Decided by |
 |---|---|---|---|
 | 2026-11-20 | Folder created as a self-contained design for a native iPhone app. Words, rules and test cases seeded from the web app into `Shared/` | The parent asked for an iPhone design in a new folder that can be handed off whole | Parent asked; agent wrote |
+| 2026-11-20 | Minimum iOS set to 26.0 (was 26.4 in the first draft). Token counting is used only where the phone has it | Ben's iPhone 15 Pro Max runs iOS 26.2. The kit shows the model and its context size from 26.0 and token counting from 26.4; the first draft wrongly put context size at 26.4 | Agent, from the parent's answer |

@@ -2,7 +2,7 @@
 
 ## 3.1 The AI on the phone
 
-**What it is.** Apple's on-device language model, reached through the `FoundationModels` framework. **Verified** by reading the interface in the iOS 27.2 kit on this Mac: chat sessions with separate instructions, streamed replies, tools the model can call, replies shaped as typed data (`@Generable`), an availability check, the model's context size and token counting (iOS 26.4 and later), and named error kinds.
+**What it is.** Apple's on-device language model, reached through the `FoundationModels` framework. **Verified** by reading the interface in the iOS 27.2 kit on this Mac: chat sessions with separate instructions, streamed replies, tools the model can call, replies shaped as typed data (`@Generable`), an availability check, the model's context size (iOS 26.0), token counting (iOS 26.4 and later only, so not on Ben's iOS 26.2), and named error kinds.
 
 **Why it suits this project.** No key, no account, no cost, works offline, and the student's words do not leave the phone. That removes the adult-and-money step every other AI path needs, and uses no exception to "data stays on the device".
 
@@ -30,7 +30,7 @@ Not given to the AI: judging whether work is correct, deciding a step is done, s
 
 - The rules text is the web app's, word for word, in `Shared/content.json`: hints and questions only, never the finished answer, short replies, point to sources, and reply with the safety word alone if the student seems to be in danger or distress.
 - The rules go in the session's **instructions**, which the framework keeps apart from the conversation. The student's guide is added as one quoted line that cannot imitate the rules. Search results are added as data, with the rules repeated after them.
-- The conversation is trimmed to fit the model's reported context, oldest first, leaving room for the rules and the reply. If the model still reports the context is full, drop more and try once more, then say "This chat got long. Start a new chat to keep going."
+- The conversation is trimmed to fit the model's reported context, oldest first (by token count where the phone offers it, otherwise by a cautious estimate from characters), leaving room for the rules and the reply. If the model still reports the context is full, drop more and try once more, then say "This chat got long. Start a new chat to keep going."
 
 ## 3.4 Checks before anyone but Ben uses it
 
