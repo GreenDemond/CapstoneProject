@@ -28,26 +28,6 @@ public enum Safety {
     let bare = form.trimmingCharacters(in: CharacterSet(charactersIn: "_").union(.whitespaces))
     return Text.collapsed(bare) == spaced
   }
-
-  /// The part of a streamed reply that may be shown now: only whole sentences, and never a
-  /// sentence that ends where the safety word could be starting ("... TRUSTED.").
-  public static func releasable(_ text: String, word: String) -> String {
-    let target = normalized(word)
-    for end in SentenceSplitter.boundaries(in: text).reversed() {
-      let head = String(text[..<end])
-      if !endsLikeWordStart(head, target: target) { return Text.trimmed(head) }
-    }
-    return ""
-  }
-
-  private static func endsLikeWordStart(_ text: String, target: String) -> Bool {
-    let form = normalized(text).trimmingCharacters(in: .whitespacesAndNewlines)
-    let firstWord = target.prefix { $0 != "_" }.count
-    for length in firstWord..<target.count where form.hasSuffix(String(target.prefix(length))) {
-      return true
-    }
-    return false
-  }
 }
 
 /// A last net against a reply that looks like finished work. It is a heuristic and does not replace

@@ -1,0 +1,21 @@
+{
+  "id": "FEAT-003",
+  "type": "fix",
+  "description": "Safety.swift: grep to confirm `releasable` and `endsLikeWordStart` have no callers, delete them; add tests for finished-essay multi-paragraph rule in looksFinished, cap(for:) medium, long, short. Gate 2 area: follow ios/AGENTS.md gate rules with a separate fresh review pass (say 'same model as Builder' if so). Commit.",
+  "status": "completed",
+  "steps": [
+    "grep callers",
+    "delete dead code",
+    "add tests in FocusKit/Tests",
+    "gate review"
+  ],
+  "acceptance_criteria": [
+    "swift test passes; Safety.swift coverage above 72.1%",
+    "no references to deleted functions"
+  ],
+  "verification": [
+    "cd ios/FocusKit && swift test --enable-code-coverage"
+  ],
+  "blocked_reason": null,
+  "findings": "Deleted unused Safety.releasable and endsLikeWordStart (no callers in ios/, grep confirmed). Added FocusKit/Tests/FocusKitTests/AnswerGuardTests.swift. swift test --disable-sandbox: 257 tests in 14 suites passed (was 250). Safety.swift coverage 51/51 lines, 100% (was 72.1%). Gate 2 review done as a separate fresh pass, same model as Builder: GO (pure deletion of dead code plus tests, no behaviour change, no Shared/cases edits). ios/DECISIONS.md had uncommitted edits before this task; left unstaged."
+}
