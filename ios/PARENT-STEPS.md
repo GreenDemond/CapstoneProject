@@ -10,7 +10,7 @@ You need: a Mac with Xcode (current release, with the iOS 26 SDK), your paid App
 2. In Xcode choose Xcode > Settings > Accounts. Click `+` and sign in with your Apple ID. (Xcode asks for the password itself. Do not share it with anyone or anything else.)
 3. In the left list, click the blue **FocusApp** project, then the **FocusApp** target, then **Signing & Capabilities**.
 4. Under **Team**, choose your developer team.
-5. Change the **Bundle Identifier** from `example.focusapp` to one you own, in the form `com.yourname.focusapp`. It must be unique to you. Do the same for the **FocusAppUITests** target if Xcode asks (keep it the same name plus `.UITests`).
+5. **Done 2026-11-21:** the Bundle Identifier is `com.craighagan.benssteps` (tests: `com.craighagan.benssteps.UITests`) and the team is set. Use the same identifier when you create the app record in App Store Connect, with the name "Ben's Steps" (or another free name).
 6. Open `ios/FocusKit/Sources/FocusKit/LookUp/WikipediaLookUp.swift`, line 10. Replace `set-by-owner@example.invalid` with a real email address you are happy for Wikipedia to see if their servers need to contact the app's owner. This goes in the app's requests. Use an address you are comfortable having public, not Ben's.
 7. On Ben's iPhone: Settings > Privacy & Security > Developer Mode > on. The phone restarts. Confirm when it asks.
 8. Plug the iPhone into the Mac. Tap **Trust** on the phone.

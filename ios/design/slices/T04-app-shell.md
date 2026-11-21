@@ -21,7 +21,7 @@ Not applicable yet.
 Native tabs; no pop-out window.
 
 ## Project file
-Written by hand: `App/FocusApp.xcodeproj` uses Xcode's folder-based groups (every file under `App/FocusApp` and `App/FocusAppUITests` is picked up) and the local package `../FocusKit`. It built on the first attempt, so the "two attempts" fallback in T04 was not needed. No signing team; the bundle identifier is the placeholder `example.focusapp` at the time; since replaced by `com.craighagan.focusapp` (see DECISIONS.md change log).
+Written by hand: `App/FocusApp.xcodeproj` uses Xcode's folder-based groups (every file under `App/FocusApp` and `App/FocusAppUITests` is picked up) and the local package `../FocusKit`. It built on the first attempt, so the "two attempts" fallback in T04 was not needed. No signing team; the bundle identifier is the placeholder `example.focusapp` at the time; since replaced by `com.craighagan.benssteps` (see DECISIONS.md change log).
 
 ## Findings
 - Xcode follows the `Resources/Shared` symlink inside FocusKit: `content.json` is inside `FocusApp.app/FocusKit_FocusKit.bundle/Shared/` in the built app. The `Shared/cases` test files are copied into the app too (small, harmless; remove with a build-setting exclusion later if wanted).
