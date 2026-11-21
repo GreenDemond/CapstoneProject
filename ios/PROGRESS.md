@@ -33,7 +33,7 @@ Nothing.
 - T16 was a self-review read-through only (no simulator, no Advisor or Checker, same model as Builder). It found no code defects. Still owed: simulator screen walk, `design/02` 2.11 row tests, `T16-strings.md`.
 - Shared starter step "Check what you missed" uses a word on the "never shame" list. Left as is; see `design/slices/T06`.
 - Ben's phone is on iOS 26.2; whether Apple Intelligence is on is not yet known. The iOS 26 deprecation-style warnings for `GenerationError` in the iOS 27 SDK are expected (the minimum is iOS 26.0).
-- The bundle identifier (`example.focusapp`) and signing team are the parent's to set in Xcode. The app's data folder is excluded from phone backup (the recommendation; the parent has not confirmed).
+- The bundle identifier is now `com.craighagan.focusapp` and the signing team is ANA76MNRSN (set 2026-11-20 at the parent's request, automatic signing). Not yet installed on a phone: the agent shell could not reach the phone service (CoreDevice timed out), so the install must be run from a normal Terminal. The app's data folder is excluded from phone backup (the recommendation; the parent has not confirmed).
 - Inside a sandboxed agent shell, Swift cannot start its macro plug-ins and SwiftPM cannot write its caches. `check.sh` detects this and adds the needed flags. Normal Macs need none.
 - Not done from the screens note: voice in on the editor rows, the Stuck boxes and the recall question (only the assignment, "say my steps", Talk and notes have the microphone); the AI looking things up (D8 row 2); the "test the guess" experiments.
 

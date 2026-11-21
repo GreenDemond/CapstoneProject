@@ -12,7 +12,7 @@ Choices already made for the iPhone app, with reasons, so agents do not re-ask. 
 | D4 | The app never asks for a name, age, school, or diagnosis | Rules 3 and 4 | Decided |
 | D5 | The app is fully usable with no AI | Not every phone has the AI, and the no-AI path must always exist | Decided |
 | D6 | Version 1 uses only the AI that runs on the phone. Apple's cloud model is never used. No AI keys in version 1 | Keeps every word on the device; needs no adult, account or money | **(waiting: parent)**. T11 to T13 are built on this recommendation (2026-11-20), pending confirmation: on-device AI only, no keys, no cloud model |
-| D7 | Voice: speech is turned into text on the phone; the microphone is on only while the student holds or taps the button; recordings are never kept; the app is silent unless the student turns its voice on | Rules 4 and 5; "no sound by default" | **(waiting: parent and Ben)**. T09 and T10 are built on this recommendation (2026-11-20), pending confirmation: voice off by default, microphone only while the button is held or tapped, nothing recorded |
+| D7 | Voice: speech is turned into text on the phone; the microphone is on only while the student holds or taps the button; recordings are never kept; the app is silent unless the student turns its voice on | Rules 4 and 5; "no sound by default" | **Parent decided 2026-11-20:** the microphone is used for voice interaction. Voice is two separate switches under Me: **Read aloud** (the app speaks) and **Talk** (the student speaks into the microphone). Either, both, or neither may be on. This replaces the three-way Quiet / I talk / We talk setting, which still needs changing in code. Still Ben's: whether both start off at first launch (recommended) |
 | D8 | What may leave the phone: see the table below. Nothing else, ever | Rule 4 stated openly | **(draft: parent to confirm before classmates)** |
 | D9 | Ben never runs a command or edits a file. The parent does every Apple account step (sign-in, signing, TestFlight, App Store). Agents never handle account details | Ben does not code; the account is the parent's | Decided |
 | D10 | One check command, `checks/check.sh`. A skipped part is reported as skipped | A wrong "it works" cannot be caught by anyone | Decided |
@@ -52,7 +52,7 @@ Chosen from the research so that work can start. Ben can change any of them.
 
 The questions, options and recommendations are in `design/04-engineering-and-plan.md` section 4.7. Task T00 records the answers here.
 
-**Parent:** sign in to Xcode and set the team; confirm D8; exclude the app's data from phone backup; the two extra safety signals; microphone use by students; who may receive a build.
+**Parent:** sign in to Xcode and set the team; confirm D8; exclude the app's data from phone backup; the two extra safety signals; who may receive a build.
 
 **Ben:** whether Apple Intelligence is on; voice at first launch; which way of making steps comes first; whether a suggested step must be changed before Start; the four places; what waits until after version 1; the app's name, the words for drifting and stuck, and how progress is shown.
 
@@ -71,3 +71,5 @@ Already answered:
 | 2026-11-20 | Minimum iOS set to 26.0 (was 26.4 in the first draft). Token counting is used only where the phone has it | Ben's iPhone 15 Pro Max runs iOS 26.2. The kit shows the model and its context size from 26.0 and token counting from 26.4; the first draft wrongly put context size at 26.4 | Agent, from the parent's answer |
 | 2026-11-20 | D1 decided: go ahead with a native iPhone app. The parent asked for "a complete working app" | The parent's request | Parent |
 | 2026-11-20 | T09 to T13 and T15 built on the recommendations for D6 and D7 without changing their status. They stay waiting for the parent (and Ben for D7). If either answer differs, the voice and AI parts switch off by setting Voice to Quiet and by `Services.none` | The parent asked for a complete working app; no answer had been given | Agent, on the parent's request |
+| 2026-11-20 | D7 and parent question 7 decided: the microphone is used for voice interaction (on-device speech to text, nothing recorded). Voice becomes two independent switches, Read aloud and Talk, instead of Quiet / I talk / We talk. Needs a code change to the voice setting and the Me screen, done as its own task | The parent wants reading aloud and talking to be separately toggleable | Parent |
+| 2026-11-20 | Bundle identifier set to `com.craighagan.focusapp` (tests: `com.craighagan.focusapp.UITests`) and signing team to ANA76MNRSN, automatic signing | The parent owns the Apple developer account and confirmed these | Parent |
