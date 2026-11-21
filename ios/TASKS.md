@@ -22,11 +22,11 @@ A task is `ready` when every task it depends on is `done` and everything on its 
 | T11 The phone's AI | done (compile-checked, not cleared) | T03, T00 | 2026-11-20 | check.sh: FocusKit passed (164 tests); app compiles for generic iOS; UI tests not run (no simulator), exit 3. Fake model only: the real model was not run. Built on D6's recommendation, pending confirmation. Fixed phrase list not built (needs approval). Self-review only. Advisor gate 2 owed |
 | T12 Talk | done (compile-checked) | T11, T06 | 2026-11-20 | check.sh: FocusKit passed (196 tests); app and UI tests compile for generic iOS; UI tests written, not run (no simulator), exit 3. Fake model only. Built on D6 and D7 recommendations, pending confirmation. Not cleared until T14. Self-review only. Advisor gate 2 owed |
 | T13 Step coach | done (compile-checked, not cleared) | T12, T05 | 2026-11-20 | check.sh: FocusKit passed (223 tests); app and UI tests compile for generic iOS; UI tests written, not run (no simulator), exit 3. Fake model only. Built on D6's recommendation, pending confirmation. Not cleared until T14. Self-review only. Advisor gate 2 owed |
-| T14 Answer-giving checks on a real phone | waiting | T12, T13, T17a | | Needs T17a (parent signs in to Xcode, builds to Ben's phone). Logic-side net (AnswerGuard, ProcessStep) is built and tested with fakes; it does not replace T14 |
+| T14 Answer-giving checks on a real phone | waiting on parent | T12, T13, T17a | | Needs T17a (parent signs in to Xcode, builds to Ben's phone). Logic-side net (AnswerGuard, ProcessStep) is built and tested with fakes; it does not replace T14 |
 | T15 Me | done (compile-checked) | T06 | 2026-11-20 | check.sh: FocusKit passed (247 tests); app and UI tests compile for generic iOS; UI tests written, not run (no simulator), exit 3. Sound answer does not change voice (see slice). Self-review only. Advisor gate 2 owed |
-| T16 Whole-app review | waiting | T05 to T15 | | |
-| T17a First build on Ben's phone | waiting | T06 | | |
-| T17b Version 1 build on Ben's phone | waiting | T16, T14 | | |
+| T16 Whole-app review | done (partial: self-review only) | T05 to T15 | 2026-11-20 | check.sh: FocusKit passed (247 tests); app and UI tests compile; UI tests SKIPPED (no simulator), exit 3. Read-through of every Words file, Safety/AnswerGuard, the trusted-adult path, backup exclusion, network use and secrets; no code defects found. NOT done: simulator screen walk, 2.11 row-by-row tests, `T16-strings.md`, Advisor verdict. No independent Checker or Advisor was possible (same model as Builder). Flagged: starter step "Check what you missed" (in `Shared/`, not edited) |
+| T17a First build on Ben's phone | waiting on parent | T06 | | Steps for the parent are in `PARENT-STEPS.md` (Xcode sign-in, team, bundle id, contact address, install) |
+| T17b Version 1 build on Ben's phone | waiting on parent | T16, T14 | | Needs T14 cleared by the Advisor, then a week of real use by Ben |
 
 Statuses: `waiting`, `ready`, `in progress`, `blocked` (say why in a line under the table), `done`.
 

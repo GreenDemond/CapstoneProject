@@ -27,6 +27,7 @@ Nothing.
 - **Two things were added that the parent must look at:** (1) a guardrail stop on the student's own chat message shows the trusted-adult line (a proposal in `design/03` 3.5, not yet approved); the fixed phrase list is NOT built. (2) The microphone's language files are fetched from Apple when the student taps Download. Nothing of the student's is sent; it is not a D8 row. Confirm that reading.
 - No Advisor or Checker agent ran for T04 to T15 (same model as Builder, self-review only). Advisor gate 2 is owed for T02 to T15. The highest-value reads are `AI/`, `Voice/`, `Models/ChatModel.swift`, the words in `Models/Words*.swift`, and the About text vs D8.
 - **Look it up needs a real contact** in `WikipediaLookUp.userAgent` (currently `set-by-owner@example.invalid`) before anyone else uses the app.
+- T16 was a self-review read-through only (no simulator, no Advisor or Checker, same model as Builder). It found no code defects. Still owed: simulator screen walk, `design/02` 2.11 row tests, `T16-strings.md`.
 - Shared starter step "Check what you missed" uses a word on the "never shame" list. Left as is; see `design/slices/T06`.
 - Ben's phone is on iOS 26.2; whether Apple Intelligence is on is not yet known. The iOS 26 deprecation-style warnings for `GenerationError` in the iOS 27 SDK are expected (the minimum is iOS 26.0).
 - The bundle identifier (`example.focusapp`) and signing team are the parent's to set in Xcode. The app's data folder is excluded from phone backup (the recommendation; the parent has not confirmed).
@@ -35,6 +36,8 @@ Nothing.
 
 ## Waiting on
 
+The parent's numbered steps and the plain-words list of open questions (each with a recommendation) are in `PARENT-STEPS.md`.
+
 See `DECISIONS.md`, "Waiting on". Open: D6, D7, D8 confirmation, the trusted-adult proposals, and the parent's Apple steps for T17a (sign in to Xcode, set the team and bundle identifier, run on Ben's phone, then `design/04` section 4.7 questions).
 
 ## Next
@@ -42,4 +45,13 @@ See `DECISIONS.md`, "Waiting on". Open: D6, D7, D8 confirmation, the trusted-adu
 1. On a computer with a simulator: `checks/check.sh`; fix UI test failures; look at every screen at the largest text size, in dark mode, on the smallest iPhone.
 2. T17a: the parent builds to Ben's phone (numbered steps are to be written for the parent; no account details are ever handled by an agent). Ben works through `checks/device-checks.md`.
 3. T14: the eight answer-giving attempts against Talk and the step coach on the phone, recorded word for word; Advisor gate 4.
-4. Advisor gate 2 on T02 to T15, then T16 whole-app review.
+4. Advisor gate 2 on T02 to T15, and a real T16 pass (simulator walk, `T16-strings.md`, Advisor verdict on the strings).
+
+## Report (session of 2026-11-20, T16 and parent steps)
+
+- **New:** nothing the student sees. `PARENT-STEPS.md` now gives you numbered Xcode, install, device-check and TestFlight steps, and the open questions with recommendations.
+- **Try it:** nothing in the app changed. Read `PARENT-STEPS.md` and follow part A and B on your Mac.
+- **Checked:** Builder ran `checks/check.sh`: 247 tests pass, app and UI tests compile for a generic iPhone. Builder re-read the student-facing words, safety and answer guard, trusted-adult path, backup exclusion, network use and secrets against the rules. No defects found. No Advisor or Checker ran (same model as Builder).
+- **Skipped:** UI tests (no simulator, exit 3); nothing run on a phone; T14 answer-giving checks; Advisor gates 2 and 4.
+- **Worries:** the app has never been run. The AI is built, not cleared. The starter step "Check what you missed" sits in `Shared/` and was not edited. The Wikipedia contact placeholder and bundle id are unset.
+- **Next:** you do `PARENT-STEPS.md` A to C; Ben does the device checks; then T14, then a stronger-model review.
