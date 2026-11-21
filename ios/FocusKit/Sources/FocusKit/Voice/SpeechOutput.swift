@@ -107,6 +107,29 @@ public struct SentenceSplitter: Sendable {
     return rest.isEmpty ? nil : rest
   }
 
+  /// The index where each complete sentence ends (before the space or new line that follows it).
+  public static func boundaries(in text: String) -> [String.Index] {
+    var found: [String.Index] = []
+    var index = text.startIndex
+    let closers: Set<Character> = ["\"", "'", ")", "]", "”", "’", "»"]
+    while index < text.endIndex {
+      let character = text[index]
+      if character == "\n" {
+        if index > text.startIndex { found.append(index) }
+      } else if ".!?…".contains(character) {
+        var end = text.index(after: index)
+        while end < text.endIndex, ".!?…".contains(text[end]) || closers.contains(text[end]) {
+          end = text.index(after: end)
+        }
+        if end < text.endIndex, text[end].isWhitespace { found.append(end) }
+        index = end
+        continue
+      }
+      index = text.index(after: index)
+    }
+    return found
+  }
+
   /// The complete sentences in `text`, and what is left after them.
   public static func split(_ text: String) -> (sentences: [String], remainder: String) {
     var sentences: [String] = []

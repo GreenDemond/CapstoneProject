@@ -13,7 +13,7 @@ enum AppBoot {
     let store = FileStore(folder: folder, limits: content.limits)
     let services = Services(
       speechInput: AppleSpeechInput(), speechOutput: AppleSpeechOutput(),
-      headphones: AppleHeadphones())
+      headphones: AppleHeadphones(), languageModel: AppleLanguageModel())
     return AppModel(content: content, store: store, services: services)
   }
 
