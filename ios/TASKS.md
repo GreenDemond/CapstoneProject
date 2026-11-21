@@ -10,7 +10,7 @@ A task is `ready` when every task it depends on is `done` and everything on its 
 |---|---|---|---|---|
 | T00 Decisions and design review | ready | | | |
 | T01 Skeleton | done | | 2026-11-20 | check.sh: FocusKit passed; `SKIPPED: no iOS simulator`, exit 3 |
-| T02 Content and logic | waiting | T01 | | |
+| T02 Content and logic | done | T01 | 2026-11-20 | check.sh: FocusKit passed (27 tests, all 8 case files named `cases/<file>.json`); `SKIPPED: no iOS simulator`, exit 3. Checker: same model as Builder |
 | T03 Storage | waiting | T02 | | |
 | T04 App shell | waiting | T03, T00 | | |
 | T05 Assignment and editor | waiting | T04 | | |

@@ -5,6 +5,7 @@ The memory between sessions. Rewrite it each session; do not let it grow into a 
 ## Working
 
 - T01 skeleton: `FocusKit` package with the content loader and 7 passing tests; `checks/check.sh`; `.swift-format`; `.gitignore`. No Xcode project yet.
+- T02 logic: work steps and the five choices, hints, starter steps, paste cleaning, welcome line, guide cleaning and AI instructions, safe sources, history trimming. All eight `Shared/cases` files pass; 27 tests.
 - The design is written (`design/01` to `04`), with rules for agents (`AGENTS.md`), decisions (`DECISIONS.md`), a task list (`TASKS.md`), the research (`research/`), and starting content with test cases (`Shared/`).
 
 ## In progress
@@ -27,4 +28,4 @@ See `DECISIONS.md`, "Waiting on". D1 is answered (2026-11-20). Other questions s
 
 0. If this folder was moved out of the web project: run `git init` here and make a first commit before anything else.
 1. T00: put the questions to the parent and Ben, record the answers, and get an Advisor review of the design.
-2. T01 to T03 (skeleton, content and logic, storage). These need no simulator.
+2. T03 (storage). Needs no simulator.
