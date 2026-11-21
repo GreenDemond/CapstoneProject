@@ -288,7 +288,10 @@ import Testing
     #expect(text.contains("audio, a name, an age, a school, a diagnosis"))
     // Apple's own cloud model is never used. "iCloud" is the student's own backup (D8).
     #expect(!text.lowercased().contains("private cloud"))
-    #expect(text.contains("Use my own AI service"))
+    #expect(text.contains("add an AI service in Me"))
     #expect(text.contains("Keychain"))
+    #expect(text.contains("Check connection"))
+    #expect(text.contains("Look up models"))
+    #expect(text.contains("not encrypted"))
   }
 }

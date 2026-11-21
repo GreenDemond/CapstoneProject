@@ -10,6 +10,12 @@ public protocol HTTPTransport: Sendable {
   func send(_ request: URLRequest) async throws -> (data: Data, status: Int)
 }
 
+/// The most a reply may be, in bytes. A longer reply is refused, and nothing from it is kept. The
+/// live transport reads at most one byte past this, so a huge reply is never held in memory.
+public enum ReplyLimit {
+  public static let bytes = 1_000_000
+}
+
 /// The real transport: no cookies, no cache, no redirects (a redirect could carry the key to
 /// another host), and a time limit.
 public struct LiveHTTPTransport: HTTPTransport {
@@ -28,8 +34,14 @@ public struct LiveHTTPTransport: HTTPTransport {
   }
 
   public func send(_ request: URLRequest) async throws -> (data: Data, status: Int) {
-    let (data, response) = try await session.data(for: request, delegate: NoRedirects())
+    let (bytes, response) = try await session.bytes(for: request, delegate: NoRedirects())
     guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+    // Stop one byte past the limit. Leaving the loop ends the request, so the rest is never read.
+    var data = Data()
+    for try await byte in bytes {
+      data.append(byte)
+      if data.count > ReplyLimit.bytes { break }
+    }
     return (data, http.statusCode)
   }
 
@@ -53,8 +65,9 @@ public struct OwnAIConfig: Equatable, Sendable {
     self.modelName = modelName
   }
 
-  /// The address as a URL, or nil. Only https is accepted. No password in the address and no
-  /// query or fragment (a key put in the address would end up in the settings file).
+  /// The address as a URL, or nil. https and http are accepted (the parent's decision, 2026-11-21;
+  /// see `isEncrypted`). No password in the address and no query or fragment (a key put in the
+  /// address would end up in the settings file).
   public var url: URL? { Self.parse(address) }
 
   public static let addressLimit = 500
@@ -62,19 +75,86 @@ public struct OwnAIConfig: Equatable, Sendable {
 
   public static func parse(_ text: String) -> URL? {
     let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-    guard !trimmed.isEmpty, trimmed.utf16.count <= addressLimit,
-      let parts = URLComponents(string: trimmed),
-      parts.scheme?.lowercased() == "https",
+    guard !trimmed.isEmpty, trimmed.utf16.count <= addressLimit else { return nil }
+    let withScheme = addingSchemeIfMissing(trimmed)
+    guard let parts = URLComponents(string: withScheme),
+      let scheme = parts.scheme?.lowercased(), scheme == "https" || scheme == "http",
       let host = parts.host, !host.isEmpty,
       parts.user == nil, parts.password == nil,
       parts.query == nil, parts.fragment == nil
     else { return nil }
-    var secure = parts
-    secure.scheme = "https"
-    return secure.url
+    var normal = parts
+    normal.scheme = scheme
+    normal.path = chatPath(host: host, path: parts.path)
+    return normal.url
   }
 
-  public var hasModelName: Bool { !modelName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+  /// A host with no scheme, such as `openrouter.ai/api/v1` or `localhost:11434`, is taken as https.
+  /// Anything else with a colon before the host (`javascript:...`) is left alone so it is refused.
+  static func addingSchemeIfMissing(_ text: String) -> String {
+    if text.contains("://") { return text }
+    let hostPart =
+      text.split(separator: "/", maxSplits: 1, omittingEmptySubsequences: false)
+      .first.map(String.init) ?? text
+    guard !hostPart.contains(":") || isHostWithPort(hostPart) else { return text }
+    let host = hostPart.split(separator: ":").first.map(String.init) ?? hostPart
+    guard host == "localhost" || host.contains(".") else { return text }
+    return "https://" + text
+  }
+
+  private static func isHostWithPort(_ hostPart: String) -> Bool {
+    guard let colon = hostPart.lastIndex(of: ":") else { return false }
+    let host = hostPart[..<colon]
+    let port = hostPart[hostPart.index(after: colon)...]
+    let hostOK =
+      !host.isEmpty && host.allSatisfy { $0.isLetter || $0.isNumber || $0 == "." || $0 == "-" }
+    return hostOK && !port.isEmpty && port.allSatisfy(\.isNumber)
+  }
+
+  /// Turns the base address a provider shows (for example `https://openrouter.ai/api/v1`,
+  /// `https://api.openai.com`, or `http://localhost:11434`) into the chat address. The app adds
+  /// `/chat/completions`, and OpenRouter's `/api` prefix, when they are missing.
+  static func chatPath(host: String, path: String) -> String {
+    var base = path
+    while base.hasSuffix("/") { base.removeLast() }
+    if base.hasSuffix("/chat/completions") { return base }
+    // Only a base address is completed. Any other path is the student's own and is kept as typed.
+    let isBase = base.isEmpty || base == "/api" || base == "/v1" || base == "/api/v1"
+    guard isBase else { return base }
+    if host.lowercased() == "openrouter.ai", !base.hasPrefix("/api") {
+      base = "/api" + base
+    }
+    if !base.hasSuffix("/v1") {
+      base += "/v1"
+    }
+    return base + "/chat/completions"
+  }
+
+  /// False for a good http address: the key and the messages would travel unencrypted.
+  public var isEncrypted: Bool { url?.scheme == "https" }
+
+  /// A Tailscale address: a `.ts.net` name or an address in 100.64.0.0/10. Its traffic is
+  /// encrypted end to end by the tailnet, so http there does not need the unencrypted warning.
+  public var isTailnet: Bool {
+    guard let host = url?.host?.lowercased() else { return false }
+    if host == "ts.net" || host.hasSuffix(".ts.net") { return true }
+    let octets = host.split(separator: ".").compactMap { Int($0) }
+    guard octets.count == 4 else { return false }
+    return octets[0] == 100 && (64...127).contains(octets[1])
+  }
+
+  /// True when chat should say the messages are not encrypted: http, and not a Tailscale address.
+  public var needsUnencryptedWarning: Bool { !isEncrypted && !isTailnet }
+
+  /// The provider's page on getting a key, when the address is OpenRouter's.
+  public var keyHelpURL: URL? {
+    guard let host = url?.host?.lowercased(), host == "openrouter.ai" else { return nil }
+    return URL(string: Words.ownAIKeyHelpURL)
+  }
+
+  public var hasModelName: Bool {
+    !modelName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+  }
 }
 
 /// How a "Check connection" went. Never carries text from the service.
@@ -93,17 +173,23 @@ public final class OpenAICompatibleModel: LanguageModel, Sendable {
   public static let checkMessage = "Hello"
 
   private let config: OwnAIConfig
+  private let account: String
   private let keys: any KeyStore
   private let transport: any HTTPTransport
 
-  public init(config: OwnAIConfig, keys: any KeyStore, transport: any HTTPTransport) {
+  /// One service: its address and model, and the account of its own key. This model reads no other
+  /// account, so it can never send another service's key.
+  public init(
+    config: OwnAIConfig, account: String, keys: any KeyStore, transport: any HTTPTransport
+  ) {
     self.config = config
+    self.account = account
     self.keys = keys
     self.transport = transport
   }
 
   public var availability: ModelAvailability {
-    config.url != nil && config.hasModelName && keys.hasKey ? .available : .other
+    config.url != nil && config.hasModelName && keys.hasKey(account: account) ? .available : .other
   }
 
   /// A cautious size for services the app knows nothing about, as small as the phone's own model.
@@ -165,7 +251,9 @@ public final class OpenAICompatibleModel: LanguageModel, Sendable {
 
   /// The failures are the app's own words for what went wrong. No service text, no key.
   private func complete(instructions: String, messages: [ChatMessage]) async throws -> String {
-    guard let url = config.url, config.hasModelName, let key = keys.read(), !key.isEmpty else {
+    guard let url = config.url, config.hasModelName, let key = keys.read(account: account),
+      !key.isEmpty
+    else {
       throw ModelFailure.unavailable
     }
     var lines = [Body.Line(role: "system", content: instructions)]
@@ -207,10 +295,94 @@ public final class OpenAICompatibleModel: LanguageModel, Sendable {
     default:
       throw ModelFailure.unavailable
     }
-    guard let answer = try? JSONDecoder().decode(Answer.self, from: data),
+    guard data.count <= ReplyLimit.bytes,
+      let answer = try? JSONDecoder().decode(Answer.self, from: data),
       let text = answer.choices?.first?.message?.content,
       !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     else { throw ModelFailure.other }
     return text
+  }
+}
+
+/// What "Look up models" found. Never carries text from the service other than plain model names.
+public enum ModelLookup: Equatable, Sendable {
+  case found([String])
+  /// The address is not a standard chat address, so the list's address is not known.
+  case noListAddress
+  case keyNotAccepted
+  case busy
+  case problem
+}
+
+/// Optional: asks the service for the names of its models, so the student can pick one instead of
+/// typing it. Typing always works. Lessons from the web app (`js/ai-direct.js`, `js/logic/ai-services.js`):
+/// the list's address is the chat address with `/models` in place of `/chat/completions` and the
+/// app never guesses another; only plain names are kept; at most 1000; a failure never blocks typing.
+public enum ModelLister {
+  public static let suffix = "/chat/completions"
+  public static let most = 1000
+
+  /// The list's address, on the same scheme, host and port as the chat address, or nil.
+  public static func listAddress(for chat: URL?) -> URL? {
+    guard let chat, var parts = URLComponents(url: chat, resolvingAgainstBaseURL: false),
+      parts.path.hasSuffix(suffix)
+    else { return nil }
+    parts.path = String(parts.path.dropLast(suffix.count)) + "/models"
+    parts.query = nil
+    parts.fragment = nil
+    return parts.url
+  }
+
+  /// Plain names only: letters, digits and . _ : / ~ -, 1 to 100 characters.
+  static func readNames(_ data: Data) -> [String] {
+    struct Reply: Decodable {
+      struct Item: Decodable { var id: String? }
+      var data: [Item]?
+    }
+    guard data.count <= ReplyLimit.bytes,
+      let reply = try? JSONDecoder().decode(Reply.self, from: data)
+    else { return [] }
+    let allowed = Set("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._:/~-")
+    var seen = Set<String>()
+    var names: [String] = []
+    for item in reply.data ?? [] {
+      guard let id = item.id?.trimmingCharacters(in: .whitespacesAndNewlines),
+        (1...100).contains(id.count), id.allSatisfy(allowed.contains), seen.insert(id).inserted
+      else { continue }
+      names.append(id)
+      if names.count == most { break }
+    }
+    return names
+  }
+
+  /// One GET. The key (the one just typed, or else the one saved for this service's account) goes
+  /// only in the Authorization header, to the list address built from this service's own address.
+  /// No key at all is fine: some lists are public.
+  public static func lookUp(
+    config: OwnAIConfig, typedKey: String?, account: String?, keys: any KeyStore,
+    transport: any HTTPTransport
+  ) async -> ModelLookup {
+    guard let url = listAddress(for: config.url) else { return .noListAddress }
+    var request = URLRequest(url: url, timeoutInterval: LiveHTTPTransport.timeLimit)
+    request.httpMethod = "GET"
+    request.setValue("application/json", forHTTPHeaderField: "Accept")
+    let typed = typedKey?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+    let key = !typed.isEmpty ? typed : account.flatMap { keys.read(account: $0) } ?? ""
+    if !key.isEmpty { request.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization") }
+    let data: Data
+    let status: Int
+    do {
+      (data, status) = try await transport.send(request)
+    } catch {
+      return .problem
+    }
+    switch status {
+    case 200...299:
+      let names = readNames(data)
+      return names.isEmpty ? .problem : .found(names)
+    case 401, 403: return .keyNotAccepted
+    case 429: return .busy
+    default: return .problem
+    }
   }
 }

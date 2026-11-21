@@ -44,6 +44,17 @@ final class TalkUITests: XCTestCase {
     XCTAssertTrue(app.staticTexts["No saved chats yet."].waitForExistence(timeout: 5))
   }
 
+  /// The keyboard can be put away from the chat box, so the rest of the screen is reachable.
+  func testKeyboardCanBePutAwayInChat() {
+    let app = launch()
+    let input = app.textFields["talk-input"]
+    input.tap()
+    XCTAssertTrue(app.keyboards.count > 0)
+    app.buttons["talk-keyboard-done"].tap()
+    XCTAssertTrue(app.buttons["talk-send"].waitForExistence(timeout: 5))
+    XCTAssertEqual(app.keyboards.count, 0)
+  }
+
   /// With no AI the screen says so calmly and still offers hints and Look it up.
   func testNoAIStillOffersHintsAndLookUp() {
     let app = XCUIApplication()

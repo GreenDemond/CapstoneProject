@@ -1,5 +1,5 @@
 # AI-own-service-and-backup: Use my own AI service, and the backup switch
-Status: built 2026-11-21 (decided by the parent the same day, D6 and D13)
+Status: built 2026-11-21 (decided by the parent the same day, D6 and D13). **The single own service was replaced by a list of up to five on 2026-11-21 (build 6): see `AI-multiple-services.md`.** The backup part below is unchanged.
 
 ## What the student sees and does
 1. Nothing changes for a student who never opens Me. Apple's on-device AI is used, and the data folder is included in the phone's backup (new default).

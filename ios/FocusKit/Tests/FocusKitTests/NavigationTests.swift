@@ -164,7 +164,8 @@ import Testing
 
   @Test func talkCanBeRetriedWhenTheAIWasNotReady() {
     let fake = FakeLanguageModel(availability: .notReady)
-    let speaker = SpeakerModel(output: FakeSpeechOutput(), headphones: FakeHeadphones(connected: true))
+    let speaker = SpeakerModel(
+      output: FakeSpeechOutput(), headphones: FakeHeadphones(connected: true))
     let chat = ChatModel(
       content: content, store: store, clock: clock, model: fake, speaker: speaker)
     #expect(chat.unavailableLine != nil)

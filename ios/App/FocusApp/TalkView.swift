@@ -1,7 +1,7 @@
 import FocusKit
 import SwiftUI
 
-/// The Talk tab: a hints-only chat with the AI on this iPhone, by typing or by voice.
+/// The Talk tab: a hints-only chat with the AI in use, by typing or by voice.
 struct TalkView: View {
   let model: AppModel
 
@@ -21,24 +21,22 @@ struct ChatScreen: View {
   @State private var showingChats = false
   @State private var hints: LadderModel?
   @State private var began = false
+  @FocusState private var inputFocused: Bool
 
   private var talk: ChatModel { model.talk }
 
   var body: some View {
     VStack(alignment: .leading, spacing: 0) {
-      if model.ownAI.isReady {
-        Picker(
-          Words.ownAIWhichAI,
-          selection: Binding(
-            get: { model.ownAI.isInUse }, set: { model.ownAI.use(own: $0) })
-        ) {
-          Text(Words.ownAIThisPhone).tag(false)
-          Text(Words.ownAIMine).tag(true)
-        }
-        .pickerStyle(.segmented)
-        .padding(.horizontal, Theme.Space.medium)
-        .padding(.top, Theme.Space.small)
-        .accessibilityIdentifier("talk-which-ai")
+      if model.ownAI.showsPicker {
+        whichAI
+      }
+      if let line = model.ownAI.fellBackLine {
+        Text(verbatim: line)
+          .font(Theme.Typography.small)
+          .foregroundStyle(Theme.Palette.quiet)
+          .padding(.horizontal, Theme.Space.medium)
+          .padding(.top, Theme.Space.small)
+          .accessibilityIdentifier("talk-fell-back")
       }
       Text(talk.privacyLine)
         .font(Theme.Typography.small)
@@ -58,17 +56,54 @@ struct ChatScreen: View {
         Button(Words.talkMyChats) { showingChats = true }
           .accessibilityIdentifier("talk-chats")
       }
+      ToolbarItemGroup(placement: .keyboard) {
+        Spacer()
+        Button(Words.talkKeyboardDone) { inputFocused = false }
+          .accessibilityIdentifier("talk-keyboard-done")
+      }
     }
     .sheet(isPresented: $showingChats) { ChatListView(talk: talk, close: { showingChats = false }) }
     .onAppear {
       talk.refreshAvailability()
       if hints == nil { hints = model.freshHints() }
+      if step == nil, talk.isAboutAStep { talk.newChat() }
       if let step, !began {
         began = true
         talk.begin(stepText: step.text, kindId: step.kindId)
       }
     }
     .onDisappear { talk.leave() }
+  }
+
+  // MARK: Which AI
+
+  /// "On this iPhone" first, then each ready service by its label. Always visible, one tap: a
+  /// segmented control for up to two services, a menu that shows the choice for more.
+  @ViewBuilder
+  private var whichAI: some View {
+    let choice = Binding<String?>(
+      get: { model.ownAI.chosenId }, set: { model.ownAI.use($0) })
+    Group {
+      if model.ownAI.usesSegments {
+        Picker(Words.ownAIWhichAI, selection: choice) { choices }
+          .pickerStyle(.segmented)
+      } else {
+        Picker(Words.ownAIWhichAI, selection: choice) { choices }
+          .pickerStyle(.menu)
+      }
+    }
+    .padding(.horizontal, Theme.Space.medium)
+    .padding(.top, Theme.Space.small)
+    .accessibilityLabel(Words.ownAIWhichAI)
+    .accessibilityIdentifier("talk-which-ai")
+  }
+
+  @ViewBuilder
+  private var choices: some View {
+    Text(Words.ownAIThisPhone).tag(String?.none)
+    ForEach(model.ownAI.readyServices) { service in
+      Text(verbatim: service.label).tag(Optional(service.id))
+    }
   }
 
   // MARK: The conversation
@@ -187,6 +222,7 @@ struct ChatScreen: View {
           )
           .font(Theme.Typography.body)
           .lineLimit(1...5)
+          .focused($inputFocused)
           .cardStyle()
           .accessibilityLabel(Words.talkPlaceholder)
           .accessibilityIdentifier("talk-input")

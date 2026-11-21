@@ -50,8 +50,11 @@ public final class ChatModel {
   public var onUseSteps: ([String], String?) -> Void = { _, _ in }
   /// The current settings (guide, reply length). Set by the app.
   public var settings: () -> Settings = { Settings() }
-  /// Whether the student's own AI service is the one in use. Set by the app.
-  public var usingOwnService: () -> Bool = { false }
+  /// The label of the student's own AI service when one is in use, or nil for the AI on this
+  /// iPhone. Set by the app.
+  public var ownServiceLabel: () -> String? = { nil }
+  /// Whether that service's address starts with http://. Set by the app.
+  public var ownServiceUsesHttp: () -> Bool = { false }
 
   private let content: Content
   private let store: any Store
@@ -85,7 +88,11 @@ public final class ChatModel {
   public var isAvailable: Bool { availability == .available }
 
   /// The line at the top of the screen: where the messages go.
-  public var privacyLine: String { usingOwnService() ? Words.talkPrivacyOwn : Words.talkPrivacy }
+  public var privacyLine: String {
+    guard let label = ownServiceLabel() else { return Words.talkPrivacy }
+    return ownServiceUsesHttp()
+      ? Words.talkPrivacyOwnHttp(label: label) : Words.talkPrivacyOwn(label: label)
+  }
 
   public var unavailableLine: String? {
     availability == .available ? nil : Words.aiUnavailable(availability)
@@ -114,6 +121,10 @@ public final class ChatModel {
     stopAndKeep()
     startFresh(kind: nil, step: nil)
   }
+
+  /// True while the chat is about a step from "Talk it through". Opening Talk from the tab bar
+  /// starts a fresh chat when this is true, so an old step does not steer a new conversation.
+  public var isAboutAStep: Bool { step != nil }
 
   /// "Talk it through" from Stuck: a new chat that knows the step and the kind of work.
   public func begin(stepText: String, kindId: String?) {

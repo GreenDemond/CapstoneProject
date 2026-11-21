@@ -95,19 +95,24 @@ You need Apple Intelligence switched on (Settings, Apple Intelligence & Siri). W
 60. Turn Apple Intelligence off in Settings and open Talk. You should see a calm line, **Try again**, hints, and Look it up. Nothing should be stuck.
 61. Turn on Airplane Mode, then Look it up. You should see a calm line and **Try again**. Turn Airplane Mode off and tap Try again: results should appear.
 
-## Your own AI service and the backup switch (2026-11-21)
+## Your own AI services and the backup switch (2026-11-21, build 6)
 
-Use a key you own. Never paste a key anywhere except the Key box on the phone. Build 5 or later.
+Use keys you own. Steps 62 to 78 replace the single-service steps of build 5.
 
-62. Open Me and scroll to **Use my own AI service**. It should be off. Above the switch you should read a line saying what is sent (chat messages, the step and assignment text, the app's rules) and that the service's own privacy rules apply. The switch should be greyed out.
-63. In **Address** type `http://example.com/x`. You should see a calm line saying it must start with https://, and the switch stays greyed out.
-64. Replace it with your service's full address, for example `https://api.openai.com/v1/chat/completions`. In **Model name** type the model. In **Key** paste your key and tap **Save key**. The box should empty, and the line should say "A key is saved on this iPhone." The key itself must never appear on the screen.
-65. Tap **Check connection**. You should see "It works." (or a calm line about the key, a busy service, or the address).
-66. Turn the switch on. Open Talk. At the top you should see a switch **On this iPhone | My service** with My service chosen, and the line "Your messages go to the AI service you chose in Me, and its own privacy rules apply."
-67. Send "I'm stuck on my essay". You should get a hint or a question, not a finished answer.
-68. Tap **On this iPhone**. The line should change to "This AI runs on this iPhone..." and a new message should be answered by Apple's AI. Tap **My service** to switch back.
-69. In Me, remove the key (**Remove key**) and paste a wrong key, save it, and send a message on Talk. You should see "The key wasn't accepted..." and your message should still be in the box.
-70. Switch **Use my own AI service** off. The switch on Talk should disappear and Apple's AI should be used.
-71. Look in Me for **Include in my iPhone backup**. It should be on. Turn it off and on again; nothing should look different.
-72. **T14 for the own service:** with the service on, run the eight answer-giving attempts in `design/03` section 3.4 against Talk and the step coach, and record every reply word for word. This is separate from the Apple model's attempts.
-73. Open About and privacy. It should mention the own AI service, the Keychain, and the iPhone backup. Tap **Delete everything on this iPhone** twice. Open Me again: the key line should say "No key saved." and the service should be off.
+62. Open Me and scroll to **My AI services**. It should say no services are added. Above the list you should read a line saying what is sent (chat messages, the step and assignment text, the app's rules) and that the service's own privacy rules apply. **Add a service** should be tappable.
+63. Tap **Add a service**. In **Address** type `ftp://example.com/x`. You should see a calm line saying it must start with https:// or http://. Change it to `http://example.com/v1/chat/completions`: the calm line should become one saying the address is not encrypted. Tap **Cancel**. Nothing should be added.
+64. Add service one. Tap **Add a service**. Label `One`, Address your first service's full address (for example `https://api.openai.com/v1/chat/completions`), Key your key. Tap **Look up models**: you should see "Found N models" and a **Pick a model** menu; pick one and see it appear in **Model name** (or type a name yourself, which always works). Tap **Save service**. The key box should empty and the key itself must never appear on the screen. The list should show **One** with "Ready".
+65. Add service two the same way, with a different label (for example `Two`), address and key. Try the same label again as a third service: you should see "You already have a service with that label."
+66. Tap **Check connection One**, then **Check connection Two**. Each should say "It works." (or a calm line about the key, a busy service, or the address). Each check uses its own service's key.
+67. Open Talk. At the top you should see **On this iPhone | One | Two** with On this iPhone chosen, and the line "This AI runs on this iPhone...". Tap **One**: the line should now begin "Your messages go to One...". Send "I'm stuck on my essay". You should get a hint or a question, not a finished answer. Tap **Two** and send another message. Tap **On this iPhone** and send one more.
+68. Leave Talk and come back, then close and reopen the app. The last choice should still be there.
+69. Remove one while it is chosen. Choose **Two** on Talk. In Me tap **Remove Two** once: it should ask "Tap again to remove" and nothing is removed yet. Tap again. Open Talk: **Two** is gone from the choice, **On this iPhone** is chosen, and one calm line says the AI on this iPhone is being used. A new message is answered by Apple's AI.
+70. Wrong key on one. In Me, **Edit One**, paste a wrong key, **Save service**. Choose **One** on Talk and send a message. You should see "The key wasn't accepted..." and your message should still be in the box. Tap **Check connection One**: the same calm line. Edit One again and paste the right key.
+71. Edit One and change its address to a different host. The saved key should be removed (the screen says so) and One should show "Needs a key". Paste the key again and save.
+72. Add services until there are five. **Add a service** should be greyed out with a calm line saying five is the most.
+73. Look in Me for **Include in my iPhone backup**. It should be on. Turn it off and on again; nothing should look different.
+74. If your phone ran build 5 with the own service on: after installing build 6, Me should list one service called **My service** with your old address and model, "Ready", and Talk should still be using it with no key re-entry. If it was off, **My service** is listed but Talk starts on On this iPhone.
+75. **T14 for each own service:** with each service chosen in turn, run the eight answer-giving attempts in `design/03` section 3.4 against Talk and the step coach, and record every reply word for word. This is separate from the Apple model's attempts.
+76. With an `http://` service (for example one on your own network), choose it on Talk and send a message. It should work, and the About text says http is not encrypted. Only use http for a service you trust on a network you trust.
+77. Open About and privacy. It should mention adding your own AI service, Check connection, Look up models, the Keychain, http not being encrypted, and the iPhone backup.
+78. Tap **Delete everything on this iPhone** twice. Open Me again: the list should be empty and Talk should have no choice. Add a service: its key line should say "No key saved." before you paste one.

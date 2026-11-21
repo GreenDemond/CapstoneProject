@@ -267,11 +267,11 @@ struct AboutView: View {
   }
 }
 
-/// "Use my own AI service": off by default. The line about what is sent is always shown above the
-/// switch, and the switch needs it to have been shown.
+/// "My AI services": none at first. The line about what is sent is always shown at the top, and
+/// nothing can be added until it has been shown. All behaviour is in `OwnAIModel`.
 struct OwnAISection: View {
   let model: AppModel
-  @State private var keyDraft = ""
+  @State private var editing: ServiceTarget?
 
   private var own: OwnAIModel { model.ownAI }
 
@@ -282,86 +282,273 @@ struct OwnAISection: View {
         .foregroundStyle(Theme.Palette.ink)
         .onAppear { own.noteDisclosureShown() }
         .accessibilityIdentifier("own-ai-disclosure")
-      VStack(alignment: .leading, spacing: Theme.Space.tiny) {
-        Text(Words.ownAIAddress).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
-        TextField(
-          Words.ownAIAddressPlaceholder,
-          text: Binding(get: { own.address }, set: { own.setAddress($0) })
-        )
-        .textInputAutocapitalization(.never)
-        .autocorrectionDisabled()
-        .keyboardType(.URL)
-        .font(Theme.Typography.body)
-        .accessibilityLabel(Words.ownAIAddress)
-        .accessibilityIdentifier("own-ai-address")
-        if let problem = own.addressProblem {
-          Text(verbatim: problem).font(Theme.Typography.small)
-            .foregroundStyle(Theme.Palette.quiet)
-            .accessibilityIdentifier("own-ai-address-problem")
-        } else {
-          Text(Words.ownAIAddressNote).font(Theme.Typography.small)
-            .foregroundStyle(Theme.Palette.quiet)
+      if own.services.isEmpty {
+        Text(Words.ownAIEmpty).font(Theme.Typography.body).foregroundStyle(Theme.Palette.quiet)
+          .accessibilityIdentifier("own-ai-empty")
+      }
+      ForEach(own.services) { service in
+        ServiceRow(
+          model: model, service: service, edit: { editing = ServiceTarget(id: service.id) })
+      }
+      Button(Words.ownAIAdd) { editing = ServiceTarget(id: nil) }
+        .disabled(!own.canAdd)
+        .accessibilityLabel(Words.ownAIAdd)
+        .accessibilityIdentifier("own-ai-add")
+        .sheet(item: $editing) { target in
+          ServiceEditor(model: model, id: target.id, close: { editing = nil })
         }
+      if own.isFull {
+        Text(Words.ownAIFull).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
+          .accessibilityIdentifier("own-ai-full")
       }
-      VStack(alignment: .leading, spacing: Theme.Space.tiny) {
-        Text(Words.ownAIKey).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
-        Text(own.keyLine).font(Theme.Typography.body).foregroundStyle(Theme.Palette.ink)
-          .accessibilityIdentifier("own-ai-key-line")
-        SecureField(Words.ownAIKeyPlaceholder, text: $keyDraft)
-          .textInputAutocapitalization(.never)
-          .autocorrectionDisabled()
-          .font(Theme.Typography.body)
-          .accessibilityLabel(Words.ownAIKey)
-          .accessibilityIdentifier("own-ai-key")
-        Button(Words.ownAIKeySave) {
-          own.saveKey(keyDraft)
-          keyDraft = ""
-        }
-        .disabled(keyDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-        .accessibilityIdentifier("own-ai-key-save")
-        if own.hasKey {
-          Button(Words.ownAIKeyRemove, role: .destructive) { own.removeKey() }
-            .accessibilityIdentifier("own-ai-key-remove")
-        }
-        if let note = own.keyNote {
-          Text(note).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
-        }
-        Text(Words.ownAIKeyNote).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
-      }
-      VStack(alignment: .leading, spacing: Theme.Space.tiny) {
-        Text(Words.ownAIModel).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
-        TextField(
-          Words.ownAIModelPlaceholder,
-          text: Binding(get: { own.modelName }, set: { own.setModelName($0) })
-        )
-        .textInputAutocapitalization(.never)
-        .autocorrectionDisabled()
-        .font(Theme.Typography.body)
-        .accessibilityLabel(Words.ownAIModel)
-        .accessibilityIdentifier("own-ai-model")
-      }
-      Button(own.checkState == .checking ? Words.ownAIChecking : Words.ownAICheck) {
-        Task { await own.checkConnection() }
-      }
-      .disabled(!own.canCheck)
-      .accessibilityIdentifier("own-ai-check")
-      if let line = own.checkLine {
-        Text(verbatim: line).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
-          .accessibilityIdentifier("own-ai-check-line")
-      }
-      Toggle(
-        Words.ownAISwitch,
-        isOn: Binding(get: { own.isOn }, set: { own.setOn($0) })
-      )
-      .disabled(!own.isOn && !own.canSwitchOn)
-      .accessibilityIdentifier("own-ai-switch")
-      if !own.isOn && !own.canSwitchOn {
-        Text(Words.ownAINeedsFirst).font(Theme.Typography.small)
-          .foregroundStyle(Theme.Palette.quiet)
+      if let note = own.note {
+        Text(verbatim: note).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
+          .accessibilityIdentifier("own-ai-note")
       }
     } header: {
       Text(Words.ownAITitle)
     }
     .listRowBackground(Theme.Palette.card)
+  }
+}
+
+/// Which service the editor is open for: nil is a new one.
+private struct ServiceTarget: Identifiable {
+  let id: String?
+}
+
+/// One service in the list: its label and state, and Edit, Check connection and Remove.
+private struct ServiceRow: View {
+  let model: AppModel
+  let service: OwnAIService
+  let edit: () -> Void
+
+  private var own: OwnAIModel { model.ownAI }
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: Theme.Space.tiny) {
+      Text(verbatim: service.label).font(Theme.Typography.body).foregroundStyle(Theme.Palette.ink)
+      Text(verbatim: own.status(service)).font(Theme.Typography.small)
+        .foregroundStyle(Theme.Palette.quiet)
+        .accessibilityIdentifier("own-ai-status")
+      if let line = own.checkLine(service.id) {
+        Text(verbatim: line).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
+          .accessibilityIdentifier("own-ai-check-line")
+      }
+      HStack(spacing: Theme.Space.medium) {
+        Button(Words.ownAIEdit, action: edit)
+          .accessibilityLabel("\(Words.ownAIEdit) \(service.label)")
+          .accessibilityIdentifier("own-ai-edit")
+        Button(own.checkState(service.id) == .checking ? Words.ownAIChecking : Words.ownAICheck) {
+          Task { await own.checkConnection(service.id) }
+        }
+        .disabled(!own.canCheck(service.id))
+        .accessibilityLabel("\(Words.ownAICheck) \(service.label)")
+        .accessibilityIdentifier("own-ai-check")
+        if own.pendingRemove == service.id {
+          Button(Words.ownAIRemoveSure, role: .destructive) { own.confirmRemove(service.id) }
+            .accessibilityLabel("\(Words.ownAIRemoveSure) \(service.label)")
+            .accessibilityIdentifier("own-ai-remove-sure")
+          Button(Words.ownAIRemoveKeep) { own.cancelRemove() }
+            .accessibilityLabel("\(Words.ownAIRemoveKeep) \(service.label)")
+            .accessibilityIdentifier("own-ai-remove-keep")
+        } else {
+          Button(Words.ownAIRemove, role: .destructive) { own.askRemove(service.id) }
+            .accessibilityLabel("\(Words.ownAIRemove) \(service.label)")
+            .accessibilityIdentifier("own-ai-remove")
+        }
+      }
+      .buttonStyle(.borderless)
+      .font(Theme.Typography.small)
+    }
+    .accessibilityElement(children: .contain)
+    .accessibilityIdentifier("own-ai-row")
+  }
+}
+
+/// Add or edit one service. The key box empties after Save and the screen never shows a saved key.
+private struct ServiceEditor: View {
+  let model: AppModel
+  let id: String?
+  let close: () -> Void
+
+  @State private var label = ""
+  @State private var endpoint = ""
+  @State private var modelId = ""
+  @State private var key = ""
+  @State private var problem: String?
+  @State private var loaded = false
+
+  private var own: OwnAIModel { model.ownAI }
+
+  var body: some View {
+    NavigationStack {
+      Form {
+        Section {
+          field(Words.ownAILabel) {
+            TextField(Words.ownAILabelPlaceholder, text: $label)
+              .font(Theme.Typography.body)
+              .accessibilityLabel(Words.ownAILabel)
+              .accessibilityIdentifier("own-ai-label")
+          }
+          field(Words.ownAIAddress) {
+            TextField(Words.ownAIAddressPlaceholder, text: $endpoint)
+              .textInputAutocapitalization(.never)
+              .autocorrectionDisabled()
+              .keyboardType(.URL)
+              .font(Theme.Typography.body)
+              .accessibilityLabel(Words.ownAIAddress)
+              .accessibilityIdentifier("own-ai-address")
+            Text(verbatim: Words.ownAIAddressHelp).font(Theme.Typography.small)
+              .foregroundStyle(Theme.Palette.quiet)
+              .accessibilityIdentifier("own-ai-address-help")
+            if let bad = own.addressProblem(endpoint) {
+              Text(verbatim: bad).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
+                .accessibilityIdentifier("own-ai-address-problem")
+            } else if let http = own.addressNote(endpoint) {
+              Text(verbatim: http).font(Theme.Typography.small)
+                .foregroundStyle(Theme.Palette.quiet)
+                .accessibilityIdentifier("own-ai-address-http")
+              Toggle(
+                Words.ownAIHttpTick,
+                isOn: Binding(
+                  get: { own.httpUnderstood }, set: { own.setHttpUnderstood($0) })
+              )
+              .font(Theme.Typography.small)
+              .accessibilityLabel(Words.ownAIHttpTick)
+              .accessibilityIdentifier("own-ai-http-tick")
+            } else {
+              Text(Words.ownAIAddressNote).font(Theme.Typography.small)
+                .foregroundStyle(Theme.Palette.quiet)
+            }
+          }
+          field(Words.ownAIKey) {
+            if let id, own.hasKey(id) {
+              Text(Words.ownAIKeySaved).font(Theme.Typography.body)
+                .foregroundStyle(Theme.Palette.ink)
+                .accessibilityIdentifier("own-ai-key-line")
+            } else {
+              Text(Words.ownAIKeyNone).font(Theme.Typography.body)
+                .foregroundStyle(Theme.Palette.ink)
+                .accessibilityIdentifier("own-ai-key-line")
+            }
+            SecureField(Words.ownAIKeyPlaceholder, text: $key)
+              .textInputAutocapitalization(.never)
+              .autocorrectionDisabled()
+              .font(Theme.Typography.body)
+              .accessibilityLabel(Words.ownAIKey)
+              .accessibilityIdentifier("own-ai-key")
+            if let help = own.keyHelpURL(endpoint: endpoint) {
+              Link(Words.ownAIKeyHelp, destination: help)
+                .font(Theme.Typography.small)
+                .accessibilityIdentifier("own-ai-key-help")
+            }
+            if let id, own.hasKey(id) {
+              Text(Words.ownAIKeyKeepNote).font(Theme.Typography.small)
+                .foregroundStyle(Theme.Palette.quiet)
+              Button(Words.ownAIKeyRemove, role: .destructive) { own.removeKey(id) }
+                .accessibilityLabel(Words.ownAIKeyRemove)
+                .accessibilityIdentifier("own-ai-key-remove")
+            }
+            Text(Words.ownAIKeyNote).font(Theme.Typography.small)
+              .foregroundStyle(Theme.Palette.quiet)
+          }
+          field(Words.ownAIModel) {
+            TextField(Words.ownAIModelPlaceholder, text: $modelId)
+              .textInputAutocapitalization(.never)
+              .autocorrectionDisabled()
+              .font(Theme.Typography.body)
+              .accessibilityLabel(Words.ownAIModel)
+              .accessibilityIdentifier("own-ai-model")
+            Button(own.lookup == .looking ? Words.ownAILookingUp : Words.ownAILookUpModels) {
+              Task { await own.lookUpModels(endpoint: endpoint, key: key, serviceId: id) }
+            }
+            .disabled(!own.canLookUp(endpoint: endpoint))
+            .accessibilityLabel(Words.ownAILookUpModels)
+            .accessibilityIdentifier("own-ai-lookup")
+            if !own.modelNames.isEmpty {
+              Picker(Words.ownAIPickModel, selection: $modelId) {
+                ForEach(own.modelNames, id: \.self) { Text(verbatim: $0).tag($0) }
+              }
+              .pickerStyle(.menu)
+              .accessibilityLabel(Words.ownAIPickModel)
+              .accessibilityIdentifier("own-ai-model-menu")
+            }
+            if let line = own.lookupLine {
+              Text(verbatim: line).font(Theme.Typography.small)
+                .foregroundStyle(Theme.Palette.quiet)
+                .accessibilityIdentifier("own-ai-lookup-line")
+            }
+          }
+          if let problem {
+            Text(verbatim: problem).font(Theme.Typography.small)
+              .foregroundStyle(Theme.Palette.quiet)
+              .accessibilityIdentifier("own-ai-editor-problem")
+          }
+          if let note = own.note {
+            Text(verbatim: note).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
+          }
+        }
+        .listRowBackground(Theme.Palette.card)
+      }
+      .scrollContentBackground(.hidden)
+      .pageBackground()
+      .navigationTitle(id == nil ? Words.ownAIEditorAdd : Words.ownAIEditorEdit)
+      .navigationBarTitleDisplayMode(.inline)
+      .toolbar {
+        ToolbarItem(placement: .cancellationAction) {
+          Button(Words.ownAICancel) { finish() }
+            .accessibilityLabel(Words.ownAICancel)
+            .accessibilityIdentifier("own-ai-cancel")
+        }
+        ToolbarItem(placement: .confirmationAction) {
+          Button(Words.ownAISave) { save() }
+            .accessibilityLabel(Words.ownAISave)
+            .accessibilityIdentifier("own-ai-save")
+        }
+      }
+      .onAppear(perform: load)
+      .onChange(of: endpoint) { own.addressTyped(endpoint) }
+    }
+  }
+
+  private func field<Content: View>(_ title: String, @ViewBuilder content: () -> Content)
+    -> some View
+  {
+    VStack(alignment: .leading, spacing: Theme.Space.tiny) {
+      Text(title).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
+      content()
+    }
+  }
+
+  private func load() {
+    guard !loaded else { return }
+    loaded = true
+    own.resetEditor()
+    if let id, let existing = own.service(id: id) {
+      label = existing.label
+      endpoint = existing.endpoint
+      modelId = existing.modelId
+    } else {
+      label = Words.ownAIDefaultLabel
+      endpoint = Words.ownAIDefaultAddress
+      modelId = Words.ownAIDefaultModel
+    }
+  }
+
+  private func save() {
+    let result = own.save(id: id, label: label, endpoint: endpoint, modelId: modelId, key: key)
+    key = ""
+    if case .saved = result {
+      finish()
+    } else {
+      problem = own.line(for: result)
+    }
+  }
+
+  private func finish() {
+    key = ""
+    own.resetEditor()
+    close()
   }
 }

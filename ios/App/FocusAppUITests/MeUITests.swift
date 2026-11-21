@@ -74,24 +74,93 @@ final class MeUITests: XCTestCase {
     XCTAssertEqual(backup.value as? String, "1")
   }
 
-  /// The line about what is sent is shown before the switch can be used, the switch cannot be
-  /// turned on yet, and an http address is refused with a calm line.
-  func testOwnAIShowsTheDisclosureFirstAndRejectsHttp() {
+  /// The line about what is sent is shown first, nothing is listed yet, a bad address gets a calm
+  /// line, and an http address is accepted with a note that it is not encrypted.
+  func testOwnAIShowsTheDisclosureFirstAndHandlesAddresses() {
     let app = launch()
     let disclosure = app.element("own-ai-disclosure")
     app.scrollTo(disclosure)
     XCTAssertTrue(disclosure.waitForExistence(timeout: 5))
     XCTAssertTrue(disclosure.label.contains("privacy rules"))
-    let own = app.switches["own-ai-switch"]
-    app.scrollTo(own)
-    XCTAssertEqual(own.value as? String, "0")
-    XCTAssertFalse(own.isEnabled)
+    let empty = app.element("own-ai-empty")
+    app.scrollTo(empty)
+    XCTAssertTrue(empty.waitForExistence(timeout: 5))
+    let add = app.buttons["own-ai-add"]
+    app.scrollTo(add)
+    XCTAssertTrue(add.isEnabled)
+    add.tap()
 
     let address = app.textFields["own-ai-address"]
-    app.scrollTo(address)
+    XCTAssertTrue(address.waitForExistence(timeout: 5))
     address.tap()
-    address.typeText("http://example.com/v1/chat/completions")
+    address.typeText("ftp://example.com/v1/chat/completions")
     XCTAssertTrue(app.element("own-ai-address-problem").waitForExistence(timeout: 5))
-    XCTAssertFalse(own.isEnabled)
+    address.clearAndType("http://example.com/v1/chat/completions")
+    XCTAssertTrue(app.element("own-ai-address-http").waitForExistence(timeout: 5))
+    XCTAssertFalse(app.element("own-ai-address-problem").exists)
+    app.buttons["own-ai-cancel"].tap()
+    XCTAssertFalse(app.textFields["own-ai-address"].waitForExistence(timeout: 2))
+    XCTAssertTrue(app.element("own-ai-empty").waitForExistence(timeout: 5))
+  }
+
+  /// Add a service (after the disclosure), see it in the list, see it on Talk, and remove it.
+  func testAddAServiceSeeItOnTalkAndRemoveIt() {
+    let app = launch()
+    let disclosure = app.element("own-ai-disclosure")
+    app.scrollTo(disclosure)
+    XCTAssertTrue(disclosure.waitForExistence(timeout: 5))
+    let add = app.buttons["own-ai-add"]
+    app.scrollTo(add)
+    add.tap()
+
+    let label = app.textFields["own-ai-label"]
+    XCTAssertTrue(label.waitForExistence(timeout: 5))
+    label.tap()
+    label.typeText("Alpha")
+    let address = app.textFields["own-ai-address"]
+    address.tap()
+    address.typeText("https://example.com/v1/chat/completions")
+    let model = app.textFields["own-ai-model"]
+    model.tap()
+    model.typeText("test-model")
+    let key = app.secureTextFields["own-ai-key"]
+    key.tap()
+    key.typeText("test-key-123")
+    app.buttons["own-ai-save"].tap()
+
+    let row = app.element("own-ai-row")
+    XCTAssertTrue(row.waitForExistence(timeout: 5))
+    XCTAssertFalse(app.element("own-ai-empty").exists)
+    XCTAssertTrue(app.staticTexts["Alpha"].exists)
+    XCTAssertEqual(app.staticTexts["own-ai-status"].label, "Ready")
+    XCTAssertTrue(app.buttons["Edit Alpha"].exists)
+    XCTAssertTrue(app.buttons["Check connection Alpha"].exists)
+
+    app.tabBars.buttons["Talk"].tap()
+    XCTAssertTrue(app.element("talk-which-ai").waitForExistence(timeout: 5))
+    app.tabBars.buttons["Me"].tap()
+
+    let remove = app.buttons["Remove Alpha"]
+    app.scrollTo(remove)
+    remove.tap()
+    let sure = app.buttons["Tap again to remove Alpha"]
+    XCTAssertTrue(sure.waitForExistence(timeout: 5))
+    XCTAssertTrue(app.staticTexts["Alpha"].exists)  // asked once, nothing removed yet
+    sure.tap()
+    XCTAssertFalse(app.element("own-ai-row").waitForExistence(timeout: 2))
+    XCTAssertTrue(app.element("own-ai-empty").waitForExistence(timeout: 5))
+    app.tabBars.buttons["Talk"].tap()
+    XCTAssertFalse(app.element("talk-which-ai").exists)
+  }
+}
+
+extension XCUIElement {
+  /// Replaces what is in a text field.
+  fileprivate func clearAndType(_ text: String) {
+    tap()
+    if let current = value as? String, !current.isEmpty {
+      typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: current.count))
+    }
+    typeText(text)
   }
 }

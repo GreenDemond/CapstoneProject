@@ -94,7 +94,10 @@ public final class AppModel {
     self.ownAI.settings = { [weak self] in self?.settings ?? Settings() }
     self.ownAI.change = { [weak self] change in self?.updateSettings(change) }
     self.ownAI.onChoiceChanged = { [weak self] in self?.chooseModel() }
-    self.talk.usingOwnService = { [weak self] in self?.ownAI.isInUse ?? false }
+    self.talk.ownServiceLabel = { [weak self] in self?.ownAI.chosen?.label }
+    self.talk.ownServiceUsesHttp = { [weak self] in
+      self?.ownAI.chosen?.config.needsUnencryptedWarning == true
+    }
     self.talk.settings = { [weak self] in self?.settings ?? Settings() }
     self.talk.onUseSteps = { [weak self] steps, kind in
       guard let self, self.planner.importSteps(steps, kindId: kind) else { return }
@@ -106,8 +109,23 @@ public final class AppModel {
     }
     self.speaker.settings = { [weak self] in self?.settings ?? Settings() }
     self.dictation.willListen = { [weak self] in self?.speaker.interrupted() }
+    startOwnServices()
     chooseModel()
     applyBackup()
+  }
+
+  /// Build 5 kept one service in four settings and one key. Save the list first, then move the
+  /// key, so a failure at either step is simply tried again next launch with nothing lost.
+  private func startOwnServices() {
+    if settings.movedFromSingleService {
+      var copy = settings
+      copy.movedFromSingleService = false
+      updateSettings { $0 = copy }
+    }
+    // If the list could not be saved, the key stays in its old place until a launch where it can.
+    if saveNote == nil { ownAI.migrateLegacyKey() }
+    ownAI.refreshKeys()
+    ownAI.settleChoice()
   }
 
   // MARK: Reading
@@ -307,10 +325,10 @@ public final class AppModel {
     applyBackup()
   }
 
-  /// Uses the student's own AI service when it is on, ready and chosen; otherwise the phone's own.
+  /// Uses the student's own AI service when one is chosen and ready; otherwise the phone's own.
   /// Every reply from either goes through the same safety and answer checks.
   private func chooseModel() {
-    if ownAI.isInUse, let own = ownAI.makeModel() {
+    if let own = ownAI.makeModel() {
       switcher.use(own)
     } else {
       switcher.use(phoneModel)
@@ -333,7 +351,7 @@ public final class AppModel {
   @discardableResult
   public func eraseEverything() -> Bool {
     // The key goes first. If it cannot be removed, nothing is reported as deleted.
-    guard ownAI.eraseKey() else {
+    guard ownAI.eraseKeys() else {
       saveNote = Words.couldNotErase
       return false
     }

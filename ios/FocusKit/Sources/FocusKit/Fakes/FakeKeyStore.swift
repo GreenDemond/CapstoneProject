@@ -3,30 +3,41 @@ import Foundation
 /// A key store that lives in memory, for tests. It can be told to fail.
 public final class FakeKeyStore: KeyStore, @unchecked Sendable {
   private let lock = NSLock()
-  private var key: String?
+  private var keys: [String: String]
   private var failing = false
 
-  public init(key: String? = nil) {
-    self.key = key
+  public init(keys: [String: String] = [:]) {
+    self.keys = keys
   }
 
   public func setFailing(_ on: Bool) { lock.withLock { failing = on } }
 
-  public var hasKey: Bool { lock.withLock { key != nil } }
-  public func read() -> String? { lock.withLock { key } }
+  /// The accounts that hold a key. Never the keys.
+  public var accounts: [String] { lock.withLock { keys.keys.sorted() } }
 
-  public func save(_ key: String) -> Bool {
+  public func hasKey(account: String) -> Bool { lock.withLock { keys[account] != nil } }
+  public func read(account: String) -> String? { lock.withLock { keys[account] } }
+
+  public func save(_ key: String, account: String) -> Bool {
     lock.withLock {
       guard !failing else { return false }
-      self.key = key
+      keys[account] = key
       return true
     }
   }
 
-  public func delete() -> Bool {
+  public func delete(account: String) -> Bool {
     lock.withLock {
       guard !failing else { return false }
-      key = nil
+      keys[account] = nil
+      return true
+    }
+  }
+
+  public func deleteAll() -> Bool {
+    lock.withLock {
+      guard !failing else { return false }
+      keys = [:]
       return true
     }
   }

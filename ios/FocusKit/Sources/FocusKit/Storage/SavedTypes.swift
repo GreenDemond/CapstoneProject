@@ -124,21 +124,22 @@ public struct Settings: Storable {
   /// "Include in my iPhone backup". On unless the student turns it off, and on for settings saved
   /// before this existed (DECISIONS: Backup, 2026-11-21).
   public var includeInBackup: Bool
-  /// "Use my own AI service": off unless the student turns it on. The key is NOT here; it is only
-  /// in the Keychain (`KeyStore`). The address and the model's name are not secret.
-  public var ownAIOn: Bool
-  public var ownAIEndpoint: String
-  public var ownAIModelId: String
-  /// When the own service is on, which AI is in use right now: true = the student's own service,
-  /// false = the AI on this iPhone. The student flips it with a visible switch on the Talk screen.
-  public var ownAIChosen: Bool
+  /// The student's own AI services: up to five. The keys are NOT here; each is only in the
+  /// Keychain (`KeyStore`), under an account made from the service's id. The label, address and
+  /// model are not secret.
+  public var ownAIServices: [OwnAIService]
+  /// The id of the service chosen on Talk, or nil for the AI on this iPhone.
+  public var chosenServiceId: String?
+  /// True only for settings read from build 5's single service: the list was made from the old
+  /// fields and the app should save it and move the old key. Never written.
+  public var movedFromSingleService = false
 
   public init(
     readAloud: Bool = false, talk: Bool = false, headphonesOnly: Bool = true,
     voiceId: String? = nil,
     speechRate: Double = 0.5, guides: [String: String] = [:], lengths: [String: String] = [:],
-    howILikeToWork: [String: String] = [:], includeInBackup: Bool = true, ownAIOn: Bool = false,
-    ownAIEndpoint: String = "", ownAIModelId: String = "", ownAIChosen: Bool = false
+    howILikeToWork: [String: String] = [:], includeInBackup: Bool = true,
+    ownAIServices: [OwnAIService] = [], chosenServiceId: String? = nil
   ) {
     self.readAloud = readAloud
     self.talk = talk
@@ -149,16 +150,15 @@ public struct Settings: Storable {
     self.lengths = lengths
     self.howILikeToWork = howILikeToWork
     self.includeInBackup = includeInBackup
-    self.ownAIOn = ownAIOn
-    self.ownAIEndpoint = ownAIEndpoint
-    self.ownAIModelId = ownAIModelId
-    self.ownAIChosen = ownAIChosen
+    self.ownAIServices = ownAIServices
+    self.chosenServiceId = chosenServiceId
   }
 
   private enum CodingKeys: String, CodingKey {
     case readAloud, talk, voiceMode, headphonesOnly, voiceId, speechRate, guides, lengths
-    case howILikeToWork, includeInBackup, ownAIOn, ownAIEndpoint, ownAIModelId
-    case ownAIChosen
+    case howILikeToWork, includeInBackup, ownAIServices, chosenServiceId
+    // Build 5's single service. Read, never written.
+    case ownAIOn, ownAIEndpoint, ownAIModelId, ownAIChosen
   }
 
   /// Reads the two switches. Settings saved before D7 have a single `voiceMode` word instead:
@@ -179,10 +179,37 @@ public struct Settings: Storable {
     self.howILikeToWork =
       try c.decodeIfPresent([String: String].self, forKey: .howILikeToWork) ?? [:]
     self.includeInBackup = (try? c.decodeIfPresent(Bool.self, forKey: .includeInBackup)) ?? true
-    self.ownAIOn = (try? c.decodeIfPresent(Bool.self, forKey: .ownAIOn)) ?? false
-    self.ownAIEndpoint = (try? c.decodeIfPresent(String.self, forKey: .ownAIEndpoint)) ?? ""
-    self.ownAIModelId = (try? c.decodeIfPresent(String.self, forKey: .ownAIModelId)) ?? ""
-    self.ownAIChosen = (try? c.decodeIfPresent(Bool.self, forKey: .ownAIChosen)) ?? false
+    let listed = try? c.decodeIfPresent([LossyService].self, forKey: .ownAIServices)
+    if let listed {
+      self.ownAIServices = listed.compactMap(\.service)
+      self.chosenServiceId = (try? c.decodeIfPresent(String.self, forKey: .chosenServiceId)) ?? nil
+    } else {
+      // Settings saved by build 5: one service in four fields. It becomes the first entry.
+      let endpoint = (try? c.decodeIfPresent(String.self, forKey: .ownAIEndpoint)) ?? ""
+      let model = (try? c.decodeIfPresent(String.self, forKey: .ownAIModelId)) ?? ""
+      if !Text.trimmed(endpoint).isEmpty || !Text.trimmed(model).isEmpty {
+        let service = OwnAIService(
+          id: UUID().uuidString, label: OwnAIService.migratedLabel, endpoint: endpoint,
+          modelId: model)
+        let on = (try? c.decodeIfPresent(Bool.self, forKey: .ownAIOn)) ?? false
+        let chosen = (try? c.decodeIfPresent(Bool.self, forKey: .ownAIChosen)) ?? false
+        self.ownAIServices = [service]
+        self.chosenServiceId = on && chosen ? service.id : nil
+        self.movedFromSingleService = true
+      } else {
+        self.ownAIServices = []
+        self.chosenServiceId = nil
+      }
+    }
+    self = limitedServices()
+  }
+
+  /// One saved service that may be damaged: a bad entry is dropped, never a crash.
+  private struct LossyService: Decodable {
+    var service: OwnAIService?
+    init(from decoder: Decoder) throws {
+      service = try? OwnAIService(from: decoder)
+    }
   }
 
   public func encode(to encoder: Encoder) throws {
@@ -196,10 +223,8 @@ public struct Settings: Storable {
     try c.encode(lengths, forKey: .lengths)
     try c.encode(howILikeToWork, forKey: .howILikeToWork)
     try c.encode(includeInBackup, forKey: .includeInBackup)
-    try c.encode(ownAIOn, forKey: .ownAIOn)
-    try c.encode(ownAIEndpoint, forKey: .ownAIEndpoint)
-    try c.encode(ownAIModelId, forKey: .ownAIModelId)
-    try c.encode(ownAIChosen, forKey: .ownAIChosen)
+    try c.encode(ownAIServices, forKey: .ownAIServices)
+    try c.encodeIfPresent(chosenServiceId, forKey: .chosenServiceId)
   }
 
   public func limited(by limits: Content.Limits) -> Settings {
@@ -207,10 +232,54 @@ public struct Settings: Storable {
     copy.speechRate = speechRate.isFinite ? min(1, max(0, speechRate)) : 0.5
     copy.guides = guides.mapValues { Text.cut($0, to: limits.guide) }
     copy.howILikeToWork = howILikeToWork.mapValues { Text.cut($0, to: 100) }
-    copy.ownAIEndpoint = Text.cut(ownAIEndpoint, to: OwnAIConfig.addressLimit)
-    copy.ownAIModelId = Text.cut(ownAIModelId, to: OwnAIConfig.modelLimit)
+    return copy.limitedServices()
+  }
+
+  /// Keeps the services well formed: a label (cut to length), no repeated id, at most five, and a
+  /// chosen id that points at a service in the list.
+  fileprivate func limitedServices() -> Settings {
+    var copy = self
+    var seen = Set<String>()
+    var kept: [OwnAIService] = []
+    for service in ownAIServices {
+      var s = service
+      s.label = Text.cut(Text.trimmed(s.label), to: OwnAIService.labelLimit)
+      s.endpoint = Text.cut(s.endpoint, to: OwnAIConfig.addressLimit)
+      s.modelId = Text.cut(s.modelId, to: OwnAIConfig.modelLimit)
+      guard !Text.trimmed(s.id).isEmpty, !s.label.isEmpty, !seen.contains(s.id),
+        kept.count < OwnAIService.maxServices
+      else { continue }
+      seen.insert(s.id)
+      kept.append(s)
+    }
+    copy.ownAIServices = kept
+    if let chosen = copy.chosenServiceId, !seen.contains(chosen) { copy.chosenServiceId = nil }
     return copy
   }
+}
+
+/// One AI service the student entered. The key is not here.
+public struct OwnAIService: Codable, Equatable, Sendable, Identifiable {
+  public static let maxServices = 5
+  public static let labelLimit = 30
+  /// The label for the service made from build 5's single setting.
+  public static let migratedLabel = "My service"
+
+  /// A UUID that never changes. The key's account is made from it, never from the label.
+  public var id: String
+  public var label: String
+  public var endpoint: String
+  public var modelId: String
+
+  public init(id: String = UUID().uuidString, label: String, endpoint: String, modelId: String) {
+    self.id = id
+    self.label = label
+    self.endpoint = endpoint
+    self.modelId = modelId
+  }
+
+  public var keyAccount: String { KeyAccount.forService(id: id) }
+  public var config: OwnAIConfig { OwnAIConfig(address: endpoint, modelName: modelId) }
 }
 
 public struct Chat: Codable, Equatable, Sendable, Identifiable {
