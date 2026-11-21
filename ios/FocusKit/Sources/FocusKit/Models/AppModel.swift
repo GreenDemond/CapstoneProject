@@ -27,6 +27,7 @@ public final class AppModel {
   public let planner: PlannerModel
   public let dictation: DictationModel
   public let speaker: SpeakerModel
+  public let talk: ChatModel
 
   public private(set) var welcomed: Bool
   /// The student is on the work screen.
@@ -40,6 +41,8 @@ public final class AppModel {
   public private(set) var planning: Bool
   public private(set) var saveNote: String?
   public private(set) var settings: Settings
+  /// The student chose "Use these as my steps": the screen should show Today (the editor).
+  public var showToday = false
 
   private let store: any Store
   private let clock: any AppClock
@@ -67,8 +70,17 @@ public final class AppModel {
     self.dictation = DictationModel(
       input: services.speechInput, store: store, clock: clock, limit: content.limits.pasteLength)
     self.speaker = SpeakerModel(output: services.speechOutput, headphones: services.headphones)
+    self.talk = ChatModel(
+      content: content, store: store, clock: clock, model: services.languageModel,
+      speaker: self.speaker)
     self.planner = PlannerModel(content: content, store: store, clock: clock, draft: draft)
     self.planner.onStart = { [weak self] saved in self?.began(saved) }
+    self.talk.settings = { [weak self] in self?.settings ?? Settings() }
+    self.talk.onUseSteps = { [weak self] steps, kind in
+      guard let self, self.planner.importSteps(steps, kindId: kind) else { return }
+      self.planning = true
+      self.showToday = true
+    }
     self.speaker.settings = { [weak self] in self?.settings ?? Settings() }
     self.dictation.willListen = { [weak self] in self?.speaker.interrupted() }
   }
@@ -219,6 +231,11 @@ public final class AppModel {
     let made = LadderModel(content: content, stepText: step.text)
     ladders[step.id] = made
     return made
+  }
+
+  /// Hints with no step, for the Talk screen when there is no AI.
+  public func freshHints() -> LadderModel {
+    LadderModel(content: content)
   }
 
   // MARK: Parked thoughts and recall

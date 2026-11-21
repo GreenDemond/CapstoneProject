@@ -22,3 +22,21 @@ extension Words {
     }
   }
 }
+
+extension Words {
+  public static let talkPrivacy =
+    "This AI runs on this iPhone. Your messages don't leave it. It can still be wrong."
+  public static let talkPlaceholder = "Say or type what you're stuck on"
+  public static let talkSend = "Send"
+  public static let talkStop = "Stop"
+  public static let talkNewChat = "New chat"
+  public static let talkMyChats = "My chats"
+  public static let talkNoChats = "No saved chats yet."
+  public static let talkDelete = "Delete"
+  public static let talkDeleteSure = "Tap again to delete"
+  public static let talkDeleteAll = "Delete all chats"
+  public static let talkUseSteps = "Use these as my steps"
+  public static let talkHints = "Get a hint"
+  public static let messageCut = "That was long, so the end was cut off."
+  public static let talkItThrough = "Talk it through"
+}

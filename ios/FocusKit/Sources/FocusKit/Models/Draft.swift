@@ -34,11 +34,13 @@ public struct Draft: Storable {
   /// Steps whose "looks like two steps" nudge was answered No.
   public var nudgeDismissed: [Int]
   public var truncated: Bool
+  /// The steps came from the AI on the phone. They always carry a label saying so.
+  public var fromAI: Bool
 
   public init(
     stage: DraftStage = .assignment, text: String = "", kindId: String = "other",
     stepCount: Int = 5, steps: [DraftStep] = [], nextId: Int = 0, nudgeDismissed: [Int] = [],
-    truncated: Bool = false
+    truncated: Bool = false, fromAI: Bool = false
   ) {
     self.stage = stage
     self.text = text
@@ -48,6 +50,24 @@ public struct Draft: Storable {
     self.nextId = nextId
     self.nudgeDismissed = nudgeDismissed
     self.truncated = truncated
+    self.fromAI = fromAI
+  }
+
+  private enum CodingKeys: String, CodingKey {
+    case stage, text, kindId, stepCount, steps, nextId, nudgeDismissed, truncated, fromAI
+  }
+
+  public init(from decoder: Decoder) throws {
+    let values = try decoder.container(keyedBy: CodingKeys.self)
+    stage = try values.decode(DraftStage.self, forKey: .stage)
+    text = try values.decode(String.self, forKey: .text)
+    kindId = try values.decode(String.self, forKey: .kindId)
+    stepCount = try values.decode(Int.self, forKey: .stepCount)
+    steps = try values.decode([DraftStep].self, forKey: .steps)
+    nextId = try values.decode(Int.self, forKey: .nextId)
+    nudgeDismissed = try values.decode([Int].self, forKey: .nudgeDismissed)
+    truncated = try values.decode(Bool.self, forKey: .truncated)
+    fromAI = try values.decodeIfPresent(Bool.self, forKey: .fromAI) ?? false
   }
 
   public static let empty = Draft()

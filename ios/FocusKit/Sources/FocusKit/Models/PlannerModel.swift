@@ -68,7 +68,27 @@ public final class PlannerModel {
     draft.steps = []
     draft.nextId = 0
     draft.nudgeDismissed = []
+    draft.fromAI = false
     for text in chosen { append(text) }
+    draft.stage = .editor
+    persist()
+    return true
+  }
+
+  /// Steps from the AI (or from a chat) open in the editor with the AI label, never on the work
+  /// screen. The kind is kept if it is one of ours.
+  @discardableResult
+  public func importSteps(_ texts: [String], kindId: String?) -> Bool {
+    let limit = content.limits.stepLength
+    let chosen = texts.map { Text.trimmed(Text.cut($0, to: limit)) }.filter { !$0.isEmpty }
+      .prefix(content.limits.savedSteps)
+    guard !chosen.isEmpty else { return false }
+    draft.steps = []
+    draft.nextId = 0
+    draft.nudgeDismissed = []
+    for text in chosen { append(text) }
+    if let kindId, content.kinds.contains(where: { $0.id == kindId }) { draft.kindId = kindId }
+    draft.fromAI = true
     draft.stage = .editor
     persist()
     return true

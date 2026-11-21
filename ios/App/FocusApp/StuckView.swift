@@ -55,9 +55,7 @@ struct LadderBody: View {
 
         LookItUpRung(model: model, ladder: ladder, dismiss: dismiss)
 
-        Text(Words.talkItThroughLater).font(Theme.Typography.body).foregroundStyle(
-          Theme.Palette.quiet)
-        Text(Words.talkNotYet).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
+        TalkItThroughRung(model: model, ladder: ladder, kindId: model.saved?.kindId)
 
         if ladder.canAskPerson { askPerson }
 
@@ -141,6 +139,36 @@ struct LookItUpRung: View {
           .cardStyle()
       }
       .accessibilityIdentifier("lookup-rung")
+    }
+  }
+}
+
+/// The Talk it through rung: opens the chat already knowing the step. Only when the AI is on.
+struct TalkItThroughRung: View {
+  let model: AppModel
+  let ladder: LadderModel
+  let kindId: String?
+
+  var body: some View {
+    if model.talk.isAvailable {
+      NavigationLink {
+        ChatScreen(model: model, step: (text: ladder.onStep, kindId: kindId))
+      } label: {
+        Label(Words.talkItThrough, systemImage: "bubble.left")
+          .font(Theme.Typography.button)
+          .foregroundStyle(Theme.Palette.ink)
+          .frame(maxWidth: .infinity, minHeight: Theme.Space.touch, alignment: .leading)
+          .cardStyle()
+      }
+      .accessibilityIdentifier("talk-rung")
+    } else {
+      VStack(alignment: .leading, spacing: Theme.Space.tiny) {
+        Text(Words.talkItThrough).font(Theme.Typography.body).foregroundStyle(Theme.Palette.quiet)
+        Text(Words.aiUnavailable(model.talk.availability))
+          .font(Theme.Typography.small)
+          .foregroundStyle(Theme.Palette.quiet)
+          .accessibilityIdentifier("talk-rung-unavailable")
+      }
     }
   }
 }

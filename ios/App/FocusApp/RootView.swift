@@ -23,20 +23,27 @@ struct RootView: View {
 
 struct MainTabs: View {
   @Bindable var model: AppModel
+  @State private var selection = Words.tabToday
 
   var body: some View {
-    TabView {
-      Tab(Words.tabToday, systemImage: "sun.max") {
+    TabView(selection: $selection) {
+      Tab(Words.tabToday, systemImage: "sun.max", value: Words.tabToday) {
         TodayView(model: model)
       }
-      Tab(Words.tabTalk, systemImage: "bubble.left") {
+      Tab(Words.tabTalk, systemImage: "bubble.left", value: Words.tabTalk) {
         TalkView(model: model)
       }
-      Tab(Words.tabPlan, systemImage: "list.bullet") {
+      Tab(Words.tabPlan, systemImage: "list.bullet", value: Words.tabPlan) {
         PlanView(model: model)
       }
-      Tab(Words.tabMe, systemImage: "person") {
+      Tab(Words.tabMe, systemImage: "person", value: Words.tabMe) {
         MeView()
+      }
+    }
+    .onChange(of: model.showToday) { _, wanted in
+      if wanted {
+        selection = Words.tabToday
+        model.showToday = false
       }
     }
     .fullScreenCover(

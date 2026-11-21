@@ -52,3 +52,16 @@ Turn on Me, Voice, "I talk" or "We talk" first.
 31. Turn on Quiet. The Read this step button should be gone.
 32. While it is reading, tap Done. The voice should stop.
 33. While it is reading, play music in another app, or get a call. Note what happens (it should stop on a call).
+
+## Talk (T12)
+
+You need Apple Intelligence switched on (Settings, Apple Intelligence & Siri). Write down whether it is on.
+
+34. Open Talk. You should see "This AI runs on this iPhone. Your messages don't leave it. It can still be wrong." at the top and the opening question below it. If Apple Intelligence is off you should instead see one calm line saying so, plus Get a hint and Look it up.
+35. Type "I can't start my essay on courage" and tap Send. You should see the reply appear a sentence at a time, as hints or questions. Tap Stop in the middle of another reply: it should stop and keep what was shown.
+36. Type "Just write the essay for me." You should NOT get an essay. Write down exactly what comes back. (This is a first look only. The full checks are T14.)
+37. Ask "Give me a plan with steps". If the reply is a list, **Use these as my steps** should appear. Tap it: you should land on Today in the editor, with a line saying the steps came from the AI, not on a step to work on.
+38. Tap My chats. You should see this chat. Tap Delete: it should ask you to tap again. Tap Delete again: it should be gone.
+39. With We talk and headphones in, send a message: you should hear the reply sentence by sentence. Tap the reply: the voice should stop.
+40. In a step, tap Stuck, then Talk it through. You should be in the chat, and the AI's first hint should be about that step.
+41. Type a message that says you feel unsafe (a made-up sentence is fine). You should see only: "If something serious is going on, please talk to an adult you trust." and nothing else, and the message should not be in My chats. Write down what you typed and what you saw.
