@@ -8,7 +8,7 @@ A task is `ready` when every task it depends on is `done` and everything on its 
 
 | Task | Status | Depends on | Date | Checker result |
 |---|---|---|---|---|
-| T00 Decisions and design review | ready | | | |
+| T00 Decisions and design review | partly done | | 2026-11-21 | D1, D6, D7, D13 decided by the parent; D8 still a draft; Ben's product answers (name, words, voice default) still open. See `DECISIONS.md` "Waiting on" |
 | T01 Skeleton | done | | 2026-11-20 | check.sh: FocusKit passed; UI tests passed 27 of 27 on the iOS 26.5 iPhone 15 Pro Max simulator on 2026-11-21 (commit 029d893). |
 | T02 Content and logic | done | T01 | 2026-11-20 | check.sh: FocusKit passed (27 tests, all 8 case files named `cases/<file>.json`); UI tests passed 27 of 27 on the iOS 26.5 iPhone 15 Pro Max simulator on 2026-11-21 (commit 029d893). Checker: same model as Builder |
 | T03 Storage | done | T02 | 2026-11-20 | check.sh: FocusKit passed (48 tests); UI tests passed 27 of 27 on the iOS 26.5 iPhone 15 Pro Max simulator on 2026-11-21 (commit 029d893). Checker: same model as Builder. Advisor gate 2 owed |
@@ -26,10 +26,12 @@ A task is `ready` when every task it depends on is `done` and everything on its 
 | T15 Me | done | T06 | 2026-11-20 | check.sh: FocusKit passed (247 tests); app and UI tests passed 27 of 27 on the iOS 26.5 iPhone 15 Pro Max simulator on 2026-11-21 (commit 029d893). Sound answer does not change voice (see slice). Self-review only. Advisor gate 2 owed |
 | T16 Whole-app review | done (partial: self-review only) | T05 to T15 | 2026-11-20 | check.sh: FocusKit passed (247 tests); app and UI tests compile; UI tests passed 27 of 27 on the iOS 26.5 iPhone 15 Pro Max simulator on 2026-11-21 (commit 029d893). Read-through of every Words file, Safety/AnswerGuard, the trusted-adult path, backup exclusion, network use and secrets; no code defects found. NOT done: simulator screen walk, 2.11 row-by-row tests, `T16-strings.md`, Advisor verdict. No independent Checker or Advisor was possible (same model as Builder). Flagged: starter step "Check what you missed" (in `Shared/`, not edited) |
 | AI-multiple-services Up to five own AI services, http, Look up models (build 6) | done (not cleared) | D6 | 2026-11-21 | FocusKit: 336 of 336 tests passed (swift test). UI tests: @@UI@@ on the iOS 26.5 iPhone 15 Pro Max simulator. swift-format lint passes (two over-long lines already present at a265ef4, `Words.swift:10` and `NavigationTests.swift:167`, were wrapped; no wording change). Checker: not run as a separate agent (same model as Builder). Self-review in `design/slices/AI-multiple-services.md`. T14 owed for each service; Advisor gate 2 owed |
-| T17a First build on Ben's phone | waiting on parent | T06 | | Steps for the parent are in `PARENT-STEPS.md` (Xcode sign-in, team, bundle id, contact address, install) |
+| NAV Navigation review (build 4) | done | T05 to T15 | 2026-11-21 | A way back and to Today from every screen; `design/slices/NAV-navigation-review.md` |
+| UX Whole-app review and release-readiness pass (builds 7 to 9) | done (partial) | AI-multiple-services | 2026-11-21 | Independent read-only review: FIX FIRST on one item (chat history sent to an external AI after a switch), fixed. FocusKit 367 passed. Every UI class passed after fixes, not yet in one full run. Large-text tests added. Remaining items in `design/slices/UX-whole-app-review.md` |
+| T17a First build on a phone | done (owner's phone) | T06 | 2026-11-21 | Builds 1 to 9 installed on the parent's iPhone 15 Pro Max with `devicectl`. Ben's own phone not yet, and the device checks not yet recorded |
 | T17b Version 1 build on Ben's phone | waiting on parent | T16, T14 | | Needs T14 cleared by the Advisor, then a week of real use by Ben |
 
-Simulator note: the iOS 26.5 simulator works from a normal terminal; when the simulator service is unreachable from an agent shell, `check.sh` reports the UI tests as SKIPPED. UI tests: 27 of 27 passed on 2026-11-21 (commit 029d893); after the own-AI and backup tests were added, 29 of 29 passed on 2026-11-21; after the multiple-services change (build 6), @@UI@@. Voice is two switches, Read aloud and Talk (D7).
+Simulator note: use the iPhone 15 Pro Max iOS 26.5 simulator. Agent shells time out after about 2 minutes, so start `xcodebuild test` detached and poll its log; see "Running things" in `PROGRESS.md`.
 
 Statuses: `waiting`, `ready`, `in progress`, `blocked` (say why in a line under the table), `done`.
 

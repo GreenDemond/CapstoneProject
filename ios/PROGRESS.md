@@ -1,45 +1,69 @@
-# PROGRESS.md
+# PROGRESS.md (iPhone app)
 
-The memory between sessions. Rewrite it each session; do not let it grow into a diary. Task-by-task status is in `TASKS.md`.
+Read this first in any session. It is the memory between sessions. Rewrite it each session; do not let it grow into a diary. Task history is in `TASKS.md`, decisions in `DECISIONS.md`.
 
-## Working
+**As of 2026-11-21, build 9 (`CURRENT_PROJECT_VERSION = 9`, commit `4a8a275`).** The app is built, runs on the owner's iPhone, and has an archive for TestFlight (`Bens Steps 0.1 (9)`). Nothing has been uploaded to App Store Connect yet, and nothing has been pushed to a remote.
 
-- T01 to T03: `FocusKit` (content, logic matching all eight shared case files, versioned storage).
-- T04 to T08: app shell, assignment and editor, Today and the work screen, stuck ladder, Look it up (Wikipedia).
-- T09 voice in and T10 voice out: two switches under Me, Read aloud and Talk (D7), both off at first.
-- T11 to T13: the AI behind a `LanguageModel` protocol; safety word, trusted-adult line and `AnswerGuard` run on every reply before it is shown, spoken or saved; Talk; step coach; works with no AI.
-- T15 Me: goals, notes, How I like to work, AI guide and length, voice, backup switch (D13), About and privacy, Delete everything.
-- My AI services (D6): up to five, each with its own Keychain key; forgiving addresses with OpenRouter defaults (`openrouter/free`); optional Look up models; http with a tick box and warning, no Talk warning for Tailscale (see D8 note).
-- **2026-11-21 release-readiness pass (build 8):**
-  - Independent review (read-only reviewer plus Opus as Builder/Advisor). Must-fix found and fixed: earlier on-phone chat messages were sent to an external AI after a switch. A chat now stays with the AI it was written to; switching and sending starts a new chat and says so.
-  - Also fixed from the review: steps offered from a chat reply pass the process-step check; two more quote marks cleaned from the guide; "Check what you missed" became "Check your answers against your notes".
-  - UX fixes: the work screen scrolls; its header is one line at every text size; saved thoughts and recall answers are listed in Plan with a confirmed delete; notes need a confirmed delete; Talk shows "Talking about: <step> · Clear"; VoiceOver says who wrote each message and has a Stop reading action; Search is disabled while searching; startup failure has Try again; a keyboard Done button on every screen with a text box.
-  - New large-text UI tests (`LargeTextUITests`) at the largest accessibility size.
-- Tests: see the Report in `design/slices/UX-whole-app-review.md` for the exact final counts.
+## What the app is
 
-## In progress
+"Ben's Steps", a native SwiftUI app for students with ADHD. It turns an assignment into small steps, shows one step at a time, takes honest check-ins (Done, Still working, Stuck, Drifted, Later), gives hints instead of answers, and can be talked to. Rules and research are in `AGENTS.md` section 0 and `research/`.
 
-Nothing.
+## Working (built and tested)
+
+- **Logic** (`FocusKit`, Swift package): content from `Shared/content.json`, work model, starter steps, process-step check, answer guard, safety word, storage with backups, saved chats (10, each remembers its AI), the planner, settings and migrations from older formats.
+- **Today and planning:** assignment (six kinds, 3/5/8 steps), "Suggest some to start" (AI or starter steps), "I'll say my steps", the editor (change, reorder, split, join, Get ready and Put it away steps), Start.
+- **Work screen:** one step, five equal buttons, Back to Today (keeps the step), Stuck sheet, Drifted with a smaller piece, optional countdown ring, park a thought, recall question after study steps. Scrolls at large text sizes.
+- **Plan tab:** the steps, plus saved thoughts and recall answers (confirmed delete).
+- **Talk:** hints-only chat. The AI choice is one setting, shown on Talk and on the assignment screen ("Steps will be made by"). Each chat remembers its AI; switching sends a new chat and the old one stays unsent. Look it up (Wikipedia). Talk it through shows "Talking about: <step> · Clear".
+- **AI:** Apple's on-device model by default. Up to five of the student's own OpenAI-compatible services (up to five ready at once), each with its own Keychain key. Forgiving address entry (bare host, OpenRouter defaults, `openrouter/free`). Look up models, Check connection, Edit, Remove. http is accepted with a tick box and a warning; Tailscale addresses skip the chat warning.
+- **Me:** goals, notes (confirmed delete), How I like to work, How the AI talks, My AI services, voice (Read aloud and Talk, two switches, both off at first), backup switch (on by default), About and privacy, Delete everything (removes every key first).
+- **Safety:** the trusted-adult line, the safety word on every reply, the answer guard, the process-step check on steps from the AI, and a check that stops AI text from reaching the screen or speech before it has passed.
+
+## Tests (state at build 9)
+
+- `FocusKit` unit tests: **367 passed**, 0 failed (`swift test` in `ios/FocusKit`).
+- UI tests (`ios/App/FocusAppUITests`, 32+ tests incl. `LargeTextUITests`, `DemoWalkthroughUITests`): every class passed after the build 8 fixes, but **not in one full run since the last changes**. Run the full suite before relying on it.
+- Format lint: `xcrun swift-format lint --strict --configuration .swift-format` over `FocusKit/Sources`, `FocusKit/Tests` and `App` is clean.
+- `checks/check.sh` runs lint, `swift build`, `swift test`, an app compile check and the UI tests when a simulator is available. It exits 3 when the UI part is skipped.
+
+## Not built, or not checked
+
+- **Me is one long page.** Designed as short destinations (`design/slices/UX-whole-app-review.md`), not built. It changes the structure, so the parent or Ben should see it first.
+- **"How I want help"**: a visible default guide, presets, Reset. Not built.
+- **Native dialogs** for deleting chats, AI services, saved keys and Delete everything. They still use "tap again". They work and are tested.
+- **AI-service form**: no Next/Done field order and no focus-to-error.
+- **Tailscale exception** covers all 100.64.0.0/10 addresses, which internet providers also use. Decide before classmates whether to keep only `*.ts.net` names (`DECISIONS.md`).
+- **Never checked by an agent:** the real on-device model, the microphone and voice on a phone, real OpenRouter or other keys, VoiceOver reading order, the smallest iPhone and dark mode. These need a person and a real phone.
+- **T14 answer-giving checks** (`design/03` 3.4) must be run for **each** AI in use before anyone except Ben uses the app. The AI is "built, not cleared".
 
 ## Broken or worrying
 
-- **Me is one long page.** At the largest text size it is many screens tall. The split into short destinations is designed (`design/slices/UX-whole-app-review.md`) but not built: it changes the app's structure and should be seen by the parent or Ben first.
-- **Chats, AI services, saved keys and Delete everything still use the "tap again" confirmation** instead of the native dialog. They work and are tested.
-- **The AI-service form** has no Next field order or focus-to-error.
-- **Tailscale exception uses 100.64.0.0/10,** which internet providers also use. Decide before classmates whether to keep only `*.ts.net` names.
-- **The trusted-adult line depends on the AI obeying TRUSTED_ADULT**; the app does not check the student's own words. The parent's "two extra safety signals" question is still open.
-- **Nothing about the real AI, microphone, voice, VoiceOver reading order, or a real OpenRouter key has been checked by an agent.** T14 (answer-giving checks) must be run for each AI used. The AI is "built, not cleared".
-- **Look it up needs a real contact** in `WikipediaLookUp.userAgent` before anyone but Ben uses the app.
-- D8 is still a draft until the parent confirms it.
-- The bash tool in agent sessions times out at about 2 minutes; run `xcodebuild test` with `nohup … & disown` and poll.
+- **Trusted-adult line** depends on the AI sending `TRUSTED_ADULT`. The app checks AI text only, not the student's own words. The parent's question about two extra safety signals is open.
+- **Look it up** still needs a real contact in `WikipediaLookUp.userAgent` (placeholder `set-by-owner@example.invalid`) before anyone except Ben uses the app.
+- **Starter step wording** was changed to "Check your answers against your notes" in `Shared/content.json` and its case file together. Check other starter steps against the never-shame list.
+- **D8 is a draft** until the parent confirms it (`DECISIONS.md`).
+- **The simulator and the phone** are not always reachable from the agent shell. See "Running things" below.
 
 ## Waiting on
 
-The parent: confirm D8 (with the Tailscale note); the trusted-adult proposals; T14 for each AI; uploading build 8 to TestFlight; whether to split Me and to build "How I want help".
+- **Parent:** confirm D8 and the Tailscale note; decide on the trusted-adult proposals; upload build 9 from Xcode's Organizer (Window → Organizer → Bens Steps 0.1 (9) → Distribute App → App Store Connect → Upload); decide whether to split Me and whether to build "How I want help"; run or arrange T14 for each AI.
+- **Ben:** the final name and icon (placeholder staircase), the words for Drifted and Stuck, whether voice starts off (it does now).
 
-## Next
+## Next (in order)
 
-1. The parent installs build 8 and tries `checks/device-checks.md`, including real OpenRouter and Talk switching between AIs.
-2. Decide and build the Me split and "How I want help" (presets, visible default guide, Reset).
-3. Convert the remaining "tap again" deletes to native dialogs; Next/focus order in the AI-service form.
-4. T14 for Apple's model and each AI service.
+1. Parent: install build 9 (`devicectl`, or Xcode Run), try `checks/device-checks.md`, and upload to TestFlight.
+2. Run the full UI suite once, in one run, on the iPhone 15 Pro Max simulator (see "Running things"). Fix anything that fails.
+3. Decide with the parent: Me split; "How I want help"; native dialogs for remaining deletes; the Tailscale range.
+4. T14 for Apple's model and each AI service, recorded word for word; then an independent review at the strongest available model before wider use.
+
+## Running things (learned the hard way)
+
+- **Phone:** `xcrun devicectl list devices` shows the phone as `connected` or `available (paired)` when it can be used. `unavailable` means it is not reachable from the Mac right now. Install with `xcrun devicectl device install app --device <UDID> <path>.app`, launch with `xcrun devicectl device process launch --device <UDID> com.craighagan.benssteps`. Launch fails with "Locked" if the phone is locked; that is fine, unlock and open the app. Phone UDID: `00008130-001804EA2803401C`.
+- **Simulator for tests:** `FDB37B2F-1E82-46E8-AA49-005A4A99BD93` (iPhone 15 Pro Max, iOS 26.5). iOS 18.2 simulators are too old.
+- **Long commands time out after about 2 minutes** in agent shells. Start `xcodebuild` and `swift test` detached: `nohup bash -c '… > /tmp/x.log 2>&1; echo "exit $?" >> /tmp/x.log' >/dev/null 2>&1 < /dev/null & disown`, then poll the log with short `sleep` calls (under about 60 seconds each).
+- **Run the UI tests in pieces** if one hangs: `-only-testing:FocusAppUITests/<Class>` plus `-test-timeouts-enabled YES -default-test-execution-time-allowance 180`. A test that waits on a control hidden by the keyboard is the usual cause of a hang. The test helper `putKeyboardAway()` exists for this.
+- **Archive:** `xcodebuild -project ios/App/FocusApp.xcodeproj -scheme FocusApp -configuration Release -destination "generic/platform=iOS" -archivePath /tmp/FocusApp.xcarchive -allowProvisioningUpdates archive`. Copy into `~/Library/Developer/Xcode/Archives/<YYYY-MM-DD>/"Bens Steps 0.1 (N).xcarchive"`. Do not upload from the command line (it fails); the parent uploads from the Organizer.
+- **Build number:** bump `CURRENT_PROJECT_VERSION` in all four places in `App/FocusApp.xcodeproj/project.pbxproj` (verify the count is 4) before each archive.
+- **Signing:** team `ANA76MNRSN`, automatic signing, bundle `com.craighagan.benssteps` (tests `com.craighagan.benssteps.UITests`). The parent owns the Apple account; agents never handle credentials (`AGENTS.md` section 9).
+- **Swift name clash:** FocusKit has its own `Content` type. In SwiftUI code, use `Self.Content` when the name matters.
+- **Reviewers:** the only independent reviewer available in these sessions was a read-only reviewer agent (`semantic_reviewer`). The builder agent (`general-task-execution`) sometimes fails with network errors; re-invoke it with a smaller task. A stronger model was not reachable from the builder's sessions. Note in every report whether the reviewer was the same model as the builder.

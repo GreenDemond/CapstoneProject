@@ -1,5 +1,7 @@
 # ROADMAP.md
 
+> **Update 2026-11-21:** the native iPhone app this roadmap proposed (section 3 and phase N) was approved and built in `ios/` as "Ben's Steps". For the iPhone app, `ios/PROGRESS.md` and `ios/DECISIONS.md` replace this file. The web-app items here still stand.
+
 Written 2026-11-20 for the agents who will build the next stage. It answers four requests from the parent:
 
 1. Students can chat with the app interactively.

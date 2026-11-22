@@ -1,6 +1,6 @@
 # The iPhone app
 
-**Status, 2026-11-20: designed, not built.** There is no Swift code yet. Building past the first three tasks waits on the parent's go-ahead (`DECISIONS.md` D1).
+**Status, 2026-11-21: built, build 9, on the owner's iPhone, archived for TestFlight (not yet uploaded).** The app is called **Ben's Steps** (bundle `com.craighagan.benssteps`). The AI features are "built, not cleared": the answer-giving checks (T14) have not been run on a real phone. Current state, open problems and how to run things are in `PROGRESS.md`. Read it first.
 
 A native iPhone app, written in Swift, that helps students with ADHD get schoolwork done: it shows one small step at a time, lets the student say honestly how each step went, gives hints instead of answers, and can be talked to.
 
@@ -13,7 +13,7 @@ One thing to know if you move it: today it sits inside the web project's git rep
 1. Pure Swift and SwiftUI, no web view, no third-party code.
 2. It opens on one thing: the next small step.
 3. The student can **talk** to it. Tapping and typing always work too, and the app is silent unless the student turns its voice on.
-4. The AI runs **on the phone**: no key, no account, no cost, and the student's words stay on the device. Without it, the app still works.
+4. The AI runs **on the phone** by default: no key, no account, no cost, and the student's words stay on the device. The student may add up to five of their own AI services (D6); then only what `DECISIONS.md` D8 lists leaves the phone. Without any AI, the app still works.
 5. The AI gives hints and questions, never finished answers. The student makes the plan.
 6. Every feature is tied to a research finding, or labelled as design judgment to be tested.
 
@@ -29,7 +29,10 @@ One thing to know if you move it: today it sits inside the web project's git rep
 | `design/02-screens-and-voice.md` | Every screen, step by step, and how talking works |
 | `design/03-ai-search-privacy.md` | The AI on the phone, looking things up, safety, what is stored and what leaves |
 | `design/04-engineering-and-plan.md` | How it is built and tested, the build order, open decisions, what is unverified |
-| `design/slices/` | One short design note per task, written as each task starts |
+| `design/slices/` | One short design note per task or change. `UX-whole-app-review.md` holds the latest review, the large-text results, and what is still to build |
+| `App/` | The Xcode project (`FocusApp.xcodeproj`, scheme FocusApp), the SwiftUI screens (`App/FocusApp/`) and the UI tests (`App/FocusAppUITests/`) |
+| `FocusKit/` | The Swift package with all the logic, the AI and network code, storage, and the unit tests (`swift test`) |
+| `PARENT-STEPS.md` | Numbered steps for the parent: Xcode, the phone, TestFlight, and the open questions |
 | `research/` | The research the app must match |
 | `Shared/` | The app's words and rules, and the cases its logic must pass |
 | `checks/` | The check command (made in T01) and the steps Ben runs on a real iPhone |
@@ -46,8 +49,9 @@ Message to start any session:
 
 ```
 Read AGENTS.md, DECISIONS.md, PROGRESS.md and TASKS.md in this folder.
-You are the Builder. Take the first task in TASKS.md that is ready and
-do exactly that one task, following the loop in AGENTS.md section 3.
+You are the Builder. Start with the first item under "Next" in
+PROGRESS.md (or the first task in TASKS.md that is ready) and do exactly
+that one piece of work, following the loop in AGENTS.md section 3.
 Use the ios-advisor agent at each gate the task requires and the
 ios-checker agent before marking it done. If the task needs a decision
 that DECISIONS.md does not record, ask me one clear question and stop.

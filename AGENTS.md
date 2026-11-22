@@ -42,7 +42,7 @@ Do these before anything else:
 
 Do not state a research finding from memory. If a claim is not in these files, say it is unverified.
 
-**The `ios/` folder is a separate, self-contained project** (the iPhone app) with its own `AGENTS.md`, `DECISIONS.md`, `PROGRESS.md` and task list. When working on the web app, do not read rules from it or change anything in it. When working on the iPhone app, open `ios/` as the project and follow its files instead of these.
+**The `ios/` folder is a separate, self-contained project** (the iPhone app, "Ben's Steps", built as of 2026-11-21) with its own `AGENTS.md`, `DECISIONS.md`, `PROGRESS.md` and task list. When working on the web app, do not read rules from it or change anything in it. When working on the iPhone app, open `ios/` as the project and follow its files instead of these; start with `ios/PROGRESS.md`. If a request does not say which app, ask which one before changing anything.
 
 ## Rules that always apply
 

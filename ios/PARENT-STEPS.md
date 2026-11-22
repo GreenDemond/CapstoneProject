@@ -1,5 +1,7 @@
 # Steps for the parent
 
+**Where things stand (2026-11-21):** parts A and B are done on your own iPhone (signing set up, builds installed with Xcode or `devicectl`). The newest archive is **Bens Steps 0.1 (9)** in Xcode's Organizer. To upload it: Window → Organizer → select it → Distribute App → App Store Connect → Upload. Then add testers under TestFlight. Ben is 18, so he can be an internal tester (Users and Access, then the Internal Testing group). The open questions below are still open; the current list is in `PROGRESS.md` "Waiting on".
+
 These are for you only. Ben does not do any of this. No agent ever needs your Apple ID, password, certificates or keys, and none should be given to one. You type those yourself, into Xcode, on your own computer.
 
 You need: a Mac with Xcode (current release, with the iOS 26 SDK), your paid Apple developer account, and Ben's iPhone 15 Pro Max (iOS 26.2) with a cable.

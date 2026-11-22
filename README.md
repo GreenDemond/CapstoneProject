@@ -10,7 +10,7 @@ A school project for Ben: a tool that helps students with ADHD stay on task whil
 | `CLAUDE.md` | One-line file that imports `AGENTS.md`, because Claude Code reads `CLAUDE.md` |
 | `DECISIONS.md` | Technical and product choices made in advance, with reasons, so agents do not re-ask; also lists what is still Ben's or a parent's to decide |
 | `PROGRESS.md` | What is built, what is waiting on whom, and the ordered list of what to build next |
-| `ios/` | The iPhone app: a self-contained folder with its own `README.md`, rules, decisions, research copy and task list. Designed, not built |
+| `ios/` | The iPhone app, "Ben's Steps": a self-contained folder with its own `README.md`, rules, decisions, research copy and task list. **Built** (build 9, 2026-11-21); start with `ios/PROGRESS.md` |
 | `ROADMAP.md` | Plan for the next stage: chat, search, web app or Apple app, on-device AI, and the interface clean-up, with the decisions each needs |
 | `00-knowledge-summary.md` | **Start here.** What the research supports, design principles, things to avoid, honest claims, privacy rules, and how to test, independent of what gets built |
 | `01-evidence.md` | What the research says about each part of the idea, with confidence ratings and sources |
@@ -30,8 +30,16 @@ A school project for Ben: a tool that helps students with ADHD stay on task whil
 
 ## Status
 
+Two apps share this repository.
+
+- **Web app** (this folder): built and tested; see `PROGRESS.md`.
+- **iPhone app** (`ios/`): built, on the parent's iPhone, archived for TestFlight; see `ios/PROGRESS.md`.
+
+The paragraph below is the original research-stage status, kept for history.
+
 Research pass complete. Nothing is built. The build plan is a web app with assignment breakdown as the core feature, and the choices for it are in `DECISIONS.md`. File 03 was written before that plan and still recommends an extension first; `DECISIONS.md` wins where they differ. Most evidence was read at abstract level; items marked *(not read)* or **(confirm)** in the files still need checking.
 
 ## Next step
 
-Open this folder in Claude and say: "Read PROGRESS.md and start on the first item under Next." `AGENTS.md` tells it how to work.
+- **Web app:** open this folder and say "Read PROGRESS.md and start on the first item under Next." `AGENTS.md` tells the agent how to work.
+- **iPhone app:** open the `ios/` folder as the project and use the start message in `ios/README.md`. `ios/AGENTS.md` tells the agent how to work, and `ios/PROGRESS.md` has the current state and how to run builds and tests.

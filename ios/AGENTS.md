@@ -247,3 +247,13 @@ Report failures and gaps as plainly as successes. A wrong "it works" is the most
 - `PROGRESS.md`: rewrite it each session; do not let it grow into a diary. Working; In progress; Broken or worrying; Waiting on; Next.
 - `DECISIONS.md`: any new or changed decision goes in its change log with the date, the reason, and who decided.
 - `research/`: a new finding is added to `research/01-evidence.md` with its source and how much of the source was read.
+
+## 14. Practical notes for the next agent (added 2026-11-21)
+
+- **The app is built.** Do not start from T01. `PROGRESS.md` says what exists, which build is current, what is open, and what is next. `TASKS.md` has the task history; new work since T16 is recorded as named rows (NAV, AI-multiple-services, UX).
+- **How to run builds, tests, the phone install and the archive** in an agent shell that times out after about two minutes: see "Running things" in `PROGRESS.md`. Do not run a long `xcodebuild` in the foreground; it is killed and reports BUILD INTERRUPTED.
+- **Roles in practice.** In past sessions the Advisor and Checker were often the same model as the Builder. The read-only `semantic_reviewer` agent was the one independent reviewer that worked, and it found a real privacy bug the Builder's own tests missed. For any change to `AI/`, `Network/`, `Storage/`, the Keychain, or what leaves the phone, get an independent read-only review and record its verdict in the slice note. Say plainly in the report when the reviewer was the same model.
+- **One AI setting.** Talk and the assignment screen show the same "which AI" choice (`App/FocusApp/AIChoicePicker.swift`, backed by `OwnAIModel.use`). A chat remembers the AI it was written to (`Chat.aiId`); never send earlier messages to a different AI.
+- **Words live in two places.** Student-facing words for the app's own screens are in `FocusKit/Sources/FocusKit/Models/Words*.swift`; rules, the safety word, hints and starter steps are in `Shared/content.json` (a change there needs gate 2 and the matching `Shared/cases/` file changed with it). Check both against the never-shame list.
+- **UI tests:** put the keyboard away before tapping the next control (`putKeyboardAway()` in `App/FocusAppUITests/UITestHelpers.swift`), wait for animated rows to leave, and run with per-test time limits. A test that hangs is almost always a control hidden behind the keyboard.
+- **Confirmation dialogs:** attach `confirmationDialog` to a whole list or screen, not to a row or section (a row's dialog can disappear when the row is deleted, and a section's does not always appear). Keep the chosen item in its own state, because the dialog clears its binding before the button's action runs.

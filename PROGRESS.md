@@ -58,12 +58,12 @@ Nothing. The whole-app review plan (`design/review-plan-2026-11-17.md`) is finis
 **Parent**
 
 - Confirm the draft T8/T6 rows (chat sends the conversation and the guide; resumed chats send older messages again) before classmates use the chat.
-- `ROADMAP.md` section 8: go ahead with the native iPhone app (`ios/DECISIONS.md` D1, and the other parent items listed there); TestFlight only or the public App Store; sign in to Xcode with the developer account (the parent has a paid one, 2026-11-20).
+- The native iPhone app: approved and built (see `ios/PROGRESS.md`). Its open parent items (D8, the trusted-adult proposals, TestFlight upload, the answer-giving checks) are listed in `ios/PROGRESS.md` "Waiting on".
 - Hosting (T7). Teacher approval and written parent permission before classmates use the app.
 
 ## Next
 
-**The iPhone app has its own self-contained folder, `ios/`** (2026-11-20): design, rules for agents, task list, decisions, research copy, and starting content. Nothing is built. It replaces the thin-shell draft in `design/iphone-app.md` and phase N of `ROADMAP.md`. It does not change this web app, and T1 here is unchanged until the parent answers `ios/DECISIONS.md` D1.
+**The iPhone app lives in its own self-contained folder, `ios/`, and is built** (2026-11-21): "Ben's Steps", build 9, installed on the parent's iPhone and archived for TestFlight. The parent approved it (`ios/DECISIONS.md` D1, 2026-11-20). Its state, open problems and next steps are in `ios/PROGRESS.md`; work on it follows `ios/AGENTS.md`, not this file. It replaces the thin-shell draft in `design/iphone-app.md` and phase N of `ROADMAP.md`. It does not change this web app, and T1 here is unchanged.
 
 **`ROADMAP.md` (2026-11-20) lays out the next stage**: interface clean-up, a more interactive chat, search, and an Apple shell with on-device AI. It needs answers from the parent and Ben first (its section 8). Until they answer, the list below stands.
 
