@@ -53,6 +53,8 @@ public final class ChatModel {
   /// The label of the student's own AI service when one is in use, or nil for the AI on this
   /// iPhone. Set by the app.
   public var ownServiceLabel: () -> String? = { nil }
+  /// The id of the AI in use now: a service id, or nil for the AI on this iPhone. Set by the app.
+  public var currentAIId: () -> String? = { nil }
   /// Whether that service's address starts with http://. Set by the app.
   public var ownServiceUsesHttp: () -> Bool = { false }
 
@@ -64,6 +66,8 @@ public final class ChatModel {
   private var chatId = UUID().uuidString
   private var kindId: String?
   private var step: String?
+  /// The AI this chat's earlier messages went to. A chat never carries messages to a different AI.
+  private var chatAIId: String?
   private var task: Task<Void, Never>?
   private var run = 0
 
@@ -112,7 +116,10 @@ public final class ChatModel {
     guard !isReplying,
       let last = turns.last(where: { $0.role == .assistant }), last.kind == .normal
     else { return [] }
-    return StepList.extract(from: last.text, limit: content.limits.stepLength)
+    // The same check as the step coach: only steps the student does, never answer content.
+    let limit = content.limits.stepLength
+    return StepList.extract(from: last.text, limit: limit)
+      .filter { ProcessStep.isProcess($0, limit: limit) }
   }
 
   // MARK: Chats
@@ -139,6 +146,7 @@ public final class ChatModel {
     stopAndKeep()
     chatId = chat.id
     kindId = chat.kindId
+    chatAIId = chat.aiId
     step = nil
     turns = chat.messages.map { ChatTurn(role: $0.role, text: $0.text) }
     cancelDeletes()
@@ -178,8 +186,18 @@ public final class ChatModel {
     refreshAvailability()
     let cut = Text.cut(Text.trimmed(draft), to: content.limits.message)
     guard isAvailable, !isReplying, !cut.isEmpty else { return }
+    // Earlier messages stay with the AI they were written to. If the AI changed, keep the old
+    // chat saved and start a new one, so nothing typed for this iPhone is sent to a service.
+    let switched = turns.contains { $0.role == .user } && currentAIId() != chatAIId
+    if switched {
+      stopAndKeep()
+      saveChat()
+      startFresh(kind: kindId, step: step)
+    }
+    // A chat with no messages yet belongs to whichever AI it is first sent to.
+    if !turns.contains(where: { $0.role == .user }) { chatAIId = currentAIId() }
     cutNote = Text.trimmed(draft).utf16.count > content.limits.message ? Words.messageCut : nil
-    serviceNote = nil
+    serviceNote = switched ? Words.talkNewChatForAI : nil
     draft = ""
     turns.append(ChatTurn(role: .user, text: cut))
     turns.append(ChatTurn(role: .assistant, text: "", inProgress: true))
@@ -308,6 +326,7 @@ public final class ChatModel {
 
   private func startFresh(kind: String?, step: String?) {
     chatId = UUID().uuidString
+    chatAIId = currentAIId()
     kindId = kind
     self.step = step
     turns = []
@@ -335,7 +354,8 @@ public final class ChatModel {
   private func saveChat() {
     let messages = savableMessages
     guard !messages.isEmpty else { return }
-    let chat = Chat(id: chatId, kindId: kindId, updatedOn: clock.now, messages: messages)
+    let chat = Chat(
+      id: chatId, kindId: kindId, updatedOn: clock.now, messages: messages, aiId: chatAIId)
     chats.removeAll { $0.id == chatId }
     chats.insert(chat, at: 0)
     saveChats()

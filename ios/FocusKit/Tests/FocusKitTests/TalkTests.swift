@@ -269,6 +269,14 @@ import Testing
     #expect(app.work == nil)
   }
 
+  @Test func aListOfAnswerContentIsNotOfferedAsSteps() async {
+    // Each line is an answer, not something the student does, so nothing is offered.
+    model.enqueue(
+      .init(["Here you go.\n1. The answer is 42\n2. Paris is the capital\n3. x equals 7\n"]))
+    await say("give me the answers as a list")
+    #expect(chat.offeredSteps.isEmpty)
+  }
+
   @Test func aReplyWithoutAListOffersNothing() async {
     model.enqueue(.init(["Just one idea. Try it."]))
     await say("help")

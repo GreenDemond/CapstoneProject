@@ -95,6 +95,7 @@ public final class AppModel {
     self.ownAI.change = { [weak self] change in self?.updateSettings(change) }
     self.ownAI.onChoiceChanged = { [weak self] in self?.chooseModel() }
     self.talk.ownServiceLabel = { [weak self] in self?.ownAI.chosen?.label }
+    self.talk.currentAIId = { [weak self] in self?.ownAI.chosenId }
     self.talk.ownServiceUsesHttp = { [weak self] in
       self?.ownAI.chosen?.config.needsUnencryptedWarning == true
     }

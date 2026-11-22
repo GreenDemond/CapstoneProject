@@ -8,7 +8,9 @@ public enum Guide {
     var line = Text.collapsed(
       text.replacingOccurrences(of: "\"", with: "'")
         .replacingOccurrences(of: "“", with: "'")
-        .replacingOccurrences(of: "”", with: "'"))
+        .replacingOccurrences(of: "”", with: "'")
+        .replacingOccurrences(of: "＂", with: "'")
+        .replacingOccurrences(of: "„", with: "'"))
     var before: String
     repeat {
       before = line

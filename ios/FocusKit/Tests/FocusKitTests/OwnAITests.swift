@@ -82,6 +82,69 @@ private let addressB = "https://other.example.org/v1/chat/completions"
     for _ in 0..<5000 where a.talk.isReplying { await Task.yield() }
   }
 
+  // MARK: Earlier messages stay with the AI they were written to (D8)
+
+  /// The user messages in one request body sent to a service.
+  private func userMessages(_ request: URLRequest) -> [String] {
+    guard let body = request.httpBody,
+      let json = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
+      let messages = json["messages"] as? [[String: Any]]
+    else { return [] }
+    return messages.filter { $0["role"] as? String == "user" }.compactMap {
+      $0["content"] as? String
+    }
+  }
+
+  @Test func switchingToAServiceStartsANewChatSoPhoneMessagesAreNotSent() async throws {
+    let a = app()
+    await send(a, "private words typed for the phone")
+    #expect(phone.calls.count == 1)
+    let id = add(a)
+    a.ownAI.use(id)
+    transport.enqueueReply("A hint from the service.")
+    await send(a, "now to the service")
+    let request = try #require(transport.requests.last)
+    #expect(userMessages(request) == ["now to the service"])
+    #expect(a.talk.serviceNote == Words.talkNewChatForAI)
+    // The earlier phone chat is kept, unchanged, in My chats.
+    #expect(
+      a.talk.chats.contains { $0.messages.first?.text == "private words typed for the phone" })
+    #expect(a.talk.chats.first?.aiId == id)
+  }
+
+  @Test func reopeningAPhoneChatThenSendingToAServiceStartsFresh() async throws {
+    let a = app()
+    await send(a, "phone chat words")
+    let phoneChat = try #require(a.talk.chats.first)
+    #expect(phoneChat.aiId == nil)
+    let id = add(a)
+    a.ownAI.use(id)
+    a.talk.open(phoneChat)
+    transport.enqueueReply("Service hint.")
+    await send(a, "a new question")
+    let request = try #require(transport.requests.last)
+    #expect(userMessages(request) == ["a new question"])
+  }
+
+  @Test func aChatStaysWholeWhileTheSameAIIsUsed() async throws {
+    let a = app()
+    let id = add(a)
+    a.ownAI.use(id)
+    transport.enqueueReply("First hint.")
+    await send(a, "one")
+    transport.enqueueReply("Second hint.")
+    await send(a, "two")
+    let request = try #require(transport.requests.last)
+    #expect(userMessages(request) == ["one", "two"])
+    #expect(a.talk.serviceNote == nil)
+  }
+
+  @Test func olderSavedChatsWithNoAIValueLoadAsPhoneChats() throws {
+    let json = #"{"id":"c1","updatedOn":0,"messages":[{"role":"user","text":"hi"}]}"#
+    let chat = try JSONDecoder().decode(Chat.self, from: Data(json.utf8))
+    #expect(chat.aiId == nil)
+  }
+
   // MARK: The list: add, edit, remove, the limit
 
   @Test func noServicesAtFirstAndNothingIsSent() async {

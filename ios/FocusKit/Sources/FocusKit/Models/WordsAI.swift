@@ -37,6 +37,8 @@ extension Words {
   public static let talkStop = "Stop"
   public static let talkNewChat = "New chat"
   public static let talkKeyboardDone = "Done"
+  public static let talkNewChatForAI =
+    "This is a new chat, because you changed which AI to use. Your earlier chat is saved in My chats and was not sent."
   public static let talkingAbout = "Talking about"
   public static let talkClearStep = "Clear"
   public static let talkMyChats = "My chats"

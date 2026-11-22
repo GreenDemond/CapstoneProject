@@ -287,15 +287,19 @@ public struct Chat: Codable, Equatable, Sendable, Identifiable {
   public var kindId: String?
   public var updatedOn: Date
   public var messages: [ChatMessage]
+  /// The id of the student's own AI service this chat ran on, or nil for the AI on this iPhone.
+  /// Older saved chats have no value, which means the AI on this iPhone.
+  public var aiId: String?
 
   public init(
     id: String = UUID().uuidString, kindId: String? = nil, updatedOn: Date,
-    messages: [ChatMessage]
+    messages: [ChatMessage], aiId: String? = nil
   ) {
     self.id = id
     self.kindId = kindId
     self.updatedOn = updatedOn
     self.messages = messages
+    self.aiId = aiId
   }
 }
 
