@@ -63,7 +63,7 @@ Nothing. The whole-app review plan (`design/review-plan-2026-11-17.md`) is finis
 
 ## Next
 
-**The iPhone app lives in its own self-contained folder, `ios/`, and is built** (2026-11-21): "Ben's Steps", build 9, installed on the parent's iPhone and archived for TestFlight. The parent approved it (`ios/DECISIONS.md` D1, 2026-11-20). Its state, open problems and next steps are in `ios/PROGRESS.md`; work on it follows `ios/AGENTS.md`, not this file. It replaces the thin-shell draft in `design/iphone-app.md` and phase N of `ROADMAP.md`. It does not change this web app, and T1 here is unchanged.
+**The iPhone app lives in its own self-contained folder, `ios/`, and is built** (2026-11-21): "Ben's Steps", build 10, installed on the parent's iPhone (build 9 is the one archived for TestFlight). The parent approved it (`ios/DECISIONS.md` D1, 2026-11-20). Its state, open problems and next steps are in `ios/PROGRESS.md`; work on it follows `ios/AGENTS.md`, not this file. It replaces the thin-shell draft in `design/iphone-app.md` and phase N of `ROADMAP.md`. It does not change this web app, and T1 here is unchanged.
 
 **`ROADMAP.md` (2026-11-20) lays out the next stage**: interface clean-up, a more interactive chat, search, and an Apple shell with on-device AI. It needs answers from the parent and Ben first (its section 8). Until they answer, the list below stands.
 

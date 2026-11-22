@@ -116,3 +116,10 @@ Use keys you own. Steps 62 to 78 replace the single-service steps of build 5.
 76. With an `http://` service (for example one on your own network), choose it on Talk and send a message. It should work, and the About text says http is not encrypted. Only use http for a service you trust on a network you trust.
 77. Open About and privacy. It should mention adding your own AI service, Check connection, Look up models, the Keychain, http not being encrypted, and the iPhone backup.
 78. Tap **Delete everything on this iPhone** twice. Open Me again: the list should be empty and Talk should have no choice. Add a service: its key line should say "No key saved." before you paste one.
+
+## Touch size and haptics (build 10, 2026-11-21)
+
+79. Open **Me → My AI services → Add a service**. Every text box (name, address, key, model) should be a tall box, about as tall as a finger. Tap near the top, middle and bottom of each: the keyboard should open every time.
+80. Tap a main button (for example **Start** or **Save service**) and feel a short tap as your finger goes down, before you lift it. Do the same for an outlined button (for example **Back to Today**) and a text link.
+81. Type in the chat box in Talk. It should be tall enough to tap easily. Report anything that is still hard to hit, and which control it was.
+

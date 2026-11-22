@@ -1,6 +1,6 @@
 # The iPhone app
 
-**Status, 2026-11-21: built, build 9, on the owner's iPhone, archived for TestFlight (not yet uploaded).** The app is called **Ben's Steps** (bundle `com.craighagan.benssteps`). The AI features are "built, not cleared": the answer-giving checks (T14) have not been run on a real phone. Current state, open problems and how to run things are in `PROGRESS.md`. Read it first.
+**Status, 2026-11-21: built, build 10 on the owner's iPhone (build 9 archived for TestFlight, not yet uploaded).** The app is called **Ben's Steps** (bundle `com.craighagan.benssteps`). The AI features are "built, not cleared": the answer-giving checks (T14) have not been run on a real phone. Current state, open problems and how to run things are in `PROGRESS.md`. Read it first.
 
 A native iPhone app, written in Swift, that helps students with ADHD get schoolwork done: it shows one small step at a time, lets the student say honestly how each step went, gives hints instead of answers, and can be talked to.
 

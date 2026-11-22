@@ -2,7 +2,7 @@
 
 Read this first in any session. It is the memory between sessions. Rewrite it each session; do not let it grow into a diary. Task history is in `TASKS.md`, decisions in `DECISIONS.md`.
 
-**As of 2026-11-21, build 9 (`CURRENT_PROJECT_VERSION = 9`, commit `4a8a275`).** The app is built, runs on the owner's iPhone, and has an archive for TestFlight (`Bens Steps 0.1 (9)`). Nothing has been uploaded to App Store Connect yet, and nothing has been pushed to a remote.
+**As of 2026-11-21, build 10 (`CURRENT_PROJECT_VERSION = 10`, commit `bf9ae67`).** Build 9 (commit `4a8a275`) is the one in the TestFlight archive; build 10 adds the taller text fields and press haptics and needs its own archive before upload. The app is built, runs on the owner's iPhone, and has an archive for TestFlight (`Bens Steps 0.1 (9)`). Nothing has been uploaded to App Store Connect yet, and nothing has been pushed to a remote.
 
 ## What the app is
 
@@ -19,15 +19,16 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 - **Me:** goals, notes (confirmed delete), How I like to work, How the AI talks, My AI services, voice (Read aloud and Talk, two switches, both off at first), backup switch (on by default), About and privacy, Delete everything (removes every key first).
 - **Safety:** the trusted-adult line, the safety word on every reply, the answer guard, the process-step check on steps from the AI, and a check that stops AI text from reaching the screen or speech before it has passed.
 
-## Tests (state at build 9)
+## Tests (state at build 10)
 
-- `FocusKit` unit tests: **367 passed**, 0 failed (`swift test` in `ios/FocusKit`).
+- `FocusKit` unit tests: **367 passed**, 0 failed (build 10 changes are view-only; the screen tests have not been re-run since) (`swift test` in `ios/FocusKit`).
 - UI tests (`ios/App/FocusAppUITests`, 32+ tests incl. `LargeTextUITests`, `DemoWalkthroughUITests`): every class passed after the build 8 fixes, but **not in one full run since the last changes**. Run the full suite before relying on it.
 - Format lint: `xcrun swift-format lint --strict --configuration .swift-format` over `FocusKit/Sources`, `FocusKit/Tests` and `App` is clean.
 - `checks/check.sh` runs lint, `swift build`, `swift test`, an app compile check and the UI tests when a simulator is available. It exits 3 when the UI part is skipped.
 
 ## Not built, or not checked
 
+- **Touch size and haptics (build 10):** every text field is 56 points tall and tappable across its width (`RoomyTextFieldStyle` in `Theme.swift`, applied once in `RootView`). Main, outlined and link buttons give a light tap on press (`Haptics.press()`). Not covered: switches, menus and the AI picker's own controls. The owner reported that small text fields were hard to touch; re-check on the phone before calling it fixed.
 - **Me is one long page.** Designed as short destinations (`design/slices/UX-whole-app-review.md`), not built. It changes the structure, so the parent or Ben should see it first.
 - **"How I want help"**: a visible default guide, presets, Reset. Not built.
 - **Native dialogs** for deleting chats, AI services, saved keys and Delete everything. They still use "tap again". They work and are tested.
@@ -46,12 +47,12 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 
 ## Waiting on
 
-- **Parent:** confirm D8 and the Tailscale note; decide on the trusted-adult proposals; upload build 9 from Xcode's Organizer (Window → Organizer → Bens Steps 0.1 (9) → Distribute App → App Store Connect → Upload); decide whether to split Me and whether to build "How I want help"; run or arrange T14 for each AI.
+- **Parent:** check the taller fields and haptics on the phone (device steps 79 to 81); confirm D8 and the Tailscale note; decide on the trusted-adult proposals; archive build 10, then upload it from Xcode's Organizer (Window → Organizer → Bens Steps 0.1 (9) → Distribute App → App Store Connect → Upload); decide whether to split Me and whether to build "How I want help"; run or arrange T14 for each AI.
 - **Ben:** the final name and icon (placeholder staircase), the words for Drifted and Stuck, whether voice starts off (it does now).
 
 ## Next (in order)
 
-1. Parent: install build 9 (`devicectl`, or Xcode Run), try `checks/device-checks.md`, and upload to TestFlight.
+1. Parent: check build 10 on the phone (`checks/device-checks.md` steps 79 to 81), then archive and upload it to TestFlight. Archive with the command in "Running things" (bump the build number first if it is needed again).
 2. Run the full UI suite once, in one run, on the iPhone 15 Pro Max simulator (see "Running things"). Fix anything that fails.
 3. Decide with the parent: Me split; "How I want help"; native dialogs for remaining deletes; the Tailscale range.
 4. T14 for Apple's model and each AI service, recorded word for word; then an independent review at the strongest available model before wider use.
