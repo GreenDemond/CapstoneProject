@@ -13,9 +13,11 @@ struct AIChoicePicker: View {
       if model.ownAI.usesSegments {
         Picker(Words.ownAIWhichAI, selection: choice) { choices }
           .pickerStyle(.segmented)
+          .touchTarget()
       } else {
         Picker(Words.ownAIWhichAI, selection: choice) { choices }
           .pickerStyle(.menu)
+          .touchTarget()
       }
     }
     .accessibilityLabel(Words.ownAIWhichAI)

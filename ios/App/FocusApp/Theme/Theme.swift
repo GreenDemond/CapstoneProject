@@ -40,6 +40,8 @@ enum Theme {
     static let huge: CGFloat = 40
     /// The smallest comfortable touch area.
     static let touch: CGFloat = 44
+    /// Text fields and the AI service inputs: taller than the minimum, so they are easy to hit.
+    static let field: CGFloat = 56
     static let corner: CGFloat = 14
     static let line: CGFloat = 1
     static let ring: CGFloat = 6
@@ -66,6 +68,7 @@ struct MainButtonStyle: ButtonStyle {
       .padding(.vertical, Theme.Space.small)
       .background(Theme.Palette.moss, in: RoundedRectangle(cornerRadius: Theme.Space.corner))
       .opacity(configuration.isPressed ? 0.8 : 1)
+      .onChange(of: configuration.isPressed) { _, pressed in if pressed { Haptics.press() } }
   }
 }
 
@@ -80,6 +83,7 @@ struct QuietButtonStyle: ButtonStyle {
       .background(
         RoundedRectangle(cornerRadius: Theme.Space.corner).fill(Theme.Palette.card)
       )
+      .onChange(of: configuration.isPressed) { _, pressed in if pressed { Haptics.press() } }
       .overlay(
         RoundedRectangle(cornerRadius: Theme.Space.corner)
           .stroke(Theme.Palette.line, lineWidth: Theme.Space.line)
@@ -96,6 +100,7 @@ struct LinkButtonStyle: ButtonStyle {
       .foregroundStyle(Theme.Palette.moss)
       .frame(minHeight: Theme.Space.touch)
       .opacity(configuration.isPressed ? 0.6 : 1)
+      .onChange(of: configuration.isPressed) { _, pressed in if pressed { Haptics.press() } }
   }
 }
 
@@ -112,5 +117,28 @@ extension View {
         RoundedRectangle(cornerRadius: Theme.Space.corner)
           .stroke(Theme.Palette.line, lineWidth: Theme.Space.line)
       )
+  }
+}
+
+extension View {
+  /// At least a 44-point tap area (Apple's minimum), tappable across the whole row.
+  func touchTarget() -> some View {
+    frame(minHeight: Theme.Space.touch, alignment: .leading).contentShape(Rectangle())
+  }
+}
+
+/// A light tap when a button is pressed down, so the student feels that it registered.
+enum Haptics {
+  static func press() {
+    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+  }
+}
+
+/// Every text field in the app is this tall and tappable across its whole width.
+struct RoomyTextFieldStyle: TextFieldStyle {
+  func _body(configuration: TextField<Self._Label>) -> some View {
+    configuration
+      .frame(maxWidth: .infinity, minHeight: Theme.Space.field, alignment: .leading)
+      .contentShape(Rectangle())
   }
 }

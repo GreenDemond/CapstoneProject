@@ -14,6 +14,7 @@ struct RootView: View {
       }
     }
     .tint(Theme.Palette.moss)
+    .textFieldStyle(RoomyTextFieldStyle())
     .onChange(of: scenePhase) { _, phase in
       if phase == .active { model.refreshWelcome() }
       if phase != .active { model.dictation.appWentToBackground() }

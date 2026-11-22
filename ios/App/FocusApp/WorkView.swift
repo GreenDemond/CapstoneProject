@@ -181,7 +181,7 @@ struct WorkView: View {
     case .later:
       reset()
     }
-    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+    Haptics.press()
   }
 
   private func reset() {
