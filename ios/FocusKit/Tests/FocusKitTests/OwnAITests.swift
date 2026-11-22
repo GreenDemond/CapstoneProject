@@ -139,6 +139,17 @@ private let addressB = "https://other.example.org/v1/chat/completions"
     #expect(a.talk.serviceNote == nil)
   }
 
+  @Test func stepsAndChatUseTheSameChosenAI() async throws {
+    let a = app()
+    let id = add(a)
+    a.ownAI.use(id)
+    // The one setting the assignment screen and Talk both show and change.
+    #expect(a.ownAI.chosenId == id)
+    #expect(a.ownAI.showsPicker)
+    a.ownAI.use(nil)
+    #expect(a.ownAI.chosenId == nil)
+  }
+
   @Test func olderSavedChatsWithNoAIValueLoadAsPhoneChats() throws {
     let json = #"{"id":"c1","updatedOn":0,"messages":[{"role":"user","text":"hi"}]}"#
     let chat = try JSONDecoder().decode(Chat.self, from: Data(json.utf8))

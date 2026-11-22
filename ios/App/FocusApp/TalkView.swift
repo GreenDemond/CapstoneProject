@@ -70,29 +70,10 @@ struct ChatScreen: View {
   /// segmented control for up to two services, a menu that shows the choice for more.
   @ViewBuilder
   private var whichAI: some View {
-    let choice = Binding<String?>(
-      get: { model.ownAI.chosenId }, set: { model.ownAI.use($0) })
-    Group {
-      if model.ownAI.usesSegments {
-        Picker(Words.ownAIWhichAI, selection: choice) { choices }
-          .pickerStyle(.segmented)
-      } else {
-        Picker(Words.ownAIWhichAI, selection: choice) { choices }
-          .pickerStyle(.menu)
-      }
-    }
-    .padding(.horizontal, Theme.Space.medium)
-    .padding(.top, Theme.Space.small)
-    .accessibilityLabel(Words.ownAIWhichAI)
-    .accessibilityIdentifier("talk-which-ai")
-  }
-
-  @ViewBuilder
-  private var choices: some View {
-    Text(Words.ownAIThisPhone).tag(String?.none)
-    ForEach(model.ownAI.readyServices) { service in
-      Text(verbatim: service.label).tag(Optional(service.id))
-    }
+    AIChoicePicker(model: model)
+      .padding(.horizontal, Theme.Space.medium)
+      .padding(.top, Theme.Space.small)
+      .accessibilityIdentifier("talk-which-ai")
   }
 
   // MARK: The conversation

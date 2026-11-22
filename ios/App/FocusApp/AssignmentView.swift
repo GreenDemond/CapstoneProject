@@ -18,6 +18,16 @@ struct AssignmentView: View {
           .font(Theme.Typography.big)
           .foregroundStyle(Theme.Palette.ink)
           .accessibilityAddTraits(.isHeader)
+        if model.ownAI.showsPicker {
+          VStack(alignment: .leading, spacing: Theme.Space.tiny) {
+            Text(Words.stepsFrom)
+              .font(Theme.Typography.small)
+              .foregroundStyle(Theme.Palette.quiet)
+            AIChoicePicker(model: model)
+          }
+          .accessibilityElement(children: .contain)
+          .accessibilityIdentifier("steps-from")
+        }
 
         ZStack(alignment: .topLeading) {
           TextEditor(
