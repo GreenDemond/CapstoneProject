@@ -22,13 +22,17 @@ final class MeUITests: XCTestCase {
     let field = app.textFields["note-text"]
     field.tap()
     field.typeText("Too noisy at home")
+    app.putKeyboardAway()
     app.buttons["note-add"].tap()
     let row = app.element("note-row")
     XCTAssertTrue(row.waitForExistence(timeout: 5))
     row.swipeLeft()
     app.buttons["Delete"].tap()
     app.buttons["note-delete-confirm"].firstMatch.tap()
-    XCTAssertFalse(app.element("note-row").exists)
+    // The row leaves with an animation, so wait for it to go.
+    let gone = expectation(
+      for: NSPredicate(format: "exists == false"), evaluatedWith: app.element("note-row"))
+    wait(for: [gone], timeout: 5)
   }
 
   /// A changed setting is used: turning on Talk shows the microphone on Today.
@@ -93,7 +97,6 @@ final class MeUITests: XCTestCase {
 
     let address = app.textFields["own-ai-address"]
     XCTAssertTrue(address.waitForExistence(timeout: 5))
-    address.tap()
     address.clearAndType("ftp://example.com/v1/chat/completions")
     XCTAssertTrue(app.element("own-ai-address-problem").waitForExistence(timeout: 5))
     address.clearAndType("http://example.com/v1/chat/completions")
@@ -116,17 +119,15 @@ final class MeUITests: XCTestCase {
 
     let label = app.textFields["own-ai-label"]
     XCTAssertTrue(label.waitForExistence(timeout: 5))
-    label.tap()
     label.clearAndType("Alpha")
     let address = app.textFields["own-ai-address"]
-    address.tap()
     address.clearAndType("https://example.com/v1/chat/completions")
     let model = app.textFields["own-ai-model"]
-    model.tap()
     model.clearAndType("test-model")
     let key = app.secureTextFields["own-ai-key"]
     key.tap()
     key.typeText("test-key-123")
+    app.putKeyboardAway()
     app.buttons["own-ai-save"].tap()
 
     let row = app.element("own-ai-row")
@@ -158,6 +159,14 @@ final class MeUITests: XCTestCase {
 extension XCUIElement {
   /// Replaces what is in a text field.
   fileprivate func clearAndType(_ text: String) {
+    // Put an open keyboard away first, as a person would, so its Done bar is not in the way.
+    let app = XCUIApplication()
+    app.putKeyboardAway()
+    var swipes = 0
+    while !isHittable && swipes < 4 {
+      app.swipeUp()
+      swipes += 1
+    }
     tap()
     if let current = value as? String, !current.isEmpty {
       typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: current.count))

@@ -57,6 +57,7 @@ struct LookUpView: View {
     }
     .scrollDismissesKeyboard(.interactively)
     .pageBackground()
+    .keyboardDoneButton()
     .navigationTitle(Words.lookUpTitle)
     .navigationBarTitleDisplayMode(.inline)
     .onDisappear { lookUp.cancel() }

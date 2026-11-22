@@ -28,6 +28,7 @@ struct WorkView: View {
     .padding(Theme.Space.large)
     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     .pageBackground()
+    .keyboardDoneButton()
     .accessibilityElement(children: .contain)
     .accessibilityIdentifier("work-screen")
     .sheet(item: $stuckStep) { target in
@@ -38,7 +39,7 @@ struct WorkView: View {
         get: { recallStepId != nil && model.currentStep != nil },
         set: { if !$0 { finishRecall() } })
     ) {
-      recallCard.padding(Theme.Space.large).presentationDetents([.medium])
+      recallCard.padding(Theme.Space.large).presentationDetents([.medium]).keyboardDoneButton()
     }
   }
 
@@ -46,6 +47,12 @@ struct WorkView: View {
   private var content: some View {
     Group {
       if let step = model.currentStep {
+        if let position = model.stepPosition {
+          Text("Step \(position.number) of \(position.total)")
+            .font(Theme.Typography.small)
+            .foregroundStyle(Theme.Palette.quiet)
+            .accessibilityIdentifier("step-position")
+        }
         stepCard(step)
         readButton(step)
         ChoiceGrid(choices: ChoiceGrid.layout) { choice in choose(choice, step: step) }
@@ -70,19 +77,17 @@ struct WorkView: View {
       Button {
         model.leaveStep()
       } label: {
-        Label(Words.backToToday, systemImage: "chevron.left")
+        // One line at every text size: the short label is used when the long one does not fit.
+        ViewThatFits(in: .horizontal) {
+          Label(Words.backToToday, systemImage: "chevron.left").lineLimit(1)
+          Label(Words.tabToday, systemImage: "chevron.left").lineLimit(1)
+        }
       }
       .buttonStyle(LinkButtonStyle())
       .accessibilityLabel(Words.backToToday)
       .accessibilityHint("Your step is saved. You can pick it up again from Today.")
       .accessibilityIdentifier("leave-step")
       Spacer()
-      if let position = model.stepPosition {
-        Text("Step \(position.number) of \(position.total)")
-          .font(Theme.Typography.small)
-          .foregroundStyle(Theme.Palette.quiet)
-          .accessibilityIdentifier("step-position")
-      }
       Menu {
         Button(Words.timerOff) { timerEnds = nil }
         ForEach([12, 25], id: \.self) { minutes in

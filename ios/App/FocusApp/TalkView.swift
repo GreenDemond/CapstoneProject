@@ -21,7 +21,6 @@ struct ChatScreen: View {
   @State private var showingChats = false
   @State private var hints: LadderModel?
   @State private var began = false
-  @FocusState private var inputFocused: Bool
 
   private var talk: ChatModel { model.talk }
 
@@ -38,31 +37,11 @@ struct ChatScreen: View {
           .padding(.top, Theme.Space.small)
           .accessibilityIdentifier("talk-fell-back")
       }
-      Text(talk.privacyLine)
-        .font(Theme.Typography.small)
-        .foregroundStyle(Theme.Palette.quiet)
-        .padding(.horizontal, Theme.Space.medium)
-        .padding(.vertical, Theme.Space.small)
-        .accessibilityIdentifier("talk-privacy")
-      if let about = talk.stepText {
-        HStack(spacing: Theme.Space.small) {
-          Text(verbatim: "\(Words.talkingAbout): \(about)")
-            .font(Theme.Typography.small)
-            .foregroundStyle(Theme.Palette.ink)
-            .lineLimit(2)
-            .accessibilityIdentifier("talk-about-step")
-          Spacer(minLength: 0)
-          Button(Words.talkClearStep) { talk.newChat() }
-            .buttonStyle(LinkButtonStyle())
-            .accessibilityIdentifier("talk-clear-step")
-        }
-        .padding(.horizontal, Theme.Space.medium)
-        .padding(.vertical, Theme.Space.small)
-      }
       conversation
-      bottom
+      if talk.unavailableLine == nil { bottom }
     }
     .pageBackground()
+    .keyboardDoneButton()
     .navigationTitle(Words.tabTalk)
     .toolbar {
       ToolbarItemGroup(placement: .topBarTrailing) {
@@ -70,11 +49,6 @@ struct ChatScreen: View {
           .accessibilityIdentifier("talk-new")
         Button(Words.talkMyChats) { showingChats = true }
           .accessibilityIdentifier("talk-chats")
-      }
-      ToolbarItemGroup(placement: .keyboard) {
-        Spacer()
-        Button(Words.talkKeyboardDone) { inputFocused = false }
-          .accessibilityIdentifier("talk-keyboard-done")
       }
     }
     .sheet(isPresented: $showingChats) { ChatListView(talk: talk, close: { showingChats = false }) }
@@ -127,6 +101,8 @@ struct ChatScreen: View {
     ScrollViewReader { proxy in
       ScrollView {
         VStack(alignment: .leading, spacing: Theme.Space.medium) {
+          header
+          if talk.unavailableLine != nil { unavailable }
           Text(talk.openingLine)
             .font(Theme.Typography.body)
             .foregroundStyle(Theme.Palette.ink)
@@ -206,31 +182,62 @@ struct ChatScreen: View {
     return mine ? "talk-you" : "talk-ai"
   }
 
+  /// Where the messages go, and the step the chat is about. Scrolls with the chat, so it is never
+  /// cut off at large text sizes.
+  @ViewBuilder
+  private var header: some View {
+    Text(talk.privacyLine)
+      .font(Theme.Typography.small)
+      .foregroundStyle(Theme.Palette.quiet)
+      .padding(.vertical, Theme.Space.small)
+      .accessibilityIdentifier("talk-privacy")
+    if let about = talk.stepText {
+      HStack(spacing: Theme.Space.small) {
+        Text(verbatim: "\(Words.talkingAbout): \(about)")
+          .font(Theme.Typography.small)
+          .foregroundStyle(Theme.Palette.ink)
+          .lineLimit(2)
+          .accessibilityIdentifier("talk-about-step")
+        Spacer(minLength: 0)
+        Button(Words.talkClearStep) { talk.newChat() }
+          .buttonStyle(LinkButtonStyle())
+          .accessibilityIdentifier("talk-clear-step")
+      }
+      .padding(.vertical, Theme.Space.small)
+    }
+  }
+
+  /// No AI on this iPhone right now: one calm line, Try again, hints and Look it up.
+  @ViewBuilder
+  private var unavailable: some View {
+    if let line = talk.unavailableLine {
+      Text(verbatim: line)
+        .font(Theme.Typography.body)
+        .foregroundStyle(Theme.Palette.quiet)
+        .accessibilityIdentifier("talk-unavailable")
+      Button(Words.tryAgain) { talk.refreshAvailability() }
+        .buttonStyle(LinkButtonStyle())
+        .accessibilityIdentifier("talk-retry")
+      NavigationLink {
+        if let hints { LadderBody(model: model, ladder: hints, dismiss: nil) }
+      } label: {
+        Label(Words.talkHints, systemImage: "lightbulb")
+          .font(Theme.Typography.button)
+          .foregroundStyle(Theme.Palette.ink)
+          .frame(maxWidth: .infinity, minHeight: Theme.Space.touch, alignment: .leading)
+          .cardStyle()
+      }
+      .accessibilityIdentifier("talk-hints")
+      lookUpLink
+    }
+  }
+
   // MARK: The bottom
 
   @ViewBuilder
   private var bottom: some View {
     VStack(alignment: .leading, spacing: Theme.Space.small) {
-      if let line = talk.unavailableLine {
-        Text(verbatim: line)
-          .font(Theme.Typography.body)
-          .foregroundStyle(Theme.Palette.quiet)
-          .accessibilityIdentifier("talk-unavailable")
-        Button(Words.tryAgain) { talk.refreshAvailability() }
-          .buttonStyle(LinkButtonStyle())
-          .accessibilityIdentifier("talk-retry")
-        NavigationLink {
-          if let hints { LadderBody(model: model, ladder: hints, dismiss: nil) }
-        } label: {
-          Label(Words.talkHints, systemImage: "lightbulb")
-            .font(Theme.Typography.button)
-            .foregroundStyle(Theme.Palette.ink)
-            .frame(maxWidth: .infinity, minHeight: Theme.Space.touch, alignment: .leading)
-            .cardStyle()
-        }
-        .accessibilityIdentifier("talk-hints")
-        lookUpLink
-      } else {
+      Group {
         if let note = talk.serviceNote {
           Text(verbatim: note).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
             .accessibilityIdentifier("talk-service-note")
@@ -249,7 +256,6 @@ struct ChatScreen: View {
           )
           .font(Theme.Typography.body)
           .lineLimit(1...5)
-          .focused($inputFocused)
           .cardStyle()
           .accessibilityLabel(Words.talkPlaceholder)
           .accessibilityIdentifier("talk-input")

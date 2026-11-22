@@ -19,6 +19,7 @@ final class PlanningUITests: XCTestCase {
     let box = app.textViews["assignment-text"]
     box.tap()
     box.typeText(words)
+    app.putKeyboardAway()
   }
 
   /// Empty app to the work screen by "Suggest some to start", through the editor.
@@ -42,6 +43,7 @@ final class PlanningUITests: XCTestCase {
       let field = app.textFields["said-step"]
       field.tap()
       field.typeText(words)
+      app.putKeyboardAway()
       app.buttons["add-said"].tap()
     }
     app.buttons["thats-all"].tap()

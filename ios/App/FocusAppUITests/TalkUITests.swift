@@ -24,6 +24,7 @@ final class TalkUITests: XCTestCase {
     let input = app.textFields["talk-input"]
     input.tap()
     input.typeText("Help me plan")
+    app.putKeyboardAway()
     app.buttons["talk-send"].tap()
     XCTAssertTrue(app.buttons["talk-use-steps"].waitForExistence(timeout: 10))
     app.buttons["talk-use-steps"].tap()
@@ -37,6 +38,7 @@ final class TalkUITests: XCTestCase {
     let input = app.textFields["talk-input"]
     input.tap()
     input.typeText("some private words")
+    app.putKeyboardAway()
     app.buttons["talk-send"].tap()
     XCTAssertTrue(app.element("talk-trusted-adult").waitForExistence(timeout: 10))
     XCTAssertFalse(app.staticTexts["You: some private words"].exists)
@@ -50,7 +52,7 @@ final class TalkUITests: XCTestCase {
     let input = app.textFields["talk-input"]
     input.tap()
     XCTAssertTrue(app.keyboards.count > 0)
-    app.buttons["talk-keyboard-done"].tap()
+    app.buttons["keyboard-done"].tap()
     XCTAssertTrue(app.buttons["talk-send"].waitForExistence(timeout: 5))
     XCTAssertEqual(app.keyboards.count, 0)
   }
@@ -84,6 +86,7 @@ final class StepCoachUITests: XCTestCase {
     let box = app.textViews["assignment-text"]
     box.tap()
     box.typeText("Five paragraphs on courage")
+    app.putKeyboardAway()
     app.buttons["suggest-steps"].tap()
     XCTAssertTrue(app.element("editor-screen").waitForExistence(timeout: 5))
     XCTAssertTrue(app.staticTexts["starter-label"].exists)
@@ -100,6 +103,7 @@ final class StepCoachUITests: XCTestCase {
     let box = app.textViews["assignment-text"]
     box.tap()
     box.typeText("A project")
+    app.putKeyboardAway()
     app.buttons["say-steps"].tap()
     app.buttons["give-idea"].tap()
     XCTAssertTrue(app.buttons["idea-use"].waitForExistence(timeout: 5))

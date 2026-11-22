@@ -14,12 +14,14 @@ final class WorkUITests: XCTestCase {
     let box = app.textViews["assignment-text"]
     box.tap()
     box.typeText("Some work")
+    app.putKeyboardAway()
     if let kind { app.buttons["kind-\(kind)"].tap() }
     app.buttons["say-steps"].tap()
     for words in steps {
       let field = app.textFields["said-step"]
       field.tap()
       field.typeText(words)
+      app.putKeyboardAway()
       app.buttons["add-said"].tap()
     }
     app.buttons["thats-all"].tap()
@@ -49,6 +51,7 @@ final class WorkUITests: XCTestCase {
     let smaller = app.textFields["smaller-piece"]
     smaller.tap()
     smaller.typeText("A small piece")
+    app.putKeyboardAway()
     tap(app, "drifted-confirm")
     XCTAssertEqual(app.staticTexts["work-step"].label, "A small piece")
     tap(app, "choice-later")

@@ -16,6 +16,7 @@ struct TodayView: View {
       }
       .pageBackground()
       .navigationBarTitleDisplayMode(.inline)
+      .keyboardDoneButton()
     }
   }
 }

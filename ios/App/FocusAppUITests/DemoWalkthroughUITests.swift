@@ -26,6 +26,7 @@ final class DemoWalkthroughUITests: XCTestCase {
     let box = app.textViews["assignment-text"]
     box.tap()
     box.typeText("Read chapter 3 and answer the questions at the end")
+    app.putKeyboardAway()
     app.buttons["suggest-steps"].tap()
     XCTAssertTrue(app.element("editor-screen").waitForExistence(timeout: 5))
     shot(app, "02-editor")
@@ -51,6 +52,7 @@ final class DemoWalkthroughUITests: XCTestCase {
     app.scrollTo(key)
     key.tap()
     key.typeText("sk-or-test-not-a-real-key")
+    app.putKeyboardAway()
     app.buttons["own-ai-save"].tap()
     let row = app.element("own-ai-row")
     XCTAssertTrue(row.waitForExistence(timeout: 5))

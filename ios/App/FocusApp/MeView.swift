@@ -29,6 +29,21 @@ struct MeView: View {
       }
       .scrollContentBackground(.hidden)
       .pageBackground()
+      .keyboardDoneButton()
+      // One dialog on the whole list: a dialog on a row or a section does not always appear.
+      .confirmationDialog(
+        Words.savedThoughtConfirm,
+        isPresented: Binding(
+          get: { pendingNote != nil },
+          set: { if !$0 { pendingNote = nil } })
+      ) {
+        Button(Words.savedThoughtDelete, role: .destructive) {
+          if let id = chosenNote { me.deleteNote(id) }
+          chosenNote = nil
+        }
+        .accessibilityIdentifier("note-delete-confirm")
+        Button(Words.savedThoughtKeep, role: .cancel) { pendingNote = nil }
+      }
       .navigationTitle(Words.tabMe)
       .scrollDismissesKeyboard(.interactively)
     }
@@ -102,20 +117,6 @@ struct MeView: View {
         .accessibilityIdentifier("me-trusted-adult")
     }
     .listRowBackground(Theme.Palette.card)
-    // One dialog for the whole section, so it is not attached to a row that is removed by the delete.
-    .confirmationDialog(
-      Words.savedThoughtConfirm,
-      isPresented: Binding(
-        get: { pendingNote != nil },
-        set: { if !$0 { pendingNote = nil } })
-    ) {
-      Button(Words.savedThoughtDelete, role: .destructive) {
-        if let id = chosenNote { me.deleteNote(id) }
-        chosenNote = nil
-      }
-      .accessibilityIdentifier("note-delete-confirm")
-      Button(Words.savedThoughtKeep, role: .cancel) { pendingNote = nil }
-    }
   }
 
   // MARK: How I like to work
@@ -514,6 +515,7 @@ private struct ServiceEditor: View {
       }
       .scrollContentBackground(.hidden)
       .pageBackground()
+      .keyboardDoneButton()
       .navigationTitle(id == nil ? Words.ownAIEditorAdd : Words.ownAIEditorEdit)
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {

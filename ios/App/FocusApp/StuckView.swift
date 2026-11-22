@@ -75,6 +75,7 @@ struct LadderBody: View {
       .padding(Theme.Space.large)
     }
     .pageBackground()
+    .keyboardDoneButton()
     .onAppear { if ladder.hintsShown.isEmpty { ladder.nextHint() } }
     .accessibilityElement(children: .contain)
     .accessibilityIdentifier("stuck-screen")

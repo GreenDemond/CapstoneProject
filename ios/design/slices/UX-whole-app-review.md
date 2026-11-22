@@ -97,3 +97,40 @@ Nothing from the layout changes. Prompt/context changes do not add a new destina
 ## Gates
 - Gate 1 design review: pending parent approval.
 - Advisor review: the codebase audit was read-only; a stronger-model design review is still recommended before implementation.
+
+## Report: release-readiness pass, 2026-11-21 (build 8)
+
+Builder and Advisor in this pass: Claude Opus (the strongest model available). A separate read-only reviewer agent checked safety and privacy. Its verdict was FIX FIRST on one item.
+
+### Review findings and what happened
+
+| # | Finding | Priority | Done |
+|---|---|---|---|
+| 1 | After switching Talk from the on-phone AI to an external service, earlier on-phone messages were sent to that service on the next message (rule 4, D8) | Must fix before Ben | Fixed. A chat remembers its AI (`Chat.aiId`). Changing the AI and sending starts a new chat with a calm line, and the earlier chat stays saved and unsent. 4 tests |
+| 2 | Tailscale exception uses 100.64.0.0/10, which internet providers also use | Before classmates | Recorded in D8 as the parent's choice, with the caveat. Not changed |
+| 3 | The build-5 key migration picks its new home by label, not address | Later | Not changed. Rare: needs a failed move plus a new "My service" at another host |
+| 4 | Steps from a chat reply skipped the process-step check | Later | Fixed. 1 test |
+| 5 | Two quote marks (＂ „) were not cleaned from the guide | Later | Fixed. 1 test |
+| 6 | Starter step "Check what you missed" | Wording | Changed to "Check your answers against your notes" (content and case file together) |
+| — | The trusted-adult line depends on the AI obeying TRUSTED_ADULT | Open question | The parent's pending "two extra safety signals" decision |
+
+Safe, per the review: per-service key isolation; no key in saved data, errors, labels or logs; Delete everything removes keys first; every reply is checked before it is shown, spoken or saved; the backup never includes a key; prompt text is quoted and cleaned.
+
+### UX fixes in this pass
+- The work screen scrolls, and its header is one line at every text size ("Back to Today" shortens to "Today" if it must; the step position moved under it).
+- Plan lists saved thoughts and recall answers, with a confirmed delete.
+- Notes: confirmed delete; a full swipe does not delete.
+- Talk: "Talking about: <step> · Clear"; the privacy line and the no-AI help now scroll with the chat, so nothing is cut off at large text; VoiceOver says who wrote each message; named Stop reading action.
+- A keyboard Done button on every screen with a text box.
+- Search is disabled while searching; startup failure has Try again.
+
+### Large-text matrix
+- `LargeTextUITests` runs at the largest accessibility size (AccessibilityXXXL) on the iPhone 15 Pro Max simulator, iOS 26.5. It walks welcome, assignment, editor, the work screen (all five buttons, Drifted with the keyboard), Me and Talk, and checks every main control can be reached and tapped.
+- Screenshots showed two problems, both fixed: the work header wrapped "Back to Today" over four lines, and Talk's privacy line was cut off.
+- Not run: the smallest iPhone (iPhone 17e) and dark mode. VoiceOver reading order still needs a person listening.
+
+### Not done (needs a decision or a person)
+- Splitting Me into short destinations. At the largest text size Me is many screens tall. This is a structure change for the parent or Ben to see first.
+- "How I want help": visible default guide, presets, Reset.
+- Native dialogs for chats, AI services, saved keys and Delete everything (they still use "tap again").
+- Next order and focus-to-error in the AI-service form.

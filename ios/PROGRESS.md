@@ -5,14 +5,17 @@ The memory between sessions. Rewrite it each session; do not let it grow into a 
 ## Working
 
 - T01 to T03: `FocusKit` (content, logic matching all eight shared case files, versioned storage).
-- T04 to T08: app shell, assignment and editor, Today and the work screen, stuck ladder, Look it up (Wikipedia). See `TASKS.md`.
+- T04 to T08: app shell, assignment and editor, Today and the work screen, stuck ladder, Look it up (Wikipedia).
 - T09 voice in and T10 voice out: two switches under Me, Read aloud and Talk (D7), both off at first.
-- T11 to T13: the AI behind a `LanguageModel` protocol; safety word, trusted-adult line and `AnswerGuard` run on every reply before it is shown or spoken; Talk; step coach; works with no AI.
-- T15 Me: goals, notes, How I like to work, AI guide and length, voice, About and privacy, Delete everything.
-- Navigation review (2026-11-21): a way back and to Today from every screen.
-- **New 2026-11-21 (build 6): My AI services (D6), up to five.** Apple's on-device model stays the default. Each service has a label, an address (https, or http with a "not encrypted" line), a model name, and its own key in the Keychain under `service-<id>`. Optional **Look up models** (typing always works). Per service: Edit, Check connection, Remove (asks once, deletes its key). Talk shows **On this iPhone** then each ready service (segmented up to two, a menu for more); the choice is kept by id and falls back to the phone with one calm line. The step coach follows it. Build 5's single service becomes "My service" and keeps its key. Delete everything removes every key first. Design: `design/slices/AI-multiple-services.md`.
-- Include in my iPhone backup (D13): unchanged.
-- Tests: 336 FocusKit tests pass. UI tests: @@UI@@ on the iOS 26.5 iPhone 15 Pro Max simulator (2026-11-21).
+- T11 to T13: the AI behind a `LanguageModel` protocol; safety word, trusted-adult line and `AnswerGuard` run on every reply before it is shown, spoken or saved; Talk; step coach; works with no AI.
+- T15 Me: goals, notes, How I like to work, AI guide and length, voice, backup switch (D13), About and privacy, Delete everything.
+- My AI services (D6): up to five, each with its own Keychain key; forgiving addresses with OpenRouter defaults (`openrouter/free`); optional Look up models; http with a tick box and warning, no Talk warning for Tailscale (see D8 note).
+- **2026-11-21 release-readiness pass (build 8):**
+  - Independent review (read-only reviewer plus Opus as Builder/Advisor). Must-fix found and fixed: earlier on-phone chat messages were sent to an external AI after a switch. A chat now stays with the AI it was written to; switching and sending starts a new chat and says so.
+  - Also fixed from the review: steps offered from a chat reply pass the process-step check; two more quote marks cleaned from the guide; "Check what you missed" became "Check your answers against your notes".
+  - UX fixes: the work screen scrolls; its header is one line at every text size; saved thoughts and recall answers are listed in Plan with a confirmed delete; notes need a confirmed delete; Talk shows "Talking about: <step> · Clear"; VoiceOver says who wrote each message and has a Stop reading action; Search is disabled while searching; startup failure has Try again; a keyboard Done button on every screen with a text box.
+  - New large-text UI tests (`LargeTextUITests`) at the largest accessibility size.
+- Tests: see the Report in `design/slices/UX-whole-app-review.md` for the exact final counts.
 
 ## In progress
 
@@ -20,29 +23,23 @@ Nothing.
 
 ## Broken or worrying
 
-- **http is allowed for every address** (the parent chose "http for any address"). That needed `NSAllowsArbitraryLoads` in `App/Info-Extra.plist`, which turns off iOS's https rule for the whole app. A key sent to an http address is not encrypted. App Store review may ask why. Not tried against a real http server.
-- **No own service was ever called for real, and the Keychain was never run from an agent.** Compiled and unit-tested with fakes only. The parent should try `checks/device-checks.md` steps 62 to 78 with keys they own. The migration from build 5 was tested with fakes only; step 74 checks it on the phone.
-- **T14 must be run separately for each AI service used** (Apple's model and each own service). None has been run. The AI is "built, not cleared". Do not give a build with an own service to anyone but Ben before T14 for it.
-- **When an own service is chosen, messages leave the phone.** D8 is still a draft until the parent confirms it, including the rows rewritten on 2026-11-21 and the new Look up models row.
-- Delete everything clears this iPhone; an older iPhone backup keeps its copy until a new backup is made. The About text says so.
-- **The simulator is reachable from the agent shell only some of the time.** When it is not, `checks/check.sh` can only compile (exit 3).
-- Guardrail stop on the student's own message shows the trusted-adult line: an unapproved proposal (`PARENT-STEPS.md`). The fixed phrase list is NOT built.
-- The microphone's language files are fetched from Apple when the student taps Download. Not a D8 row; the parent should confirm that reading.
-- No Advisor or Checker agent has run for T04 onward, nor for the own-service changes (same model as Builder, self-review only). Gate 2 is owed for T02 to T15 and both own-service slices; gate 4 before anyone but Ben.
-- **Look it up needs a real contact** in `WikipediaLookUp.userAgent` (currently `set-by-owner@example.invalid`) before anyone else uses the app.
-- Shared starter step "Check what you missed" uses a word on the "never shame" list. Left as is (it is in `Shared/`).
-- Not done from the screens note: voice in on the editor rows, the Stuck boxes and the recall question; the AI looking things up (D8 row 2); the "test the guess" experiments.
-- Ben's phone is on iOS 26.2; whether Apple Intelligence is on is not known.
-- The app is **Ben's Steps**, bundle id `com.craighagan.benssteps`, team ANA76MNRSN. Build 0.1 (5) and 0.1 (6) are archived locally and not uploaded.
-- Inside a sandboxed agent shell, Swift cannot start its macro plug-ins; `check.sh` adds the needed flags.
+- **Me is one long page.** At the largest text size it is many screens tall. The split into short destinations is designed (`design/slices/UX-whole-app-review.md`) but not built: it changes the app's structure and should be seen by the parent or Ben first.
+- **Chats, AI services, saved keys and Delete everything still use the "tap again" confirmation** instead of the native dialog. They work and are tested.
+- **The AI-service form** has no Next field order or focus-to-error.
+- **Tailscale exception uses 100.64.0.0/10,** which internet providers also use. Decide before classmates whether to keep only `*.ts.net` names.
+- **The trusted-adult line depends on the AI obeying TRUSTED_ADULT**; the app does not check the student's own words. The parent's "two extra safety signals" question is still open.
+- **Nothing about the real AI, microphone, voice, VoiceOver reading order, or a real OpenRouter key has been checked by an agent.** T14 (answer-giving checks) must be run for each AI used. The AI is "built, not cleared".
+- **Look it up needs a real contact** in `WikipediaLookUp.userAgent` before anyone but Ben uses the app.
+- D8 is still a draft until the parent confirms it.
+- The bash tool in agent sessions times out at about 2 minutes; run `xcodebuild test` with `nohup … & disown` and poll.
 
 ## Waiting on
 
-The parent's numbered steps and open questions are in `PARENT-STEPS.md`. Open: D8 confirmation (with the new rows), the trusted-adult proposals, T14 for each service, and the parent's Apple steps (uploading build 6).
+The parent: confirm D8 (with the Tailscale note); the trusted-adult proposals; T14 for each AI; uploading build 8 to TestFlight; whether to split Me and to build "How I want help".
 
 ## Next
 
-1. The parent opens build 6 on the phone, tries steps 62 to 78 of `checks/device-checks.md` with keys they own, and reports what the screen said (especially step 74, the move from build 5).
-2. T14 for Apple's model and for each own service, recorded word for word; Advisor gate 4.
-3. Give `WikipediaLookUp.userAgent` a real contact before anyone but Ben uses the app.
-4. Advisor gate 2 on T02 to T15 and on `design/slices/AI-multiple-services.md`.
+1. The parent installs build 8 and tries `checks/device-checks.md`, including real OpenRouter and Talk switching between AIs.
+2. Decide and build the Me split and "How I want help" (presets, visible default guide, Reset).
+3. Convert the remaining "tap again" deletes to native dialogs; Next/focus order in the AI-service form.
+4. T14 for Apple's model and each AI service.

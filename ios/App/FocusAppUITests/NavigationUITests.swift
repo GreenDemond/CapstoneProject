@@ -53,6 +53,7 @@ final class NavigationUITests: XCTestCase {
     let box = app.textViews["assignment-text"]
     box.tap()
     box.typeText("Half an idea")
+    app.putKeyboardAway()
     tap(app, "cancel-planning")
     XCTAssertTrue(app.element("today-screen").waitForExistence(timeout: 5))
     XCTAssertEqual(app.staticTexts["next-step"].label, "Step A")
@@ -64,6 +65,7 @@ final class NavigationUITests: XCTestCase {
     let box = app.textViews["assignment-text"]
     box.tap()
     box.typeText("Five paragraphs on courage")
+    app.putKeyboardAway()
     tap(app, "suggest-steps")
     XCTAssertTrue(app.element("editor-screen").waitForExistence(timeout: 5))
     tap(app, "editor-back")
@@ -84,6 +86,7 @@ final class NavigationUITests: XCTestCase {
     let box = app.textViews["assignment-text"]
     box.tap()
     box.typeText("A short essay")
+    app.putKeyboardAway()
     tap(app, "suggest-steps")
     tap(app, "editor-back")
     app.scrollTo(app.buttons["back-to-editor"])
@@ -100,6 +103,7 @@ final class NavigationUITests: XCTestCase {
     let box = app.textViews["assignment-text"]
     box.tap()
     box.typeText("Another one")
+    app.putKeyboardAway()
     tap(app, "say-steps")
     XCTAssertTrue(app.element("saying-screen").waitForExistence(timeout: 5))
     app.scrollTo(app.buttons["cancel-planning"])
@@ -143,6 +147,7 @@ final class NavigationUITests: XCTestCase {
     let words = app.textFields["lookup-words"]
     words.tap()
     words.typeText("courage")
+    app.putKeyboardAway()
     XCTAssertTrue(app.buttons["lookup-search"].isHittable)
     app.navigationBars.buttons.firstMatch.tap()
     XCTAssertTrue(app.buttons["talk-lookup"].waitForExistence(timeout: 5))

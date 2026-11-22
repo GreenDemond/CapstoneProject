@@ -16,17 +16,26 @@ extension XCUIApplication {
     return app
   }
 
+  /// Puts the keyboard away with its Done button, as a person would before tapping something
+  /// the keyboard may cover.
+  func putKeyboardAway() {
+    let done = buttons["keyboard-done"].firstMatch
+    if keyboards.count > 0, done.exists { done.tap() }
+  }
+
   /// Types an assignment, says the given steps one by one, and presses Start.
   /// Leaves the app on the work screen.
   func startSteps(_ steps: [String], assignment: String = "Some work") {
     let box = textViews["assignment-text"]
     box.tap()
     box.typeText(assignment)
+    putKeyboardAway()
     buttons["say-steps"].tap()
     for words in steps {
       let field = textFields["said-step"]
       field.tap()
       field.typeText(words)
+      putKeyboardAway()
       buttons["add-said"].tap()
     }
     buttons["thats-all"].tap()
@@ -36,7 +45,7 @@ extension XCUIApplication {
   /// Scrolls the front list or page up until the element can be tapped.
   func scrollTo(_ target: XCUIElement, maxSwipes: Int = 8) {
     var swipes = 0
-    while !target.isHittable && swipes < maxSwipes {
+    while !(target.exists && target.isHittable) && swipes < maxSwipes {
       swipeUp()
       swipes += 1
     }

@@ -15,10 +15,12 @@ final class StuckUITests: XCTestCase {
     let box = app.textViews["assignment-text"]
     box.tap()
     box.typeText("Some work")
+    app.putKeyboardAway()
     app.buttons["say-steps"].tap()
     let field = app.textFields["said-step"]
     field.tap()
     field.typeText("Write one line")
+    app.putKeyboardAway()
     app.buttons["add-said"].tap()
     app.buttons["thats-all"].tap()
     app.buttons["start-steps"].tap()
@@ -38,8 +40,10 @@ final class StuckUITests: XCTestCase {
     on.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: "Write one line".count))
     XCTAssertFalse(app.buttons["ask-copy"].exists)
     XCTAssertTrue(app.staticTexts["ask-need-words"].exists)
+    app.putKeyboardAway()
     tried.tap()
     tried.typeText("Reading the example")
+    app.putKeyboardAway()
     XCTAssertTrue(app.buttons["ask-copy"].waitForExistence(timeout: 5))
     app.buttons["ask-copy"].tap()
     XCTAssertTrue(app.buttons["Copied."].waitForExistence(timeout: 5))
