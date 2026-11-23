@@ -45,6 +45,8 @@ public final class ChatModel {
   /// A chat the student asked to delete and has not confirmed yet.
   public private(set) var pendingDelete: String?
   public private(set) var pendingDeleteAll = false
+  /// How replies ended on this iPhone (counts only). Shown under About.
+  public private(set) var counts: TalkCounts
 
   /// Hands steps from a reply to the editor. Set by the app.
   public var onUseSteps: ([String], String?) -> Void = { _, _ in }
@@ -82,6 +84,7 @@ public final class ChatModel {
     self.speaker = speaker
     self.availability = model.availability
     self.chats = store.load(SavedChats.self).value?.chats ?? []
+    self.counts = store.load(TalkCounts.self).value ?? TalkCounts()
   }
 
   // MARK: Reading
@@ -243,6 +246,7 @@ public final class ChatModel {
 
   private func handle(_ event: ChatEvent) {
     guard let index = turns.indices.last, turns[index].role == .assistant else { return }
+    count(event)
     switch event {
     case .finished(let text):
       turns[index].text = text
@@ -294,6 +298,21 @@ public final class ChatModel {
       }
       finishRun()
     }
+  }
+
+  /// Adds one to the count for what the student saw. The trusted-adult line is not counted. A
+  /// failed save is silent: the counts are not the student's work.
+  private func count(_ event: ChatEvent) {
+    switch event {
+    case .finished: counts.shown = TalkCounts.raised(counts.shown)
+    case .answerRefused: counts.hintsOnly = TalkCounts.raised(counts.hintsOnly)
+    case .couldNotAnswer: counts.couldNotAnswer = TalkCounts.raised(counts.couldNotAnswer)
+    case .tooLong: counts.tooLong = TalkCounts.raised(counts.tooLong)
+    case .unavailable, .keyNotAccepted, .busy:
+      counts.unavailable = TalkCounts.raised(counts.unavailable)
+    case .trustedAdult: return
+    }
+    try? store.save(counts)
   }
 
   private func endRun(_ mine: Int) {
@@ -375,6 +394,7 @@ public final class ChatModel {
   public func reset() {
     stopAndKeep()
     chats = []
+    counts = TalkCounts()
     startFresh(kind: nil, step: nil)
   }
 }

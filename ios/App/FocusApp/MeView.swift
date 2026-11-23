@@ -289,6 +289,14 @@ struct AboutView: View {
         }
       }
       .listRowBackground(Theme.Palette.card)
+      Section(Words.talkCountsTitle) {
+        ForEach(Words.talkCountsLines(model.talk.counts), id: \.self) {
+          Text(verbatim: $0).font(Theme.Typography.small).foregroundStyle(Theme.Palette.ink)
+        }
+        Text(Words.talkCountsNote).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
+      }
+      .listRowBackground(Theme.Palette.card)
+      .accessibilityIdentifier("talk-counts")
       Section {
         Text(Words.appVersion(AboutView.version, build: AboutView.build))
           .font(Theme.Typography.small)

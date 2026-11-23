@@ -463,3 +463,30 @@ public struct Flags: Storable {
     self.inStep = inStep
   }
 }
+
+/// How Talk replies ended on this iPhone, as five counts. Never text, dates, chats or which AI.
+/// The trusted-adult line is not counted, so nothing here reveals what a student wrote.
+public struct TalkCounts: Storable {
+  public static let fileName = "talk-counts.json"
+  public static let cap = 1_000_000
+
+  public var shown: Int
+  public var hintsOnly: Int
+  public var couldNotAnswer: Int
+  public var tooLong: Int
+  public var unavailable: Int
+
+  public init(
+    shown: Int = 0, hintsOnly: Int = 0, couldNotAnswer: Int = 0, tooLong: Int = 0,
+    unavailable: Int = 0
+  ) {
+    self.shown = shown
+    self.hintsOnly = hintsOnly
+    self.couldNotAnswer = couldNotAnswer
+    self.tooLong = tooLong
+    self.unavailable = unavailable
+  }
+
+  /// One more, never past the cap.
+  public static func raised(_ value: Int) -> Int { min(max(value, 0) + 1, cap) }
+}

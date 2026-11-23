@@ -258,3 +258,18 @@ extension Words {
     }
   }
 }
+
+extension Words {
+  public static let talkCountsTitle = "How Talk replied on this iPhone"
+  public static let talkCountsNote =
+    "Counts only. What was said is not kept. Deleting chats does not change these; Delete everything does."
+  public static func talkCountsLines(_ counts: TalkCounts) -> [String] {
+    [
+      "The AI's reply was shown: \(counts.shown)",
+      "The app showed \"I can give hints, not the finished answer\" instead: \(counts.hintsOnly)",
+      "The app showed \"The AI couldn't answer that one\": \(counts.couldNotAnswer)",
+      "The chat got too long: \(counts.tooLong)",
+      "The AI was not available: \(counts.unavailable)",
+    ]
+  }
+}
