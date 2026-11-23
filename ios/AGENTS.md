@@ -250,6 +250,7 @@ Report failures and gaps as plainly as successes. A wrong "it works" is the most
 
 ## 14. Practical notes for the next agent (added 2026-11-21)
 
+- **Two task lists.** `TASKS.md` is the original build (done). `TASKS-coaching.md` is the coaching and memory layer (not started). Take the first `ready` task from `TASKS-coaching.md` unless `PROGRESS.md` says otherwise.
 - **The app is built.** Do not start from T01. `PROGRESS.md` says what exists, which build is current, what is open, and what is next. `TASKS.md` has the task history; new work since T16 is recorded as named rows (NAV, AI-multiple-services, UX).
 - **How to run builds, tests, the phone install and the archive** in an agent shell that times out after about two minutes: see "Running things" in `PROGRESS.md`. Do not run a long `xcodebuild` in the foreground; it is killed and reports BUILD INTERRUPTED.
 - **Roles in practice.** In past sessions the Advisor and Checker were often the same model as the Builder. The read-only `semantic_reviewer` agent was the one independent reviewer that worked, and it found a real privacy bug the Builder's own tests missed. For any change to `AI/`, `Network/`, `Storage/`, the Keychain, or what leaves the phone, get an independent read-only review and record its verdict in the slice note. Say plainly in the report when the reviewer was the same model.

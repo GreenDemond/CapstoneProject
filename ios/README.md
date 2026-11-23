@@ -30,7 +30,9 @@ One thing to know if you move it: today it sits inside the web project's git rep
 | `design/02-screens-and-voice.md` | Every screen, step by step, and how talking works |
 | `design/03-ai-search-privacy.md` | The AI on the phone, looking things up, safety, what is stored and what leaves |
 | `design/04-engineering-and-plan.md` | How it is built and tested, the build order, open decisions, what is unverified |
-| `design/slices/` | One short design note per task or change. `UX-whole-app-review.md` holds the latest review, the large-text results, and what is still to build |
+| `design/05-coaching-and-memory.md` | The AI coaching moves and the learner record as one system: what it is for, the shape, what the student sees, what leaves the phone |
+| `TASKS-coaching.md` | The coaching and memory work, in order, with "done when" checks. Start at C0 |
+| `design/slices/` | One short design note per task or change. `COACH-plan.md`, `MEMORY-plan.md` and `COACH-MEMORY-testing.md` are the detailed plans behind `TASKS-coaching.md`. `UX-whole-app-review.md` holds the latest review, the large-text results, and what is still to build |
 | `App/` | The Xcode project (`FocusApp.xcodeproj`, scheme FocusApp), the SwiftUI screens (`App/FocusApp/`) and the UI tests (`App/FocusAppUITests/`) |
 | `FocusKit/` | The Swift package with all the logic, the AI and network code, storage, and the unit tests (`swift test`) |
 | `PARENT-STEPS.md` | Numbered steps for the parent: Xcode, the phone, TestFlight, and the open questions |
