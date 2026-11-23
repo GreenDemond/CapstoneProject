@@ -48,6 +48,10 @@ Research: `research/07-ai-coaching.md`. Plan with exact prompts, files and tests
 
 `design/slices/MEMORY-plan.md`. A learner record on the phone (settings tried and verdicts, confirmed patterns, obstacles, weekly reflections, per-course "what worked", thumbs feedback on AI lines), never a description of the person. A selector gives each AI move at most 5 lines it is allowed to see, rules first, then on-phone semantic search (`NLEmbedding`, verified in the kit). Thumbs up / meh / down under every AI line, with a per-move fallback bias. A "How I work" screen shows the whole record and what the AI was told. Slices MEMORY-0 to MEMORY-4 and COACH-8 (check a hunch) interleave with COACH-plan.
 
+## 2d. Backlog from the parent (2026-11-23)
+
+- **Reorganise settings.** Settings are spread across Me, Talk and the AI sections. Gather them into clearer groups. Needs a design note first; no decision yet on the layout.
+
 ## 3. Phase 2: already designed, waiting on a decision
 
 These are in `design/slices/UX-whole-app-review.md` and need the parent or Ben first.
