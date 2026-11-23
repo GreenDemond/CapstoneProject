@@ -25,6 +25,7 @@ One thing to know if you move it: today it sits inside the web project's git rep
 | `TASKS.md` | The work, in order, each task with what to read, what to build, and how "done" is checked |
 | `DECISIONS.md` | What is decided, what is waiting on the parent or Ben, and the change log |
 | `PROGRESS.md` | What works, what is broken or worrying, what is next. The memory between sessions |
+| `ROADMAP.md` | Features the research supports that are not built yet, in order, with what each needs decided first. A plan, not decisions |
 | `design/01-what-it-is.md` | What the app is for, what Ben asked for, the research behind each part, what it will not do |
 | `design/02-screens-and-voice.md` | Every screen, step by step, and how talking works |
 | `design/03-ai-search-privacy.md` | The AI on the phone, looking things up, safety, what is stored and what leaves |

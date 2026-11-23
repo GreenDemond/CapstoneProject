@@ -52,6 +52,8 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 
 ## Next (in order)
 
+Feature ideas beyond these fixes are in `ROADMAP.md`, ranked by evidence and effort.
+
 1. Parent: check build 10 on the phone (`checks/device-checks.md` steps 79 to 81), then archive and upload it to TestFlight. Archive with the command in "Running things" (bump the build number first if it is needed again).
 2. Run the full UI suite once, in one run, on the iPhone 15 Pro Max simulator (see "Running things"). Fix anything that fails.
 3. Decide with the parent: Me split; "How I want help"; native dialogs for remaining deletes; the Tailscale range.
