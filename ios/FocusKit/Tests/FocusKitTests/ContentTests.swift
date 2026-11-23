@@ -33,6 +33,18 @@ import Testing
     #expect(throws: ContentError.missingFile) { try Content.load(from: url) }
   }
 
+  @Test func coachCommonRulesCarryTheNothingAndSafetyWords() throws {
+    let content = try Content.bundled()
+    #expect(!content.coach.common.isEmpty)
+    #expect(content.coach.common.contains(content.coach.nothingWord))
+    #expect(content.coach.common.contains(content.safety.word))
+    #expect(content.coach.common.contains("\n"))
+    for (key, move) in content.coach.moves {
+      #expect(!move.rules.isEmpty, "\(key) rules")
+      #expect(!move.fallback.isEmpty, "\(key) fallback")
+    }
+  }
+
   @Test func missingKeyThrows() throws {
     let url = try temporaryFile(#"{"version": 1}"#)
     #expect(throws: ContentError.unreadable) { try Content.load(from: url) }

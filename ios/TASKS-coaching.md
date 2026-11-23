@@ -8,7 +8,7 @@ A task is `ready` when every task it depends on is `done`. Every task here needs
 
 | Task | Status | Depends on | Date | Checker result |
 |---|---|---|---|---|
-| C0 Move runner, shape check, content keys | ready | | | |
+| C0 Move runner, shape check, content keys | done | | 2026-11-20 | Gates 1 and 2: `semantic_reviewer` (Claude, same family, fresh context), approve with changes, applied. `check.sh` lint and 380 `swift test` pass; its UI step did not finish (no view changed) |
 | C1 Stuck question | waiting | C0 | | |
 | C2 Split nudge | waiting | C0 | | |
 | M0 Learner record and courses | waiting | C0 | | |

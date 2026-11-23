@@ -52,6 +52,17 @@ public struct Content: Codable, Equatable, Sendable {
     public let rules: String
   }
 
+  public struct CoachMoveText: Codable, Equatable, Sendable {
+    public let rules: String
+    public let fallback: String
+  }
+
+  public struct Coach: Codable, Equatable, Sendable {
+    public let common: String
+    public let nothingWord: String
+    public let moves: [String: CoachMoveText]
+  }
+
   public struct Pickup: Codable, Equatable, Sendable {
     public let sameDay: String
     public let laterDay: String
@@ -83,6 +94,7 @@ public struct Content: Codable, Equatable, Sendable {
   public let safety: Safety
   public let chat: Chat
   public let stepCoach: StepCoach
+  public let coach: Coach
   public let pickup: Pickup
   public let howILikeToWork: HowILikeToWork
 }

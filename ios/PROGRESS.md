@@ -52,7 +52,7 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 
 ## Next (in order)
 
-The coaching and memory layer is designed and ready to build: `design/05-coaching-and-memory.md`, then `TASKS-coaching.md` (start at C0). Each task names its reading, its tests (`design/slices/COACH-MEMORY-testing.md`) and its "done when" lines. Every task needs gate 2.
+The coaching and memory layer is designed and ready to build: `design/05-coaching-and-memory.md`, then `TASKS-coaching.md` (C0 done 2026-11-20: `AI/CoachMove.swift`, `coach` keys in `content.json`; next is C1, or C2 and M0, which depend only on C0). Each task names its reading, its tests (`design/slices/COACH-MEMORY-testing.md`) and its "done when" lines. Every task needs gate 2.
 
 Feature ideas beyond these fixes are in `ROADMAP.md`, ranked by evidence and effort. The AI coaching layer has its own research note (`research/07-ai-coaching.md`) and a slice-by-slice plan for a Sonnet/Haiku Builder (`design/slices/COACH-plan.md`); start it at COACH-0. The learner record, retrieval and feedback that the moves draw on are in `design/slices/MEMORY-plan.md`; `ROADMAP.md` section 6 of that file has the open parent decisions and the "subscription instead of a key" backlog item the parent asked to be reminded of.
 
