@@ -2,7 +2,7 @@
 
 Read this first in any session. It is the memory between sessions. Rewrite it each session; do not let it grow into a diary. Task history is in `TASKS.md`, decisions in `DECISIONS.md`.
 
-**As of 2026-11-21, build 10 (`CURRENT_PROJECT_VERSION = 10`, commit `bf9ae67`).** Build 9 (commit `4a8a275`) is the one in the TestFlight archive; build 10 adds the taller text fields and press haptics and needs its own archive before upload. The app is built, runs on the owner's iPhone, and has an archive for TestFlight (`Bens Steps 0.1 (9)`). Nothing has been uploaded to App Store Connect yet, and nothing has been pushed to a remote.
+**As of 2026-11-22, build 11 (`CURRENT_PROJECT_VERSION = 11`, installed on the owner's iPhone).** Build 11 adds the first two coaching moves (Stuck: Ask me a question; editor: Ask me a question on a two-job step). Build 9 is the one in the TestFlight archive; builds 10 and 11 need their own archive before upload. Nothing has been uploaded to App Store Connect, and nothing has been pushed to a remote.
 
 ## What the app is
 
@@ -21,8 +21,8 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 
 ## Tests (state at build 10)
 
-- `FocusKit` unit tests: **367 passed**, 0 failed (build 10 changes are view-only; the screen tests have not been re-run since) (`swift test` in `ios/FocusKit`).
-- UI tests (`ios/App/FocusAppUITests`, 32+ tests incl. `LargeTextUITests`, `DemoWalkthroughUITests`): every class passed after the build 8 fixes, but **not in one full run since the last changes**. Run the full suite before relying on it.
+- `FocusKit` unit tests: **412 passed**, 0 failed (`swift test` in `ios/FocusKit`).
+- UI tests (`ios/App/FocusAppUITests`, 38 tests): **all passed in one full run** of `checks/check.sh` (2026-11-22, run alone). Do not run two simulator jobs at once: overlapping runs made three tests fail for no real reason.
 - Format lint: `xcrun swift-format lint --strict --configuration .swift-format` over `FocusKit/Sources`, `FocusKit/Tests` and `App` is clean.
 - `checks/check.sh` runs lint, `swift build`, `swift test`, an app compile check and the UI tests when a simulator is available. It exits 3 when the UI part is skipped.
 
@@ -39,7 +39,6 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 
 ## Broken or worrying
 
-- **C0 check is blocked:** the fresh Checker ran `checks/check.sh`. Lint, FocusKit build/tests and the generic app/UI-test compile passed, but the UI run failed: `MeUITests.testAddAndDeleteANote()`, `TalkUITests.testKeyboardCanBePutAwayInChat()`, and `WorkUITests.testAllFiveButtonsThroughToTodayDone()`. C0 did not change `App/`, but its required whole check failed, so do not call C0 done until these are reproduced and resolved or correctly classified.
 - **Trusted-adult line** depends on the AI sending `TRUSTED_ADULT`. The app checks AI text only, not the student's own words. The parent's question about two extra safety signals is open.
 - **Look it up** still needs a real contact in `WikipediaLookUp.userAgent` (placeholder `set-by-owner@example.invalid`) before anyone except Ben uses the app.
 - **Starter step wording** was changed to "Check your answers against your notes" in `Shared/content.json` and its case file together. Check other starter steps against the never-shame list.
@@ -53,7 +52,7 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 
 ## Next (in order)
 
-The coaching and memory layer is designed and ready to build: `design/05-coaching-and-memory.md`, then `TASKS-coaching.md`. C0 is **blocked** despite its committed code, because the fresh Checker found three failing UI tests in the required full check. Reproduce and resolve those failures before starting C1, C2 or M0. Each task names its reading, its tests (`design/slices/COACH-MEMORY-testing.md`) and its "done when" lines. Every task needs gate 2.
+The coaching and memory layer is being built from `TASKS-coaching.md`. Done: C0 (runner and checks), C1 (Stuck question), C2 (split nudge). Next ready: M0 (learner record and courses), then M3, M1, C3 onward (the table shows what each waits on). Each task names its reading, its tests (`design/slices/COACH-MEMORY-testing.md`) and its "done when" lines. Every task needs gate 2. A fresh Checker re-run of C0 to C2 is still owed, and T14-C (answer-giving checks on the phone, device steps 82 to 85) is waiting on the parent.
 
 Feature ideas beyond these fixes are in `ROADMAP.md`, ranked by evidence and effort. The AI coaching layer has its own research note (`research/07-ai-coaching.md`) and a slice-by-slice plan for a Sonnet/Haiku Builder (`design/slices/COACH-plan.md`); start it at COACH-0. The learner record, retrieval and feedback that the moves draw on are in `design/slices/MEMORY-plan.md`; `ROADMAP.md` section 6 of that file has the open parent decisions and the "subscription instead of a key" backlog item the parent asked to be reminded of.
 
