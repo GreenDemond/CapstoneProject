@@ -103,9 +103,10 @@ public final class OwnAIModel {
   /// is removed, because it was given for the old address. An old address that does not parse
   /// counts as another address, so its key is removed too.
   @discardableResult
-  public func save(id: String?, label: String, endpoint: String, modelId: String, key: String)
-    -> SaveResult
-  {
+  public func save(
+    id: String?, label: String, endpoint: String, modelId: String, key: String,
+    thinking: ThinkingLevel
+  ) -> SaveResult {
     guard disclosureShown else { return .disclosureFirst }
     let cleanLabel = Text.cut(Text.trimmed(label), to: OwnAIService.labelLimit)
     guard !cleanLabel.isEmpty else { return .labelNeeded }
@@ -138,6 +139,7 @@ public final class OwnAIModel {
     updated.label = cleanLabel
     updated.endpoint = endpoint
     updated.modelId = modelId
+    updated.thinking = thinking
     change {
       if let at = $0.ownAIServices.firstIndex(where: { $0.id == updated.id }) {
         $0.ownAIServices[at] = updated

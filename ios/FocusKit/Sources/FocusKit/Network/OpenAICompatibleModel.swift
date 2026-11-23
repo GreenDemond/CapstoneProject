@@ -59,10 +59,13 @@ public struct LiveHTTPTransport: HTTPTransport {
 public struct OwnAIConfig: Equatable, Sendable {
   public var address: String
   public var modelName: String
+  public var thinking: ThinkingLevel
 
-  public init(address: String, modelName: String) {
+  public init(address: String, modelName: String, thinking: ThinkingLevel = ThinkingLevel.standard)
+  {
     self.address = address
     self.modelName = modelName
+    self.thinking = thinking
   }
 
   /// The address as a URL, or nil. https and http are accepted (the parent's decision, 2026-11-21;
@@ -239,6 +242,13 @@ public final class OpenAICompatibleModel: LanguageModel, Sendable {
     var model: String
     var messages: [Line]
     var stream = false
+    /// Omitted when nil, so a service that refuses the setting never sees it.
+    var reasoningEffort: String?
+
+    private enum CodingKeys: String, CodingKey {
+      case model, messages, stream
+      case reasoningEffort = "reasoning_effort"
+    }
   }
 
   private struct Answer: Decodable {
@@ -250,6 +260,8 @@ public final class OpenAICompatibleModel: LanguageModel, Sendable {
   }
 
   /// The failures are the app's own words for what went wrong. No service text, no key.
+  /// The thinking level is sent first. A service that answers 400 and names the setting is asked
+  /// once more without it; the reply text itself is never shown or kept.
   private func complete(instructions: String, messages: [ChatMessage]) async throws -> String {
     guard let url = config.url, config.hasModelName, let key = keys.read(account: account),
       !key.isEmpty
@@ -261,28 +273,13 @@ public final class OpenAICompatibleModel: LanguageModel, Sendable {
       lines.append(
         Body.Line(role: message.role == .user ? "user" : "assistant", content: message.text))
     }
-    let body = Body(
-      model: config.modelName.trimmingCharacters(in: .whitespacesAndNewlines), messages: lines)
-    var request = URLRequest(url: url, timeoutInterval: LiveHTTPTransport.timeLimit)
-    request.httpMethod = "POST"
-    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-    request.setValue("application/json", forHTTPHeaderField: "Accept")
-    request.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization")
-    do {
-      request.httpBody = try JSONEncoder().encode(body)
-    } catch {
-      throw ModelFailure.other
-    }
-
-    let data: Data
-    let status: Int
-    do {
-      (data, status) = try await transport.send(request)
-    } catch is CancellationError {
-      throw CancellationError()
-    } catch {
-      // A time limit, no connection, a refused redirect: all the same to the student.
-      throw ModelFailure.unavailable
+    let name = config.modelName.trimmingCharacters(in: .whitespacesAndNewlines)
+    let effort = config.thinking.rawValue
+    var (data, status) = try await post(
+      url: url, key: key, body: Body(model: name, messages: lines, reasoningEffort: effort))
+    if status == 400, String(decoding: data, as: UTF8.self).contains("reasoning_effort") {
+      (data, status) = try await post(
+        url: url, key: key, body: Body(model: name, messages: lines, reasoningEffort: nil))
     }
 
     switch status {
@@ -301,6 +298,28 @@ public final class OpenAICompatibleModel: LanguageModel, Sendable {
       !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     else { throw ModelFailure.other }
     return text
+  }
+
+  /// One request. The network failures are the app's own words; nothing from the service is kept.
+  private func post(url: URL, key: String, body: Body) async throws -> (Data, Int) {
+    var request = URLRequest(url: url, timeoutInterval: LiveHTTPTransport.timeLimit)
+    request.httpMethod = "POST"
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    request.setValue("application/json", forHTTPHeaderField: "Accept")
+    request.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization")
+    do {
+      request.httpBody = try JSONEncoder().encode(body)
+    } catch {
+      throw ModelFailure.other
+    }
+    do {
+      return try await transport.send(request)
+    } catch is CancellationError {
+      throw CancellationError()
+    } catch {
+      // A time limit, no connection, a refused redirect: all the same to the student.
+      throw ModelFailure.unavailable
+    }
   }
 }
 

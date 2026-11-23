@@ -280,6 +280,14 @@ public struct Settings: Storable {
   }
 }
 
+/// How much a student's own AI service may think before it answers. Sent as `reasoning_effort`.
+/// The default is low. Services that refuse the setting are asked again without it.
+public enum ThinkingLevel: String, Codable, Equatable, Sendable, CaseIterable {
+  case none, low, medium, high
+
+  public static let standard: ThinkingLevel = .low
+}
+
 /// One AI service the student entered. The key is not here.
 public struct OwnAIService: Codable, Equatable, Sendable, Identifiable {
   public static let maxServices = 5
@@ -292,16 +300,39 @@ public struct OwnAIService: Codable, Equatable, Sendable, Identifiable {
   public var label: String
   public var endpoint: String
   public var modelId: String
+  public var thinking: ThinkingLevel
 
-  public init(id: String = UUID().uuidString, label: String, endpoint: String, modelId: String) {
+  public init(
+    id: String = UUID().uuidString, label: String, endpoint: String, modelId: String,
+    thinking: ThinkingLevel = ThinkingLevel.standard
+  ) {
     self.id = id
     self.label = label
     self.endpoint = endpoint
     self.modelId = modelId
+    self.thinking = thinking
+  }
+
+  private enum CodingKeys: String, CodingKey {
+    case id, label, endpoint, modelId, thinking
+  }
+
+  /// Services saved before thinking existed load with the standard level.
+  public init(from decoder: Decoder) throws {
+    let values = try decoder.container(keyedBy: CodingKeys.self)
+    id = try values.decode(String.self, forKey: .id)
+    label = try values.decode(String.self, forKey: .label)
+    endpoint = try values.decode(String.self, forKey: .endpoint)
+    modelId = try values.decode(String.self, forKey: .modelId)
+    // A value this build does not know keeps the service and uses the standard level.
+    thinking =
+      (try? values.decodeIfPresent(ThinkingLevel.self, forKey: .thinking)) ?? ThinkingLevel.standard
   }
 
   public var keyAccount: String { KeyAccount.forService(id: id) }
-  public var config: OwnAIConfig { OwnAIConfig(address: endpoint, modelName: modelId) }
+  public var config: OwnAIConfig {
+    OwnAIConfig(address: endpoint, modelName: modelId, thinking: thinking)
+  }
 }
 
 public struct Chat: Codable, Equatable, Sendable, Identifiable {

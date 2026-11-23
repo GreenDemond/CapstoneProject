@@ -40,7 +40,7 @@ private let addressB = "https://other.example.org/v1/chat/completions"
     a.ownAI.noteDisclosureShown()
     guard
       case .saved(let id) = a.ownAI.save(
-        id: nil, label: label, endpoint: address, modelId: model, key: key)
+        id: nil, label: label, endpoint: address, modelId: model, key: key, thinking: .standard)
     else {
       Issue.record("could not add \(label)")
       return ""
@@ -177,7 +177,8 @@ private let addressB = "https://other.example.org/v1/chat/completions"
     #expect(UUID(uuidString: id) != nil)
     guard
       case .saved = a.ownAI.save(
-        id: id, label: "Alpha two", endpoint: addressA, modelId: "model-z", key: "")
+        id: id, label: "Alpha two", endpoint: addressA, modelId: "model-z", key: "",
+        thinking: .standard)
     else {
       Issue.record("edit failed")
       return
@@ -211,14 +212,15 @@ private let addressB = "https://other.example.org/v1/chat/completions"
     #expect(a.ownAI.isFull)
     #expect(!a.ownAI.canAdd)
     let sixth = a.ownAI.save(
-      id: nil, label: "S6", endpoint: addressA, modelId: "m", key: "k6")
+      id: nil, label: "S6", endpoint: addressA, modelId: "m", key: "k6", thinking: .standard)
     #expect(sixth == .limitReached)
     #expect(a.ownAI.services.count == 5)
     #expect(keys.accounts.count == 5)  // the sixth key was not saved either
     // An existing service can still be edited at five.
     let first = a.ownAI.services[0].id
     #expect(
-      a.ownAI.save(id: first, label: "S1b", endpoint: addressA, modelId: "m1", key: "")
+      a.ownAI.save(
+        id: first, label: "S1b", endpoint: addressA, modelId: "m1", key: "", thinking: .standard)
         == .saved(id: first))
     // Removing one makes room.
     a.ownAI.askRemove(first)
@@ -231,24 +233,27 @@ private let addressB = "https://other.example.org/v1/chat/completions"
     a.ownAI.noteDisclosureShown()
     for blank in ["", "   ", "\n"] {
       #expect(
-        a.ownAI.save(id: nil, label: blank, endpoint: addressA, modelId: "m", key: "k")
+        a.ownAI.save(
+          id: nil, label: blank, endpoint: addressA, modelId: "m", key: "k", thinking: .standard)
           == .labelNeeded)
     }
     #expect(a.ownAI.services.isEmpty)
     guard
       case .saved(let id) = a.ownAI.save(
         id: nil, label: "  " + String(repeating: "x", count: 80) + "  ", endpoint: addressA,
-        modelId: "m", key: "k")
+        modelId: "m", key: "k", thinking: .standard)
     else {
       Issue.record("long label not saved")
       return
     }
     #expect(a.ownAI.service(id: id)?.label.count == OwnAIService.labelLimit)
     #expect(
-      a.ownAI.save(id: nil, label: "OpenAI", endpoint: addressA, modelId: "m", key: "k")
+      a.ownAI.save(
+        id: nil, label: "OpenAI", endpoint: addressA, modelId: "m", key: "k", thinking: .standard)
         != .labelTaken)
     #expect(
-      a.ownAI.save(id: nil, label: " openai ", endpoint: addressB, modelId: "m", key: "k")
+      a.ownAI.save(
+        id: nil, label: " openai ", endpoint: addressB, modelId: "m", key: "k", thinking: .standard)
         == .labelTaken)
   }
 
@@ -256,7 +261,8 @@ private let addressB = "https://other.example.org/v1/chat/completions"
     let a = app()
     #expect(!a.ownAI.canAdd)
     #expect(
-      a.ownAI.save(id: nil, label: "A", endpoint: addressA, modelId: "m", key: "k")
+      a.ownAI.save(
+        id: nil, label: "A", endpoint: addressA, modelId: "m", key: "k", thinking: .standard)
         == .disclosureFirst)
     #expect(a.ownAI.services.isEmpty)
     #expect(keys.accounts.isEmpty)
@@ -337,14 +343,15 @@ private let addressB = "https://other.example.org/v1/chat/completions"
     let a = app()
     a.ownAI.noteDisclosureShown()
     #expect(
-      a.ownAI.save(id: nil, label: "A", endpoint: "ftp://x.com", modelId: "m", key: keyA)
+      a.ownAI.save(
+        id: nil, label: "A", endpoint: "ftp://x.com", modelId: "m", key: keyA, thinking: .standard)
         == .addressBad)
     #expect(a.ownAI.services.isEmpty)
     #expect(keys.accounts.isEmpty)
     a.ownAI.setHttpUnderstood(true)
     let http = a.ownAI.save(
       id: nil, label: "Local", endpoint: "http://localhost:1234/v1/chat/completions",
-      modelId: "m", key: keyA)
+      modelId: "m", key: keyA, thinking: .standard)
     guard case .saved = http else {
       Issue.record("http not accepted")
       return
@@ -358,7 +365,8 @@ private let addressB = "https://other.example.org/v1/chat/completions"
     a.ownAI.noteDisclosureShown()
     let home = "http://192.168.1.5:8080/v1/chat/completions"
     #expect(
-      a.ownAI.save(id: nil, label: "Home", endpoint: home, modelId: "m", key: keyA)
+      a.ownAI.save(
+        id: nil, label: "Home", endpoint: home, modelId: "m", key: keyA, thinking: .standard)
         == .httpNotUnderstood)
     #expect(a.ownAI.services.isEmpty)
     #expect(keys.accounts.isEmpty)
@@ -366,7 +374,7 @@ private let addressB = "https://other.example.org/v1/chat/completions"
     a.ownAI.setHttpUnderstood(true)
     guard
       case .saved(let id) = a.ownAI.save(
-        id: nil, label: "Home", endpoint: home, modelId: "m", key: keyA)
+        id: nil, label: "Home", endpoint: home, modelId: "m", key: keyA, thinking: .standard)
     else {
       Issue.record("http not saved with the tick")
       return
@@ -394,7 +402,8 @@ private let addressB = "https://other.example.org/v1/chat/completions"
     #expect(!a.ownAI.httpUnderstood)
     a.ownAI.addressTyped(home)
     #expect(
-      a.ownAI.save(id: nil, label: "Home", endpoint: home, modelId: "m", key: keyA)
+      a.ownAI.save(
+        id: nil, label: "Home", endpoint: home, modelId: "m", key: keyA, thinking: .standard)
         == .httpNotUnderstood)
   }
 
@@ -408,7 +417,7 @@ private let addressB = "https://other.example.org/v1/chat/completions"
     let home = "http://192.168.1.5:8080/v1/chat/completions"
     guard
       case .saved(let plain) = a.ownAI.save(
-        id: nil, label: "Home", endpoint: home, modelId: "m", key: keyB)
+        id: nil, label: "Home", endpoint: home, modelId: "m", key: keyB, thinking: .standard)
     else {
       Issue.record("http not saved")
       return
@@ -462,7 +471,8 @@ private let addressB = "https://other.example.org/v1/chat/completions"
     keys.setFailing(true)
     let a = app()
     a.ownAI.noteDisclosureShown()
-    let result = a.ownAI.save(id: nil, label: "A", endpoint: addressA, modelId: "m", key: keyA)
+    let result = a.ownAI.save(
+      id: nil, label: "A", endpoint: addressA, modelId: "m", key: keyA, thinking: .standard)
     #expect(result == .keyCouldNotSave)
     #expect(a.ownAI.services.isEmpty)
     #expect(a.ownAI.note == Words.ownAIKeyCouldNotSave)
@@ -474,19 +484,22 @@ private let addressB = "https://other.example.org/v1/chat/completions"
     // Same host, new path: the key stays.
     _ = a.ownAI.save(
       id: id, label: "Alpha", endpoint: "https://api.example.com/other/chat/completions",
-      modelId: "model-a", key: "")
+      modelId: "model-a", key: "", thinking: .standard)
     #expect(a.ownAI.hasKey(id))
     // Another host: the key given for the old address is removed, so it cannot reach the new one.
-    _ = a.ownAI.save(id: id, label: "Alpha", endpoint: addressB, modelId: "model-a", key: "")
+    _ = a.ownAI.save(
+      id: id, label: "Alpha", endpoint: addressB, modelId: "model-a", key: "", thinking: .standard)
     #expect(!a.ownAI.hasKey(id))
     #expect(keys.accounts.isEmpty)
     #expect(a.ownAI.note == Words.ownAIKeyClearedForNewAddress)
     // Moving from https to http on the same host also counts as another address.
-    _ = a.ownAI.save(id: id, label: "Alpha", endpoint: addressB, modelId: "model-a", key: keyB)
+    _ = a.ownAI.save(
+      id: id, label: "Alpha", endpoint: addressB, modelId: "model-a", key: keyB, thinking: .standard
+    )
     a.ownAI.setHttpUnderstood(true)
     _ = a.ownAI.save(
       id: id, label: "Alpha", endpoint: "http://other.example.org/v1/chat/completions",
-      modelId: "model-a", key: "")
+      modelId: "model-a", key: "", thinking: .standard)
     #expect(!a.ownAI.hasKey(id))
   }
 
@@ -506,7 +519,8 @@ private let addressB = "https://other.example.org/v1/chat/completions"
   @Test func aKeyIsDeletedWhenTheOldAddressWasBlank() throws {
     let (a, id) = try migrated(endpoint: "")
     #expect(
-      a.ownAI.save(id: id, label: "My service", endpoint: addressA, modelId: "m", key: "")
+      a.ownAI.save(
+        id: id, label: "My service", endpoint: addressA, modelId: "m", key: "", thinking: .standard)
         == .saved(id: id))
     #expect(!a.ownAI.hasKey(id))
     #expect(keys.accounts.isEmpty)
@@ -516,7 +530,8 @@ private let addressB = "https://other.example.org/v1/chat/completions"
   @Test func aKeyIsDeletedWhenTheOldAddressDidNotParse() throws {
     let (a, id) = try migrated(endpoint: "ftp://broken.example/x")
     #expect(
-      a.ownAI.save(id: id, label: "My service", endpoint: addressA, modelId: "m", key: "")
+      a.ownAI.save(
+        id: id, label: "My service", endpoint: addressA, modelId: "m", key: "", thinking: .standard)
         == .saved(id: id))
     #expect(!a.ownAI.hasKey(id))
     #expect(keys.accounts.isEmpty)
@@ -529,7 +544,7 @@ private let addressB = "https://other.example.org/v1/chat/completions"
     #expect(
       a.ownAI.save(
         id: id, label: "Same", endpoint: "https://api.example.com/v2/chat/completions",
-        modelId: "model-a", key: "") == .saved(id: id))
+        modelId: "model-a", key: "", thinking: .standard) == .saved(id: id))
     #expect(a.ownAI.hasKey(id))
     #expect(keys.read(account: "service-" + id) == keyA)
   }
@@ -540,8 +555,10 @@ private let addressB = "https://other.example.org/v1/chat/completions"
     let a = app()
     #expect(!a.ownAI.showsPicker)
     a.ownAI.noteDisclosureShown()
-    _ = a.ownAI.save(id: nil, label: "NoKey", endpoint: addressA, modelId: "m", key: "")
-    _ = a.ownAI.save(id: nil, label: "NoModel", endpoint: addressA, modelId: "  ", key: keyA)
+    _ = a.ownAI.save(
+      id: nil, label: "NoKey", endpoint: addressA, modelId: "m", key: "", thinking: .standard)
+    _ = a.ownAI.save(
+      id: nil, label: "NoModel", endpoint: addressA, modelId: "  ", key: keyA, thinking: .standard)
     #expect(a.ownAI.readyServices.isEmpty && !a.ownAI.showsPicker)
     let ready = add(a, label: "Ready", address: addressB, key: keyB)
     #expect(a.ownAI.readyServices.map(\.id) == [ready])
@@ -577,7 +594,8 @@ private let addressB = "https://other.example.org/v1/chat/completions"
   @Test func aServiceThatIsNotReadyCannotBeChosen() {
     let a = app()
     a.ownAI.noteDisclosureShown()
-    _ = a.ownAI.save(id: nil, label: "NoKey", endpoint: addressA, modelId: "m", key: "")
+    _ = a.ownAI.save(
+      id: nil, label: "NoKey", endpoint: addressA, modelId: "m", key: "", thinking: .standard)
     let id = a.ownAI.services[0].id
     a.ownAI.use(id)
     #expect(a.ownAI.chosenId == nil)
@@ -725,7 +743,7 @@ private let addressB = "https://other.example.org/v1/chat/completions"
     let address = "http://192.168.1.5:8080/v1/chat/completions"
     guard
       case .saved(let id) = a.ownAI.save(
-        id: nil, label: "Home", endpoint: address, modelId: "m", key: keyA)
+        id: nil, label: "Home", endpoint: address, modelId: "m", key: keyA, thinking: .standard)
     else {
       Issue.record("not saved")
       return
@@ -886,7 +904,8 @@ private let addressB = "https://other.example.org/v1/chat/completions"
   @Test func checkConnectionIsNotPossibleUntilTheServiceIsReady() async {
     let a = app()
     a.ownAI.noteDisclosureShown()
-    _ = a.ownAI.save(id: nil, label: "NoKey", endpoint: addressA, modelId: "m", key: "")
+    _ = a.ownAI.save(
+      id: nil, label: "NoKey", endpoint: addressA, modelId: "m", key: "", thinking: .standard)
     let id = a.ownAI.services[0].id
     #expect(!a.ownAI.canCheck(id))
     await a.ownAI.checkConnection(id)
@@ -1009,7 +1028,8 @@ private let addressB = "https://other.example.org/v1/chat/completions"
     a.ownAI.noteDisclosureShown()
     guard
       case .saved = a.ownAI.save(
-        id: nil, label: "Typed", endpoint: addressA, modelId: "my-own-name", key: "k")
+        id: nil, label: "Typed", endpoint: addressA, modelId: "my-own-name", key: "k",
+        thinking: .standard)
     else {
       Issue.record("typed name not saved")
       return

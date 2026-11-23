@@ -244,3 +244,17 @@ extension Words {
     "Version \(version) (build \(build))"
   }
 }
+
+extension Words {
+  public static let ownAIThinking = "Thinking"
+  public static let ownAIThinkingNote =
+    "Low is the usual choice. More thinking can be slower and can use more of the service's allowance. A service that does not support this setting is asked again without it."
+  public static func thinkingName(_ level: ThinkingLevel) -> String {
+    switch level {
+    case .none: "None"
+    case .low: "Low"
+    case .medium: "Medium"
+    case .high: "High"
+    }
+  }
+}

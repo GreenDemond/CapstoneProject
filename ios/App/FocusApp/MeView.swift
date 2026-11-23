@@ -413,6 +413,7 @@ private struct ServiceEditor: View {
   @State private var label = ""
   @State private var endpoint = ""
   @State private var modelId = ""
+  @State private var thinking: ThinkingLevel = ThinkingLevel.standard
   @State private var key = ""
   @State private var problem: String?
   @State private var loaded = false
@@ -489,6 +490,18 @@ private struct ServiceEditor: View {
                 .accessibilityIdentifier("own-ai-key-remove")
             }
             Text(Words.ownAIKeyNote).font(Theme.Typography.small)
+              .foregroundStyle(Theme.Palette.quiet)
+          }
+          field(Words.ownAIThinking) {
+            Picker(Words.ownAIThinking, selection: $thinking) {
+              ForEach(ThinkingLevel.allCases, id: \.self) { level in
+                Text(verbatim: Words.thinkingName(level)).tag(level)
+              }
+            }
+            .pickerStyle(.segmented)
+            .accessibilityLabel(Words.ownAIThinking)
+            .accessibilityIdentifier("own-ai-thinking")
+            Text(Words.ownAIThinkingNote).font(Theme.Typography.small)
               .foregroundStyle(Theme.Palette.quiet)
           }
           field(Words.ownAIModel) {
@@ -568,6 +581,7 @@ private struct ServiceEditor: View {
       label = existing.label
       endpoint = existing.endpoint
       modelId = existing.modelId
+      thinking = existing.thinking
     } else {
       label = Words.ownAIDefaultLabel
       endpoint = Words.ownAIDefaultAddress
@@ -576,7 +590,8 @@ private struct ServiceEditor: View {
   }
 
   private func save() {
-    let result = own.save(id: id, label: label, endpoint: endpoint, modelId: modelId, key: key)
+    let result = own.save(
+      id: id, label: label, endpoint: endpoint, modelId: modelId, key: key, thinking: thinking)
     key = ""
     if case .saved = result {
       finish()
