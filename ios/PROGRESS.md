@@ -57,6 +57,7 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 ## Next (in order)
 
 0. M0a and M0b are built. Parent to decide the course-line viewer (DECISIONS 2026-11-23): either keep course lines hidden until M4, or build a small list with delete before classmates use the app.
+0. Phone AI: research in `research/08-phone-ai.md`, plan in `design/slices/PHONE-AI-plan.md` (P0 measure, P1 rules rewrite, P2 transcript, P3 structured replies, P4 sampling, P5 fewer fixed lines). Three parent decisions in the plan. Nothing built yet.
 0a. Thinking level per own AI service (none, low, medium, high; default low) is committed (`f074bb1`), not yet on the phone. Next: the on-phone AI's repetition (see the notes from 2026-11-23: default guide asks for a closing question, long repeated rules, silently dropped history, and the phone model has no thinking control before iOS 27).
 0b. Steering from the parent (2026-11-23): a version line is on About and privacy (Version and build from the app's Info.plist). Check it on the phone (device step 86).
 

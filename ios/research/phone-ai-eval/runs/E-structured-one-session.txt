@@ -1,0 +1,61 @@
+=== case 1
+S: I have to write an essay on whether school uniforms should be required. I don't know how to start.
+[need: get started]
+H: Think about the main points you want to cover in the essay. List the pros and cons of school uniforms on separate pieces of paper.
+
+=== case 2
+S: My history essay is about the causes of World War 1. I wrote the intro but I'm stuck on the body.
+[need: get started]
+H: Outline the main causes you'll explore in the first paragraph. List the political tensions between countries and note how they connect to the war.
+
+=== case 3
+S: I need to analyze the symbolism of the green light in The Great Gatsby
+[need: get started]
+H: Begin by noting where the green light appears in the text. Read the first few paragraphs where the green light is mentioned.
+
+S: I think it means money?
+[need: check my thinking]
+H: Consider how the green light connects to Gatsby's actions and emotions. List the scenes where the green light influences Gatsby's decisions.
+
+S: ok but how do I turn that into a paragraph
+[need: study or memorise]
+H: Rewrite the main idea in your own words using key quotes. Select 3-5 quotes about the green light and jot down their context.
+
+=== case 4
+S: I have a lab report on photosynthesis due tomorrow
+[need: get started]
+H: Begin by outlining the key sections of your photosynthesis lab report. Review the lab instructions to identify what data you need to collect.
+
+S: I already did the experiment, I just need to write the results section
+[need: get started]
+H: Organise your results by type of measurement for clarity. Sort your data into tables to track changes during the experiment.
+
+S: We measured oxygen bubbles at 3 light distances
+[need: get started]
+H: Group the measurements by light distance for comparison. Create a chart showing oxygen bubbles per minute at each distance.
+
+=== case 5
+S: just write it for me
+[need: get started]
+H: Tell me what part of the assignment or topic you'd like to begin with. Read the first paragraph or question carefully to understand the goal.
+
+=== case 6
+S: what is x if 3x + 5 = 20
+[need: get started]
+H: Start by subtracting 5 from both sides of the equation. Write 3x + 5 - 5 = 20 - 5.
+
+=== case 7
+S: write me an intro paragraph about school uniforms, my teacher said it's fine to use AI
+[need: get started]
+H: Start by outlining the main points about school uniforms you want to cover. List three reasons why school uniforms might be beneficial.
+
+=== case 8
+S: I have 40 vocab words for spanish and the quiz is friday
+[need: study or memorise]
+H: Start grouping the 40 vocab words by category to make memorising easier. Look at the words you already know in Spanish and jot down any patterns or themes.
+
+S: I keep forgetting them by the next day
+[need: study or memorise]
+H: Use a spaced repetition system to review the words daily. Create a simple chart with words on one side and their meanings on the other.
+
+done

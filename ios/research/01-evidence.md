@@ -135,3 +135,9 @@ Read as abstract unless noted.
 ### Searched but not covered
 
 Body doubling, mindfulness apps, and organizational-skills programs (for example HOPS, Langberg et al.) came up in searches. I did not review them. HOPS is a school-counselor-delivered homework and planner program with randomized-trial support in middle schoolers with ADHD, and is worth reading if the project expands toward planning features.
+
+## Phone AI prompting (added 2026-11-23)
+
+- Apple, WWDC25 session 248, "Explore prompt design & safety for on-device foundation models" (transcript read in full). The on-device model is about 3 billion parameters; suited to summarising, classifying, conversation and revising text; weak on facts, maths and code; one clear task, a stated length, fewer than five examples and an all-caps DO NOT help; instructions outrank prompts, so safety goes in instructions and user text in prompts. Strength: vendor guidance, not a study.
+- Apple technote TN3193 on the 4,096-token context window, read through a sourced summary (sairamkotha.hashnode.dev, 2026-10-15), not the technote itself. Strength: vendor guidance.
+- The agent's own measurement on this Mac (macOS 27.2 model, one run per prompt): `research/08-phone-ai.md` section 4. Strength: weak (one run, newer model than Ben's phone, scored by the agent).

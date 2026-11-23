@@ -17,3 +17,4 @@ Reading notes:
 - These files were written for the web app. Where they mention `DECISIONS.md` items T1 to T14, a browser, an extension, or a three-week build, that is the web project's context. This folder's decisions are in `../DECISIONS.md`. The product defaults P1 to P10 carry over unchanged.
 - Do not state a finding that is not in these files. Say it is unverified.
 - A new finding goes into `01-evidence.md` with its source and how much of the source was read.
+- `08-phone-ai.md`: why the phone's AI repeats itself, what Apple's framework offers on iOS 26, and a measured comparison of prompts (2026-11-23).
