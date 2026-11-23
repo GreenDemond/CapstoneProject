@@ -30,6 +30,19 @@ A task is `ready` when every task it depends on is `done`. Every task here needs
 
 Statuses: `waiting`, `ready`, `in progress`, `blocked` (say why under the table), `done`.
 
+## When to ask a stronger model (gate 5, `AGENTS.md` section 4)
+
+Ask before guessing, not after. Use the independent reviewer (the same one that does gates 1 and 2) with the brief shape in `AGENTS.md` section 5, `GATE: 5 doubt`. Ask when any of these is true:
+
+- You are about to use an Apple API you have not found in the kit's `.swiftinterface` or headers.
+- Two files or two documents seem to disagree (for example the plan and the code, or a rule and a task).
+- A test in the Testing file is unclear about what it should assert.
+- You are not sure whether a reply shape, a ceiling or a fallback is right for a move.
+- You have read the task's Read line and still do not know which file to change first.
+- Anything about what leaves the phone, the Keychain, or the safety word.
+
+A question costs one short review. A guess that is wrong costs a rerun and may ship a bug nobody catches. Record each gate-5 question and its answer in the slice note under Gates.
+
 ---
 
 ## C0 Move runner, shape check, content keys

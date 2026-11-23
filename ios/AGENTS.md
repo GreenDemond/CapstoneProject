@@ -250,6 +250,7 @@ Report failures and gaps as plainly as successes. A wrong "it works" is the most
 
 ## 14. Practical notes for the next agent (added 2026-11-21)
 
+- **Ask a stronger model when confused (gate 5).** The usual Builder failure here is not a wrong answer but a confident guess. If you are about to pick an API, a file, a shape or a wording without being sure, stop and brief the independent reviewer with `GATE: 5 doubt` first. `TASKS-coaching.md` lists the triggers.
 - **Two task lists.** `TASKS.md` is the original build (done). `TASKS-coaching.md` is the coaching and memory layer (not started). Take the first `ready` task from `TASKS-coaching.md` unless `PROGRESS.md` says otherwise.
 - **The app is built.** Do not start from T01. `PROGRESS.md` says what exists, which build is current, what is open, and what is next. `TASKS.md` has the task history; new work since T16 is recorded as named rows (NAV, AI-multiple-services, UX).
 - **How to run builds, tests, the phone install and the archive** in an agent shell that times out after about two minutes: see "Running things" in `PROGRESS.md`. Do not run a long `xcodebuild` in the foreground; it is killed and reports BUILD INTERRUPTED.
