@@ -40,6 +40,10 @@ In order of value for effort. Each is one design note and one commit.
 
 **7. Dread and crux, two taps** (`05` section 5). Before Start: "Which step are you dreading most?" (tap one). After the last step: "Which was actually hardest?" Plan shows the two side by side for that assignment. Nothing is predicted and nothing is graded. Stores: two step ids per assignment. Test: skipping either changes nothing.
 
+## 2b. The AI coaching layer (researched 2026-11-22)
+
+Research: `research/07-ai-coaching.md`. Plan with exact prompts, files and tests, written for a Sonnet/Haiku Builder: `design/slices/COACH-plan.md`. In short: the AI gets a few named moves (a stuck question, a split nudge, the comeback slice, a follow-up after "did that help", a tidied question for a person, a weekly reflection), each with one fixed prompt, one output shape checked in code, a "NOTHING" option, and a non-AI fallback. The app decides which move runs from state it trusts, never from the student's words. A fading coach puts "I'll say my steps" first once the student has planned about three assignments on their own. Slices COACH-0 to COACH-7; COACH-3 and COACH-4 depend on Phase 1 items 1 and 5.
+
 ## 3. Phase 2: already designed, waiting on a decision
 
 These are in `design/slices/UX-whole-app-review.md` and need the parent or Ben first.

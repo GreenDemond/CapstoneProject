@@ -34,7 +34,7 @@ One thing to know if you move it: today it sits inside the web project's git rep
 | `App/` | The Xcode project (`FocusApp.xcodeproj`, scheme FocusApp), the SwiftUI screens (`App/FocusApp/`) and the UI tests (`App/FocusAppUITests/`) |
 | `FocusKit/` | The Swift package with all the logic, the AI and network code, storage, and the unit tests (`swift test`) |
 | `PARENT-STEPS.md` | Numbered steps for the parent: Xcode, the phone, TestFlight, and the open questions |
-| `research/` | The research the app must match |
+| `research/` | The research the app must match. `07-ai-coaching.md` covers how to prompt and control the AI as a coach |
 | `Shared/` | The app's words and rules, and the cases its logic must pass |
 | `checks/` | The check command (made in T01) and the steps Ben runs on a real iPhone |
 | `.claude/agents/` | The Advisor and Checker, ready for Claude Code; usable as instructions in any other tool |
