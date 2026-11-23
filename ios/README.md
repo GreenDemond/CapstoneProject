@@ -32,6 +32,7 @@ One thing to know if you move it: today it sits inside the web project's git rep
 | `design/04-engineering-and-plan.md` | How it is built and tested, the build order, open decisions, what is unverified |
 | `design/05-coaching-and-memory.md` | The AI coaching moves and the learner record as one system: what it is for, the shape, what the student sees, what leaves the phone |
 | `TASKS-coaching.md` | The coaching and memory work, in order, with "done when" checks. Start at C0 |
+| `PROMPTS.md` | Copy-and-paste start messages for Builder sessions (first task, Sonnet, Haiku) and for a read-only review |
 | `design/slices/` | One short design note per task or change. `COACH-plan.md`, `MEMORY-plan.md` and `COACH-MEMORY-testing.md` are the detailed plans behind `TASKS-coaching.md`. `UX-whole-app-review.md` holds the latest review, the large-text results, and what is still to build |
 | `App/` | The Xcode project (`FocusApp.xcodeproj`, scheme FocusApp), the SwiftUI screens (`App/FocusApp/`) and the UI tests (`App/FocusAppUITests/`) |
 | `FocusKit/` | The Swift package with all the logic, the AI and network code, storage, and the unit tests (`swift test`) |
@@ -47,6 +48,8 @@ One thing to know if you move it: today it sits inside the web project's git rep
 2. Give it the message below.
 3. Answer its questions. The first session asks you and Ben the questions in `design/04-engineering-and-plan.md` section 4.7.
 4. When a task needs you (signing in to Xcode, putting a build on Ben's phone), the agent gives numbered steps and waits.
+
+Messages to start a session are in `PROMPTS.md`. The one below is the original, for the finished build tasks in `TASKS.md`; for the coaching work use `PROMPTS.md`.
 
 Message to start any session:
 
