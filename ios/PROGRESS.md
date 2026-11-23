@@ -39,6 +39,7 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 
 ## Broken or worrying
 
+- **C0 check is blocked:** the fresh Checker ran `checks/check.sh`. Lint, FocusKit build/tests and the generic app/UI-test compile passed, but the UI run failed: `MeUITests.testAddAndDeleteANote()`, `TalkUITests.testKeyboardCanBePutAwayInChat()`, and `WorkUITests.testAllFiveButtonsThroughToTodayDone()`. C0 did not change `App/`, but its required whole check failed, so do not call C0 done until these are reproduced and resolved or correctly classified.
 - **Trusted-adult line** depends on the AI sending `TRUSTED_ADULT`. The app checks AI text only, not the student's own words. The parent's question about two extra safety signals is open.
 - **Look it up** still needs a real contact in `WikipediaLookUp.userAgent` (placeholder `set-by-owner@example.invalid`) before anyone except Ben uses the app.
 - **Starter step wording** was changed to "Check your answers against your notes" in `Shared/content.json` and its case file together. Check other starter steps against the never-shame list.
@@ -52,7 +53,7 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 
 ## Next (in order)
 
-The coaching and memory layer is designed and ready to build: `design/05-coaching-and-memory.md`, then `TASKS-coaching.md` (C0 done 2026-11-20: `AI/CoachMove.swift`, `coach` keys in `content.json`; next is C1, or C2 and M0, which depend only on C0). Each task names its reading, its tests (`design/slices/COACH-MEMORY-testing.md`) and its "done when" lines. Every task needs gate 2.
+The coaching and memory layer is designed and ready to build: `design/05-coaching-and-memory.md`, then `TASKS-coaching.md`. C0 is **blocked** despite its committed code, because the fresh Checker found three failing UI tests in the required full check. Reproduce and resolve those failures before starting C1, C2 or M0. Each task names its reading, its tests (`design/slices/COACH-MEMORY-testing.md`) and its "done when" lines. Every task needs gate 2.
 
 Feature ideas beyond these fixes are in `ROADMAP.md`, ranked by evidence and effort. The AI coaching layer has its own research note (`research/07-ai-coaching.md`) and a slice-by-slice plan for a Sonnet/Haiku Builder (`design/slices/COACH-plan.md`); start it at COACH-0. The learner record, retrieval and feedback that the moves draw on are in `design/slices/MEMORY-plan.md`; `ROADMAP.md` section 6 of that file has the open parent decisions and the "subscription instead of a key" backlog item the parent asked to be reminded of.
 

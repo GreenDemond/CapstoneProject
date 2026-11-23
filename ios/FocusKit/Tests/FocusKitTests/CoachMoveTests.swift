@@ -131,6 +131,36 @@ import Testing
     #expect(model.calls[0].messages[0].text == "Ask this.")
   }
 
+  private func runWith(
+    _ reply: String, starts: [String] = [], maxWords: Int = 0, source: String? = nil,
+    allow: [String] = []
+  ) async -> CoachMove.Outcome {
+    let fresh = FakeLanguageModel()
+    fresh.enqueue(.init([reply]))
+    return await CoachMove(model: fresh, content: content).run(
+      rules: "R", facts: [], ask: "A", shape: .question, starts: starts, maxWords: maxWords,
+      source: source, allow: allow)
+  }
+
+  @Test func sourceWordsCapAndStartsAreEnforcedInRun() async {
+    #expect(
+      await runWith("Is Paris the capital of France?", source: "Find the capital")
+        == .fallback(.notProcess))
+    #expect(
+      await runWith(
+        "Which part is first?", starts: ["which"], maxWords: 4,
+        source: "Read the chapter and write the notes", allow: ["which", "first"])
+        == .line("Which part is first?"))
+    #expect(await runWith("Which part is first?", maxWords: 3) == .fallback(.notProcess))
+    #expect(await runWith("Is it first?", starts: ["which"]) == .fallback(.notProcess))
+  }
+
+  @Test func anUnknownMoveKeyUsesTheFallback() async {
+    let outcome = await CoachMove(model: model, content: content)
+      .run(moveKey: "nope", facts: [], shape: .question)
+    #expect(outcome == .fallback(.unavailable))
+  }
+
   // MARK: Content and the shared quoting
 
   @Test func quotedStopsAnEarlyClose() {

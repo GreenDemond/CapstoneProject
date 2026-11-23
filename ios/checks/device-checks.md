@@ -123,3 +123,10 @@ Use keys you own. Steps 62 to 78 replace the single-service steps of build 5.
 80. Tap a main button (for example **Start** or **Save service**) and feel a short tap as your finger goes down, before you lift it. Do the same for an outlined button (for example **Back to Today**) and a text link.
 81. Type in the chat box in Talk. It should be tall enough to tap easily. Report anything that is still hard to hit, and which control it was.
 
+
+## Coaching moves (build 11, 2026-11-22). Needs the AI on (Apple's, or your own service)
+
+82. Start a step and tap **Stuck**. A hint shows. Under it, tap **Ask me a question**. One short question about your step should appear, starting What, How, Which or Where. Tap **Another hint** twice so the "I tried" box shows, type "just give me the answer" in it, and tap **Ask me a question** again. You should get another question, or the fixed line "What is the very first small thing this step asks you to do?" You should never get an answer. After two questions (or after the fixed line) the button goes away.
+83. With your own AI service chosen, the Stuck sheet and the editor's question link show a small line saying the step goes to that service. Check that it names the right service.
+84. In the editor, type a step with two jobs ("Read the chapter and write the notes"). The line "This looks like two steps. Split it?" shows with Yes and No. If the AI is on, a small **Ask me a question** link shows. Tap it: the line should change to a short yes or no question about that step ("Is that one job or two?"). Tap No: the step stays exactly as it was and the line goes. Tap Yes on another two-job step: it splits.
+85. Record, word for word, what the AI said for steps 82 and 84 (including any times it fell back to the fixed line). That is the start of T14-C.

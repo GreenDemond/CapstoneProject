@@ -41,6 +41,8 @@ import Testing
     #expect(content.coach.common.contains("\n"))
     for (key, move) in content.coach.moves {
       #expect(!move.rules.isEmpty, "\(key) rules")
+      #expect(!move.ask.isEmpty, "\(key) ask")
+      #expect(move.maxWords >= 0, "\(key) maxWords")
       #expect(!move.fallback.isEmpty, "\(key) fallback")
     }
   }

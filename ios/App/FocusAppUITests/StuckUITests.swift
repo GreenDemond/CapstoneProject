@@ -48,4 +48,65 @@ final class StuckUITests: XCTestCase {
     app.buttons["ask-copy"].tap()
     XCTAssertTrue(app.buttons["Copied."].waitForExistence(timeout: 5))
   }
+
+  /// With the AI on, Stuck can ask one question. The fake AI answers with a real question.
+  func testAskMeAQuestionShowsAQuestion() {
+    let app = XCUIApplication()
+    app.launchArguments = ["-focus-fresh-data", "-focus-fake-ai-question"]
+    app.launch()
+    app.buttons["welcome-start"].tap()
+    let box = app.textViews["assignment-text"]
+    box.tap()
+    box.typeText("Some work")
+    app.putKeyboardAway()
+    app.buttons["say-steps"].tap()
+    let field = app.textFields["said-step"]
+    field.tap()
+    field.typeText("Write one line")
+    app.putKeyboardAway()
+    app.buttons["add-said"].tap()
+    app.buttons["thats-all"].tap()
+    app.buttons["start-steps"].tap()
+    app.buttons["choice-stuck"].tap()
+    XCTAssertTrue(app.element("stuck-screen").waitForExistence(timeout: 5))
+    let ask = app.buttons["ask-question"]
+    XCTAssertTrue(ask.waitForExistence(timeout: 5))
+    ask.tap()
+    let card = app.element("stuck-question")
+    XCTAssertTrue(card.waitForExistence(timeout: 5))
+    XCTAssertEqual(card.label, "Which part would you do first?")
+    // Awkward path: a second tap is allowed once more, then the button goes away.
+    app.buttons["ask-question"].tap()
+    let gone = expectation(
+      for: NSPredicate(format: "exists == false"), evaluatedWith: app.buttons["ask-question"])
+    wait(for: [gone], timeout: 5)
+  }
+
+  /// With the AI on but a reply that is not a question, the fixed question shows and the button
+  /// goes away (asking again would show the same line).
+  func testAFailedReplyShowsTheFixedQuestion() {
+    let app = XCUIApplication()
+    app.launchArguments = ["-focus-fresh-data", "-focus-fake-ai"]
+    app.launch()
+    app.buttons["welcome-start"].tap()
+    let box = app.textViews["assignment-text"]
+    box.tap()
+    box.typeText("Some work")
+    app.putKeyboardAway()
+    app.buttons["say-steps"].tap()
+    let field = app.textFields["said-step"]
+    field.tap()
+    field.typeText("Write one line")
+    app.putKeyboardAway()
+    app.buttons["add-said"].tap()
+    app.buttons["thats-all"].tap()
+    app.buttons["start-steps"].tap()
+    app.buttons["choice-stuck"].tap()
+    XCTAssertTrue(app.element("stuck-screen").waitForExistence(timeout: 5))
+    app.buttons["ask-question"].tap()
+    let card = app.element("stuck-question")
+    XCTAssertTrue(card.waitForExistence(timeout: 5))
+    XCTAssertEqual(card.label, "What is the very first small thing this step asks you to do?")
+    XCTAssertFalse(app.buttons["ask-question"].exists)
+  }
 }

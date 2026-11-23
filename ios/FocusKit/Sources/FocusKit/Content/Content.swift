@@ -54,13 +54,31 @@ public struct Content: Codable, Equatable, Sendable {
 
   public struct CoachMoveText: Codable, Equatable, Sendable {
     public let rules: String
+    /// The one request line sent after the facts.
+    public let ask: String
+    /// The words a question may start with. Empty means the default list.
+    public let starts: [String]
+    /// Extra words of 5 or more letters a question may use, besides the student's own words.
+    public let allow: [String]
+    /// The most words the line may have. Zero means no cap.
+    public let maxWords: Int
     public let fallback: String
+  }
+
+  public struct CoachFacts: Codable, Equatable, Sendable {
+    public let kind: String
+    public let step: String
+    public let tried: String
   }
 
   public struct Coach: Codable, Equatable, Sendable {
     public let common: String
     public let nothingWord: String
     public let moves: [String: CoachMoveText]
+    /// The names of the facts a move may send.
+    public let facts: CoachFacts
+    /// How one fact is written: `{label}` and `{text}` are filled in.
+    public let factTemplate: String
   }
 
   public struct Pickup: Codable, Equatable, Sendable {

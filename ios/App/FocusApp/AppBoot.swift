@@ -10,6 +10,10 @@ enum AppBoot {
   static let noAIArgument = "-focus-no-ai"
   static let fakeAIArgument = "-focus-fake-ai"
   static let fakeAIDistressArgument = "-focus-fake-ai-distress"
+  /// A fake AI whose every reply is one short question, for the coaching-move UI tests.
+  static let fakeAIQuestionArgument = "-focus-fake-ai-question"
+  /// The same, with a yes or no question (the split nudge asks one).
+  static let fakeAIYesNoArgument = "-focus-fake-ai-yesno"
 
   static func make() -> AppModel? {
     guard let content = try? Content.bundled() else { return nil }
@@ -40,12 +44,19 @@ enum AppBoot {
   /// Used only by the UI tests: a scripted AI, so the chat can be driven without Apple's model.
   private static func fakeServices() -> Services? {
     let arguments = CommandLine.arguments
-    guard arguments.contains(fakeAIArgument) || arguments.contains(fakeAIDistressArgument) else {
+    guard
+      arguments.contains(fakeAIArgument) || arguments.contains(fakeAIDistressArgument)
+        || arguments.contains(fakeAIQuestionArgument) || arguments.contains(fakeAIYesNoArgument)
+    else {
       return nil
     }
     let model = FakeLanguageModel()
     if arguments.contains(fakeAIDistressArgument) {
       model.enqueue(.init(["TRUSTED_ADULT"]))
+    } else if arguments.contains(fakeAIYesNoArgument) {
+      model.enqueue(.init(["Is that one job or two?"]))
+    } else if arguments.contains(fakeAIQuestionArgument) {
+      model.enqueue(.init(["Which part would you do first?"]))
     } else {
       model.enqueue(
         .init([

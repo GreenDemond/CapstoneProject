@@ -16,15 +16,18 @@ struct StuckView: View {
 
   var body: some View {
     NavigationStack {
-      LadderBody(model: model, ladder: model.ladder(for: target.step), dismiss: { dismiss() })
-        .navigationTitle(Words.stuckTitle)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-          ToolbarItem(placement: .topBarLeading) {
-            Button(Words.backToStep) { dismiss() }
-              .accessibilityIdentifier("stuck-close")
-          }
+      LadderBody(
+        model: model, ladder: model.ladder(for: target.step), step: target.step,
+        dismiss: { dismiss() }
+      )
+      .navigationTitle(Words.stuckTitle)
+      .navigationBarTitleDisplayMode(.inline)
+      .toolbar {
+        ToolbarItem(placement: .topBarLeading) {
+          Button(Words.backToStep) { dismiss() }
+            .accessibilityIdentifier("stuck-close")
         }
+      }
     }
     .presentationDetents([.large])
   }
@@ -33,6 +36,8 @@ struct StuckView: View {
 struct LadderBody: View {
   let model: AppModel
   let ladder: LadderModel
+  /// The saved step this ladder is for. Nil on the Talk tab, where there is no step.
+  var step: Step?
   /// Closes the whole Stuck sheet. Nil when there is no step to go back to (the Talk tab).
   let dismiss: (() -> Void)?
   @State private var copied = false
@@ -60,6 +65,8 @@ struct LadderBody: View {
           Text(Words.noMoreHints).font(Theme.Typography.body).foregroundStyle(Theme.Palette.quiet)
         }
 
+        if let step, ladder.coach != nil { askQuestionRung(step) }
+
         LookItUpRung(model: model, ladder: ladder, dismiss: dismiss)
 
         TalkItThroughRung(model: model, ladder: ladder, kindId: model.saved?.kindId)
@@ -79,6 +86,40 @@ struct LadderBody: View {
     .onAppear { if ladder.hintsShown.isEmpty { ladder.nextHint() } }
     .accessibilityElement(children: .contain)
     .accessibilityIdentifier("stuck-screen")
+  }
+
+  @ViewBuilder
+  private func askQuestionRung(_ step: Step) -> some View {
+    if let note = ladder.coachNote {
+      Text(verbatim: note)
+        .font(Theme.Typography.body)
+        .foregroundStyle(Theme.Palette.ink)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .cardStyle()
+        .accessibilityIdentifier("stuck-question-note")
+    }
+    if let question = ladder.coachQuestion {
+      Text(verbatim: question)
+        .font(Theme.Typography.body)
+        .foregroundStyle(Theme.Palette.ink)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .cardStyle()
+        .accessibilityIdentifier("stuck-question")
+    }
+    if ladder.isAsking {
+      Text(Words.askQuestionThinking)
+        .font(Theme.Typography.body)
+        .foregroundStyle(Theme.Palette.quiet)
+    } else if ladder.canAskQuestion {
+      Button(Words.askQuestion) { Task { await model.askQuestion(ladder, for: step) } }
+        .buttonStyle(QuietButtonStyle())
+        .accessibilityIdentifier("ask-question")
+      if let own = model.ownAI.chosen {
+        Text(Words.askQuestionOwn(label: own.label))
+          .font(Theme.Typography.small)
+          .foregroundStyle(Theme.Palette.quiet)
+      }
+    }
   }
 
   private var askPerson: some View {

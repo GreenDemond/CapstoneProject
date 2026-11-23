@@ -20,6 +20,16 @@ public final class PlannerModel {
   public private(set) var aiNote: String?
   /// The AI is working on a suggestion.
   public private(set) var thinking = false
+  /// The split-nudge question move. Nil means no AI, so no Ask me a question link.
+  public var nudgeMove: CoachMove?
+  /// The label of the student's own AI service when it is the one in use. Set by the app model.
+  public var ownServiceLabel: () -> String? = { nil }
+  /// Steps already asked about in this app run. Memory only; one call per step id.
+  private var nudgeAsked: Set<Int> = []
+  private var nudgeQuestions: [Int: (text: String, question: String)] = [:]
+  /// Bumped when the draft is replaced, so a late answer for an older draft is dropped.
+  private var nudgeEpoch = 0
+
   /// One idea for the next step, waiting for the student to use it or not.
   public private(set) var idea: Idea?
 
@@ -45,6 +55,7 @@ public final class PlannerModel {
   /// Back to an empty planner without saving anything (after Delete everything).
   public func reset() {
     draft = .empty
+    forgetNudges()
     saveNote = nil
     aiNote = nil
     idea = nil
@@ -92,6 +103,7 @@ public final class PlannerModel {
     draft.steps = []
     draft.nextId = 0
     draft.nudgeDismissed = []
+    forgetNudges()
     draft.fromAI = false
     for text in chosen { append(text) }
     draft.stage = .editor
@@ -185,6 +197,7 @@ public final class PlannerModel {
     draft.steps = []
     draft.nextId = 0
     draft.nudgeDismissed = []
+    forgetNudges()
     for text in chosen { append(text) }
     if let kindId, content.kinds.contains(where: { $0.id == kindId }) { draft.kindId = kindId }
     draft.fromAI = true
@@ -203,6 +216,7 @@ public final class PlannerModel {
     draft.steps = []
     draft.nextId = 0
     draft.nudgeDismissed = []
+    forgetNudges()
     draft.fromAI = false
     idea = nil
     draft.stage = .saying
@@ -315,6 +329,7 @@ public final class PlannerModel {
     }
     let text = Text.trimmed(draft.steps[index].text)
     guard let parts = Self.splitParts(text) else { return false }
+    nudgeQuestions[id] = nil
     draft.steps[index].text = parts.0
     let newId = draft.nextId
     draft.nextId += 1
@@ -332,8 +347,47 @@ public final class PlannerModel {
       && (Self.andRange(in: step.text) != nil || step.text.count > 90)
   }
 
+  /// The AI's question for this step in place of the fixed nudge line, while the text is unchanged.
+  public func nudgeQuestion(for id: Int) -> String? {
+    guard let stored = nudgeQuestions[id], let index = index(of: id),
+      Text.trimmed(draft.steps[index].text) == stored.text
+    else { return nil }
+    return stored.question
+  }
+
+  /// The Ask me a question link shows when the nudge shows, the AI is on, and this step was not
+  /// asked about yet.
+  public func canAskNudge(_ id: Int) -> Bool {
+    nudgeMove?.isAvailable == true && looksLikeTwo(id) && !nudgeAsked.contains(id)
+  }
+
+  /// Asks the AI for one question about whether to split this step. Nothing changes the step. A
+  /// refusal, NOTHING or a question that fails the checks leaves the fixed line.
+  public func askNudge(_ id: Int) async {
+    guard let nudgeMove, canAskNudge(id), let at = index(of: id) else { return }
+    nudgeAsked.insert(id)
+    let asked = Text.trimmed(draft.steps[at].text)
+    let epoch = nudgeEpoch
+    let fact = CoachText.fact(content.coach.facts.step, asked, content: content)
+    let outcome = await nudgeMove.run(
+      moveKey: "splitNudge", facts: [fact], shape: .question, source: asked)
+    // The safety line is shown even if the student has moved on from this step.
+    if outcome == .trustedAdult { aiNote = content.safety.line }
+    guard epoch == nudgeEpoch, let now = index(of: id),
+      Text.trimmed(draft.steps[now].text) == asked, looksLikeTwo(id)
+    else { return }
+    if case .line(let line) = outcome { nudgeQuestions[id] = (asked, line) }
+  }
+
+  private func forgetNudges() {
+    nudgeAsked = []
+    nudgeQuestions = [:]
+    nudgeEpoch += 1
+  }
+
   /// The answer No: the step stays as it is and the nudge does not come back.
   public func dismissNudge(_ id: Int) {
+    nudgeQuestions[id] = nil
     guard !draft.nudgeDismissed.contains(id) else { return }
     draft.nudgeDismissed.append(id)
     persist()
@@ -384,6 +438,7 @@ public final class PlannerModel {
       return false
     }
     draft = .empty
+    forgetNudges()
     persist()
     onStart(saved)
     return true

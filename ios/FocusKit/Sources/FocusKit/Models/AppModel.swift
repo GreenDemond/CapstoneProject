@@ -87,6 +87,8 @@ public final class AppModel {
     self.me = MeModel(content: content, store: store, clock: clock)
     self.planner = PlannerModel(content: content, store: store, clock: clock, draft: draft)
     self.planner.coach = StepCoach(model: switcher, content: content)
+    self.planner.nudgeMove = CoachMove(model: switcher, content: content)
+    self.planner.ownServiceLabel = { [weak self] in self?.ownAI.chosen?.label }
     self.planner.onStart = { [weak self] saved in self?.began(saved) }
     self.me.settings = { [weak self] in self?.settings ?? Settings() }
     self.me.change = { [weak self] change in self?.updateSettings(change) }
@@ -283,8 +285,16 @@ public final class AppModel {
   public func ladder(for step: Step) -> LadderModel {
     if let existing = ladders[step.id] { return existing }
     let made = LadderModel(content: content, stepText: step.text)
+    made.coach = CoachMove(model: switcher, content: content)
     ladders[step.id] = made
     return made
+  }
+
+  /// Asks the AI for one question about this step. The step text and kind come from the saved
+  /// step, not from the boxes the student can edit.
+  public func askQuestion(_ ladder: LadderModel, for step: Step) async {
+    let label = content.kinds.first { $0.id == saved?.kindId }?.label ?? "Something else"
+    await ladder.askQuestion(stepText: step.text, kindLabel: label)
   }
 
   /// Hints with no step, for the Talk screen when there is no AI.

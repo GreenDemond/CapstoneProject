@@ -222,3 +222,18 @@ extension Words {
   public static let meBackupNote =
     "On: your things are also in your own iPhone backup (iCloud or your computer). Off: they stay only on this iPhone. Your AI key is never in a backup."
 }
+
+extension Words {
+  public static let askQuestion = "Ask me a question"
+  public static let askQuestionThinking = "Thinking of a question"
+  public static func askQuestionOwn(label: String) -> String {
+    "Your step and what you tried go to \(label), the AI service you added in Me."
+  }
+}
+
+extension Words {
+  public static let askNudge = "Ask me a question"
+  public static func askNudgeOwn(label: String) -> String {
+    "This step goes to \(label), the AI service you added in Me."
+  }
+}

@@ -18,8 +18,9 @@ final class MeUITests: XCTestCase {
   /// Add a private note, see it, and delete it. The trusted-adult line is always under the notes.
   func testAddAndDeleteANote() {
     let app = launch()
-    XCTAssertTrue(app.staticTexts["me-trusted-adult"].waitForExistence(timeout: 5))
+    // The Me page is a lazy list, so scroll to the notes first.
     let field = app.textFields["note-text"]
+    app.scrollTo(field)
     field.tap()
     field.typeText("Too noisy at home")
     app.putKeyboardAway()
@@ -33,6 +34,10 @@ final class MeUITests: XCTestCase {
     let gone = expectation(
       for: NSPredicate(format: "exists == false"), evaluatedWith: app.element("note-row"))
     wait(for: [gone], timeout: 5)
+    // The trusted-adult line is under the notes. It sits in a lazy list, so scroll down to it.
+    let trusted = app.element("me-trusted-adult")
+    app.scrollTo(trusted)
+    XCTAssertTrue(trusted.exists)
   }
 
   /// A changed setting is used: turning on Talk shows the microphone on Today.

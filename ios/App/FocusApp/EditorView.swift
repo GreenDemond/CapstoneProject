@@ -125,9 +125,10 @@ struct StepRow: View {
       }
       if planner.looksLikeTwo(step.id) {
         HStack {
-          Text(Words.looksLikeTwo)
+          Text(verbatim: planner.nudgeQuestion(for: step.id) ?? Words.looksLikeTwo)
             .font(Theme.Typography.small)
             .foregroundStyle(Theme.Palette.quiet)
+            .accessibilityIdentifier("nudge-line-\(step.id)")
           Spacer()
           Button("Yes") { planner.split(step.id) }
             .accessibilityIdentifier("nudge-yes-\(step.id)")
@@ -135,6 +136,17 @@ struct StepRow: View {
             .accessibilityIdentifier("nudge-no-\(step.id)")
         }
         .buttonStyle(.borderless)
+        if planner.canAskNudge(step.id) {
+          Button(Words.askNudge) { Task { await planner.askNudge(step.id) } }
+            .font(Theme.Typography.small)
+            .buttonStyle(.borderless)
+            .accessibilityIdentifier("nudge-ask-\(step.id)")
+          if let own = planner.ownServiceLabel() {
+            Text(Words.askNudgeOwn(label: own))
+              .font(Theme.Typography.small)
+              .foregroundStyle(Theme.Palette.quiet)
+          }
+        }
       }
       if showDoneLine || !step.doneLine.isEmpty {
         TextField(

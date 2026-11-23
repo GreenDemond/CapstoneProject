@@ -7,6 +7,25 @@ enum CoachText {
     Guide.clean(Text.cut(text, to: 1000))
   }
 
+  /// One fact line. The label comes from content.json; the student's words go in last, so words
+  /// that look like a placeholder are never filled in.
+  static func fact(_ label: String, _ text: String, content: Content) -> String {
+    content.coach.factTemplate
+      .replacingOccurrences(of: "{label}", with: label)
+      .replacingOccurrences(of: "{text}", with: quoted(text))
+  }
+
+  /// Words of 5 or more letters, lower-cased, letters only.
+  static func longWords(_ text: String) -> [String] {
+    text.split(whereSeparator: { !$0.isLetter }).map { $0.lowercased() }.filter { $0.count >= 5 }
+  }
+
+  /// Every word of 5 or more letters in `line` is in `source` or in `allow`.
+  static func usesOnlyWords(_ line: String, from source: String, allow: [String]) -> Bool {
+    let known = Set(longWords(source)).union(allow.map { $0.lowercased() })
+    return longWords(line).allSatisfy { known.contains($0) }
+  }
+
   /// A quotation of 25 or more characters: that is content, not a step or a question.
   static func hasLongQuote(_ text: String) -> Bool {
     text.firstMatch(of: /["“][^"”]{25,}["”]/) != nil
@@ -46,7 +65,10 @@ public struct CoachMove: Sendable {
 
   /// `rules` is the whole instruction text (common rules then the move's own). `facts` are lines
   /// already quoted by the caller.
-  public func run(rules: String, facts: [String], ask: String, shape: Shape) async -> Outcome {
+  public func run(
+    rules: String, facts: [String], ask: String, shape: Shape, starts: [String] = [],
+    maxWords: Int = 0, source: String? = nil, allow: [String] = []
+  ) async -> Outcome {
     guard isAvailable else { return .fallback(.unavailable) }
     var latest = ""
     do {
@@ -62,12 +84,36 @@ public struct CoachMove: Sendable {
     }
     switch Self.check(
       latest, shape: shape, limit: content.limits.stepLength, word: content.safety.word,
-      nothing: content.coach.nothingWord)
+      nothing: content.coach.nothingWord, starts: starts)
     {
-    case .success(let line?): return .line(line)
+    case .success(let line?):
+      if maxWords > 0, line.split(whereSeparator: { $0.isWhitespace }).count > maxWords {
+        return .fallback(.notProcess)
+      }
+      if let source, !CoachText.usesOnlyWords(line, from: source, allow: allow) {
+        return .fallback(.notProcess)
+      }
+      return .line(line)
     case .success(nil): return .nothing
     case .failure(let reason): return .fallback(reason)
     }
+  }
+
+  /// Runs a move named in content.json: the common rules then the move's rules, the move's own
+  /// ask line and allowed question starts. An unknown name uses the fallback.
+  /// With `source`, the reply may only use words from that text or the move's `allow` list.
+  public func run(
+    moveKey: String, facts: [String], shape: Shape, source: String? = nil
+  ) async -> Outcome {
+    guard let move = content.coach.moves[moveKey] else { return .fallback(.unavailable) }
+    return await run(
+      rules: content.coach.common + "\n" + move.rules, facts: facts, ask: move.ask, shape: shape,
+      starts: move.starts, maxWords: move.maxWords, source: source, allow: move.allow)
+  }
+
+  /// The non-AI line for a move, or nil for an unknown name.
+  public func fallbackLine(for moveKey: String) -> String? {
+    content.coach.moves[moveKey]?.fallback
   }
 
   private static let questionWords: Set<String> = [
@@ -77,7 +123,8 @@ public struct CoachMove: Sendable {
 
   /// Checks a whole reply. `.success(nil)` means the model said NOTHING. Fails closed.
   static func check(
-    _ reply: String, shape: Shape, limit: Int, word: String, nothing: String
+    _ reply: String, shape: Shape, limit: Int, word: String, nothing: String,
+    starts: [String] = []
   ) -> Result<String?, CoachFallback> {
     if Safety.containsSignal(reply, word: word) { return .failure(.notProcess) }
     let lines = reply.split(separator: "\n", omittingEmptySubsequences: true)
@@ -101,7 +148,8 @@ public struct CoachMove: Sendable {
       guard text.hasSuffix("?") else { return .failure(.notProcess) }
       let firstWord = text.split(whereSeparator: { $0.isWhitespace }).first.map(String.init) ?? ""
       let letters = firstWord.lowercased().filter { $0.isLetter }
-      guard questionWords.contains(letters) else { return .failure(.notProcess) }
+      let allowed = starts.isEmpty ? questionWords : Set(starts)
+      guard allowed.contains(letters) else { return .failure(.notProcess) }
     case .shortLine:
       if text.hasSuffix("?") || CoachText.hasColonSentence(text) { return .failure(.notProcess) }
     }
