@@ -132,3 +132,8 @@ Use keys you own. Steps 62 to 78 replace the single-service steps of build 5.
 85. Record, word for word, what the AI said for steps 82 and 84 (including any times it fell back to the fixed line). That is the start of T14-C.
 
 86. Open **Me → About and privacy**. At the bottom, the line should read **Version 0.1 (build 11)**. Report the build number if it differs from the one on the Xcode archive.
+
+## Build 13 (2026-11-23)
+
+87. Me → My AI services → edit a service: a **Thinking** choice (None, Low, Medium, High) shows, set to Low. Change it, save, chat on Talk with that service: replies still arrive. If a service stops answering after the change, set it back to Low and report which service.
+88. Chat a few times on Talk, then open Me → About and privacy: **How Talk replied on this iPhone** shows five counts, and they went up. There is no count for the trusted-adult line. Delete everything sets them to 0.
