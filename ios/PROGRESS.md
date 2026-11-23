@@ -39,6 +39,8 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 
 ## Broken or worrying
 
+- **Backup read-back is briefly stale.** After the backup switch is cleared, the folder can still read as excluded for under a second (about 1 read in 30). The app does not depend on the instant read. The test now waits briefly. Measured 2026-11-23; see `design/slices/M0-learner-record.md`.
+
 - **Flaky unit test:** `BackupTests.theRealFolderResourceValueIsSetAndCleared` (real data folder's backup flag) failed once in the Checker's first `swift test` and once more by hand, then passed. Not caused by the coaching work. Find the cause before relying on it.
 
 - **Trusted-adult line** depends on the AI sending `TRUSTED_ADULT`. The app checks AI text only, not the student's own words. The parent's question about two extra safety signals is open.
@@ -53,6 +55,8 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 - **Ben:** the final name and icon (placeholder staircase), the words for Drifted and Stuck, whether voice starts off (it does now).
 
 ## Next (in order)
+
+0. M0a (learner record) is committed. Next: M0b (class label on the assignment screen, course entries on finish, obstacle lines from notes, per-class limit of 10). Write its design note first and get gate 1.
 
 The coaching and memory layer is being built from `TASKS-coaching.md`. Done: C0 (runner and checks), C1 (Stuck question), C2 (split nudge). Next ready: M0 (learner record and courses), then M3, M1, C3 onward (the table shows what each waits on). Each task names its reading, its tests (`design/slices/COACH-MEMORY-testing.md`) and its "done when" lines. Every task needs gate 2. The fresh Checker passed C0 to C2 on 2026-11-22. T14-C (answer-giving checks on the phone, device steps 82 to 85) is waiting on the parent.
 

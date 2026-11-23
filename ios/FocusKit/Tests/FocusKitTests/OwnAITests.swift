@@ -1328,14 +1328,22 @@ private let addressB = "https://other.example.org/v1/chat/completions"
       "backup-\(UUID().uuidString)")
     defer { try? FileManager.default.removeItem(at: folder) }
     let flag = FolderBackupFlag(folder: folder)
+    // Read through a new URL each time: a URL object can keep the value it read first.
+    func reread() throws -> URLResourceValues {
+      try URL(fileURLWithPath: folder.path).resourceValues(forKeys: [.isExcludedFromBackupKey])
+    }
     #expect(flag.setExcluded(true))
-    #expect(
-      try folder.resourceValues(forKeys: [.isExcludedFromBackupKey]).isExcludedFromBackup == true)
+    #expect(try reread().isExcludedFromBackup == true)
     #expect(flag.setExcluded(false))
-    // Cleared may read back as nil or false; both mean the folder is not excluded.
-    #expect(
-      try folder.resourceValues(forKeys: [.isExcludedFromBackupKey]).isExcludedFromBackup ?? false
-        == false)
+    // The system applies a cleared flag a moment later: read-back is briefly stale (measured on
+    // this Mac: about 1 in 30 reads right after clearing, none after a second). So poll, briefly.
+    // The check itself is unchanged: in the end the folder must not be excluded.
+    var cleared = try reread().isExcludedFromBackup
+    for _ in 0..<40 where cleared == true {
+      Thread.sleep(forTimeInterval: 0.05)
+      cleared = try reread().isExcludedFromBackup
+    }
+    #expect(cleared != true, "after clearing the flag read \(String(describing: cleared))")
   }
 
   @Test func theWelcomeAndAboutWordsMentionTheBackup() {
