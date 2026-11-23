@@ -44,6 +44,10 @@ In order of value for effort. Each is one design note and one commit.
 
 Research: `research/07-ai-coaching.md`. Plan with exact prompts, files and tests, written for a Sonnet/Haiku Builder: `design/slices/COACH-plan.md`. In short: the AI gets a few named moves (a stuck question, a split nudge, the comeback slice, a follow-up after "did that help", a tidied question for a person, a weekly reflection), each with one fixed prompt, one output shape checked in code, a "NOTHING" option, and a non-AI fallback. The app decides which move runs from state it trusts, never from the student's words. A fading coach puts "I'll say my steps" first once the student has planned about three assignments on their own. Slices COACH-0 to COACH-7; COACH-3 and COACH-4 depend on Phase 1 items 1 and 5.
 
+## 2c. Memory, retrieval and feedback (planned 2026-11-22)
+
+`design/slices/MEMORY-plan.md`. A learner record on the phone (settings tried and verdicts, confirmed patterns, obstacles, weekly reflections, per-course "what worked", thumbs feedback on AI lines), never a description of the person. A selector gives each AI move at most 5 lines it is allowed to see, rules first, then on-phone semantic search (`NLEmbedding`, verified in the kit). Thumbs up / meh / down under every AI line, with a per-move fallback bias. A "How I work" screen shows the whole record and what the AI was told. Slices MEMORY-0 to MEMORY-4 and COACH-8 (check a hunch) interleave with COACH-plan.
+
 ## 3. Phase 2: already designed, waiting on a decision
 
 These are in `design/slices/UX-whole-app-review.md` and need the parent or Ben first.
@@ -61,6 +65,7 @@ These are in `design/slices/UX-whole-app-review.md` and need the parent or Ben f
 - **Background noise as a personal experiment** (`00` section 5). Needs volume and time limits, headphones only, and an "did it help" question. Only after item 5 exists.
 - **Calendar list and "Fire it Up"** (`design/02` 2.12; Ben's wish). A list grouped by how soon things are due, with a calm "Time has passed" group. Day/week/month grids are not planned.
 - **Per-kind AI guides**, own-key web search, Mac and iPad.
+- **Use a subscription instead of a key** (parent: "remind me later"). OpenAI's "Sign in with ChatGPT" allows Plus/Pro plans to power an app's requests with a weekly cap and no key; Anthropic does not allow Claude plan logins in third-party apps (checked 2026-11-22); Grok not checked. Needs a parent decision, a D8 row and an OAuth flow. See `design/slices/MEMORY-plan.md` section 8.
 
 ## 5. What not to build, and why (so the next agent does not re-open it)
 

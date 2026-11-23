@@ -3,6 +3,8 @@ Status: plan, 2026-11-22. Nothing here is built. Research behind it: `research/0
 
 **Who this is for.** A Sonnet- or Haiku-class Builder working one slice per session under `AGENTS.md`. Each slice below says exactly which files to touch, what to put in them, which tests must exist, and what "done" means. Do not skip ahead; each slice depends on the one before. Do not invent prompt wording; use the wording given here (gate 2 may adjust it).
 
+**Scope note (parent, 2026-11-22):** the moves stay few and narrow, but what they draw on will grow: a learner record, per-course memory, on-phone retrieval and thumbs feedback are in `MEMORY-plan.md`. Build COACH-0 to COACH-2 first; they need no memory and prove the guardrails. From COACH-3 on, each move takes its `facts` from the selector in that plan.
+
 **The idea in one paragraph.** The AI does not get a "coach" personality. It gets a small set of named **moves**. Each move is one fixed prompt in `Shared/content.json`, one call, one output shape, and one check in code. The app, not the model, decides which move runs and when, from state it trusts (how many hints shown, which step, whether the student has acted). Every move may answer `NOTHING`, and then the app shows nothing. Every move has a non-AI fallback line so the student is never left with an error.
 
 ---
