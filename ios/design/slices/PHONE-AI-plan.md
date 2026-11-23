@@ -69,9 +69,9 @@ Only if P0's tally shows the fixed lines are common:
 
 | # | Question | Recommendation | Needed by |
 |---|---|---|---|
-| P0-1 | May the app keep a count (no text) of how Talk replies ended, shown under About? | Yes: counts only, on the phone, deleted with Delete everything | P0 |
-| P0-2 | Update Ben's phone to iOS 27? It has a newer model, a larger window on the Mac (8,192), and a reasoning level. The app already supports iOS 26.0 and later | Yes, after P1, so the prompt is tested on the model he will use. Re-run the harness either way | P1 |
-| P0-3 | Apple's cloud model (iOS 27) stays off, as D6 says. Confirm | Keep it off. It sends the student's words off the phone, and D8 has no row for it | Any time |
+| P0-1 | May the app keep a count (no text) of how Talk replies ended, shown under About? | **Yes (parent, 2026-11-23)** | P0 |
+| P0-2 | Which iOS is Ben on? | **He runs the latest public iOS, no betas (parent, 2026-11-23).** iOS 27 is public since 2026-09-14, so test against the 27 model first and keep 26 working. Confirm on his phone (Settings, General, About) | P1 |
+| P0-3 | Apple's cloud model (iOS 27) | **Allowed later as an option the student turns on, off by default (parent, 2026-11-23).** Needs a D6 change, a D8 row and T14 before it is built. Own slice, after P3 | After P3 |
 
 ## What this plan does not do
 
