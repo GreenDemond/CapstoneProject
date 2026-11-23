@@ -39,6 +39,8 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 
 ## Broken or worrying
 
+- **Flaky unit test:** `BackupTests.theRealFolderResourceValueIsSetAndCleared` (real data folder's backup flag) failed once in the Checker's first `swift test` and once more by hand, then passed. Not caused by the coaching work. Find the cause before relying on it.
+
 - **Trusted-adult line** depends on the AI sending `TRUSTED_ADULT`. The app checks AI text only, not the student's own words. The parent's question about two extra safety signals is open.
 - **Look it up** still needs a real contact in `WikipediaLookUp.userAgent` (placeholder `set-by-owner@example.invalid`) before anyone except Ben uses the app.
 - **Starter step wording** was changed to "Check your answers against your notes" in `Shared/content.json` and its case file together. Check other starter steps against the never-shame list.
@@ -52,7 +54,7 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 
 ## Next (in order)
 
-The coaching and memory layer is being built from `TASKS-coaching.md`. Done: C0 (runner and checks), C1 (Stuck question), C2 (split nudge). Next ready: M0 (learner record and courses), then M3, M1, C3 onward (the table shows what each waits on). Each task names its reading, its tests (`design/slices/COACH-MEMORY-testing.md`) and its "done when" lines. Every task needs gate 2. A fresh Checker re-run of C0 to C2 is still owed, and T14-C (answer-giving checks on the phone, device steps 82 to 85) is waiting on the parent.
+The coaching and memory layer is being built from `TASKS-coaching.md`. Done: C0 (runner and checks), C1 (Stuck question), C2 (split nudge). Next ready: M0 (learner record and courses), then M3, M1, C3 onward (the table shows what each waits on). Each task names its reading, its tests (`design/slices/COACH-MEMORY-testing.md`) and its "done when" lines. Every task needs gate 2. The fresh Checker passed C0 to C2 on 2026-11-22. T14-C (answer-giving checks on the phone, device steps 82 to 85) is waiting on the parent.
 
 Feature ideas beyond these fixes are in `ROADMAP.md`, ranked by evidence and effort. The AI coaching layer has its own research note (`research/07-ai-coaching.md`) and a slice-by-slice plan for a Sonnet/Haiku Builder (`design/slices/COACH-plan.md`); start it at COACH-0. The learner record, retrieval and feedback that the moves draw on are in `design/slices/MEMORY-plan.md`; `ROADMAP.md` section 6 of that file has the open parent decisions and the "subscription instead of a key" backlog item the parent asked to be reminded of.
 

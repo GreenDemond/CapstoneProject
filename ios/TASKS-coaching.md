@@ -8,8 +8,8 @@ A task is `ready` when every task it depends on is `done`. Every task here needs
 
 | Task | Status | Depends on | Date | Checker result |
 |---|---|---|---|---|
-| C0 Move runner, shape check, content keys | done | | 2026-11-22 | Gates 1 and 2: `semantic_reviewer` (Claude, same family) and a second Gate 2 by GPT-5.6-terra: GO. First fresh Checker found 3 UI failures, which were not C0: two were load from overlapping runs, one was a fragile `MeUITests` check, now fixed. After the fix the Builder ran `checks/check.sh` alone: ALL CHECKS PASSED (412 unit tests, 38 UI tests). A fresh Checker re-run is still owed |
-| C1 Stuck question | done | C0 | 2026-11-22 | Gates 1 and 2 by `semantic_reviewer` (Claude, same family): must-fix applied. Builder ran `checks/check.sh` alone: ALL CHECKS PASSED (412 unit, 38 UI). Fresh Checker re-run still owed. Device steps 82 to 85 |
+| C0 Move runner, shape check, content keys | done | | 2026-11-22 | Gates 1 and 2: `semantic_reviewer` (Claude, same family) and a second Gate 2 by GPT-5.6-terra: GO. First fresh Checker found 3 UI failures, which were not C0: two were load from overlapping runs, one was a fragile `MeUITests` check, now fixed. After the fix a fresh Checker ran `checks/check.sh` alone: first run failed once on an unrelated flaky test (`BackupTests.theRealFolderResourceValueIsSetAndCleared`), second run ALL CHECKS PASSED (415 unit tests, 38 UI tests); all C0 done-when items PASS |
+| C1 Stuck question | done | C0 | 2026-11-22 | Gates 1 and 2 by `semantic_reviewer` (Claude, same family): must-fix applied. fresh Checker: every done-when item PASS; `check.sh` ALL CHECKS PASSED on its second run (415 unit, 38 UI). Device steps 82 to 85 are for the parent |
 | C2 Split nudge | done | C0 | 2026-11-22 | As C1. D8 row awaits the parent |
 | M0 Learner record and courses | waiting | C0 | | |
 | M3 Feedback under AI lines | waiting | C1, M0 | | |
