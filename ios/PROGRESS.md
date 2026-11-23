@@ -2,7 +2,7 @@
 
 Read this first in any session. It is the memory between sessions. Rewrite it each session; do not let it grow into a diary. Task history is in `TASKS.md`, decisions in `DECISIONS.md`.
 
-**As of 2026-11-22, build 11 (`CURRENT_PROJECT_VERSION = 11`, installed on the owner's iPhone).** Build 11 adds the first two coaching moves (Stuck: Ask me a question; editor: Ask me a question on a two-job step). Build 9 is the one in the TestFlight archive; builds 10 and 11 need their own archive before upload. Nothing has been uploaded to App Store Connect, and nothing has been pushed to a remote.
+**As of 2026-11-23, build 12 (`CURRENT_PROJECT_VERSION = 12`).** Build 12 is installed on the owner's iPhone (open the app once; the phone was locked at install) and archived as `Bens Steps 0.1 (12).xcarchive`, not yet uploaded. The parent uploads it from Xcode's Organizer (Window → Organizer → Bens Steps 0.1 (12) → Distribute App → App Store Connect → Upload). Build 12 adds: class labels, course and note lines (stored on the phone), and the version line on About and privacy. Nothing has been pushed to a remote.
 
 ## What the app is
 
