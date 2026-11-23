@@ -35,6 +35,8 @@ public final class AppModel {
   /// The student is on the work screen.
   public private(set) var inStep: Bool
   public private(set) var saved: SavedWork?
+  /// What the app keeps across assignments: one line per saved note, and one per finished course.
+  public private(set) var learner: LearnerRecord
   public private(set) var parked: ParkedThoughts
   public private(set) var recall: RecallAnswers
   /// The welcome line, worked out once per opening of the app.
@@ -85,6 +87,7 @@ public final class AppModel {
       content: content, store: store, clock: clock, model: switcher,
       speaker: self.speaker)
     self.me = MeModel(content: content, store: store, clock: clock)
+    self.learner = store.load(LearnerRecord.self).value ?? LearnerRecord()
     self.planner = PlannerModel(content: content, store: store, clock: clock, draft: draft)
     self.planner.coach = StepCoach(model: switcher, content: content)
     self.planner.nudgeMove = CoachMove(model: switcher, content: content)
@@ -93,6 +96,7 @@ public final class AppModel {
     self.me.settings = { [weak self] in self?.settings ?? Settings() }
     self.me.change = { [weak self] change in self?.updateSettings(change) }
     self.me.erase = { [weak self] in self?.eraseEverything() ?? false }
+    self.me.onNotesSaved = { [weak self] in self?.syncNoteLines() }
     self.ownAI.settings = { [weak self] in self?.settings ?? Settings() }
     self.ownAI.change = { [weak self] change in self?.updateSettings(change) }
     self.ownAI.onChoiceChanged = { [weak self] in self?.chooseModel() }
@@ -238,6 +242,10 @@ public final class AppModel {
     switch choice {
     case .stuck:
       lastTap = now
+      var counted = saved
+      counted.stuck += 1
+      self.saved = counted
+      save(counted)
       return .stuck
     case .still:
       lastTap = now
@@ -252,11 +260,22 @@ public final class AppModel {
     }
 
     lastTap = now
+    let previous = saved
     var updated = saved
     updated.work = after
     updated.savedOn = now
-    self.saved = updated
+    if choice == .drifted { updated.drifted += 1 }
     let ask = choice == .done && asksRecall(kindId: saved.kindId)
+    let wrote = save(updated)
+    // If the last step cannot be saved, the step stays open so the student can tap Done again.
+    if !wrote, choice == .done, after.allDone {
+      self.saved = previous
+      return .ignored
+    }
+    self.saved = updated
+    if wrote, choice == .done, after.allDone {
+      writeCourseLine(updated)
+    }
 
     switch choice {
     case .later:
@@ -266,7 +285,6 @@ public final class AppModel {
     default:
       break
     }
-    save(updated)
     saveFlags()
 
     switch choice {
@@ -389,6 +407,7 @@ public final class AppModel {
     saved = nil
     parked = ParkedThoughts()
     recall = RecallAnswers()
+    learner = LearnerRecord()
     settings = Settings()
     planning = false
     ladders = [:]
@@ -408,13 +427,58 @@ public final class AppModel {
 
   // MARK: Saving
 
-  private func save<Value: Storable>(_ value: Value) {
+  @discardableResult
+  private func save<Value: Storable>(_ value: Value) -> Bool {
     do {
       try store.save(value)
       saveNote = nil
+      return true
     } catch {
       saveNote = Words.couldNotSave
+      return false
     }
+  }
+
+  // MARK: What the learner record keeps
+
+  /// One course line for a finished assignment with a class label. Written once: the id is the
+  /// assignment's, so a repeat writes over the same line. A failed record write is silent: the
+  /// steps have already saved, and the record is not shown anywhere.
+  private func writeCourseLine(_ finished: SavedWork) {
+    guard let label = finished.course, !finished.work.steps.isEmpty else { return }
+    let kind = content.kinds.first { $0.id == finished.kindId }?.label ?? "Something else"
+    let kept = finished.work.steps.prefix(LearnerRecord.courseStepLimit)
+      .map { Text.trimmed($0.text) }
+      .joined(separator: " / ")
+    let id = "course-\(finished.assignmentId)"
+    learner.remove(id: id)
+    learner.add(
+      LearnerRecord.Entry(
+        id: id, kind: .course, date: clock.now, text: "\(kind): \(kept)", source: .app,
+        courseLabel: label, stuckCount: finished.stuck, driftedCount: finished.drifted))
+    saveLearner()
+  }
+
+  /// Brings the note lines up to date with the Me notes: a line for each note, with the note's own
+  /// id, and no line for a note that is gone (deleted, or dropped past the notes cap). This runs
+  /// after each successful notes save, so a note whose earlier save failed still gets its line, and
+  /// notes saved before the record existed get lines the first time a note is saved after that.
+  private func syncNoteLines() {
+    let notes = me.profile.notes
+    let ids = Set(notes.map(\.id))
+    learner.entries.removeAll { $0.kind == .obstacle && !ids.contains($0.id) }
+    let have = Set(learner.entries.map(\.id))
+    for note in notes where !have.contains(note.id) {
+      learner.add(
+        LearnerRecord.Entry(
+          id: note.id, kind: .obstacle, date: note.date, text: note.text, source: .student))
+    }
+    saveLearner()
+  }
+
+  private func saveLearner() {
+    learner = learner.limited(by: content.limits)
+    try? store.save(learner)
   }
 
   private func saveFlags() {

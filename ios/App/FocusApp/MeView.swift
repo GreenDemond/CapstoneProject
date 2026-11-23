@@ -255,6 +255,15 @@ struct MeView: View {
 struct AboutView: View {
   let model: AppModel
 
+  /// The app's own version and build, from the app's Info.plist.
+  static var version: String {
+    Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
+  }
+
+  static var build: String {
+    Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?"
+  }
+
   var body: some View {
     List {
       Section {
@@ -278,6 +287,13 @@ struct AboutView: View {
         if let note = model.me.eraseNote {
           Text(note).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
         }
+      }
+      .listRowBackground(Theme.Palette.card)
+      Section {
+        Text(Words.appVersion(AboutView.version, build: AboutView.build))
+          .font(Theme.Typography.small)
+          .foregroundStyle(Theme.Palette.quiet)
+          .accessibilityIdentifier("app-version")
       }
       .listRowBackground(Theme.Palette.card)
     }

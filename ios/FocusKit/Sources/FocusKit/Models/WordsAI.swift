@@ -237,3 +237,10 @@ extension Words {
     "This step goes to \(label), the AI service you added in Me."
   }
 }
+
+extension Words {
+  /// Shown at the foot of About, so a tester can say which build they have.
+  public static func appVersion(_ version: String, build: String) -> String {
+    "Version \(version) (build \(build))"
+  }
+}

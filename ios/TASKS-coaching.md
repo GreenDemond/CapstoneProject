@@ -11,7 +11,7 @@ A task is `ready` when every task it depends on is `done`. Every task here needs
 | C0 Move runner, shape check, content keys | done | | 2026-11-22 | Gates 1 and 2: `semantic_reviewer` (Claude, same family) and a second Gate 2 by GPT-5.6-terra: GO. First fresh Checker found 3 UI failures, which were not C0: two were load from overlapping runs, one was a fragile `MeUITests` check, now fixed. After the fix a fresh Checker ran `checks/check.sh` alone: first run failed once on an unrelated flaky test (`BackupTests.theRealFolderResourceValueIsSetAndCleared`), second run ALL CHECKS PASSED (415 unit tests, 38 UI tests); all C0 done-when items PASS |
 | C1 Stuck question | done | C0 | 2026-11-22 | Gates 1 and 2 by `semantic_reviewer` (Claude, same family): must-fix applied. fresh Checker: every done-when item PASS; `check.sh` ALL CHECKS PASSED on its second run (415 unit, 38 UI). Device steps 82 to 85 are for the parent |
 | C2 Split nudge | done | C0 | 2026-11-22 | As C1. D8 row awaits the parent |
-| M0 Learner record and courses | in progress: M0a done, M0b ready | C0 | 2026-11-23 | M0a: gates 1 and 2 by `semantic_reviewer` (model not stated), must-fix applied. `checks/check.sh` ALL CHECKS PASSED (427 unit, 38 UI). M0b (class label, course entries, obstacle lines) now allowed by the parent's yes (DECISIONS 2026-11-23) |
+| M0 Learner record and courses | done (M0a and M0b). The Plan viewer and per-line delete are waiting on the parent (DECISIONS 2026-11-23) | C0 | 2026-11-23 | M0b: gates 1 and 2 by `semantic_reviewer` (model not stated), must-fix applied. `checks/check.sh` ALL CHECKS PASSED (446 unit, 39 UI) |
 | M3 Feedback under AI lines | waiting | C1, M0 | | |
 | M1 Rule selector | waiting | M0 | | |
 | C3 Comeback slice | waiting | M1, R1 | | |

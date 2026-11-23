@@ -56,7 +56,8 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 
 ## Next (in order)
 
-0. M0a (learner record) is committed. Next: M0b (class label on the assignment screen, course entries on finish, obstacle lines from notes, per-class limit of 10). Write its design note first and get gate 1.
+0. M0a and M0b are built. Parent to decide the course-line viewer (DECISIONS 2026-11-23): either keep course lines hidden until M4, or build a small list with delete before classmates use the app.
+0b. Steering from the parent (2026-11-23): a version line is on About and privacy (Version and build from the app's Info.plist). Check it on the phone (device step 86).
 
 The coaching and memory layer is being built from `TASKS-coaching.md`. Done: C0 (runner and checks), C1 (Stuck question), C2 (split nudge). Next ready: M0 (learner record and courses), then M3, M1, C3 onward (the table shows what each waits on). Each task names its reading, its tests (`design/slices/COACH-MEMORY-testing.md`) and its "done when" lines. Every task needs gate 2. The fresh Checker passed C0 to C2 on 2026-11-22. T14-C (answer-giving checks on the phone, device steps 82 to 85) is waiting on the parent.
 

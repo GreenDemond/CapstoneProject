@@ -20,6 +20,9 @@ public final class MeModel {
   public var settings: () -> Settings = { Settings() }
   public var change: ((inout Settings) -> Void) -> Void = { _ in }
   public var erase: () -> Bool = { false }
+  /// Called after a note is added or deleted and the save worked, so the learner record can bring
+  /// its note lines up to date with the notes.
+  public var onNotesSaved: () -> Void = {}
 
   private let content: Content
   private let store: any Store
@@ -58,14 +61,15 @@ public final class MeModel {
   public func addNote(_ words: String) -> Bool {
     let text = Text.trimmed(Text.cut(words, to: Profile.noteLength))
     guard !text.isEmpty else { return false }
-    profile.notes.insert(Note(text: text, date: clock.now), at: 0)
-    saveProfile()
+    let note = Note(text: text, date: clock.now)
+    profile.notes.insert(note, at: 0)
+    if saveProfile() { onNotesSaved() }
     return true
   }
 
   public func deleteNote(_ id: String) {
     profile.notes.removeAll { $0.id == id }
-    saveProfile()
+    if saveProfile() { onNotesSaved() }
   }
 
   // MARK: How I like to work
@@ -166,13 +170,17 @@ public final class MeModel {
     saveNote = nil
   }
 
-  private func saveProfile() {
+  /// Saves the profile. True when the save worked.
+  @discardableResult
+  private func saveProfile() -> Bool {
+    profile = profile.limited(by: content.limits)
     do {
       try store.save(profile)
-      profile = profile.limited(by: content.limits)
       saveNote = nil
+      return true
     } catch {
       saveNote = Words.couldNotSave
+      return false
     }
   }
 }

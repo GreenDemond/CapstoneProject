@@ -177,3 +177,9 @@ import Testing
     }
   }
 }
+
+@Suite struct VersionLineTests {
+  @Test func theVersionLineNamesVersionAndBuild() {
+    #expect(Words.appVersion("0.1", build: "11") == "Version 0.1 (build 11)")
+  }
+}

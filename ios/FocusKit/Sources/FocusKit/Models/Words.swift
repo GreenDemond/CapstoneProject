@@ -14,6 +14,9 @@ public enum Words {
   // Assignment
   public static let assignmentTitle = "What's the assignment?"
   public static let assignmentPlaceholder = "Paste or type it here"
+  /// Optional. The label is the student's own words, for example "History".
+  public static let classLabel = "Class (optional)"
+  public static let classLabelHint = "For example: History"
   public static let emptyAssignment = "Add a few words about the assignment first."
   public static let pasteCut = "That was a lot, so the end was cut off to fit."
   public static let kindQuestion = "What kind of work is this?"

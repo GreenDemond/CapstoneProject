@@ -364,7 +364,7 @@ struct SampleValues {
     SavedWork(
       work: Work(
         steps: [Step(id: 0, text: "Read", done: true), Step(id: 4, text: "Write")], nextId: 5),
-      kindId: "essay", savedOn: date)
+      kindId: "essay", savedOn: date, assignmentId: "sample-assignment")
   }
 
   var profile: Profile {

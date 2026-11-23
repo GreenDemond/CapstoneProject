@@ -13,18 +13,33 @@ public struct SavedWork: Storable {
   public var savedOn: Date?
   /// The optional "How will I know it's done?" line, by step number.
   public var doneLines: [String: String]
+  /// The class label the student typed, if any (cut to 40 characters; nil when blank).
+  public var course: String?
+  /// Stuck taps the app accepted on this assignment.
+  public var stuck: Int
+  /// Drifted taps that changed the steps on this assignment.
+  public var drifted: Int
+  /// Stable for one assignment, so its course line can be written once. Older saved work gets an
+  /// id made from its save time, which does not change between loads.
+  public var assignmentId: String
 
   public init(
-    work: Work, kindId: String? = nil, savedOn: Date? = nil, doneLines: [String: String] = [:]
+    work: Work, kindId: String? = nil, savedOn: Date? = nil, doneLines: [String: String] = [:],
+    course: String? = nil, stuck: Int = 0, drifted: Int = 0,
+    assignmentId: String = UUID().uuidString
   ) {
     self.work = work
     self.kindId = kindId
     self.savedOn = savedOn
     self.doneLines = doneLines
+    self.course = LearnerRecord.Entry.cleanLabel(course)
+    self.stuck = stuck
+    self.drifted = drifted
+    self.assignmentId = assignmentId
   }
 
   private enum CodingKeys: String, CodingKey {
-    case work, kindId, savedOn, doneLines
+    case work, kindId, savedOn, doneLines, course, stuck, drifted, assignmentId
   }
 
   public init(from decoder: Decoder) throws {
@@ -33,6 +48,13 @@ public struct SavedWork: Storable {
     kindId = try values.decodeIfPresent(String.self, forKey: .kindId)
     savedOn = try values.decodeIfPresent(Date.self, forKey: .savedOn)
     doneLines = try values.decodeIfPresent([String: String].self, forKey: .doneLines) ?? [:]
+    course = LearnerRecord.Entry.cleanLabel(
+      try values.decodeIfPresent(String.self, forKey: .course))
+    stuck = try values.decodeIfPresent(Int.self, forKey: .stuck) ?? 0
+    drifted = try values.decodeIfPresent(Int.self, forKey: .drifted) ?? 0
+    assignmentId =
+      try values.decodeIfPresent(String.self, forKey: .assignmentId)
+      ?? "legacy-\(savedOn?.timeIntervalSince1970 ?? 0)"
   }
 
   /// Drops steps that are blank or have a bad or repeated number, cuts long steps, keeps at most

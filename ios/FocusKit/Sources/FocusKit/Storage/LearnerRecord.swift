@@ -16,6 +16,12 @@ public struct LearnerRecord: Storable {
   public static let feedbackLimit = 500
   /// One line, in UTF-16 units, as the other stored text.
   public static let entryLength = 300
+  /// The class label, in UTF-16 units (MEMORY-plan 2.2).
+  public static let courseLabelLength = 40
+  /// Course lines kept for one class label.
+  public static let perClassCourseLimit = 10
+  /// The most kept steps written into one course line.
+  public static let courseStepLimit = 8
 
   public enum Kind: String, Codable, Equatable, Sendable, CaseIterable {
     case setting, pattern, obstacle, reflection, course, feedback
@@ -33,9 +39,16 @@ public struct LearnerRecord: Storable {
     public var source: Source
     public var tags: [Tag]
 
+    /// The class label for a course line (cut to 40, blank is none). Only course lines have one.
+    public var courseLabel: String?
+    /// For a course line: how many Stuck taps and effective Drifted taps the assignment had.
+    public var stuckCount: Int?
+    public var driftedCount: Int?
+
     public init(
       id: String = UUID().uuidString, kind: Kind, date: Date, text: String, source: Source,
-      tags: [Tag] = []
+      tags: [Tag] = [], courseLabel: String? = nil, stuckCount: Int? = nil,
+      driftedCount: Int? = nil
     ) {
       self.id = id
       self.kind = kind
@@ -43,10 +56,13 @@ public struct LearnerRecord: Storable {
       self.text = Entry.clean(text)
       self.source = source
       self.tags = tags
+      self.courseLabel = Entry.cleanLabel(courseLabel)
+      self.stuckCount = stuckCount
+      self.driftedCount = driftedCount
     }
 
     private enum CodingKeys: String, CodingKey {
-      case id, kind, date, text, source, tags
+      case id, kind, date, text, source, tags, courseLabel, stuckCount, driftedCount
     }
 
     /// A line read from a file goes through the same cut and trim as one made in the app. Tags
@@ -60,6 +76,21 @@ public struct LearnerRecord: Storable {
       source = try values.decode(Source.self, forKey: .source)
       let names = try values.decodeIfPresent([String].self, forKey: .tags) ?? []
       tags = names.compactMap { Tag(rawValue: $0) }
+      courseLabel = Entry.cleanLabel(try values.decodeIfPresent(String.self, forKey: .courseLabel))
+      stuckCount = try values.decodeIfPresent(Int.self, forKey: .stuckCount)
+      driftedCount = try values.decodeIfPresent(Int.self, forKey: .driftedCount)
+    }
+
+    /// Cut to the class-label limit but not trimmed, so a space typed mid-word is kept.
+    public static func cutLabel(_ label: String) -> String {
+      Text.cut(label, to: LearnerRecord.courseLabelLength)
+    }
+
+    /// Trimmed and cut to the class-label limit; blank or missing is nil.
+    public static func cleanLabel(_ label: String?) -> String? {
+      guard let label else { return nil }
+      let cut = Text.trimmed(Text.cut(Text.trimmed(label), to: LearnerRecord.courseLabelLength))
+      return cut.isEmpty ? nil : cut
     }
 
     private static func clean(_ text: String) -> String {
@@ -100,12 +131,23 @@ public struct LearnerRecord: Storable {
     }
   }
 
-  /// Keeps only the newest entries of each kind, up to that kind's cap, and drops blank text.
+  /// Keeps the newest entries of each kind up to that kind's cap, and drops blank text. Course
+  /// lines are also kept to `perClassCourseLimit` for each class label, newest first. A busy
+  /// class can therefore use up the overall course cap and push out a quiet class's lines.
   public func limited(by _: Content.Limits) -> LearnerRecord {
     var kept: [Entry] = []
     for kind in Kind.allCases {
-      let ofKind = entries.filter { $0.kind == kind && !$0.text.isEmpty }
+      var ofKind = entries.filter { $0.kind == kind && !$0.text.isEmpty }
         .sorted { $0.date > $1.date }
+      if kind == .course {
+        var perClass: [String: Int] = [:]
+        ofKind = ofKind.filter { entry in
+          let key = (entry.courseLabel ?? "").lowercased()
+          let seen = perClass[key, default: 0] + 1
+          perClass[key] = seen
+          return seen <= Self.perClassCourseLimit
+        }
+      }
       kept += ofKind.prefix(Self.cap(for: kind))
     }
     return LearnerRecord(entries: kept.sorted { $0.date < $1.date })

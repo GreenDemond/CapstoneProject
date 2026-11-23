@@ -74,6 +74,14 @@ public final class PlannerModel {
     persist()
   }
 
+  /// The optional class label. Blank is none; the length limit is in `LearnerRecord`.
+  /// The label is kept as typed (cut to the limit) so spaces survive while typing. It is trimmed
+  /// when it is saved with the assignment.
+  public func setCourse(_ raw: String) {
+    draft.course = LearnerRecord.Entry.cutLabel(raw)
+    persist()
+  }
+
   public func setKind(_ id: String) {
     guard content.kinds.contains(where: { $0.id == id }) else { return }
     draft.kindId = id
@@ -430,7 +438,8 @@ public final class PlannerModel {
       texts.append(text)
     }
     let saved = SavedWork(
-      work: Work(texts: texts), kindId: draft.kindId, savedOn: clock.now, doneLines: lines)
+      work: Work(texts: texts), kindId: draft.kindId, savedOn: clock.now, doneLines: lines,
+      course: draft.course)
     do {
       try store.save(saved)
     } catch {

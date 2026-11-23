@@ -59,6 +59,18 @@ struct AssignmentView: View {
           Text(Words.pasteCut).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
         }
 
+        VStack(alignment: .leading, spacing: Theme.Space.tiny) {
+          Text(Words.classLabel).font(Theme.Typography.small).foregroundStyle(Theme.Palette.quiet)
+          TextField(
+            Words.classLabelHint,
+            text: Binding(get: { planner.draft.course ?? "" }, set: { planner.setCourse($0) })
+          )
+          .font(Theme.Typography.body)
+          .cardStyle()
+          .accessibilityLabel(Words.classLabel)
+          .accessibilityIdentifier("class-label")
+        }
+
         Text(Words.kindQuestion).font(Theme.Typography.body).foregroundStyle(Theme.Palette.ink)
         LazyVGrid(
           columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: Theme.Space.small

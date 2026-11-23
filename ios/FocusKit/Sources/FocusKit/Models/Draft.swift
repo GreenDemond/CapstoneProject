@@ -36,11 +36,13 @@ public struct Draft: Storable {
   public var truncated: Bool
   /// The steps came from the AI on the phone. They always carry a label saying so.
   public var fromAI: Bool
+  /// The class label, if the student typed one (cut to 40; nil when blank).
+  public var course: String?
 
   public init(
     stage: DraftStage = .assignment, text: String = "", kindId: String = "other",
     stepCount: Int = 5, steps: [DraftStep] = [], nextId: Int = 0, nudgeDismissed: [Int] = [],
-    truncated: Bool = false, fromAI: Bool = false
+    truncated: Bool = false, fromAI: Bool = false, course: String? = nil
   ) {
     self.stage = stage
     self.text = text
@@ -51,10 +53,11 @@ public struct Draft: Storable {
     self.nudgeDismissed = nudgeDismissed
     self.truncated = truncated
     self.fromAI = fromAI
+    self.course = course.map(LearnerRecord.Entry.cutLabel)
   }
 
   private enum CodingKeys: String, CodingKey {
-    case stage, text, kindId, stepCount, steps, nextId, nudgeDismissed, truncated, fromAI
+    case stage, text, kindId, stepCount, steps, nextId, nudgeDismissed, truncated, fromAI, course
   }
 
   public init(from decoder: Decoder) throws {
@@ -68,6 +71,8 @@ public struct Draft: Storable {
     nudgeDismissed = try values.decode([Int].self, forKey: .nudgeDismissed)
     truncated = try values.decode(Bool.self, forKey: .truncated)
     fromAI = try values.decodeIfPresent(Bool.self, forKey: .fromAI) ?? false
+    course = try values.decodeIfPresent(String.self, forKey: .course).map(
+      LearnerRecord.Entry.cutLabel)
   }
 
   public static let empty = Draft()
