@@ -62,9 +62,10 @@ Result of the Mac eval ((removed, see the final state), raw replies shown per ca
 Test results before the revert: `StepCoachTests` 33 of 33 passed; full FocusKit `swift test` 469 of 469 passed, with the study-word additions.
 Eval tool: `FocusKit/Sources/StepsEval/main.swift` (Mac only, target in `FocusKit/Package.swift`).
 
-## Gates (blocked)
-Gate 1: FIX FIRST (7 must-fix, per earlier review) applied in part; the eval is the new blocker.
-Gate 2: not reached. Gate 3: not reached.
+## Gates
+Gate 1: FIX FIRST (7 must-fix, earlier review); applied. Parent answered the distress question yes (2026-11-24).
+Gate 2: STOP: ASK A PERSON (round 1 and round 2), both on the guardrail question; parent answered yes; change follows that answer, and DECISIONS 2026-11-24 records it.
+Gate 3 (fresh Checker, 2026-11-24): full check/check.sh ALL CHECKS PASSED, 0 SKIPPED, 0 FAIL. Done-when lines checked against the repository.
 
 ## Update 2026-11-24: word-source gate removed, verbs added
 - Parent decided: remove the word-source gate (option A). Removed from `StepCoach`, `Content.StepCoach`, `content.json` and tests. Other checks kept.

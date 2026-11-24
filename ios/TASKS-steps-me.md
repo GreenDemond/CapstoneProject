@@ -11,7 +11,7 @@ Background, if needed: `research/08-phone-ai.md` sections 9 to 11 (why these des
 | Task | Status | Depends on | Date | Checker result |
 |---|---|---|---|---|
 | ME1 Me tab: a short list of screens | done | | 2026-11-24 | `checks/check.sh` ALL CHECKS PASSED (463 unit, 40 UI, incl. new testEveryMeRowOpensItsScreenAndComesBack). Gate 2 FIX FIRST, fixes applied and re-checked |
-| S1 New step-suggestion rules and checks | awaiting fresh Checker | | 2026-11-24 | `checks/check.sh` ALL CHECKS PASSED (471 unit, UI tests, no SKIPPED). Gate 2: two rounds, both STOP on the guardrail question, answered by parent 2026-11-24 and recorded in DECISIONS; the change follows that answer. Fresh gate-3 Checker not yet run. Eval `research/phone-ai-eval/steps/H-2026-11-24-review-fixes.txt`: 4 of 5 AI step sets; distress shows the line |
+| S1 New step-suggestion rules and checks | done | | 2026-11-24 | Fresh Checker: `checks/check.sh` ALL CHECKS PASSED, 0 SKIPPED, 0 FAIL. Gate 2 STOP x2 on the guardrail question, answered yes by parent, recorded in DECISIONS 2026-11-24. Eval `H-2026-11-24-review-fixes.txt`: 4 of 5 AI step sets; distress shows the line. Build 16 on phone and archived |
 | S2 Review notes on each step | waiting | S1 | | |
 | S3 Check the steps against the assignment | waiting | S2 | | |
 
