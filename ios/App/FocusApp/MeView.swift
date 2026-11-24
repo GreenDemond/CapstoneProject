@@ -126,6 +126,7 @@ struct MeView: View {
       ForEach(me.questions, id: \.id) { question in
         VStack(alignment: .leading, spacing: Theme.Space.tiny) {
           Text(question.text).font(Theme.Typography.body).foregroundStyle(Theme.Palette.ink)
+          // The question is shown once, above. The menu keeps it only as its spoken label.
           Picker(
             question.text,
             selection: Binding(
@@ -135,7 +136,9 @@ struct MeView: View {
             Text(Words.meChoose).tag("")
             ForEach(question.options, id: \.value) { Text($0.label).tag($0.value) }
           }
+          .labelsHidden()
           .pickerStyle(.menu)
+          .accessibilityLabel(question.text)
           .accessibilityIdentifier("how-\(question.id)")
         }
       }

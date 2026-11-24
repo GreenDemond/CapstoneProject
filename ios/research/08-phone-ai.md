@@ -65,3 +65,12 @@ Other findings:
 - How often the app's own fixed lines replace a reply on his phone.
 - Whether temperature changes repetition for this model (not yet tested).
 - Whether any rewritten prompt passes the answer-giving checks (T14). None has been run yet.
+
+## 7. Do the prompts reach the model? (checked 2026-11-23)
+
+Asked by the parent. What is verified and what is not:
+
+- **Verified by reading the code:** the chat path is Me guide → `settings.guides["all"]` → `ChatModel.guide()` → `ChatContext` → `ChatEngine.instructions(for:)` → `AppleLanguageModel.stream`, which makes `LanguageModelSession(instructions: …)` and sends the conversation as the prompt. The app's real launch wires `AppleLanguageModel()` into the app (App/FocusApp/AppBoot.swift) unless a student's own AI service is chosen.
+- **Verified by test on this Mac:** `PhoneAIEval` uses the same `ChatEngine` and `AppleLanguageModel`. With the guide "Begin every reply with the single word PINEAPPLE", the reply began "PINEAPPLE." With no guide it did not. So instructions reach the model and change what it does. (One run; macOS 27.2 model.)
+- **Not verified on the phone itself.** Nothing yet shows the instructions arriving on Ben's or the parent's iPhone. The same canary can be done there: type that guide under Me → How the AI talks, then chat on Talk.
+- **One way it would not be the phone's AI at all:** if a student's own AI service is chosen on Talk, the on-device model is not used. The Talk screen's top line says "This AI runs on this iPhone" when it is.

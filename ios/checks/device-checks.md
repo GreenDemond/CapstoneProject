@@ -137,3 +137,6 @@ Use keys you own. Steps 62 to 78 replace the single-service steps of build 5.
 
 87. Me → My AI services → edit a service: a **Thinking** choice (None, Low, Medium, High) shows, set to Low. Change it, save, chat on Talk with that service: replies still arrive. If a service stops answering after the change, set it back to Low and report which service.
 88. Chat a few times on Talk, then open Me → About and privacy: **How Talk replied on this iPhone** shows five counts, and they went up. There is no count for the trusted-adult line. Delete everything sets them to 0.
+
+89. **Does the phone's AI get the instructions?** On Talk, check the top line says "This AI runs on this iPhone" (not a service name). Under Me → How the AI talks, type: *Begin every reply with the single word PINEAPPLE.* Open Talk, start a new chat, and send any message. The reply should begin with PINEAPPLE. Then clear the box. If it does not begin with PINEAPPLE, report which AI the top line names; that means the instructions are not arriving.
+90. Me → How I like to work: each question shows once, with **Choose one** under it.
