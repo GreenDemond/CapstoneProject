@@ -83,3 +83,26 @@ Asked by the parent. What is verified and what is not:
 - **A careless rewrite breaks safety.** Rewrite B (specific steps, trusted-adult line last) made the model reply TRUSTED_ADULT for all three ordinary assignments. That would show the app's safety line for an essay. Same failure as chat run C. Transcript: `steps/B-rewrite-trusted-adult-too-broad.txt`.
 - **Rewrite C worked better.** It asks for steps that name something from this assignment, uses "you/your", and says ordinary schoolwork is never a safety concern. Steps then named the topic and parts ("List the arguments for requiring school uniforms", "Plan what the conclusion should address"), with no false trusted-adult. Not perfect: some steps are odd ("Outline the study questions"). One run per rule set, on the Mac's newer model; not checked on iOS 26 or a phone, and not run through the answer-giving checks.
 - The app's own check still decides whether the steps are shown: every step must start with a verb from a fixed list, be short, and carry no answer text, or the app uses its starter steps. Rewrite C passed it on all three.
+
+## 9. Making steps useful without doing the work: alternatives (tested 2026-11-23)
+
+**The line to hold.** Breaking work into parts is help the student is allowed. Adding facts about the subject, or writing anything they could hand in, is not. That gives a rule code can check: every content word in a step must come from the assignment itself, or from a short list of study words (notes, sources, points, outline, draft, section…). It is the same check the split nudge already uses (`CoachText.usesOnlyWords`).
+
+**What today's check misses.** Today a step passes if it starts with a verb from a fixed list, is short, and has no "here is your essay" phrases. Verbs like "define", "solve", "summarize", "write" are on that list. So "Define photosynthesis as the process plants use to make sugar from light" would pass, and it contains subject content. The word-source check would reject it, because the words after "Define photosynthesis" are not in the assignment.
+
+**Tested on the Mac's model, six assignments, one run each** (`phone-ai-eval/steps/D-alternatives-extraction-vs-guided.txt`):
+
+| Approach | What the AI does | Result |
+|---|---|---|
+| Today (A) | Writes free-text steps | The same five generic steps every time, copied from the examples in the rules |
+| Rewrite C | Writes free-text steps that name the assignment | Specific, but free text can still carry content; needs the word-source check |
+| **1. Extraction + app templates** | Only **copies** facts out of the assignment (topic, parts, requirements) into fixed fields. The **app** writes the steps from templates in `content.json` | **0 words not in the assignment across all six.** Specific steps, for example "Plan what goes in the method", "Quiz yourself on mitosis without looking at your notes", "Check: use at least two sources". Cannot write the work: the model never produces prose. Weak spots: the "topic" field often copied the whole assignment; one requirement landed in the wrong field; some templates read oddly ("Read study questions 1-6, then say its main idea") |
+| 2. Guided steps (fixed verb + short target) | Fills a verb choice and a target phrase | Short but repetitive ("Find / List / Read / Outline / Plan cell parts"); the check caught 5 new words in 30 steps |
+
+**Recommendation, in layers:**
+1. **Default: extraction + templates (approach 1).** The AI does what Apple says this model is good at (copying facts out of text) and nothing it should not (subject facts, prose). The code checks every extracted phrase is in the assignment. The step wording is the app's, reviewed once in `content.json`, and the starter steps already are this. Fix the topic field (ask for "at most 8 words, the subject only") and tune the templates per kind of work.
+2. **The student shapes the steps; the AI only asks.** Keep "I'll say my steps" and the editor. Add small coaching questions on the student's own steps: the split nudge (built), "How will you know this step is done?", "Is this step small enough to start in two minutes?". This matches the research that students do better making their own steps (`research/04`, idea D2).
+3. **Optional free-text AI steps only behind the word-source check.** If free text is kept (for example for a student's own, larger AI service), make "every content word is from the assignment or the study-word list" the main gate, ahead of the verb list.
+4. **Later: the student's own past steps for the same class** (C9 in `TASKS-coaching.md`): reuse what they kept last time. Retrieval, no generation.
+
+Not verified: on Ben's phone, on the iOS 26 model, or through the answer-giving checks (T14).
