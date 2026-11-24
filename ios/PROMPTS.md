@@ -10,6 +10,7 @@ Which prompt to use:
 | Any later task, Sonnet-class Builder | Prompt 2 |
 | Any later task, Haiku-class Builder | Prompt 3 |
 | You want a review only (no code) | Prompt 4 |
+| A task in `TASKS-steps-me.md` (Haiku or Sonnet) | Prompt 5 |
 
 **Which tasks for which model.** Sonnet: any task in `TASKS-coaching.md`. Haiku: C2, R5, C7, M4 now; C1, C4, C6, C9 once C0 and C1 exist as examples to copy. Not Haiku: C0, M0, M1, M2, C3, C5, C8. T14-C needs a person and a phone.
 
@@ -184,6 +185,68 @@ Return exactly one verdict in the form in AGENTS.md section 4: GO; FIX
 FIRST with a numbered must-fix list (at most seven, each with file and
 line and what the student would see go wrong) and a separate suggestions
 list; or STOP: ASK A PERSON with who and the one question. Name your model.
+```
+
+---
+
+## Prompt 5: a task in TASKS-steps-me.md (Haiku-class or stronger)
+
+```
+Open the folder ios/ as the project. Read AGENTS.md sections 3 to 8 and
+14, then PROGRESS.md, then TASKS-steps-me.md from the top through the
+task you take. You are the Builder.
+
+Pre-flight; stop and report if any fails:
+1. git status shows nothing uncommitted under ios/ (untracked files
+   outside ios/ are fine).
+2. Pick the first task in the Status table of TASKS-steps-me.md whose
+   status is `ready`, or `waiting` with every Depends-on task `done`.
+   Take only that task.
+3. Run checks/check.sh detached, as TASKS-steps-me.md "Rules for every
+   task here" shows, and wait for its `exit` line. If it fails, report the
+   failing test names and stop.
+
+Then:
+4. Set the task to `in progress` in TASKS-steps-me.md.
+5. Write design/slices/<task-id>-<name>.md (the name is in the task's
+   Done-when line) with the template in AGENTS.md section 6. Copy the
+   task's "What the student sees", files, words and tests into it. Do not
+   invent anything the task does not say.
+6. Gate 1: ask the independent reviewer (semantic_reviewer in Kiro) to
+   review the note against the task text. Paste its verdict and model
+   into the note. Fix every must-fix. If a must-fix changes what the task
+   says, stop and ask a person. Ben's go-ahead is waived for these tasks
+   by the parent (TASKS-steps-me.md, rules); do not stop to ask him.
+7. Write the tests the task lists first, then the code, exactly as the
+   task's code shape says. Format and lint.
+8. Run the unit tests (cd FocusKit && swift test, detached). Fix until
+   they pass. Never weaken or delete an existing test.
+9. Gate 2: ask the same reviewer to review the diff and answer any
+   questions the task lists for gate 2. Paste the verdict. Fix every
+   must-fix.
+10. Run checks/check.sh detached until it passes in one full run. Do not
+    run two simulator jobs at once.
+11. Gate 3: start a fresh read-only Checker with no summary of your work
+    (ios-checker in Claude Code; in Kiro a fresh general-task-execution
+    agent told it is read-only and given the body of
+    .claude/agents/ios-checker.md and the task id). It runs check.sh and
+    checks each Done-when line. If it reports a FAIL, fix and repeat.
+12. One commit with a plain message. Set the task to `done` in
+    TASKS-steps-me.md with the date and the Checker's lines, unchanged. Add
+    the device check steps to checks/device-checks.md. Rewrite the "Next"
+    part of PROGRESS.md. Add the DECISIONS.md lines the task names.
+
+Stop and ask, never guess (gate 5), when: a file, function or identifier
+the task names does not exist or looks different; a test the task gives
+fails and the reason is not your own mistake; the eval in a task misses
+its pass conditions; anything would change what leaves the phone or the
+safety line. Brief the reviewer with "GATE: 5 doubt" in the shape in
+AGENTS.md section 5 and record the answer in the note. If the same fix
+fails twice, stop (gate 3).
+
+Do not push, do not build for or install on a phone, do not archive.
+Finish with the report in AGENTS.md section 12, and say whether the
+reviewer was a different model from you.
 ```
 
 ---

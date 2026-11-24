@@ -29,7 +29,7 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 ## Not built, or not checked
 
 - **Touch size and haptics (build 10):** every text field is 56 points tall and tappable across its width (`RoomyTextFieldStyle` in `Theme.swift`, applied once in `RootView`). Main, outlined and link buttons give a light tap on press (`Haptics.press()`). Not covered: switches, menus and the AI picker's own controls. The owner reported that small text fields were hard to touch; re-check on the phone before calling it fixed.
-- **Me is one long page.** Designed as short destinations (`design/slices/UX-whole-app-review.md`), not built. It changes the structure, so the parent or Ben should see it first.
+- **Me is one long page.** Task ME1 in `TASKS-steps-me.md` splits it into short screens (parent asked, 2026-11-23).
 - **"How I want help"**: a visible default guide, presets, Reset. Not built.
 - **Native dialogs** for deleting chats, AI services, saved keys and Delete everything. They still use "tap again". They work and are tested.
 - **AI-service form**: no Next/Done field order and no focus-to-error.
@@ -51,10 +51,12 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 
 ## Waiting on
 
-- **Parent:** check the taller fields and haptics on the phone (device steps 79 to 81); confirm D8 and the Tailscale note; decide on the trusted-adult proposals; archive build 10, then upload it from Xcode's Organizer (Window → Organizer → Bens Steps 0.1 (9) → Distribute App → App Store Connect → Upload); decide whether to split Me and whether to build "How I want help"; run or arrange T14 for each AI.
+- **Parent:** check the taller fields and haptics on the phone (device steps 79 to 81); confirm D8 and the Tailscale note; decide on the trusted-adult proposals; archive build 10, then upload it from Xcode's Organizer (Window → Organizer → Bens Steps 0.1 (9) → Distribute App → App Store Connect → Upload); decide whether to build "How I want help" (the Me split is task ME1); run or arrange T14 for each AI.
 - **Ben:** the final name and icon (placeholder staircase), the words for Drifted and Stuck, whether voice starts off (it does now).
 
 ## Next (in order)
+
+- **Ready to hand off:** `TASKS-steps-me.md` (ME1 Me screens; S1 step rules; S2 step review notes; S3 check against the assignment). Start each session with Prompt 5 in `PROMPTS.md`. Written to be Haiku-capable.
 
 0. M0a and M0b are built. Parent to decide the course-line viewer (DECISIONS 2026-11-23): either keep course lines hidden until M4, or build a small list with delete before classmates use the app.
 0. Phone AI: research in `research/08-phone-ai.md`, plan in `design/slices/PHONE-AI-plan.md`. **P0 done 2026-11-23:** `checks/phone-ai-eval.sh` runs `checks/phone-ai-cases.json` through the app's chat code on this Mac; baseline scored in `research/phone-ai-eval/scores.md`; the Talk tally (five counts, no text) shows under About. Next: P1 (rewrite the chat rules), measured against the baseline.
@@ -67,7 +69,7 @@ Feature ideas beyond these fixes are in `ROADMAP.md`, ranked by evidence and eff
 
 1. Parent: check build 10 on the phone (`checks/device-checks.md` steps 79 to 81), then archive and upload it to TestFlight. Archive with the command in "Running things" (bump the build number first if it is needed again).
 2. Run the full UI suite once, in one run, on the iPhone 15 Pro Max simulator (see "Running things"). Fix anything that fails.
-3. Decide with the parent: Me split; "How I want help"; native dialogs for remaining deletes; the Tailscale range.
+3. Decide with the parent: "How I want help"; native dialogs for remaining deletes; the Tailscale range.
 4. T14 for Apple's model and each AI service, recorded word for word; then an independent review at the strongest available model before wider use.
 
 ## Running things (learned the hard way)
