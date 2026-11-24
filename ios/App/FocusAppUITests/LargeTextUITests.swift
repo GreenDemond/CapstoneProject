@@ -89,10 +89,17 @@ final class LargeTextUITests: XCTestCase {
     app.tabBars.buttons["Me"].tap()
     shot(app, "large-07-me")
     // In screen order: the test only scrolls down.
-    reach(app, app.buttons["own-ai-add"], "Add a service")
+    reach(app, app.buttons["me-row-goals"], "Goals and notes")
+    reach(app, app.buttons["me-row-how"], "How I like to work")
+    reach(app, app.buttons["me-row-ai-style"], "How the AI talks")
+    reach(app, app.buttons["me-row-voice"], "Voice")
+    reach(app, app.buttons["me-row-services"], "My AI services")
     reach(app, app.switches["backup-switch"], "the backup switch")
     reach(app, app.buttons["me-about"], "About and privacy")
     shot(app, "large-08-me-scrolled")
+    app.openMe("me-row-services")
+    reach(app, app.buttons["own-ai-add"], "Add a service")
+    app.navigationBars.buttons.element(boundBy: 0).tap()
 
     app.tabBars.buttons["Talk"].tap()
     shot(app, "large-09-talk")

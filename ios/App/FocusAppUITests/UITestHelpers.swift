@@ -42,6 +42,19 @@ extension XCUIApplication {
     buttons["start-steps"].tap()
   }
 
+  /// Opens one screen of Me from the Me list. If a screen is already open, goes back to the list.
+  func openMe(_ row: String) {
+    tabBars.buttons["Me"].tap()
+    let target = buttons[row]
+    if !target.waitForExistence(timeout: 2) {
+      let back = navigationBars.buttons.element(boundBy: 0)
+      if back.exists { back.tap() }
+      _ = target.waitForExistence(timeout: 3)
+    }
+    scrollTo(target)
+    target.tap()
+  }
+
   /// Scrolls the front list or page up until the element can be tapped.
   func scrollTo(_ target: XCUIElement, maxSwipes: Int = 8) {
     var swipes = 0

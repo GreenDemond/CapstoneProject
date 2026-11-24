@@ -113,6 +113,14 @@ extension Words {
   public static let meVoiceDefault = "The phone's usual voice"
   public static let meSpeed = "Speed"
   public static let meAbout = "About and privacy"
+  // The Me list (ME1): each row opens a screen with the same controls as before.
+  public static let meRowGoals = "Goals and notes"
+  public static let meRowHowIWork = "How I like to work"
+  public static let meRowAIStyle = "How the AI talks"
+  public static let meRowVoice = "Voice"
+  public static let meRowServices = "My AI services"
+  public static let meGroupHelp = "How the app helps"
+  public static let meGroupPrivacy = "Privacy"
   public static let meDeleteAll = "Delete everything on this iPhone"
   public static let meDeleteSure = "Tap again to delete everything"
   public static let meDeleteExplain =

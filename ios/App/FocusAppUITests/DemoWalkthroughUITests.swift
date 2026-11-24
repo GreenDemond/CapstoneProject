@@ -37,7 +37,7 @@ final class DemoWalkthroughUITests: XCTestCase {
 
     app.buttons["Back to Today"].tap()
     XCTAssertTrue(app.element("today-screen").waitForExistence(timeout: 5))
-    app.tabBars.buttons["Me"].tap()
+    app.openMe("me-row-services")
     let disclosure = app.element("own-ai-disclosure")
     app.scrollTo(disclosure)
     XCTAssertTrue(disclosure.waitForExistence(timeout: 5))

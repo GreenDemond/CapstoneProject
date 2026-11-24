@@ -18,7 +18,8 @@ final class MeUITests: XCTestCase {
   /// Add a private note, see it, and delete it. The trusted-adult line is always under the notes.
   func testAddAndDeleteANote() {
     let app = launch()
-    // The Me page is a lazy list, so scroll to the notes first.
+    app.openMe("me-row-goals")
+    // The Me screen is a lazy list, so scroll to the notes first.
     let field = app.textFields["note-text"]
     app.scrollTo(field)
     field.tap()
@@ -43,6 +44,7 @@ final class MeUITests: XCTestCase {
   /// A changed setting is used: turning on Talk shows the microphone on Today.
   func testChangingVoiceIsUsed() {
     let app = launch()
+    app.openMe("me-row-voice")
     let talkSwitch = app.switches["voice-talk"]
     app.scrollTo(talkSwitch)
     // Tap the switch itself, at the right of the row, as a student would.
@@ -54,6 +56,7 @@ final class MeUITests: XCTestCase {
   /// The first-guess card appears after an answer and says it is a guess.
   func testFirstGuessCard() {
     let app = launch()
+    app.openMe("me-row-how")
     let question = app.buttons["how-block"]
     app.scrollTo(question)
     question.tap()
@@ -88,6 +91,7 @@ final class MeUITests: XCTestCase {
   /// line, and an http address is accepted with a note that it is not encrypted.
   func testOwnAIShowsTheDisclosureFirstAndHandlesAddresses() {
     let app = launch()
+    app.openMe("me-row-services")
     let disclosure = app.element("own-ai-disclosure")
     app.scrollTo(disclosure)
     XCTAssertTrue(disclosure.waitForExistence(timeout: 5))
@@ -115,6 +119,7 @@ final class MeUITests: XCTestCase {
   /// Add a service (after the disclosure), see it in the list, see it on Talk, and remove it.
   func testAddAServiceSeeItOnTalkAndRemoveIt() {
     let app = launch()
+    app.openMe("me-row-services")
     let disclosure = app.element("own-ai-disclosure")
     app.scrollTo(disclosure)
     XCTAssertTrue(disclosure.waitForExistence(timeout: 5))
@@ -159,6 +164,21 @@ final class MeUITests: XCTestCase {
     app.tabBars.buttons["Talk"].tap()
     XCTAssertFalse(app.element("talk-which-ai").exists)
   }
+
+  /// Each row of the Me list opens its own screen with its control, and the back button returns.
+  func testEveryMeRowOpensItsScreenAndComesBack() {
+    let app = launch()
+    let pairs = [
+      ("me-row-goals", "goal-today"), ("me-row-how", "how-block"), ("me-row-ai-style", "ai-guide"),
+      ("me-row-voice", "voice-talk"), ("me-row-services", "own-ai-disclosure"),
+    ]
+    for (row, control) in pairs {
+      app.openMe(row)
+      XCTAssertTrue(app.element(control).waitForExistence(timeout: 5), "\(row) has \(control)")
+      app.navigationBars.buttons.element(boundBy: 0).tap()
+      XCTAssertTrue(app.buttons["me-row-goals"].waitForExistence(timeout: 5))
+    }
+  }
 }
 
 extension XCUIElement {
@@ -178,4 +198,5 @@ extension XCUIElement {
     }
     typeText(text)
   }
+
 }

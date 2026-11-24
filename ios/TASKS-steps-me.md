@@ -10,8 +10,8 @@ Background, if needed: `research/08-phone-ai.md` sections 9 to 11 (why these des
 
 | Task | Status | Depends on | Date | Checker result |
 |---|---|---|---|---|
-| ME1 Me tab: a short list of screens | ready | | | |
-| S1 New step-suggestion rules and checks | ready | | | |
+| ME1 Me tab: a short list of screens | in progress: built, gate 3 (fresh Checker) pending | | 2026-11-23 | `checks/check.sh` ALL CHECKS PASSED (463 unit, 40 UI, incl. new testEveryMeRowOpensItsScreenAndComesBack). Gate 2 FIX FIRST, fixes applied and re-checked |
+| S1 New step-suggestion rules and checks | ready (not started) | | | |
 | S2 Review notes on each step | waiting | S1 | | |
 | S3 Check the steps against the assignment | waiting | S2 | | |
 

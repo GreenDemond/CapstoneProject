@@ -1,26 +1,66 @@
 import FocusKit
 import SwiftUI
 
-/// The Me tab: goals, private notes, how I like to work, how the AI talks, voice, about and privacy.
+/// The Me tab: a short list of screens. Each screen holds one kind of setting, and the controls
+/// and identifiers inside are unchanged from the earlier single page (ME1).
 struct MeView: View {
   let model: AppModel
-  @State private var note = ""
-  @State private var pendingNote: String?
-  /// Kept apart from `pendingNote`: the dialog clears that before its buttons run.
-  @State private var chosenNote: String?
 
   private var me: MeModel { model.me }
 
   var body: some View {
     NavigationStack {
       List {
-        goals
-        notes
-        howILikeToWork
-        howTheAITalks
-        OwnAISection(model: model)
-        voice
-        backup
+        Section {
+          NavigationLink {
+            MeScreen(model: model, screen: .goalsAndNotes)
+          } label: {
+            Text(Words.meRowGoals)
+          }
+          .accessibilityIdentifier("me-row-goals")
+          NavigationLink {
+            MeScreen(model: model, screen: .howIWork)
+          } label: {
+            Text(Words.meRowHowIWork)
+          }
+          .accessibilityIdentifier("me-row-how")
+        }
+        .listRowBackground(Theme.Palette.card)
+        Section {
+          NavigationLink {
+            MeScreen(model: model, screen: .aiStyle)
+          } label: {
+            Text(Words.meRowAIStyle)
+          }
+          .accessibilityIdentifier("me-row-ai-style")
+          NavigationLink {
+            MeScreen(model: model, screen: .voice)
+          } label: {
+            Text(Words.meRowVoice)
+          }
+          .accessibilityIdentifier("me-row-voice")
+          NavigationLink {
+            MeScreen(model: model, screen: .services)
+          } label: {
+            Text(Words.meRowServices)
+          }
+          .accessibilityIdentifier("me-row-services")
+        } header: {
+          Text(Words.meGroupHelp)
+        }
+        .listRowBackground(Theme.Palette.card)
+        Section {
+          Toggle(
+            Words.meBackup,
+            isOn: Binding(get: { me.includeInBackup }, set: { me.setIncludeInBackup($0) })
+          )
+          .accessibilityIdentifier("backup-switch")
+        } header: {
+          Text(Words.meGroupPrivacy)
+        } footer: {
+          Text(Words.meBackupNote)
+        }
+        .listRowBackground(Theme.Palette.card)
         Section {
           NavigationLink(Words.meAbout) { AboutView(model: model) }
             .accessibilityIdentifier("me-about")
@@ -29,24 +69,68 @@ struct MeView: View {
       }
       .scrollContentBackground(.hidden)
       .pageBackground()
-      .keyboardDoneButton()
-      // One dialog on the whole list: a dialog on a row or a section does not always appear.
-      .confirmationDialog(
-        Words.savedThoughtConfirm,
-        isPresented: Binding(
-          get: { pendingNote != nil },
-          set: { if !$0 { pendingNote = nil } })
-      ) {
-        Button(Words.savedThoughtDelete, role: .destructive) {
-          if let id = chosenNote { me.deleteNote(id) }
-          chosenNote = nil
-        }
-        .accessibilityIdentifier("note-delete-confirm")
-        Button(Words.savedThoughtKeep, role: .cancel) { pendingNote = nil }
-      }
       .navigationTitle(Words.tabMe)
-      .scrollDismissesKeyboard(.interactively)
     }
+  }
+}
+
+/// One screen opened from the Me list. Holds the state for the notes and the one dialog on it.
+struct MeScreen: View {
+  enum Screen { case goalsAndNotes, howIWork, aiStyle, voice, services }
+
+  let model: AppModel
+  let screen: Screen
+  @State private var note = ""
+  @State private var pendingNote: String?
+  /// Kept apart from `pendingNote`: the dialog clears that before its buttons run.
+  @State private var chosenNote: String?
+
+  private var me: MeModel { model.me }
+
+  var body: some View {
+    Group {
+      switch screen {
+      case .goalsAndNotes:
+        List {
+          goals
+          notes
+        }
+        .keyboardDoneButton()
+        // One dialog on the whole list: a dialog on a row or a section does not always appear.
+        .confirmationDialog(
+          Words.savedThoughtConfirm,
+          isPresented: Binding(
+            get: { pendingNote != nil },
+            set: { if !$0 { pendingNote = nil } })
+        ) {
+          Button(Words.savedThoughtDelete, role: .destructive) {
+            if let id = chosenNote { me.deleteNote(id) }
+            chosenNote = nil
+          }
+          .accessibilityIdentifier("note-delete-confirm")
+          Button(Words.savedThoughtKeep, role: .cancel) { pendingNote = nil }
+        }
+        .navigationTitle(Words.meRowGoals)
+      case .howIWork:
+        List { howILikeToWork }
+          .navigationTitle(Words.meRowHowIWork)
+      case .aiStyle:
+        List { howTheAITalks }
+          .keyboardDoneButton()
+          .navigationTitle(Words.meRowAIStyle)
+      case .voice:
+        List { voice }
+          .navigationTitle(Words.meRowVoice)
+      case .services:
+        List { OwnAISection(model: model) }
+          .keyboardDoneButton()
+          .navigationTitle(Words.meRowServices)
+      }
+    }
+    .scrollContentBackground(.hidden)
+    .pageBackground()
+    .scrollDismissesKeyboard(.interactively)
+    .navigationBarTitleDisplayMode(.inline)
   }
 
   // MARK: Goals
@@ -228,20 +312,7 @@ struct MeView: View {
     .listRowBackground(Theme.Palette.card)
   }
 
-  // MARK: Backup
-
-  private var backup: some View {
-    Section {
-      Toggle(
-        Words.meBackup,
-        isOn: Binding(get: { me.includeInBackup }, set: { me.setIncludeInBackup($0) })
-      )
-      .accessibilityIdentifier("backup-switch")
-    } footer: {
-      Text(Words.meBackupNote)
-    }
-    .listRowBackground(Theme.Palette.card)
-  }
+  // MARK: Helpers
 
   private var modeNote: String {
     let s = model.settings
