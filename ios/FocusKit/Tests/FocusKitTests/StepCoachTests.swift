@@ -101,9 +101,15 @@ import Testing
     #expect(await suggest(.init(["Read it.\n", "trusted-adult"])) == .trustedAdult)
   }
 
-  @Test func refusalAndGuardrailFallBackWithoutTheLine() async {
+  @Test func aGuardrailStopShowsTheTrustedAdultLine() async {
+    #expect(await suggest(.failing(.guardrail)) == .trustedAdult)
+  }
+
+  @Test func aRefusalFallsBackWithoutTheLine() async {
     #expect(await suggest(.failing(.refusal)) == .fallback(.refused))
-    #expect(await suggest(.failing(.guardrail)) == .fallback(.refused))
+  }
+
+  @Test func anOtherFailureFallsBackWithoutTheLine() async {
     #expect(await suggest(.failing(.other)) == .fallback(.refused))
   }
 
@@ -294,6 +300,53 @@ import Testing
     await model.planner.giveIdea()
     #expect(model.planner.aiNote == content.safety.line)
     #expect(model.planner.idea == nil)
+  }
+
+  // MARK: S1 step rules
+
+  private func isStep(_ text: String) -> Bool {
+    ProcessStep.isProcess(text, limit: content.limits.stepLength)
+  }
+
+  @Test func ideasThatNameWhatToLookIntoAreKept() {
+    #expect(isStep("Look into the main idea of the essay"))
+    #expect(isStep("Investigate one example of courage"))
+    #expect(isStep("Weigh two reasons for and against"))
+  }
+
+  @Test func aWorkedResultIsRejected() {
+    #expect(!isStep("Check that 3x = 15 after subtracting"))
+    #expect(!isStep("Check that x equals 5"))
+    #expect(!isStep("Check that x is 5"))
+    #expect(!isStep("Write the result is 12 in the box"))
+    #expect(isStep("Read chapter 3 and note two events"))
+    #expect(!isStep("Note the answer is 12"))
+  }
+
+  @Test func aGuardrailAfterSomeTextAlsoShowsTheTrustedAdultLine() async {
+    #expect(await suggest(.init(["Read the question"], failure: .guardrail)) == .trustedAdult)
+  }
+
+  @Test func aCopiedEquationWithANumberAfterItsEqualsIsRejectedOnPurpose() {
+    // Fails closed: the regex cannot tell a copied equation from a worked result.
+    #expect(!isStep("Rewrite 3x + 5 = 20 on a new line"))
+  }
+
+  @Test func stepLengthIsCheckedInWords() {
+    let twenty = "Read " + Array(repeating: "again", count: 19).joined(separator: " ")
+    let twentyThree = "Read " + Array(repeating: "again", count: 22).joined(separator: " ")
+    #expect(twenty.split(separator: " ").count == 20)
+    #expect(isStep(twenty))
+    #expect(!isStep(twentyThree))
+  }
+
+  @Test func theRulesTextHasTheSafetyWordWordingAndNoOldLine() {
+    let rules = content.stepCoach.rules
+    #expect(rules.contains("Only if the text suggests"))
+    #expect(rules.contains("TRUSTED_ADULT"))
+    #expect(rules.contains("serious distress"))
+    #expect(!rules.contains("never a safety concern"))
+    #expect(!rules.contains("try the first part"))
   }
 
   @Test func anOldDraftFileWithoutTheAIFlagStillLoads() throws {

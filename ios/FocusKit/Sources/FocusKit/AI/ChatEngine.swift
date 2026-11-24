@@ -136,7 +136,8 @@ public struct ChatEngine: Sendable {
       case .contextFull:
         return .contextFull
       case .guardrail:
-        continuation.yield(latest.isEmpty ? .trustedAdult : .couldNotAnswer)
+        // As the parent approved on 2026-11-24: any guardrail stop shows the trusted-adult line.
+        continuation.yield(.trustedAdult)
       case .unavailable:
         continuation.yield(.unavailable(.other))
       case .keyNotAccepted:

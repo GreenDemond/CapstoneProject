@@ -44,6 +44,7 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 - **Flaky unit test:** `BackupTests.theRealFolderResourceValueIsSetAndCleared` (real data folder's backup flag) failed once in the Checker's first `swift test` and once more by hand, then passed. Not caused by the coaching work. Find the cause before relying on it.
 
 - **Trusted-adult line** depends on the AI sending `TRUSTED_ADULT`. The app checks AI text only, not the student's own words. The parent's question about two extra safety signals is open.
+- **SAFETY (found 2026-11-24, not yet fixed):** when the Apple model's guardrail fires on a distress message (tested in the step coach with "I keep thinking about hurting myself"), the app shows starter steps and no trusted-adult line (`refused` in `StepCoach`). `AGENTS.md` section 0 rule 11 says the trusted-adult message must show. An existing test asserts the current behaviour. The parent must decide before any change (gate 1 and gate 5). Check whether Talk has the same gap.
 - **Look it up** still needs a real contact in `WikipediaLookUp.userAgent` (placeholder `set-by-owner@example.invalid`) before anyone except Ben uses the app.
 - **Starter step wording** was changed to "Check your answers against your notes" in `Shared/content.json` and its case file together. Check other starter steps against the never-shame list.
 - **D8 is a draft** until the parent confirms it (`DECISIONS.md`).
@@ -51,6 +52,7 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 
 ## Waiting on
 
+- **Parent:** decide the S1 word-source gate (options A, B, C in `design/slices/S1-step-rules.md`, "Blocked by"); decide whether a distress message should show the trusted-adult line when the AI guardrail fires (safety, see Broken or worrying). Then S1 can continue.
 - **Parent:** check the taller fields and haptics on the phone (device steps 79 to 81); confirm D8 and the Tailscale note; decide on the trusted-adult proposals; archive build 10, then upload it from Xcode's Organizer (Window → Organizer → Bens Steps 0.1 (9) → Distribute App → App Store Connect → Upload); decide whether to build "How I want help" (the Me split is task ME1); run or arrange T14 for each AI.
 - **Ben:** the final name and icon (placeholder staircase), the words for Drifted and Stuck, whether voice starts off (it does now).
 

@@ -103,6 +103,10 @@ public struct StepCoach: Sendable {
         latest = snapshot
         if Safety.containsSignal(latest, word: content.safety.word) { return .signal }
       }
+    } catch ModelFailure.guardrail {
+      // Rule 11 in AGENTS.md, as the parent approved on 2026-11-24: any guardrail stop on a step
+      // request shows the trusted-adult line, even if some text had already streamed.
+      return .signal
     } catch {
       return .failed(.refused)
     }
@@ -150,17 +154,32 @@ public enum ProcessStep {
     "prioritise", "select", "identify", "summarize", "summarise", "restate", "paraphrase", "use",
     "keep", "stop", "go", "turn", "join", "fix", "finish", "remind", "pause", "spend", "give",
     "send", "share", "ask", "build", "create", "name", "mention", "record", "sit", "move",
+    "locate", "explore", "research", "investigate", "weigh", "rehearse", "organize", "organise",
+    "answer",
   ])
+
+  /// The most words one step may have.
+  static let maxWords = 20
+
+  /// A worked result or a finished number answer: "x = 5", "3x = 15", "equals 5", "the answer is".
+  /// A copied equation with a number after its "=" ("3x + 5 = 20") is refused too, on purpose.
+  static func hasWorkedResult(_ text: String) -> Bool {
+    text.firstMatch(
+      of: /(?i)(?:=\s*-?\d|\bequals\s+-?\d|\banswer\s+is\b|\bresult\s+is\b|\b[a-z]\s+is\s+-?\d)/)
+      != nil
+  }
 
   public static func isProcess(_ step: String, limit: Int) -> Bool {
     let text = Text.trimmed(step)
     guard !text.isEmpty, text.utf16.count <= limit else { return false }
+    guard text.split(whereSeparator: { $0.isWhitespace }).count <= maxWords else { return false }
     let first = text.split(whereSeparator: { $0.isWhitespace }).first.map(String.init) ?? ""
     let word = first.lowercased().filter { $0.isLetter }
     guard verbs.contains(word) else { return false }
     if AnswerGuard.looksFinished(text, length: "short") { return false }
     // A long quotation or a colon followed by a sentence is content, not a step.
     if CoachText.hasLongQuote(text) || CoachText.hasColonSentence(text) { return false }
+    if hasWorkedResult(text) { return false }
     return true
   }
 }

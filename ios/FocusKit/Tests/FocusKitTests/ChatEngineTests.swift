@@ -121,11 +121,11 @@ import Testing
     #expect(await events(model) == [.trustedAdult])
   }
 
-  @Test func aGuardrailStopMidReplyIsOnlyCouldNotAnswer() async {
+  @Test func aGuardrailStopMidReplyIsTheSameTrustedAdultSignal() async {
     let model = FakeLanguageModel()
     model.enqueue(.init(["First sentence. Second"], failure: .guardrail))
     let all = await events(model)
-    #expect(all.last == .couldNotAnswer)
+    #expect(all.last == .trustedAdult)
   }
 
   // MARK: Other failures
