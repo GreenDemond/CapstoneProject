@@ -1,0 +1,87 @@
+
+==== Write a 500 word persuasive essay on whether school uniforms should be required. Use at least two sources.
+-- 1 today's guard (process only)
+Research outline.  
+Thesis statement draft.  
+Source identification.  
+Outline structure.  
+Word count check.
+
+-- 2 relaxed: may name ideas to look into
+Identify the core claims supporting mandatory school uniforms.
+
+Gather evidence from sociological studies on identity and peer pressure.
+
+Locate educational research comparing dress codes and academic outcomes.
+
+Sketch a thesis that balances practicality and personal freedom.
+
+List credible sources and their relevance to the topic.
+
+-- 3 open: do the work
+Begin by researching the arguments for and against school uniforms, using at least two credible sources to gather facts and perspectives.  
+Sample sentence: "According to a 2018 study by the National Education Association, students in schools with uniform policies reported a 20% decrease in bullying related to clothing choices."  
+
+Identify key points that support the idea of requiring school uniforms, such as promoting equality and reducing distractions.  
+Sample sentence: "Uniforms help eliminate socioeconomic barriers, ensuring all students feel included and focused on learning."  
+
+Develop a counterargument highlighting potential drawbacks, like limiting personal expression and creativity, and ensure you address these thoughtfully.  
+Sample sentence: "Critics argue that uniforms may suppress individuality, as students might feel pressured to conform rather than express themselves."  
+
+Organize your thoughts into a clear structure, including an introduction, body paragraphs with evidence, and a conclusion that balances both sides.  
+Sample sentence: "While uniforms can foster a sense of belonging, schools must also encourage students to explore their identities through other means."  
+
+Draft and revise your essay, aiming for a persuasive tone while maintaining evidence-based arguments, and ensure the word count is at least 500 words.  
+Sample sentence: "Ultimately, the decision to mandate uniforms should consider both the benefits of unity and the importance of personal freedom."
+
+
+==== Photosynthesis lab report: introduction, method, results, conclusion. Include a graph of your data.
+-- 1 today's guard (process only)
+Write the introduction.  
+Outline the method.  
+Record the results.  
+Create the graph.  
+Draft the conclusion.
+
+-- 2 relaxed: may name ideas to look into
+Identify the central biological process and its environmental drivers.  
+Gather background literature on light intensity and its effect on plant metabolic pathways.  
+Sketch a timeline of experimental conditions and expected outcomes.  
+List control variables and their role in data reliability.  
+Draft a brief synthesis of key observations and their implications.
+
+-- 3 open: do the work
+Identify the key components of a photosynthesis lab report: introduction, method, results, and conclusion.  
+Gather background information and scientific context about photosynthesis, including its importance and the factors affecting it, such as light and carbon dioxide levels.  
+Outline the experimental procedure, including the materials used, steps taken, and any controls or variables maintained, using sample sentences like, “We measured the rate of photosynthesis by counting oxygen bubbles produced over time.”  
+Collect and analyze data from the experiment, organizing it into tables or charts, and describe trends or anomalies observed, ensuring the graph clearly represents the data.  
+Draft the conclusion by summarizing findings, discussing their significance, and suggesting areas for future research, incorporating evidence from the data and analysis.
+
+
+==== Page 112, problems 1-20 odd. Solve linear equations like 3x + 5 = 20. Show your work.
+-- 1 today's guard (process only)
+Read the problems.  
+Identify the first problem.  
+Write the equation.  
+Solve the equation.  
+Record the solution.
+
+-- 2 relaxed: may name ideas to look into
+Look at the structure of the equation 3x + 5 = 20.
+
+Identify the constant term and the variable term on each side.
+
+Consider what happens when you subtract a term from both sides.
+
+Think about the inverse operation for isolating the variable.
+
+Note the role of the equal sign in maintaining balance.
+
+-- 3 open: do the work
+Identify the linear equation to solve, such as 3x + 5 = 20, and note the goal is to isolate the variable x.  
+List the steps for solving the equation: subtract 5 from both sides to get 3x = 15, then divide both sides by 3 to find x = 5.  
+Write the equation 3x + 5 = 20 and explain that the task is to find the value of x that makes the equation true.  
+Include the solved equation: x = 5, and verify by substituting back: 3(5) + 5 = 20.  
+Review the process, confirming each step maintains equality and the final solution satisfies the original equation.
+
+done

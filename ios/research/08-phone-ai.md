@@ -131,3 +131,25 @@ Tested on the Mac's model, four sets of student steps, one run each (`phone-ai-e
 - The review must never rewrite a step. At most it offers the existing Split, or asks a question.
 
 Not verified on the iOS 26 model or a phone.
+
+## 11. What relaxing the "don't do the work" guard buys (tested 2026-11-23)
+
+The parent asked how much better steps would be with a looser guard. Three fixed instructions, three assignments, one run each on the Mac's model (`phone-ai-eval/steps/G-guard-levels.txt`):
+
+| Level | Instruction | What came back |
+|---|---|---|
+| 1. Process only (today's line) | Steps name the assignment; no subject facts, no ideas for the answer | Short and generic: "Research outline. Thesis statement draft. Source identification." For the maths set it said "Solve the equation. Record the solution." |
+| 2. Ideas to look into, no hand-in text | Steps may name ideas, arguments, terms or kinds of evidence worth looking into; never sentences or answers | **Most of the usefulness.** "Identify the core claims supporting mandatory school uniforms", "Locate educational research comparing dress codes and academic outcomes". For the maths set: "Consider what happens when you subtract a term from both sides. Think about the inverse operation." These are hints, not answers. Weak spots: it leans to the answer ("Sketch a thesis that balances practicality and personal freedom"); some jargon above a high-school level ("metabolic pathways") |
+| 3. Do the work | Include the content: arguments, facts, sample sentences | Does the homework. It wrote hand-in sentences, **invented a statistic and a source** ("a 2018 study by the National Education Association… a 20% decrease in bullying"), and solved the maths ("subtract 5… x = 5… verify"). |
+
+**Reading this against the evidence.** Level 3 is the unguarded tutor in the one randomised classroom trial: practice grades rose, and the later test without the AI was 17% worse (Bastani et al. 2025, PNAS, ~1,000 high-school students; Moderate; `01-evidence.md`). The hint-only tutor kept the practice gain and largely removed the loss. Level 3 also made up facts, which Apple says this model will do (section 2). So level 3 is worse for learning and less accurate, and it breaks rule 1.
+
+**Level 2 is the useful middle.** It is still hints by the trial's meaning: it names what to look into and how to think, not the answer or text to hand in. A fixed system prompt carries most of the gain on its own. It still needs a few code checks, because a prompt is a request, not a guarantee:
+- the answer guard (finished-text phrases);
+- no quoted sentence and no step over about 20 words;
+- for problem sets, no "= <number>" result;
+- the trusted-adult wording narrowed as in section 8.
+
+Extraction stays for the final-step review (requirement coverage), not as the main way to make steps.
+
+Not verified on the iOS 26 model, on a phone, or through the answer-giving checks.
