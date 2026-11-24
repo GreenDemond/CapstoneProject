@@ -1,5 +1,5 @@
 # ME1 Me tab: a short list of screens
-Status: built 2026-11-23 (gate 2 FIX FIRST, fixes applied; gate 3 pending)
+Status: done 2026-11-24 (gate 3 PASS)
 
 ## What the student sees and does
 1. Me shows a short list in three groups. Rows: Goals and notes; How I like to work; then "How the app helps": How the AI talks, Voice, My AI services; then "Privacy": the backup switch (stays on Me, with its note); then About and privacy.
@@ -34,4 +34,4 @@ Layout on a real phone at the largest text size; whether a row reads well in the
 ## Gates
 Gate 1 (design): not obtained in this session. The layout was chosen from the UX review and recorded in DECISIONS.md (2026-11-23). The 2026-11-23 waiver covers Ben's go-ahead only.
 Gate 2 (diff, `semantic_reviewer`, model not stated, read-only, 2026-11-23): FIX FIRST. All of its must-fix items are applied: the note now records the visible changes above, stale "Me page" comments are fixed, the stray blank line is removed, and the new words sit in the existing `Words` extension. Its finding that nothing leaves the phone, nothing is stored differently, and every moved control and identifier is unchanged was confirmed by reading the diff against HEAD.
-Gate 3 (fresh Checker): pending. `checks/check.sh` passed before the gate-2 fixes (40 UI tests); it must pass again after them.
+Gate 3 (fresh Checker, 2026-11-24, read-only, model not stated): PASS. A fresh run of `checks/check.sh` on commit 0247481 gave ALL CHECKS PASSED (40 UI tests, 0 failures), and each done-when line passed: 6 NavigationLinks, every earlier identifier present plus the five me-row-* ones, testEveryMeRowOpensItsScreenAndComesBack present, backup-switch and me-about on the root.
