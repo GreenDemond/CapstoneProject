@@ -1,0 +1,26 @@
+Building for production...
+[1 / 1]
+Build complete! (0.33 sec)
+availability: available context: 8192
+
+== Essay: Write a 500 word essay on whether school uniforms should be required
+ - Find the definition of school uniforms.
+ - List the arguments for requiring school uniforms.
+ - Outline the parts of an essay on this topic.
+ - Plan the structure of your essay.
+ - Check that your essay includes evidence.
+
+== Reading: Read chapters 3 and 4 of The Great Gatsby and answer the study questions
+ - Find chapters 3 and 4 of The Great Gatsby.
+ - List the study questions.
+ - Outline the study questions.
+ - Plan how to answer the study questions.
+ - Check your outline against the study questions.
+
+== Project: Photosynthesis lab report: introduction, method, results, conclusion
+ - Find the introduction section.
+ - List the parts of the method.
+ - Outline the results section.
+ - Plan what the conclusion should address.
+ - Check the requirements for each part.
+exit 0

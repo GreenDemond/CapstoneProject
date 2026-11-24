@@ -1,0 +1,31 @@
+Building for production...
+[Planning deferred tasks]
+[6 / 15]
+[7 / 12] StepsProbe-product
+[9 / 13] StepsProbe-product
+[11 / 13] StepsProbe-product
+[12 / 13] StepsProbe-product
+Build complete! (2.58 sec)
+availability: available context: 8192
+
+== Essay: Write a 500 word essay on whether school uniforms should be required
+ - read the assignment prompt.
+ - write a plan for the essay.
+ - try the first part of the essay.
+ - check their work for clarity.
+ - rewrite if needed.
+
+== Reading: Read chapters 3 and 4 of The Great Gatsby and answer the study questions
+ - read chapter 3.
+ - write a plan for the study questions.
+ - try the first part of the study questions.
+ - check their answers against the text.
+ - write a summary of the chapter.
+
+== Project: Photosynthesis lab report: introduction, method, results, conclusion
+ - read the assignment title.
+ - write a plan for each section.
+ - try the first part of the plan.
+ - check their work for clarity.
+ - write a draft for the first section.
+exit 0

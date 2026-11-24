@@ -11,3 +11,7 @@ Runs fixed student conversations through Apple's on-device model on this Mac (ma
 - `runs/`: the transcripts the note quotes. Each was run once, on the macOS 27.2 model, which is newer than the model on iOS 26.2.
 
 Not part of `checks/check.sh`: the model is not on every machine.
+
+## Step suggestions (2026-11-23)
+
+`steps/` holds a probe that runs the step coach (`StepCoach.suggest`) on three assignments with the Mac's model, and three rule texts: A is today's `stepCoach.rules`, B and C are rewrites. `steps-probe.swift` is the program (it was a temporary extra target in `FocusKit/Package.swift`; add it back to run it: `.executableTarget(name: "StepsProbe", dependencies: ["FocusKit"])`, then `swift run -c release StepsProbe [content.json]`). Findings are in `research/08-phone-ai.md` section 8.
