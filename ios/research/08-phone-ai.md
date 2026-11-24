@@ -106,3 +106,28 @@ Asked by the parent. What is verified and what is not:
 4. **Later: the student's own past steps for the same class** (C9 in `TASKS-coaching.md`): reuse what they kept last time. Retrieval, no generation.
 
 Not verified: on Ben's phone, on the iOS 26 model, or through the answer-giving checks (T14).
+
+## 10. Reviewing the final steps, whoever wrote them (tested 2026-11-23)
+
+The parent wants AI step suggestions kept (made safe by extraction, section 9) and a review of the final steps before Start, for steps from the AI, the starter list, or the student.
+
+Tested on the Mac's model, four sets of student steps, one run each (`phone-ai-eval/steps/E-…` and `F-…`):
+
+| Check | Who does it | Result |
+|---|---|---|
+| Every requirement the assignment states (from extraction) is covered by some step | **App code**: compares the extracted requirement's words with the steps' words | Worked: "The assignment says 'Include a graph of your data'. Which step covers that?" and "…'500 word'…". No AI needed after extraction |
+| Label each step ok / too big / vague / two jobs, in one call | AI (guided generation) | **Useless:** every step labelled "ok", including "Do the essay" and "Study" |
+| Three yes/no questions per step (can start now? small enough? two tasks?) | AI, one call per step | **Over-flags:** "Read chapter 3" marked "cannot start now"; "Answer questions 1-6" marked "two tasks". The order question said "yes, a problem" for all four plans, even when the order was fine |
+
+**What this means for the review cycle:**
+- Build it mostly from checks the app can do with certainty, using what extraction already found:
+  1. A requirement in the assignment that no step touches.
+  2. A part the assignment names (a chapter, a section) with no step.
+  3. A step with " and " joining two actions (the existing split rule).
+  4. A step with no word from the assignment and no study word ("Study", "Do the essay").
+  5. A very long step.
+- Show each as a question with a quiet **Skip**, never a red mark or a blocker. The student can always Start.
+- Use the AI only for judgements it does reliably. On this test, the per-step and order judgements were not reliable enough to show. Keep them behind the eval harness until a version scores well, then add them one at a time.
+- The review must never rewrite a step. At most it offers the existing Split, or asks a question.
+
+Not verified on the iOS 26 model or a phone.

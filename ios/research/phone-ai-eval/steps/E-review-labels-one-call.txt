@@ -1,0 +1,25 @@
+
+==== Write a 500 word persuasive essay on whether school uniforms should be required. Use at least two sources.
+   1. Do the essay  [ok]
+   2. Find two sources about uniforms  [ok]
+   3. Write the intro and the conclusion  [ok]
+   4. Check spelling  [ok]
+   → The assignment says "500 word". Which step covers that?
+
+==== Photosynthesis lab report: introduction, method, results, conclusion. Include a graph of your data.
+   1. Write the introduction  [ok]
+   2. Write the method  [ok]
+   3. Write the results  [ok]
+   4. Write the conclusion  [ok]
+   → The assignment says "Include a graph of your data". Which step covers that?
+
+==== Read chapters 3 and 4 of The Great Gatsby and answer study questions 1-6.
+   1. Answer questions 1-6  [ok]
+   2. Read chapter 3  [ok]
+   3. Read chapter 4  [ok]
+
+==== Unit 4 test on cell biology Friday: cell parts, mitosis, cell transport.
+   1. Study  [ok]
+   2. Quiz myself on mitosis  [ok]
+   3. Make flashcards for cell parts and review cell transport  [ok]
+done
