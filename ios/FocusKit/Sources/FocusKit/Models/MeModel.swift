@@ -67,9 +67,18 @@ public final class MeModel {
     return true
   }
 
-  public func deleteNote(_ id: String) {
+  /// Deletes a note. If the save fails the note is put back and the calm save note shows, so a
+  /// note is never shown as gone when it is still on the device.
+  @discardableResult
+  public func deleteNote(_ id: String) -> Bool {
+    let before = profile
     profile.notes.removeAll { $0.id == id }
-    if saveProfile() { onNotesSaved() }
+    if saveProfile() {
+      onNotesSaved()
+      return true
+    }
+    profile = before
+    return false
   }
 
   // MARK: How I like to work

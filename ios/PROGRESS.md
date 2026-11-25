@@ -58,6 +58,7 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 
 ## Next (in order)
 
+- **Coaching queue 2026-11-24:** M1 (rule selector), M3 (feedback buttons) and M4 (What the app remembers about me) are done. Still waiting: R5, C7, C6, C9, C4, C8, C5, C3 (needs the R1 comeback screen), M2 (needs the NLEmbedding API checked). T14-C needs a person and a phone.
 - **Done 2026-11-24:** ME1, S1, S2, S3 and IPAD1 (the app now runs on iPad; content column up to 820 points; "iPhone" wording is now "this device"). Build 18 is on the parent's iPhone and iPad. The iPad UI run is manual: `xcodebuild test ... -destination id=CF3E2364-10CE-42CF-B887-84D437CD08ED` (iPad Air 11-inch M4 simulator), it takes about 13 minutes. Device checks 91 (S2) and 92 (S3) wait for the parent.
 
 0. M0a and M0b are built. Parent to decide the course-line viewer (DECISIONS 2026-11-23): either keep course lines hidden until M4, or build a small list with delete before classmates use the app.

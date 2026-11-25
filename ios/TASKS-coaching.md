@@ -16,7 +16,7 @@ A task is `ready` when every task it depends on is `done`. Every task here needs
 | M1 Rule selector | done | M0 | 2026-11-24 | `checks/check.sh` ALL CHECKS PASSED (518 unit, UI, 0 SKIPPED) on the iPhone 15 Pro Max. Built before its note; gates 1 and 2 combined on the diff (FIX FIRST, five must-fix, applied). No fresh-context Checker. Classmate builds need M4 first so each line can be seen and deleted |
 | C3 Comeback slice | waiting | M1, R1 | | |
 | C6 Tidy my question | waiting | M1 | | |
-| M4 How I work screen | in progress (design approved; renamed "What the app remembers about me") | M0 | | Gate 1 FIX FIRST (7), applied in `design/slices/M4-what-the-app-learned.md`. Also fixes three bugs in existing code found at gate 1 |
+| M4 How I work screen (built as "What the app remembers about me") | done | M0 | 2026-11-24 | `checks/check.sh` ALL CHECKS PASSED (558 unit, UI incl. 3 remembered tests, 0 SKIPPED). Gate 1 FIX FIRST (7) and gate 2 FIX FIRST (6) applied. No fresh-context Checker. Fixed three bugs in existing code (note sync scope, deleted class line rewritten, failed note delete shown as gone). Meets the viewer and per-line delete the parent had pending for course lines |
 | M2 Semantic search on the phone | waiting | M1 | | |
 | R5 Did that help? (non-AI) | waiting | M0 | | |
 | C4 Setting follow-up | waiting | R5, M1 | | |

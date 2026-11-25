@@ -121,6 +121,7 @@ public final class AppModel {
     startOwnServices()
     chooseModel()
     applyBackup()
+    dropOrphanNoteLines()
   }
 
   /// Build 5 kept one service in four settings and one key. Save the list first, then move the
@@ -472,8 +473,11 @@ public final class AppModel {
   /// One course line for a finished assignment with a class label. Written once: the id is the
   /// assignment's, so a repeat writes over the same line. A failed record write is silent: the
   /// steps have already saved, and the record is not shown anywhere.
-  private func writeCourseLine(_ finished: SavedWork) {
+  /// Not private so a test can run the exact path a second finish takes.
+  func writeCourseLine(_ finished: SavedWork) {
     guard let label = finished.course, !finished.work.steps.isEmpty else { return }
+    // A class line the student deleted is not written back.
+    guard !learner.wasDeleted("course-\(finished.assignmentId)") else { return }
     let kind = content.kinds.first { $0.id == finished.kindId }?.label ?? "Something else"
     let kept = finished.work.steps.prefix(LearnerRecord.courseStepLimit)
       .map { Text.trimmed($0.text) }
@@ -494,22 +498,113 @@ public final class AppModel {
   private func syncNoteLines() {
     let notes = me.profile.notes
     let ids = Set(notes.map(\.id))
-    learner.entries.removeAll { $0.kind == .obstacle && !ids.contains($0.id) }
+    // Only lines mirrored from notes. A line another feature wrote (id starts with `why-`) stays.
+    learner.entries.removeAll {
+      $0.kind == .obstacle && !ids.contains($0.id) && !$0.id.hasPrefix(Self.otherLinePrefix)
+    }
     let have = Set(learner.entries.map(\.id))
     for note in notes where !have.contains(note.id) {
       learner.add(
         LearnerRecord.Entry(
           id: note.id, kind: .obstacle, date: note.date, text: note.text, source: .student))
     }
+    if !saveLearner() { learnerNote = Words.rememberedDeleteFailed }
+  }
+
+  /// At launch: a note line whose note is gone (for example a delete whose second write failed) is
+  /// removed, so it is not shown or offered to the AI. Never adds a line.
+  private func dropOrphanNoteLines() {
+    let ids = Set(me.profile.notes.map(\.id))
+    let orphans = learner.entries.filter {
+      $0.kind == .obstacle && !ids.contains($0.id) && !$0.id.hasPrefix(Self.otherLinePrefix)
+    }
+    guard !orphans.isEmpty else { return }
+    learner.entries.removeAll { entry in orphans.contains { $0.id == entry.id } }
     saveLearner()
   }
 
-  private func saveLearner() {
+  @discardableResult
+  private func saveLearner() -> Bool {
     learner = learner.limited(by: content.limits)
-    try? store.save(learner)
+    do {
+      try store.save(learner)
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  /// A line another feature wrote into the obstacle kind has an id starting with this, so the
+  /// note sync leaves it alone.
+  static let otherLinePrefix = "why-"
+
+  /// A calm line when a delete on the What the app remembers screen could not be saved.
+  public private(set) var learnerNote: String?
+
+  /// Deletes one line the student sees under What the app remembers about me. A note line deletes
+  /// the note itself (the line mirrors it). Any other line is removed and its id remembered, so it
+  /// is not written back. If the save fails the line stays and a calm line says so.
+  public func deleteLearnerLine(_ id: String) {
+    guard let entry = learner.entries.first(where: { $0.id == id }) else { return }
+    learnerNote = nil
+    if isNoteLine(id) {
+      if !me.deleteNote(id) { learnerNote = Words.rememberedDeleteFailed }
+      return
+    }
+    let before = learner
+    learner.remove(id: id)
+    learner.markDeleted(id)
+    if !saveLearner() {
+      learner = before
+      learnerNote = Words.rememberedDeleteFailed
+    }
+  }
+
+  /// A line under Things I told it is a note's mirror: deleting it deletes the note.
+  public func isNoteLine(_ id: String) -> Bool {
+    guard let entry = learner.entries.first(where: { $0.id == id }) else { return false }
+    return entry.kind == .obstacle && !id.hasPrefix(Self.otherLinePrefix)
+  }
+
+  /// Called when the screen opens, so an old message is not shown again.
+  public func clearLearnerNote() { learnerNote = nil }
+
+  /// Removes every rating. The fixed-line-first choice for the Stuck question starts over.
+  public func clearRatings() {
+    learnerNote = nil
+    let before = learner
+    learner.entries.removeAll { $0.kind == .feedback }
+    if !saveLearner() {
+      learner = before
+      learnerNote = Words.rememberedDeleteFailed
+    }
+  }
+
+  /// Per move, how many of each rating. Moves with no ratings are left out.
+  public var ratingCounts: [RatingCount] {
+    let all = learner.entries(of: .feedback).compactMap(Feedback.parse)
+    let known = ["stuckQuestion", "splitNudge", "chat"]
+    let other = Set(all.map(\.move)).subtracting(known).sorted()
+    return (known + other).compactMap { move in
+      let mine = all.filter { $0.move == move }
+      guard !mine.isEmpty else { return nil }
+      return RatingCount(
+        move: move, helped: mine.filter { $0.rating == .helped }.count,
+        meh: mine.filter { $0.rating == .meh }.count,
+        notThis: mine.filter { $0.rating == .notthis }.count)
+    }
   }
 
   private func saveFlags() {
     save(Flags(welcomed: welcomed, inStep: inStep))
   }
+}
+
+/// How many times each rating was tapped for one kind of AI line.
+public struct RatingCount: Equatable, Identifiable, Sendable {
+  public let move: String
+  public let helped: Int
+  public let meh: Int
+  public let notThis: Int
+  public var id: String { move }
 }

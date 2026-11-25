@@ -1,5 +1,5 @@
 # M4 What the app remembers about me
-Status: approved for build 2026-11-24 after gate 1 FIX FIRST (seven must-fix, applied below)
+Status: done 2026-11-24
 
 ## What the student sees and does
 1. Me has a new row, **What the app remembers about me**, next to the existing "How I like to work" (which stays as it is: the question list). One name everywhere.
@@ -50,4 +50,5 @@ Whether students find the screen useful or alarming. Check on a phone, and with 
 
 ## Gates
 Gate 1 (semantic_reviewer, a fresh read-only agent, 2026-11-24): FIX FIRST, seven must-fix, applied above. The reviewer's suggestion of a one-line subtitle on each of the two Me rows is not taken: the two names are different enough.
-Gate 2: pending. Gate 3: pending.
+Gate 2 (semantic_reviewer, a fresh read-only agent, 2026-11-24): FIX FIRST, six must-fix, applied: a damaged deleted list loads as empty and never sets the file aside (test); the key set with a non-empty deleted list is pinned (test); the note path checks the learner save and orphan note lines are removed at launch (test); the failure message is pinned at the top, announced, and cleared on appear; each row is a container with a Delete action and its Delete button names the class; the confirmation says a note line also deletes the note. Suggestion taken: ratings for any move are counted and cleared. Suggestion not taken: a class-line delete UI test (covered in unit tests).
+Gate 3: full `checks/check.sh` ALL CHECKS PASSED (558 unit tests, UI tests, 0 SKIPPED) on the iPhone 15 Pro Max simulator. No fresh-context Checker was run.

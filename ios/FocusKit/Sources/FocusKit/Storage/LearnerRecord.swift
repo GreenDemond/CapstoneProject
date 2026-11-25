@@ -16,6 +16,8 @@ public struct LearnerRecord: Storable {
   public static let feedbackLimit = 500
   /// Feedback lines kept for one move, newest first, so a busy move cannot push out another's.
   public static let feedbackPerMoveLimit = 100
+  /// Ids of lines the student deleted, so a later writer does not put one back. Ids only.
+  public static let deletedLimit = 200
   /// One line, in UTF-16 units, as the other stored text.
   public static let entryLength = 300
   /// The class label, in UTF-16 units (MEMORY-plan 2.2).
@@ -107,13 +109,22 @@ public struct LearnerRecord: Storable {
   }
 
   public var entries: [Entry]
+  /// Ids of deleted lines, oldest first. Empty for most students and then not written to the file.
+  public var deleted: [String]
 
-  public init(entries: [Entry] = []) {
+  public init(entries: [Entry] = [], deleted: [String] = []) {
     self.entries = entries
+    self.deleted = deleted
   }
 
   private enum CodingKeys: String, CodingKey {
-    case entries
+    case entries, deleted
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var values = encoder.container(keyedBy: CodingKeys.self)
+    try values.encode(entries, forKey: .entries)
+    if !deleted.isEmpty { try values.encode(deleted, forKey: .deleted) }
   }
 
   /// A file with no entries, or with an entry of a kind or source this build does not know,
@@ -122,6 +133,9 @@ public struct LearnerRecord: Storable {
     let values = try decoder.container(keyedBy: CodingKeys.self)
     let lenient = try values.decodeIfPresent([Lenient].self, forKey: .entries) ?? []
     entries = lenient.compactMap(\.entry)
+    // Lenient like the entries: a damaged list is empty and never sets the whole file aside.
+    let ids = (try? values.decode([String].self, forKey: .deleted)) ?? []
+    deleted = Array(ids.suffix(Self.deletedLimit))
   }
 
   /// Read one entry, or nil if it is not one this build understands.
@@ -161,7 +175,9 @@ public struct LearnerRecord: Storable {
       }
       kept += ofKind.prefix(Self.cap(for: kind))
     }
-    return LearnerRecord(entries: kept.sorted { $0.date < $1.date })
+    return LearnerRecord(
+      entries: kept.sorted { $0.date < $1.date },
+      deleted: Array(deleted.suffix(Self.deletedLimit)))
   }
 
   public static func cap(for kind: Kind) -> Int {
@@ -186,5 +202,16 @@ public struct LearnerRecord: Storable {
 
   public mutating func remove(id: String) {
     entries.removeAll { $0.id == id }
+  }
+
+  /// Remembers that the student deleted this line, so it is not written back.
+  public mutating func markDeleted(_ id: String) {
+    deleted.removeAll { $0 == id }
+    deleted.append(id)
+    deleted = Array(deleted.suffix(Self.deletedLimit))
+  }
+
+  public func wasDeleted(_ id: String) -> Bool {
+    deleted.contains(id)
   }
 }

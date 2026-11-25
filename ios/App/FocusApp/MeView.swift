@@ -24,6 +24,12 @@ struct MeView: View {
             Text(Words.meRowHowIWork)
           }
           .accessibilityIdentifier("me-row-how")
+          NavigationLink {
+            RememberedView(model: model)
+          } label: {
+            Text(Words.meRowRemembered)
+          }
+          .accessibilityIdentifier("me-row-remembered")
         }
         .listRowBackground(Theme.Palette.card)
         Section {

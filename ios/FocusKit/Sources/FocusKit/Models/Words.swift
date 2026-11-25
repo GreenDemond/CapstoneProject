@@ -40,6 +40,37 @@ public enum Words {
   public static let putAwayStep = "Save. Write down what's next."
   public static let addGetReady = "Add a Get ready step"
   public static let addPutAway = "Add a Put it away step"
+  public static let meRowRemembered = "What the app remembers about me"
+  public static let rememberedIntro =
+    "This is what the app remembers about how you work. The AI sees only a few of these lines at a time, and only ones that fit what you're doing. Delete anything."
+  public static let rememberedEmpty =
+    "Nothing yet. As you use the app, short notes about how you work will show up here."
+  public static let rememberedGroupNotes = "Things I told it"
+  public static let rememberedGroupReflections = "Reflections"
+  public static let rememberedGroupPatterns = "Patterns"
+  public static let rememberedGroupSettings = "Settings"
+  public static let rememberedGroupClasses = "Classes"
+  public static let rememberedGroupRatings = "Ratings"
+  public static let rememberedYouWrote = "You wrote this"
+  public static let rememberedAppNoted = "The app noted this"
+  public static let rememberedDelete = "Delete"
+  public static let rememberedConfirm = "Delete this line?"
+  public static let rememberedConfirmNote = "This also deletes the note in Goals and notes."
+  public static let rememberedDeleteFailed = "That didn't delete. Try again."
+  public static let rememberedClearRatings = "Clear my ratings"
+  public static let rememberedClearNote = "This also puts the AI's question first again."
+  public static let rememberedClearConfirm = "Clear all your ratings?"
+  public static func feedbackMoveName(_ move: String) -> String {
+    switch move {
+    case "stuckQuestion": "Stuck question"
+    case "splitNudge": "Split-step question"
+    case "chat": "Talk replies"
+    default: "AI lines"
+    }
+  }
+  public static func ratingLine(_ count: RatingCount) -> String {
+    "\(feedbackMoveName(count.move)): \(feedbackHelped) \(count.helped), \(feedbackMeh) \(count.meh), \(feedbackNotThis) \(count.notThis)"
+  }
   public static let feedbackHelped = "Helped"
   public static let feedbackMeh = "Meh"
   public static let feedbackNotThis = "Not this"
