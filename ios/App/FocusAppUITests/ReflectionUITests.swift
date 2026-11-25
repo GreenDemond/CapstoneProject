@@ -69,4 +69,55 @@ final class ReflectionUITests: XCTestCase {
       app.element("reflection-reply").label, "Noted. Same two questions next week.")
     XCTAssertFalse(app.buttons["reflection-feedback-helped"].exists)
   }
+
+  /// A goal written in Me shows in the look-back with a third question. The switch hides both, and
+  /// the app never says whether the goal was reached.
+  func testTheGoalShowsWithAThirdQuestionAndTheSwitchHidesIt() {
+    let app = XCUIApplication()
+    app.launchArguments = ["-focus-fresh-data", "-focus-reflection-due", "-focus-no-ai"]
+    app.launch()
+    app.buttons["welcome-start"].tap()
+    app.openMe("me-row-goals")
+    let goal = app.textFields["goal-week"]
+    app.scrollTo(goal)
+    goal.tap()
+    goal.typeText("Read chapter 3")
+    app.putKeyboardAway()
+    app.tab("Plan").tap()
+    app.buttons["reflection-open"].tap()
+    let line = app.element("reflection-goal")
+    XCTAssertTrue(line.waitForExistence(timeout: 5))
+    XCTAssertEqual(line.label, "Your goal: Read chapter 3")
+    XCTAssertTrue(app.textFields["reflection-toward"].exists)
+    app.switches["reflection-show-goal"].tap()
+    XCTAssertTrue(app.element("reflection-goal").waitForNonExistence(timeout: 5))
+    XCTAssertFalse(app.textFields["reflection-toward"].exists)
+  }
+
+  /// With no goal written, the look-back is exactly as before.
+  func testWithNoGoalNothingNewShows() {
+    let app = openPlan(["-focus-no-ai"])
+    app.buttons["reflection-open"].tap()
+    XCTAssertTrue(app.textFields["reflection-helped"].waitForExistence(timeout: 5))
+    XCTAssertFalse(app.element("reflection-goal").exists)
+    XCTAssertFalse(app.textFields["reflection-toward"].exists)
+    XCTAssertFalse(app.switches["reflection-show-goal"].exists)
+  }
+
+  /// Sending the goal to an AI is off at first and sits in Me with a plain note.
+  func testTheSendSwitchIsOffAtFirstAndExplained() {
+    let app = XCUIApplication()
+    app.launchArguments = ["-focus-fresh-data", "-focus-no-ai"]
+    app.launch()
+    app.buttons["welcome-start"].tap()
+    app.openMe("me-row-goals")
+    let send = app.switches["goal-send-switch"]
+    app.scrollTo(send)
+    XCTAssertTrue(send.exists)
+    XCTAssertEqual(send.value as? String, "0")
+    XCTAssertTrue(
+      app.staticTexts[
+        "Your goal is only used in the AI's reply when this is on, and goes to your own AI service if you added one."
+      ].exists)
+  }
 }

@@ -657,19 +657,26 @@ public final class AppModel {
   /// Done: the answers become the student's own lines (deletable under What the app remembers about
   /// me), then one reply. Only the two answers go to the AI. With nothing written, nothing is
   /// saved and no call is made.
-  public func submitReflection(helped: String, next: String) async {
+  public func submitReflection(helped: String, next: String, toward: String = "") async {
     guard !reflectionBusy else { return }
     let helped = Text.trimmed(helped)
     let next = Text.trimmed(next)
+    // The goal is read now, so an edit or a clear while the sheet was open takes effect. The
+    // third answer only counts when a goal is shown.
+    let goal = me.lookBackGoal
+    let toward = goal == nil ? "" : Text.trimmed(toward)
     laterReflection()
     // Last week's reply never shows for this one, even if the sheet was swiped away.
     reflectionReply = nil
     reflectionRated = false
-    guard !helped.isEmpty || !next.isEmpty else { return }
+    guard !helped.isEmpty || !next.isEmpty || !toward.isEmpty else { return }
     reflectionBusy = true
     defer { reflectionBusy = false }
-    for (label, answer) in [(Reflection.helpedLabel, helped), (Reflection.nextLabel, next)]
-    where !answer.isEmpty {
+    let answers = [
+      (Reflection.helpedLabel, helped), (Reflection.nextLabel, next),
+      (Reflection.goalLabel, toward),
+    ]
+    for (label, answer) in answers where !answer.isEmpty {
       learner.add(
         LearnerRecord.Entry(
           kind: .reflection, date: clock.now, text: Reflection.line(label, answer),
@@ -682,19 +689,41 @@ public final class AppModel {
       reflectionReply = fixed
       return
     }
+    // The goal and the answer about it go into the request only when the student turned that on.
+    let sendGoal = settings.sendGoalToAI ? goal : nil
     var facts: [String] = []
+    var theirs = [helped, next]
     if !helped.isEmpty {
       facts.append(CoachText.fact("What helped this week", helped, content: content))
     }
     if !next.isEmpty {
       facts.append(CoachText.fact("One thing to try next week", next, content: content))
     }
+    if let sendGoal {
+      facts.append(CoachText.fact("The student's own goal", sendGoal, content: content))
+      theirs.append(sendGoal)
+      if !toward.isEmpty {
+        facts.append(
+          CoachText.fact("What connected to the goal this week", toward, content: content))
+        theirs.append(toward)
+      }
+    }
+    guard !facts.isEmpty else {
+      reflectionReply = fixed
+      return
+    }
     let outcome = await move.run(
       moveKey: "weeklyReflection", facts: facts, shape: .twoSentences,
-      source: [helped, next].joined(separator: " "))
+      source: theirs.joined(separator: " "))
     switch outcome {
     case .line(let line):
-      reflectionReply = ReflectionReply(line: line, fixed: false)
+      // A reply that says a goal is reached, near or on track, in words the student did not write,
+      // shows the fixed line instead.
+      if Reflection.judgesProgress(line, studentText: theirs) {
+        reflectionReply = fixed
+      } else {
+        reflectionReply = ReflectionReply(line: line, fixed: false)
+      }
     case .trustedAdult:
       // The student's own words may say they are in distress: show the line, never a reply.
       reflectionReply = ReflectionReply(line: content.safety.line, fixed: true)

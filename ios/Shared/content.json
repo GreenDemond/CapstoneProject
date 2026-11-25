@@ -391,7 +391,7 @@
         "minWord": 3
       },
       "weeklyReflection": {
-        "rules": "The student answered two questions about their week. Reply with exactly two sentences: first, restate one thing they said in their own words; second, one question about next week. Under 40 words in all. Do not praise or judge. Do not mention attention or focus.",
+        "rules": "The student answered two questions about their week. Reply with exactly two sentences: first, restate one thing they said in their own words; second, one question about next week. Under 40 words in all. Do not praise or judge. Do not say whether a goal has been reached, how close they are, or whether they are on track. Do not mention attention or focus.",
         "ask": "Reply to these answers.",
         "starts": [
           "would",

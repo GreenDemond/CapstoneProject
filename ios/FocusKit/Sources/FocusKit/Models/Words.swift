@@ -90,6 +90,14 @@ public enum Words {
   public static func blockFollowUpFixed(_ minutes: Int) -> String {
     "Want to try \(minutes) minutes next time?"
   }
+  public static func reflectionGoalLine(_ goal: String) -> String { "Your goal: \(goal)" }
+  public static let reflectionTowardQuestion =
+    "Did anything you did this week connect to your goal?"
+  public static let reflectionShowGoal = "Show my goal here"
+  public static let goalSendSwitch = "Use my goal in the AI's reply"
+  public static let goalSendNote =
+    "Your goal is only used in the AI's reply when this is on, and goes to your own AI service if you added one."
+  public static let goalShowNote = "Shows your goal in the weekly look-back on this device."
   public static let reflectionCard = "A quick look back at your week"
   public static let reflectionOpen = "Take a look"
   public static let reflectionNotNow = "Not now"

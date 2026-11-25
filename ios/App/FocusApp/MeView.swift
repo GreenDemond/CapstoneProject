@@ -147,12 +147,35 @@ struct MeScreen: View {
 
   // MARK: Goals
 
+  @ViewBuilder
   private var goals: some View {
     Section(Words.meGoals) {
       goalField(Words.meGoalToday, .today, id: "goal-today")
       goalField(Words.meGoalWeek, .week, id: "goal-week")
       goalField(Words.meGoalMonth, .month, id: "goal-month")
       goalField(Words.meGoalYear, .year, id: "goal-year")
+    }
+    .listRowBackground(Theme.Palette.card)
+    Section {
+      Toggle(
+        Words.reflectionShowGoal,
+        isOn: Binding(
+          get: { me.showGoalInLookBack }, set: { me.setShowGoalInLookBack($0) })
+      )
+      .accessibilityHint(Words.goalShowNote)
+      .accessibilityIdentifier("goal-show-switch")
+      Text(Words.goalShowNote)
+        .font(Theme.Typography.small)
+        .foregroundStyle(Theme.Palette.quiet)
+      Toggle(
+        Words.goalSendSwitch,
+        isOn: Binding(get: { me.sendGoalToAI }, set: { me.setSendGoalToAI($0) })
+      )
+      .accessibilityHint(Words.goalSendNote)
+      .accessibilityIdentifier("goal-send-switch")
+      Text(Words.goalSendNote)
+        .font(Theme.Typography.small)
+        .foregroundStyle(Theme.Palette.quiet)
     }
     .listRowBackground(Theme.Palette.card)
   }

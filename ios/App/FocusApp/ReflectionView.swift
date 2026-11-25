@@ -8,6 +8,7 @@ struct ReflectionView: View {
   let close: () -> Void
   @State private var helped = ""
   @State private var next = ""
+  @State private var toward = ""
   @State private var submitted = false
 
   var body: some View {
@@ -36,11 +37,29 @@ struct ReflectionView: View {
 
   @ViewBuilder
   private var questions: some View {
+    if let goal = model.me.lookBackGoal {
+      Text(verbatim: Words.reflectionGoalLine(goal))
+        .font(Theme.Typography.body)
+        .foregroundStyle(Theme.Palette.ink)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityIdentifier("reflection-goal")
+    }
     field(Words.reflectionHelpedQuestion, text: $helped, id: "reflection-helped")
     field(Words.reflectionNextQuestion, text: $next, id: "reflection-next")
+    if model.me.lookBackGoal != nil {
+      field(Words.reflectionTowardQuestion, text: $toward, id: "reflection-toward")
+    }
+    if Reflection.goal(in: model.me.profile) != nil {
+      Toggle(
+        Words.reflectionShowGoal,
+        isOn: Binding(
+          get: { model.me.showGoalInLookBack }, set: { model.me.setShowGoalInLookBack($0) })
+      )
+      .accessibilityIdentifier("reflection-show-goal")
+    }
     Button(Words.reflectionDone) {
       submitted = true
-      Task { await model.submitReflection(helped: helped, next: next) }
+      Task { await model.submitReflection(helped: helped, next: next, toward: toward) }
     }
     .buttonStyle(MainButtonStyle())
     .accessibilityIdentifier("reflection-done")

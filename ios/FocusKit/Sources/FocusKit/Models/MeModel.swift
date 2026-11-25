@@ -81,6 +81,25 @@ public final class MeModel {
     return false
   }
 
+  // MARK: The goal in the weekly look-back (PROG2)
+
+  public var showGoalInLookBack: Bool { settings().showGoalInLookBack }
+  public var sendGoalToAI: Bool { settings().sendGoalToAI }
+
+  public func setShowGoalInLookBack(_ on: Bool) {
+    change { $0.showGoalInLookBack = on }
+  }
+
+  /// Turning sending off is always allowed. Turning it on is the student's choice alone.
+  public func setSendGoalToAI(_ on: Bool) {
+    change { $0.sendGoalToAI = on }
+  }
+
+  /// The goal shown in the look-back, or nil when there is none or the student turned it off.
+  public var lookBackGoal: String? {
+    showGoalInLookBack ? Reflection.goal(in: profile) : nil
+  }
+
   // MARK: How I like to work
 
   public var questions: [Content.Question] { content.howILikeToWork.questions }
