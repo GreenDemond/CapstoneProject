@@ -11,9 +11,9 @@ public final class LadderModel {
   public static let maxAIAsks = 2
 
   public private(set) var hintsShown: [String] = []
-  public var onStep = ""
-  public var tried = ""
-  public var dontGet = ""
+  public var onStep = "" { didSet { if onStep != oldValue { boxesChanged() } } }
+  public var tried = "" { didSet { if tried != oldValue { boxesChanged() } } }
+  public var dontGet = "" { didSet { if dontGet != oldValue { boxesChanged() } } }
   public private(set) var copied = false
 
   /// The AI question move. Nil where there is no step (the Talk tab) so no button shows.
@@ -36,6 +36,18 @@ public final class LadderModel {
   private var questionIsAI = false
   public private(set) var questionRated = false
   public var onFeedback: ((FeedbackRating) -> Void)?
+
+  // MARK: Tidy my question (C6)
+
+  /// The most tidies on one step. A ceiling from state, as for the Stuck question.
+  public static let maxTidies = 2
+  /// The AI's tidy version, shown in a card until the student taps Use this or edits a box.
+  public private(set) var tidied: String?
+  public private(set) var usingTidied = false
+  public private(set) var isTidying = false
+  /// A calm line when the tidy could not be used: the student's own words are unchanged.
+  public private(set) var tidyNote: String?
+  private var tidies = 0
 
   private let content: Content
 
@@ -63,6 +75,7 @@ public final class LadderModel {
 
   /// The question, or nil when all three boxes are empty.
   public var question: String? {
+    if usingTidied, let tidied { return tidied }
     let parts = [
       (Words.askOn, onStep), (Words.askTried, tried), (Words.askDontGet, dontGet),
     ]
@@ -147,6 +160,67 @@ public final class LadderModel {
       coachQuestion = coach.fallbackLine(for: key)
       fallbackShown = true
     }
+  }
+
+  /// The Tidy it button shows when an AI is on, the "I don't get" box has words, and the ceiling
+  /// is not hit.
+  public var canTidy: Bool {
+    coach?.isAvailable == true && !Text.trimmed(dontGet).isEmpty && tidies < Self.maxTidies
+      && !isTidying
+  }
+
+  /// Asks the AI to put the three lines into one question for a person. Nothing is shown as the
+  /// question until the student taps Use this, and the three boxes never change.
+  public func tidy() async {
+    guard let coach, canTidy else { return }
+    isTidying = true
+    defer { isTidying = false }
+    tidies += 1
+    tidyNote = nil
+    let names = content.coach.facts
+    var facts: [String] = []
+    for (label, text) in [(names.step, onStep), (names.tried, tried), (names.dontGet, dontGet)]
+    where !Text.trimmed(text).isEmpty {
+      facts.append(CoachText.fact(label, text, content: content))
+    }
+    let source = [onStep, tried, dontGet].joined(separator: " ")
+    let asked = [onStep, tried, dontGet]
+    let outcome = await coach.run(
+      moveKey: "tidyQuestion", facts: facts, shape: .askLine, source: source)
+    // The boxes changed while the AI worked: that reply is for words that are gone. Drop it.
+    guard asked == [onStep, tried, dontGet] else { return }
+    switch outcome {
+    case .line(let line):
+      // It must still use the student's own words about what they do not get.
+      let mine = Set(CoachText.words(dontGet, minLetters: 4))
+      if mine.isEmpty || !mine.isDisjoint(with: Set(CoachText.words(line, minLetters: 4))) {
+        tidied = line
+        usingTidied = false
+        copied = false
+      } else {
+        tidyNote = Words.tidyUnchanged
+      }
+    case .trustedAdult:
+      tidied = nil
+      usingTidied = false
+      coachNote = content.safety.line
+    case .nothing, .fallback:
+      tidyNote = Words.tidyUnchanged
+    }
+  }
+
+  /// Use this: the copyable question becomes the tidy one. The boxes stay as they are.
+  public func useTidied() {
+    guard tidied != nil else { return }
+    usingTidied = true
+    copied = false
+  }
+
+  /// Editing any box goes back to the student's own words and drops the tidy one.
+  private func boxesChanged() {
+    tidied = nil
+    usingTidied = false
+    tidyNote = nil
   }
 
   public func markCopied() {

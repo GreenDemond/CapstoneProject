@@ -50,6 +50,8 @@ public struct Content: Codable, Equatable, Sendable {
 
   public struct StepCoach: Codable, Equatable, Sendable {
     public let rules: String
+    /// What the learner record may show the step coach (C9). Reviewed at gate 2.
+    public let sees: [Sees]
   }
 
   /// The word limit and the short list of vague steps the step review asks about.
@@ -75,6 +77,8 @@ public struct Content: Codable, Equatable, Sendable {
     public let fallback: String
     /// What the learner record may show this move (M1). Empty means nothing. Reviewed at gate 2.
     public let sees: [Sees]
+    /// The shortest word the reply is checked against the student's words, in letters. Absent means 5.
+    public let minWord: Int?
   }
 
   /// One allow-list rule: which kind of record line, with which tags, and how many.
@@ -93,6 +97,7 @@ public struct Content: Codable, Equatable, Sendable {
     public let kind: String
     public let step: String
     public let tried: String
+    public let dontGet: String
   }
 
   public struct Coach: Codable, Equatable, Sendable {

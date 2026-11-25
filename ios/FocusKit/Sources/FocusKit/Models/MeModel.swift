@@ -102,7 +102,18 @@ public final class MeModel {
   }
 
   /// The countdown length the timer menu marks as the student's starting pick.
-  public var startingCountdownMinutes: Int? { firstGuess?.countdownMinutes }
+  public var startingCountdownMinutes: Int? {
+    learnedCountdownMinutes() ?? firstGuess?.countdownMinutes
+  }
+
+  /// What the student's own answers about block length point to. Set by the app, which holds the
+  /// record. It wins over the questionnaire's guess.
+  public var learnedCountdownMinutes: () -> Int? = { nil }
+
+  /// One plain line when the answers point somewhere, else nil.
+  public var learnedLine: String? {
+    learnedCountdownMinutes().map { Words.blockLearnedLine($0) }
+  }
 
   // MARK: How the AI talks
 

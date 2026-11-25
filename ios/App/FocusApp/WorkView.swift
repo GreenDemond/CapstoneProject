@@ -14,6 +14,15 @@ struct WorkView: View {
   @State private var parkText = ""
   @State private var parkedNote = false
   @State private var timerEnds: Date?
+  /// The block length of the countdown running now, so the end can ask about it.
+  @State private var timerMinutes: Int?
+  /// Set when a countdown just ended: the length to ask "Was N minutes about right?" about.
+  @State private var askMinutes: Int?
+
+  /// Seconds in a minute of the timer. A UI test can launch with a fast timer.
+  private static var secondsPerMinute: Double {
+    CommandLine.arguments.contains("-focus-fast-timer") ? 0.2 : 60
+  }
 
   var body: some View {
     VStack(alignment: .leading, spacing: Theme.Space.medium) {
@@ -53,6 +62,7 @@ struct WorkView: View {
             .foregroundStyle(Theme.Palette.quiet)
             .accessibilityIdentifier("step-position")
         }
+        if let minutes = askMinutes { blockQuestion(minutes) }
         stepCard(step)
         readButton(step)
         ChoiceGrid(choices: ChoiceGrid.layout) { choice in choose(choice, step: step) }
@@ -89,10 +99,16 @@ struct WorkView: View {
       .accessibilityIdentifier("leave-step")
       Spacer()
       Menu {
-        Button(Words.timerOff) { timerEnds = nil }
-        ForEach([12, 25], id: \.self) { minutes in
+        Button(Words.timerOff) {
+          timerEnds = nil
+          timerMinutes = nil
+          askMinutes = nil
+        }
+        ForEach(BlockLength.lengths, id: \.self) { minutes in
           Button(timerLabel(minutes)) {
-            timerEnds = Date().addingTimeInterval(Double(minutes) * 60)
+            timerEnds = Date().addingTimeInterval(Double(minutes) * Self.secondsPerMinute)
+            timerMinutes = minutes
+            askMinutes = nil
           }
         }
       } label: {
@@ -103,9 +119,52 @@ struct WorkView: View {
     }
   }
 
+  /// One quiet question when a block ends: Shorter, About right, Longer, or Skip. One answer
+  /// writes one line; Skip writes nothing. Never blocks the step.
+  private func blockQuestion(_ minutes: Int) -> some View {
+    VStack(alignment: .leading, spacing: Theme.Space.small) {
+      Text(Words.blockQuestion(minutes))
+        .font(Theme.Typography.body)
+        .foregroundStyle(Theme.Palette.ink)
+        .accessibilityIdentifier("block-question")
+      ViewThatFits(in: .horizontal) {
+        HStack(spacing: Theme.Space.small) { blockButtons(minutes) }
+        VStack(spacing: Theme.Space.small) { blockButtons(minutes) }
+      }
+      Button(Words.blockSkip) { askMinutes = nil }
+        .buttonStyle(LinkButtonStyle())
+        .accessibilityIdentifier("block-skip")
+    }
+    .frame(maxWidth: .infinity, alignment: .leading)
+    .cardStyle()
+  }
+
+  @ViewBuilder
+  private func blockButtons(_ minutes: Int) -> some View {
+    ForEach(BlockLength.Answer.allCases.filter { BlockLength.offers($0, at: minutes) }, id: \.self)
+    {
+      answer in
+      Button(blockLabel(answer)) {
+        model.answerBlockLength(minutes: minutes, answer)
+        askMinutes = nil
+      }
+      .buttonStyle(QuietButtonStyle())
+      .accessibilityIdentifier("block-\(answer.rawValue)")
+    }
+  }
+
+  private func blockLabel(_ answer: BlockLength.Answer) -> String {
+    switch answer {
+    case .shorter: Words.blockShorter
+    case .aboutRight: Words.blockAboutRight
+    case .longer: Words.blockLonger
+    }
+  }
+
   /// "12 minutes", with "(your pick)" on the one chosen under How I like to work.
   private func timerLabel(_ minutes: Int) -> String {
     let base = "\(minutes) minutes"
+    if model.me.learnedCountdownMinutes() == minutes { return "\(base) (\(Words.timerLearned))" }
     return model.me.startingCountdownMinutes == minutes ? "\(base) (\(Words.timerSuggested))" : base
   }
 
@@ -123,7 +182,14 @@ struct WorkView: View {
         }
       }
       Spacer(minLength: 0)
-      if let end = timerEnds { CountdownRing(end: end) }
+      if let end = timerEnds {
+        CountdownRing(end: end) {
+          // Only a fresh end, with the app in front, raises the question.
+          if let minutes = timerMinutes, BlockLength.shouldAsk(end: end, now: Date()) {
+            askMinutes = minutes
+          }
+        }
+      }
     }
     .frame(maxWidth: .infinity, alignment: .leading)
     .cardStyle()
@@ -287,10 +353,12 @@ struct ChoiceGrid: View {
 struct CountdownRing: View {
   let end: Date
   private let total: TimeInterval
+  let onEnd: () -> Void
 
-  init(end: Date) {
+  init(end: Date, onEnd: @escaping () -> Void = {}) {
     self.end = end
-    self.total = max(end.timeIntervalSinceNow, 1)
+    self.total = max(end.timeIntervalSinceNow, 0.1)
+    self.onEnd = onEnd
   }
 
   var body: some View {
@@ -306,6 +374,7 @@ struct CountdownRing: View {
           .rotationEffect(.degrees(-90))
       }
       .frame(width: Theme.Space.huge, height: Theme.Space.huge)
+      .onChange(of: left <= 0) { _, over in if over { onEnd() } }
       .accessibilityElement()
       .accessibilityLabel("Timer")
       .accessibilityValue(

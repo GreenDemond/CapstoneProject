@@ -232,6 +232,12 @@ struct MeScreen: View {
           .accessibilityIdentifier("how-\(question.id)")
         }
       }
+      if let learned = me.learnedLine {
+        Text(verbatim: learned)
+          .font(Theme.Typography.body)
+          .foregroundStyle(Theme.Palette.ink)
+          .accessibilityIdentifier("learned-block")
+      }
       if let guess = me.firstGuess {
         VStack(alignment: .leading, spacing: Theme.Space.small) {
           Text(Words.meGuessTitle).font(Theme.Typography.title).foregroundStyle(Theme.Palette.ink)

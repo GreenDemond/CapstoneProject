@@ -97,12 +97,22 @@ public final class AppModel {
     self.me.change = { [weak self] change in self?.updateSettings(change) }
     self.me.erase = { [weak self] in self?.eraseEverything() ?? false }
     self.me.onNotesSaved = { [weak self] in self?.syncNoteLines() }
+    self.me.learnedCountdownMinutes = { [weak self] in
+      guard let self else { return nil }
+      return BlockLength.suggested(in: self.learner, now: self.clock.now)
+    }
     self.ownAI.settings = { [weak self] in self?.settings ?? Settings() }
     self.ownAI.change = { [weak self] change in self?.updateSettings(change) }
     self.ownAI.onChoiceChanged = { [weak self] in self?.chooseModel() }
     self.talk.ownServiceLabel = { [weak self] in self?.ownAI.chosen?.label }
     self.talk.onFeedback = { [weak self] in self?.rate(move: $0, $1) }
     self.planner.onFeedback = { [weak self] in self?.rate(move: $0, $1) }
+    self.planner.recordLines = { [weak self] course in
+      guard let self else { return [] }
+      return LearnerSelector.entries(
+        context: SelectorContext(moveKey: "stepCoach", course: course), record: self.learner,
+        content: self.content)
+    }
     self.talk.currentAIId = { [weak self] in self?.ownAI.chosenId }
     self.talk.ownServiceUsesHttp = { [weak self] in
       self?.ownAI.chosen?.config.needsUnencryptedWarning == true
@@ -568,6 +578,17 @@ public final class AppModel {
 
   /// Called when the screen opens, so an old message is not shown again.
   public func clearLearnerNote() { learnerNote = nil }
+
+  /// One answer to "Was 12 minutes about right?". A plain app summary: the student's tap, nothing
+  /// they typed. It shows in What the app remembers about me, where it can be deleted.
+  public func answerBlockLength(minutes: Int, _ answer: BlockLength.Answer) {
+    guard BlockLength.lengths.contains(minutes) else { return }
+    learner.add(
+      LearnerRecord.Entry(
+        kind: .setting, date: clock.now, text: BlockLength.text(minutes: minutes, answer: answer),
+        source: .app))
+    saveLearner()
+  }
 
   /// Removes every rating. The fixed-line-first choice for the Stuck question starts over.
   public func clearRatings() {

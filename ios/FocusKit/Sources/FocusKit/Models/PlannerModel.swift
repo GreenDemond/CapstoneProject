@@ -34,6 +34,9 @@ public final class PlannerModel {
   /// AI split-nudge questions already rated in this editing session. Memory only.
   private var ratedNudges: Set<Int> = []
   public var onFeedback: ((String, FeedbackRating) -> Void)?
+  /// The record lines the step coach may start from for a class (C9). Set by the app, which holds
+  /// the record and has already dropped anything the student deleted.
+  public var recordLines: (String?) -> [LearnerRecord.Entry] = { _ in [] }
   /// The last "Check my steps" result, with the assignment text it was made from. Memory only.
   private var requirementsCheck: (assignment: String, result: RequirementsCheck)?
   /// True while the check is running. A second tap does nothing.
@@ -122,6 +125,7 @@ public final class PlannerModel {
     draft.nudgeDismissed = []
     forgetNudges()
     draft.fromAI = false
+    draft.aiClass = nil
     for text in chosen { append(text) }
     draft.stage = .editor
     persist()
@@ -143,12 +147,19 @@ public final class PlannerModel {
     }
     thinking = true
     let kindLabel = content.kinds.first { $0.id == draft.kindId }?.label ?? "Something else"
+    let course = draft.course
+    let lines = recordLines(course)
     let outcome = await coach.suggest(
-      assignment: PastedText.clean(draft.text), kindLabel: kindLabel, count: draft.stepCount)
+      assignment: PastedText.clean(draft.text), kindLabel: kindLabel, count: draft.stepCount,
+      facts: lines.map { CoachText.fact($0.kind.rawValue, $0.text, content: content) })
     thinking = false
     switch outcome {
     case .steps(let steps):
-      importSteps(steps, kindId: draft.kindId)
+      // The label names a class only when that class's kept steps were sent and AI steps are used.
+      if importSteps(steps, kindId: draft.kindId) {
+        draft.aiClass = lines.contains { $0.kind == .course } ? course : nil
+        persist()
+      }
     case .trustedAdult:
       // The words are not kept, and no steps are made. The fixed line is shown.
       setText("")
@@ -168,8 +179,10 @@ public final class PlannerModel {
     let have = draft.steps.map { Text.trimmed($0.text) }
     if let coach, coach.isAvailable {
       thinking = true
+      let lines = recordLines(draft.course)
       let outcome = await coach.idea(
-        assignment: PastedText.clean(draft.text), kindLabel: kindLabel, stepsSoFar: have)
+        assignment: PastedText.clean(draft.text), kindLabel: kindLabel, stepsSoFar: have,
+        facts: lines.map { CoachText.fact($0.kind.rawValue, $0.text, content: content) })
       thinking = false
       switch outcome {
       case .idea(let text):
@@ -218,6 +231,7 @@ public final class PlannerModel {
     for text in chosen { append(text) }
     if let kindId, content.kinds.contains(where: { $0.id == kindId }) { draft.kindId = kindId }
     draft.fromAI = true
+    draft.aiClass = nil
     draft.stage = .editor
     persist()
     return true
@@ -235,6 +249,7 @@ public final class PlannerModel {
     draft.nudgeDismissed = []
     forgetNudges()
     draft.fromAI = false
+    draft.aiClass = nil
     idea = nil
     draft.stage = .saying
     showEmptyNote = false

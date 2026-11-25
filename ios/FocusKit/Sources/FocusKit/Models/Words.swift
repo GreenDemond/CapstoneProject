@@ -71,6 +71,27 @@ public enum Words {
   public static func ratingLine(_ count: RatingCount) -> String {
     "\(feedbackMoveName(count.move)): \(feedbackHelped) \(count.helped), \(feedbackMeh) \(count.meh), \(feedbackNotThis) \(count.notThis)"
   }
+  public static func aiSuggestedFromClass(_ label: String) -> String {
+    "Suggested by the AI, using steps you kept in \(label)"
+  }
+  public static func blockQuestion(_ minutes: Int) -> String {
+    "Was \(minutes) minutes about right?"
+  }
+  public static let blockShorter = "Shorter"
+  public static let blockAboutRight = "About right"
+  public static let blockLonger = "Longer"
+  public static let blockSkip = "Skip"
+  public static func blockLearnedLine(_ minutes: Int) -> String {
+    "Your answers so far point to \(minutes) minutes."
+  }
+  public static let timerLearned = "suggested"
+  public static let tidyIt = "Tidy it"
+  public static let tidying = "Tidying"
+  public static let useTidied = "Use this"
+  public static let tidyUnchanged = "Your words are unchanged."
+  public static func tidyOwn(label: String) -> String {
+    "Your three lines go to \(label), the AI service you added in Me."
+  }
   public static let feedbackHelped = "Helped"
   public static let feedbackMeh = "Meh"
   public static let feedbackNotThis = "Not this"

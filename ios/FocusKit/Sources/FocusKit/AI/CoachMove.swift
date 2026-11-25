@@ -20,10 +20,32 @@ enum CoachText {
     text.split(whereSeparator: { !$0.isLetter }).map { $0.lowercased() }.filter { $0.count >= 5 }
   }
 
-  /// Every word of 5 or more letters in `line` is in `source` or in `allow`.
-  static func usesOnlyWords(_ line: String, from source: String, allow: [String]) -> Bool {
-    let known = Set(longWords(source)).union(allow.map { $0.lowercased() })
-    return longWords(line).allSatisfy { known.contains($0) }
+  /// Words of `minLetters` or more letters, lower-cased, letters only.
+  static func words(_ text: String, minLetters: Int) -> [String] {
+    text.split(whereSeparator: { !$0.isLetter }).map { $0.lowercased() }
+      .filter { $0.count >= minLetters }
+  }
+
+  /// Runs of digits, such as a year or a number.
+  static func numbers(_ text: String) -> [String] {
+    text.split(whereSeparator: { !$0.isNumber }).map(String.init)
+  }
+
+  /// Every word of 5 or more letters in `line` is in `source` or in `allow`. With a shorter
+  /// `minLetters` (a move that must only reword the student's own lines) every shorter word is
+  /// checked too, and any number must appear in `source`.
+  static func usesOnlyWords(
+    _ line: String, from source: String, allow: [String], minLetters: Int = 5
+  ) -> Bool {
+    let known = Set(words(source, minLetters: minLetters)).union(allow.map { $0.lowercased() })
+    guard words(line, minLetters: minLetters).allSatisfy({ known.contains($0) }) else {
+      return false
+    }
+    if minLetters < 5 {
+      let seen = Set(numbers(source))
+      return numbers(line).allSatisfy { seen.contains($0) }
+    }
+    return true
   }
 
   /// A quotation of 25 or more characters: that is content, not a step or a question.
@@ -40,7 +62,9 @@ enum CoachText {
 /// One coaching move: fixed rules, one user message, one line back (or nothing). The line is
 /// checked by `check` before anything can show or speak it.
 public struct CoachMove: Sendable {
-  public enum Shape: Sendable { case question, shortLine }
+  /// `askLine` is one line ending in a single question mark, any first word: a student's own
+  /// question reworded for a person.
+  public enum Shape: Sendable { case question, shortLine, askLine }
 
   public enum Outcome: Equatable, Sendable {
     /// Passed every check.
@@ -67,7 +91,7 @@ public struct CoachMove: Sendable {
   /// already quoted by the caller.
   public func run(
     rules: String, facts: [String], ask: String, shape: Shape, starts: [String] = [],
-    maxWords: Int = 0, source: String? = nil, allow: [String] = []
+    maxWords: Int = 0, source: String? = nil, allow: [String] = [], minWord: Int = 5
   ) async -> Outcome {
     guard isAvailable else { return .fallback(.unavailable) }
     var latest = ""
@@ -90,7 +114,9 @@ public struct CoachMove: Sendable {
       if maxWords > 0, line.split(whereSeparator: { $0.isWhitespace }).count > maxWords {
         return .fallback(.notProcess)
       }
-      if let source, !CoachText.usesOnlyWords(line, from: source, allow: allow) {
+      if let source,
+        !CoachText.usesOnlyWords(line, from: source, allow: allow, minLetters: minWord)
+      {
         return .fallback(.notProcess)
       }
       return .line(line)
@@ -108,7 +134,8 @@ public struct CoachMove: Sendable {
     guard let move = content.coach.moves[moveKey] else { return .fallback(.unavailable) }
     return await run(
       rules: content.coach.common + "\n" + move.rules, facts: facts, ask: move.ask, shape: shape,
-      starts: move.starts, maxWords: move.maxWords, source: source, allow: move.allow)
+      starts: move.starts, maxWords: move.maxWords, source: source, allow: move.allow,
+      minWord: move.minWord ?? 5)
   }
 
   /// The non-AI line for a move, or nil for an unknown name.
@@ -139,7 +166,9 @@ public struct CoachMove: Sendable {
     let bare = Text.trimmed(text.trimmingCharacters(in: CharacterSet(charactersIn: ".! ")))
     if bare.caseInsensitiveCompare(nothing) == .orderedSame { return .success(nil) }
 
-    if text.utf16.count > limit { return .failure(.notProcess) }
+    // A question for a person can be longer than a step.
+    let cap = shape == .askLine ? max(limit, 300) : limit
+    if text.utf16.count > cap { return .failure(.notProcess) }
     if AnswerGuard.looksFinished(text, length: "short") { return .failure(.notProcess) }
     if CoachText.hasLongQuote(text) { return .failure(.notProcess) }
 
@@ -152,6 +181,10 @@ public struct CoachMove: Sendable {
       guard allowed.contains(letters) else { return .failure(.notProcess) }
     case .shortLine:
       if text.hasSuffix("?") || CoachText.hasColonSentence(text) { return .failure(.notProcess) }
+    case .askLine:
+      guard text.hasSuffix("?"), text.filter({ $0 == "?" }).count == 1,
+        !CoachText.hasColonSentence(text)
+      else { return .failure(.notProcess) }
     }
     return .success(text)
   }

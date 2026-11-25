@@ -155,6 +155,39 @@ struct LadderBody: View {
       field(Words.askOn, text: $ladder.onStep, id: "ask-on")
       field(Words.askTried, text: $ladder.tried, id: "ask-tried")
       field(Words.askDontGet, text: $ladder.dontGet, id: "ask-dont-get")
+      if ladder.canTidy || ladder.isTidying {
+        Button(ladder.isTidying ? Words.tidying : Words.tidyIt) { Task { await ladder.tidy() } }
+          .buttonStyle(QuietButtonStyle())
+          .disabled(ladder.isTidying)
+          .accessibilityIdentifier("tidy-it")
+        if let own = model.ownAI.chosen {
+          Text(Words.tidyOwn(label: own.label))
+            .font(Theme.Typography.small)
+            .foregroundStyle(Theme.Palette.quiet)
+        }
+      }
+      if let tidied = ladder.tidied {
+        Text(verbatim: tidied)
+          .font(Theme.Typography.body)
+          .foregroundStyle(Theme.Palette.ink)
+          .frame(maxWidth: .infinity, alignment: .leading)
+          .cardStyle()
+          .accessibilityIdentifier("tidy-card")
+        if !ladder.usingTidied {
+          Button(Words.useTidied) {
+            ladder.useTidied()
+            copied = false
+          }
+          .buttonStyle(QuietButtonStyle())
+          .accessibilityIdentifier("use-tidied")
+        }
+      }
+      if let note = ladder.tidyNote {
+        Text(verbatim: note)
+          .font(Theme.Typography.small)
+          .foregroundStyle(Theme.Palette.quiet)
+          .accessibilityIdentifier("tidy-note")
+      }
       if let question = ladder.question {
         Button(copied ? Words.askCopied : Words.askCopy) {
           UIPasteboard.general.string = question

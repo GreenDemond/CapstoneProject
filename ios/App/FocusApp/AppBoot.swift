@@ -15,6 +15,7 @@ enum AppBoot {
   /// The same, with a yes or no question (the split nudge asks one).
   static let fakeAIYesNoArgument = "-focus-fake-ai-yesno"
   static let fakeAIRequirementsArgument = "-focus-fake-ai-requirements"
+  static let fakeAITidyArgument = "-focus-fake-ai-tidy"
 
   static func make() -> AppModel? {
     guard let content = try? Content.bundled() else { return nil }
@@ -48,7 +49,7 @@ enum AppBoot {
     guard
       arguments.contains(fakeAIArgument) || arguments.contains(fakeAIDistressArgument)
         || arguments.contains(fakeAIQuestionArgument) || arguments.contains(fakeAIYesNoArgument)
-        || arguments.contains(fakeAIRequirementsArgument)
+        || arguments.contains(fakeAIRequirementsArgument) || arguments.contains(fakeAITidyArgument)
     else {
       return nil
     }
@@ -59,6 +60,9 @@ enum AppBoot {
       model.enqueue(.init(["Is that one job or two?"]))
     } else if arguments.contains(fakeAIRequirementsArgument) {
       model.enqueue(.init(["Include a graph of your data"]))
+    } else if arguments.contains(fakeAITidyArgument) {
+      model.enqueue(
+        .init(["Could you tell me what the prompt is asking, since I tried to read the prompt?"]))
     } else if arguments.contains(fakeAIQuestionArgument) {
       model.enqueue(.init(["Which part would you do first?"]))
     } else {

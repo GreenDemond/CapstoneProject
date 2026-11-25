@@ -33,7 +33,11 @@ public enum LearnerSelector {
   public static func entries(
     context: SelectorContext, record: LearnerRecord, content: Content
   ) -> [LearnerRecord.Entry] {
-    guard let rules = content.coach.moves[context.moveKey]?.sees, !rules.isEmpty else { return [] }
+    // The step coach is not a coaching move, so its allow-list sits beside its rules.
+    let rules =
+      context.moveKey == "stepCoach"
+      ? content.stepCoach.sees : (content.coach.moves[context.moveKey]?.sees ?? [])
+    guard !rules.isEmpty else { return [] }
     var picked: [LearnerRecord.Entry] = []
     for rule in rules {
       guard let kind = LearnerRecord.Kind(rawValue: rule.kind), rule.limit > 0 else { continue }
