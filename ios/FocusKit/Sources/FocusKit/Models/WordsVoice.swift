@@ -3,7 +3,7 @@ import Foundation
 /// Words for voice in and voice out. Short, calm, no shame, no medical claims.
 extension Words {
   public static let micExplain =
-    "The microphone listens only while you hold the button, and your voice is turned into words on this iPhone. It is never recorded."
+    "The microphone listens only while you hold the button, and your voice is turned into words on this device. It is never recorded."
   public static let micOkay = "Okay"
   public static let micNotNow = "Not now"
   public static let micAfterAllowed = "Ready. Hold the microphone and talk."

@@ -42,9 +42,16 @@ extension XCUIApplication {
     buttons["start-steps"].tap()
   }
 
+  /// A tab by its name. On an iPhone it is in the tab bar. On an iPad the tabs float at the top
+  /// and are not a tab bar, so they are found as buttons.
+  func tab(_ name: String) -> XCUIElement {
+    UIDevice.current.userInterfaceIdiom == .pad
+      ? buttons[name].firstMatch : tabBars.buttons[name]
+  }
+
   /// Opens one screen of Me from the Me list. If a screen is already open, goes back to the list.
   func openMe(_ row: String) {
-    tabBars.buttons["Me"].tap()
+    tab("Me").tap()
     let target = buttons[row]
     if !target.waitForExistence(timeout: 2) {
       let back = navigationBars.buttons.element(boundBy: 0)

@@ -1367,9 +1367,9 @@ private let addressB = "https://other.example.org/v1/chat/completions"
   }
 
   @Test func theWelcomeAndAboutWordsMentionTheBackup() {
-    #expect(Words.welcomePrivacy.contains("iPhone backup"))
+    #expect(Words.welcomePrivacy.contains("your own backup"))
     let about = Words.privacyLines.joined(separator: " ")
-    #expect(about.contains("Include in my iPhone backup"))
+    #expect(about.contains("Include in my backup"))
     #expect(about.contains("iCloud"))
   }
 }

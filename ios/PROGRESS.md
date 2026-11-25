@@ -58,7 +58,7 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 
 ## Next (in order)
 
-- **Done 2026-11-24:** ME1, S1, S2 and S3 from `TASKS-steps-me.md`. Build 16 on the phone has S1 only; S2 and S3 are committed but not yet on a build (next build is 17). Device checks 91 (S2) and 92 (S3) wait for the parent.
+- **Done 2026-11-24:** ME1, S1, S2, S3 and IPAD1 (the app now runs on iPad; content column up to 820 points; "iPhone" wording is now "this device"). Build 18 is on the parent's iPhone and iPad. The iPad UI run is manual: `xcodebuild test ... -destination id=CF3E2364-10CE-42CF-B887-84D437CD08ED` (iPad Air 11-inch M4 simulator), it takes about 13 minutes. Device checks 91 (S2) and 92 (S3) wait for the parent.
 
 0. M0a and M0b are built. Parent to decide the course-line viewer (DECISIONS 2026-11-23): either keep course lines hidden until M4, or build a small list with delete before classmates use the app.
 0. Phone AI: research in `research/08-phone-ai.md`, plan in `design/slices/PHONE-AI-plan.md`. **P0 done 2026-11-23:** `checks/phone-ai-eval.sh` runs `checks/phone-ai-cases.json` through the app's chat code on this Mac; baseline scored in `research/phone-ai-eval/scores.md`; the Talk tally (five counts, no text) shows under About. Next: P1 (rewrite the chat rules), measured against the baseline.

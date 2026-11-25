@@ -8,7 +8,7 @@ public enum Words {
   public static let welcomeBody =
     "Tell the app about your work. It helps you split it into small steps and pick one at a time."
   public static let welcomePrivacy =
-    "Your work stays on this iPhone, and in your own iPhone backup if that is on."
+    "Your work stays on this device, and in your own backup if that is on."
   public static let welcomeStart = "Start"
 
   // Assignment

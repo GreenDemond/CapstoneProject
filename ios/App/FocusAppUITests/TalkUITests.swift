@@ -13,7 +13,7 @@ final class TalkUITests: XCTestCase {
     app.launchArguments = ["-focus-fresh-data", extra]
     app.launch()
     app.buttons["welcome-start"].tap()
-    app.tabBars.buttons["Talk"].tap()
+    app.tab("Talk").tap()
     return app
   }
 
@@ -63,7 +63,7 @@ final class TalkUITests: XCTestCase {
     app.launchArguments = ["-focus-fresh-data", "-focus-no-ai"]
     app.launch()
     app.buttons["welcome-start"].tap()
-    app.tabBars.buttons["Talk"].tap()
+    app.tab("Talk").tap()
     XCTAssertTrue(app.staticTexts["talk-unavailable"].waitForExistence(timeout: 5))
     XCTAssertTrue(app.buttons["talk-hints"].exists)
     XCTAssertTrue(app.buttons["talk-lookup"].exists)

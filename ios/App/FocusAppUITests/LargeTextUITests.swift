@@ -86,7 +86,7 @@ final class LargeTextUITests: XCTestCase {
     let app = launch()
     app.buttons["welcome-start"].tap()
 
-    app.tabBars.buttons["Me"].tap()
+    app.tab("Me").tap()
     shot(app, "large-07-me")
     // In screen order: the test only scrolls down.
     reach(app, app.buttons["me-row-goals"], "Goals and notes")
@@ -101,7 +101,7 @@ final class LargeTextUITests: XCTestCase {
     reach(app, app.buttons["own-ai-add"], "Add a service")
     app.navigationBars.buttons.element(boundBy: 0).tap()
 
-    app.tabBars.buttons["Talk"].tap()
+    app.tab("Talk").tap()
     shot(app, "large-09-talk")
     reach(app, app.buttons["talk-hints"], "the hints in Talk")
     reach(app, app.buttons["talk-new"], "New chat")

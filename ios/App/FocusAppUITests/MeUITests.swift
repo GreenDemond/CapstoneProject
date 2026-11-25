@@ -11,7 +11,7 @@ final class MeUITests: XCTestCase {
     app.launchArguments = ["-focus-fresh-data", "-focus-no-ai"]
     app.launch()
     app.buttons["welcome-start"].tap()
-    app.tabBars.buttons["Me"].tap()
+    app.tab("Me").tap()
     return app
   }
 
@@ -49,7 +49,7 @@ final class MeUITests: XCTestCase {
     app.scrollTo(talkSwitch)
     // Tap the switch itself, at the right of the row, as a student would.
     talkSwitch.switches.firstMatch.tap()
-    app.tabBars.buttons["Today"].tap()
+    app.tab("Today").tap()
     XCTAssertTrue(app.buttons["mic-button"].waitForExistence(timeout: 5))
   }
 
@@ -148,9 +148,9 @@ final class MeUITests: XCTestCase {
     XCTAssertTrue(app.buttons["Edit Alpha"].exists)
     XCTAssertTrue(app.buttons["Check connection Alpha"].exists)
 
-    app.tabBars.buttons["Talk"].tap()
+    app.tab("Talk").tap()
     XCTAssertTrue(app.element("talk-which-ai").waitForExistence(timeout: 5))
-    app.tabBars.buttons["Me"].tap()
+    app.tab("Me").tap()
 
     let remove = app.buttons["Remove Alpha"]
     app.scrollTo(remove)
@@ -161,7 +161,7 @@ final class MeUITests: XCTestCase {
     sure.tap()
     XCTAssertFalse(app.element("own-ai-row").waitForExistence(timeout: 2))
     XCTAssertTrue(app.element("own-ai-empty").waitForExistence(timeout: 5))
-    app.tabBars.buttons["Talk"].tap()
+    app.tab("Talk").tap()
     XCTAssertFalse(app.element("talk-which-ai").exists)
   }
 

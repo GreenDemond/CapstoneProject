@@ -12,7 +12,7 @@ final class LookUpUITests: XCTestCase {
     app.launchArguments = ["-focus-fresh-data", "-focus-no-ai"]
     app.launch()
     app.buttons["welcome-start"].tap()
-    app.tabBars.buttons["Talk"].tap()
+    app.tab("Talk").tap()
     app.buttons["talk-lookup"].tap()
     XCTAssertTrue(app.staticTexts["lookup-privacy"].waitForExistence(timeout: 5))
     app.buttons["lookup-search"].tap()

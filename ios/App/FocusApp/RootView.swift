@@ -10,7 +10,7 @@ struct RootView: View {
       if model.welcomed {
         MainTabs(model: model)
       } else {
-        WelcomeView(model: model)
+        WelcomeView(model: model).readableColumn()
       }
     }
     .tint(Theme.Palette.moss)
@@ -29,16 +29,16 @@ struct MainTabs: View {
   var body: some View {
     TabView(selection: $selection) {
       Tab(Words.tabToday, systemImage: "sun.max", value: Words.tabToday) {
-        TodayView(model: model)
+        TodayView(model: model).readableColumn()
       }
       Tab(Words.tabTalk, systemImage: "bubble.left", value: Words.tabTalk) {
-        TalkView(model: model)
+        TalkView(model: model).readableColumn()
       }
       Tab(Words.tabPlan, systemImage: "list.bullet", value: Words.tabPlan) {
-        PlanView(model: model)
+        PlanView(model: model).readableColumn()
       }
       Tab(Words.tabMe, systemImage: "person", value: Words.tabMe) {
-        MeView(model: model)
+        MeView(model: model).readableColumn()
       }
     }
     .onChange(of: model.showToday) { _, wanted in
@@ -52,7 +52,7 @@ struct MainTabs: View {
         get: { model.inStep },
         set: { if !$0 { model.leaveStep() } })
     ) {
-      WorkView(model: model)
+      WorkView(model: model).readableColumn()
     }
   }
 }

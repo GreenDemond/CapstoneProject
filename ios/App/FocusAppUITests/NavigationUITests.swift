@@ -23,7 +23,7 @@ final class NavigationUITests: XCTestCase {
     XCTAssertEqual(app.buttons["leave-step"].label, "Back to Today")
     tap(app, "leave-step")
     XCTAssertTrue(app.element("today-screen").waitForExistence(timeout: 5))
-    XCTAssertTrue(app.tabBars.buttons["Today"].exists)
+    XCTAssertTrue(app.tab("Today").exists)
     XCTAssertEqual(app.staticTexts["next-step"].label, "Open the book")
     tap(app, "start-this-step")
     XCTAssertTrue(app.element("work-screen").waitForExistence(timeout: 5))
@@ -114,17 +114,17 @@ final class NavigationUITests: XCTestCase {
   /// The Plan tab with nothing in it offers a way to make steps.
   func testEmptyPlanTabOffersAWayToMakeSteps() {
     let app = XCUIApplication.launchedPastWelcome()
-    app.tabBars.buttons["Plan"].tap()
+    app.tab("Plan").tap()
     tap(app, "plan-make-steps")
     XCTAssertTrue(app.element("assignment-screen").waitForExistence(timeout: 5))
-    XCTAssertTrue(app.tabBars.buttons["Today"].isSelected)
+    XCTAssertTrue(app.tab("Today").isSelected)
   }
 
   /// Nothing on the typing screen is a dead end when the AI is not there: try again, hints, and
   /// the screen stays usable.
   func testTalkUnavailableCanBeRetriedAndStillOffersHelp() {
     let app = XCUIApplication.launchedPastWelcome()
-    app.tabBars.buttons["Talk"].tap()
+    app.tab("Talk").tap()
     XCTAssertTrue(app.staticTexts["talk-unavailable"].waitForExistence(timeout: 5))
     tap(app, "talk-retry")
     XCTAssertTrue(app.staticTexts["talk-unavailable"].exists)
@@ -140,7 +140,7 @@ final class NavigationUITests: XCTestCase {
   /// Look it up with no words gives a calm line, the box stays usable, and Back works.
   func testLookUpEmptyWordsCanBeRetriedAfterTyping() {
     let app = XCUIApplication.launchedPastWelcome()
-    app.tabBars.buttons["Talk"].tap()
+    app.tab("Talk").tap()
     tap(app, "talk-lookup")
     tap(app, "lookup-search")
     XCTAssertTrue(app.staticTexts["lookup-note"].waitForExistence(timeout: 5))

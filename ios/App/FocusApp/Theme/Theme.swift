@@ -43,6 +43,8 @@ enum Theme {
     /// Text fields and the AI service inputs: taller than the minimum, so they are easy to hit.
     static let field: CGFloat = 56
     static let corner: CGFloat = 14
+    /// The widest a screen's content gets on a large screen (an iPad).
+    static let columnWidth: CGFloat = 820
     static let line: CGFloat = 1
     static let ring: CGFloat = 6
   }
@@ -140,5 +142,16 @@ struct RoomyTextFieldStyle: TextFieldStyle {
     configuration
       .frame(maxWidth: .infinity, minHeight: Theme.Space.field, alignment: .leading)
       .contentShape(Rectangle())
+  }
+}
+
+extension View {
+  /// Keeps content in a centred column of comfortable width. On an iPhone, or in a narrow iPad
+  /// window, the column is as wide as the space, so nothing changes. On a wide screen the sand
+  /// background fills the sides.
+  func readableColumn() -> some View {
+    frame(maxWidth: Theme.Space.columnWidth)
+      .frame(maxWidth: .infinity)
+      .background(Theme.Palette.sand.ignoresSafeArea())
   }
 }

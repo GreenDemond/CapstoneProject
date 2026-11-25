@@ -11,11 +11,11 @@ extension Words {
     switch reason {
     case .available: ""
     case .deviceNotEligible:
-      "This iPhone can't run the AI helper. Hints and Look it up still work."
+      "This device can't run the AI helper. Hints and Look it up still work."
     case .notEnabled:
       "The AI helper is off. You can switch on Apple Intelligence in Settings. Hints and Look it up still work."
     case .notReady:
-      "The AI helper is still getting ready on this iPhone. Try again later. Hints and Look it up still work."
+      "The AI helper is still getting ready on this device. Try again later. Hints and Look it up still work."
     case .other:
       "The AI helper isn't available right now. Hints and Look it up still work."
     }
@@ -24,7 +24,7 @@ extension Words {
 
 extension Words {
   public static let talkPrivacy =
-    "This AI runs on this iPhone. Your messages don't leave it. It can still be wrong."
+    "This AI runs on this device. Your messages don't leave it. It can still be wrong."
   public static func talkPrivacyOwn(label: String) -> String {
     "Your messages go to \(label), the AI service you added in Me, and its own privacy rules apply. It can still be wrong."
   }
@@ -121,23 +121,23 @@ extension Words {
   public static let meRowServices = "My AI services"
   public static let meGroupHelp = "How the app helps"
   public static let meGroupPrivacy = "Privacy"
-  public static let meDeleteAll = "Delete everything on this iPhone"
+  public static let meDeleteAll = "Delete everything on this device"
   public static let meDeleteSure = "Tap again to delete everything"
   public static let meDeleteExplain =
-    "This removes your steps, notes, goals, chats and settings from this iPhone. It can't be undone."
+    "This removes your steps, notes, goals, chats and settings from this device. It can't be undone."
   public static let meDeleteCancel = "Keep my things"
   public static let couldNotErase = "That couldn't be deleted just now. Nothing was changed."
   public static let timerSuggested = "your pick"
 
   /// What the app stores and what leaves the phone: `design/03` section 3.7 and `DECISIONS.md` D8.
   public static let privacyLines: [String] = [
-    "Stored only on this iPhone, in this app's own private folder: your steps and progress, your goals and notes, your answers to How I like to work, your settings, up to 10 chats, your recall answers and parked thoughts.",
+    "Stored only on this device, in this app's own private folder: your steps and progress, your goals and notes, your answers to How I like to work, your settings, up to 10 chats, your recall answers and parked thoughts.",
     "Never stored: audio, a name, an age, a school, a diagnosis, contacts, or location.",
-    "No account and no sync. Your things stay on this iPhone and, when \"Include in my iPhone backup\" is on (it starts on), in your own iPhone backup, in iCloud or on your computer. You can switch that off in Me. Delete everything clears this iPhone; an older backup keeps its copy until your iPhone makes a new one.",
-    "Your voice is turned into words on this iPhone. It is never recorded and never leaves it.",
-    "The AI runs on this iPhone unless you add your own AI service in Me and choose it on Talk. Messages to the AI on this iPhone do not leave it.",
-    "Leaves this iPhone only when you ask: Look it up sends the words you search for to Wikipedia. Opening a source is a normal visit to that website.",
-    "Only if you add an AI service in Me and choose it on Talk (none is added at first): your chat messages, the step and assignment text the step coach uses, and this app's rules (with your AI guide) are sent to the address you entered for that service, and that service's own privacy rules apply. Your key for it is kept only in this iPhone's Keychain, is never in a backup, and is sent only to that address. If that address starts with http:// instead of https://, what is sent to it is not encrypted.",
+    "No account and no sync. Your things stay on this device and, when \"Include in my backup\" is on (it starts on), in your own backup, in iCloud or on your computer. You can switch that off in Me. Delete everything clears this device; an older backup keeps its copy until your device makes a new one.",
+    "Your voice is turned into words on this device. It is never recorded and never leaves it.",
+    "The AI runs on this device unless you add your own AI service in Me and choose it on Talk. Messages to the AI on this device do not leave it.",
+    "Leaves this device only when you ask: Look it up sends the words you search for to Wikipedia. Opening a source is a normal visit to that website.",
+    "Only if you add an AI service in Me and choose it on Talk (none is added at first): your chat messages, the step and assignment text the step coach uses, and this app's rules (with your AI guide) are sent to the address you entered for that service, and that service's own privacy rules apply. Your key for it is kept only in this device's Keychain, is never in a backup, and is sent only to that address. If that address starts with http:// instead of https://, what is sent to it is not encrypted.",
     "Check connection sends one short test message, not your words, and that service's key, to the address you entered for that service.",
     "Look up models, if you tap it, asks the address you entered for that service for its list of model names, with that service's key. It sends none of your words.",
     "Nothing else. No analytics, no crash reports, no ads, and no code from anyone else.",
@@ -148,7 +148,7 @@ extension Words {
 /// Words for "My AI services" and the backup switch. Nothing here quotes the service.
 extension Words {
   public static let ownAITitle = "My AI services"
-  public static let ownAIEmpty = "No services added. The AI on this iPhone is used."
+  public static let ownAIEmpty = "No services added. The AI on this device is used."
   public static let ownAIAdd = "Add a service"
   public static let ownAIFull = "That's five services. Remove one to add another."
   public static let ownAIEdit = "Edit"
@@ -181,11 +181,11 @@ extension Words {
     "This address starts with http://, so your key and messages are not encrypted on the way. Use https:// if the service has it."
   public static let ownAIKey = "Key"
   public static let ownAIKeyPlaceholder = "Paste your key"
-  public static let ownAIKeySaved = "A key is saved on this iPhone."
+  public static let ownAIKeySaved = "A key is saved on this device."
   public static let ownAIKeyNone = "No key saved."
   public static let ownAIKeyRemove = "Remove key"
   public static let ownAIKeyNote =
-    "The key stays in this iPhone's Keychain. It is not in your backup and is sent only to this service's address."
+    "The key stays in this device's Keychain. It is not in your backup and is sent only to this service's address."
   public static let ownAIKeyCouldNotSave =
     "The key couldn't be saved just now. Nothing was changed."
   public static let ownAIHttpTick = "I understand my key and messages are not encrypted"
@@ -218,17 +218,17 @@ extension Words {
   public static let ownAIStatusNeedsModel = "Needs a model name"
   public static let ownAIStatusNeedsKey = "Needs a key"
   public static let ownAIWhichAI = "Which AI"
-  public static let ownAIThisPhone = "On this iPhone"
+  public static let ownAIThisPhone = "On this device"
   public static let ownAIFellBack =
-    "That AI isn't ready any more, so the AI on this iPhone is being used."
+    "That AI isn't ready any more, so the AI on this device is being used."
 
   /// Shown before a service can be added. No address yet, so it speaks of "the address you entered".
   public static let ownAIDisclosure =
     "When you choose one of these services on Talk, your chat messages, the step and assignment text the step coach uses, and this app's rules (with your AI guide) are sent to the address you entered for it. That service's own privacy rules apply to them. Until you choose one, nothing is sent."
 
-  public static let meBackup = "Include in my iPhone backup"
+  public static let meBackup = "Include in my backup"
   public static let meBackupNote =
-    "On: your things are also in your own iPhone backup (iCloud or your computer). Off: they stay only on this iPhone. Your AI key is never in a backup."
+    "On: your things are also in your own backup (iCloud or your computer). Off: they stay only on this device. Your AI key is never in a backup."
 }
 
 extension Words {
@@ -268,7 +268,7 @@ extension Words {
 }
 
 extension Words {
-  public static let talkCountsTitle = "How Talk replied on this iPhone"
+  public static let talkCountsTitle = "How Talk replied on this device"
   public static let talkCountsNote =
     "Counts only. What was said is not kept. Deleting chats does not change these; Delete everything does."
   public static func talkCountsLines(_ counts: TalkCounts) -> [String] {
