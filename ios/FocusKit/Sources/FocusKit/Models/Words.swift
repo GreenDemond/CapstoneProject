@@ -101,6 +101,28 @@ public enum Words {
   public static let reflectionThinking = "Thinking about what you said"
   public static let reflectionFixed = "Noted. Same two questions next week."
   public static let timerLearned = "suggested"
+  public static let meRowDid = "What I did"
+  public static let didLast30 = "This past month"
+  public static let didNothingLately = "Nothing planned this past month."
+  public static let didNothingYet =
+    "Nothing here yet. After you plan and work on an assignment, you'll see it here."
+  public static let didGoalsLink = "Your goals are in Goals and notes."
+  public static let rememberedGroupProgress = "What I did"
+  public static func didAssignments(_ n: Int) -> String {
+    "\(n) \(n == 1 ? "assignment" : "assignments") planned"
+  }
+  public static func didSteps(_ n: Int) -> String {
+    "\(n) \(n == 1 ? "step" : "steps") finished"
+  }
+  public static func didFirstStep(_ n: Int) -> String {
+    "\(n) with a first step done soon after planning"
+  }
+  public static func didFromSuggestion(_ n: Int) -> String {
+    "\(n) \(n == 1 ? "plan" : "plans") started from a suggestion"
+  }
+  public static func didWrittenByYou(_ n: Int) -> String {
+    "\(n) \(n == 1 ? "plan" : "plans") written by you"
+  }
   public static let tidyIt = "Tidy it"
   public static let tidying = "Tidying"
   public static let useTidied = "Use this"

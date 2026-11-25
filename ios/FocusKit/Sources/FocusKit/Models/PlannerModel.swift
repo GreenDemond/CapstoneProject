@@ -126,6 +126,7 @@ public final class PlannerModel {
     forgetNudges()
     draft.fromAI = false
     draft.aiClass = nil
+    draft.suggested = true
     for text in chosen { append(text) }
     draft.stage = .editor
     persist()
@@ -208,7 +209,10 @@ public final class PlannerModel {
   public func useIdea() {
     guard let idea else { return }
     self.idea = nil
-    if addSaid(idea.text), idea.fromAI { draft.fromAI = true }
+    if addSaid(idea.text) {
+      draft.suggested = true
+      if idea.fromAI { draft.fromAI = true }
+    }
     persist()
   }
 
@@ -232,6 +236,7 @@ public final class PlannerModel {
     if let kindId, content.kinds.contains(where: { $0.id == kindId }) { draft.kindId = kindId }
     draft.fromAI = true
     draft.aiClass = nil
+    draft.suggested = true
     draft.stage = .editor
     persist()
     return true
@@ -250,6 +255,7 @@ public final class PlannerModel {
     forgetNudges()
     draft.fromAI = false
     draft.aiClass = nil
+    draft.suggested = false
     idea = nil
     draft.stage = .saying
     showEmptyNote = false
@@ -279,6 +285,8 @@ public final class PlannerModel {
   /// Back one level. The steps already made stay in the draft, so nothing is lost.
   public func backToAssignment() {
     draft.stage = .assignment
+    // The steps are not in the editor any more; the day is set again when they next reach it.
+    draft.plannedOn = nil
     persist()
   }
 
@@ -533,6 +541,15 @@ public final class PlannerModel {
   /// Turns the editor's steps into the work. Only works from the editor, so starter steps can never
   /// reach the work screen without being shown. A second call does nothing.
   @discardableResult
+  /// The day the steps reached the editor, unless the draft has sat for a month or more: then the
+  /// assignment is counted from today, so What I did still shows what is being worked on.
+  private func freshPlanDate() -> Date {
+    guard let planned = draft.plannedOn,
+      clock.now.timeIntervalSince(planned) <= Double(WhatIDid.days) * 86_400
+    else { return clock.now }
+    return planned
+  }
+
   public func start() -> Bool {
     guard canStart else { return false }
     var texts: [String] = []
@@ -546,7 +563,7 @@ public final class PlannerModel {
     }
     let saved = SavedWork(
       work: Work(texts: texts), kindId: draft.kindId, savedOn: clock.now, doneLines: lines,
-      course: draft.course)
+      course: draft.course, plannedOn: freshPlanDate(), suggested: draft.suggested)
     do {
       try store.save(saved)
     } catch {
@@ -575,6 +592,8 @@ public final class PlannerModel {
   }
 
   private func persist() {
+    // The day the steps first reached the editor, for What I did. Set once.
+    if draft.stage == .editor, draft.plannedOn == nil { draft.plannedOn = clock.now }
     do {
       try store.save(draft)
       saveNote = nil

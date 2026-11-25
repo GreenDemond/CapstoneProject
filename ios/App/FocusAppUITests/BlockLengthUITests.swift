@@ -63,7 +63,10 @@ final class BlockLengthUITests: XCTestCase {
     XCTAssertTrue(app.buttons["choice-done"].exists)
     app.buttons["leave-step"].tap()
     app.openMe("me-row-remembered")
-    XCTAssertTrue(app.element("remembered-empty").waitForExistence(timeout: 5))
+    // The assignment's own line (What I did) is there; no block-length answer is.
+    XCTAssertTrue(app.element("remembered-screen").waitForExistence(timeout: 5))
+    XCTAssertFalse(
+      app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'minute block'")).count > 0)
   }
 
   /// Turning the timer off never asks.

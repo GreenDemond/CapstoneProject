@@ -40,11 +40,17 @@ public struct Draft: Storable {
   public var course: String?
   /// The class whose kept steps the AI started from, when it used them. Shown in the editor label.
   public var aiClass: String?
+  /// The day the steps first reached the editor. Set once. Used only for What I did.
+  public var plannedOn: Date?
+  /// True when any step came from Suggest some, the starter steps, an idea or a chat. False when
+  /// the student wrote every step with I'll say my steps.
+  public var suggested: Bool
 
   public init(
     stage: DraftStage = .assignment, text: String = "", kindId: String = "other",
     stepCount: Int = 5, steps: [DraftStep] = [], nextId: Int = 0, nudgeDismissed: [Int] = [],
-    truncated: Bool = false, fromAI: Bool = false, course: String? = nil, aiClass: String? = nil
+    truncated: Bool = false, fromAI: Bool = false, course: String? = nil, aiClass: String? = nil,
+    plannedOn: Date? = nil, suggested: Bool = false
   ) {
     self.stage = stage
     self.text = text
@@ -57,11 +63,13 @@ public struct Draft: Storable {
     self.fromAI = fromAI
     self.course = course.map(LearnerRecord.Entry.cutLabel)
     self.aiClass = aiClass
+    self.plannedOn = plannedOn
+    self.suggested = suggested
   }
 
   private enum CodingKeys: String, CodingKey {
     case stage, text, kindId, stepCount, steps, nextId, nudgeDismissed, truncated, fromAI, course,
-      aiClass
+      aiClass, plannedOn, suggested
   }
 
   public init(from decoder: Decoder) throws {
@@ -78,6 +86,8 @@ public struct Draft: Storable {
     course = try values.decodeIfPresent(String.self, forKey: .course).map(
       LearnerRecord.Entry.cutLabel)
     aiClass = try? values.decodeIfPresent(String.self, forKey: .aiClass)
+    plannedOn = (try? values.decodeIfPresent(Date.self, forKey: .plannedOn)) ?? nil
+    suggested = (try? values.decodeIfPresent(Bool.self, forKey: .suggested)) ?? false
   }
 
   public static let empty = Draft()

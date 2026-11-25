@@ -14,6 +14,8 @@ public struct LearnerRecord: Storable {
   public static let reflectionLimit = 26
   public static let courseLimit = 20
   public static let feedbackLimit = 500
+  /// One line per assignment, for What I did. Newest kept.
+  public static let progressLimit = 100
   /// Feedback lines kept for one move, newest first, so a busy move cannot push out another's.
   public static let feedbackPerMoveLimit = 100
   /// Ids of lines the student deleted, so a later writer does not put one back. Ids only.
@@ -28,7 +30,7 @@ public struct LearnerRecord: Storable {
   public static let courseStepLimit = 8
 
   public enum Kind: String, Codable, Equatable, Sendable, CaseIterable {
-    case setting, pattern, obstacle, reflection, course, feedback
+    case setting, pattern, obstacle, reflection, course, feedback, progress
   }
 
   public enum Source: String, Codable, Equatable, Sendable {
@@ -188,6 +190,7 @@ public struct LearnerRecord: Storable {
     case .reflection: reflectionLimit
     case .course: courseLimit
     case .feedback: feedbackLimit
+    case .progress: progressLimit
     }
   }
 

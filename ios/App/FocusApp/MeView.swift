@@ -30,6 +30,12 @@ struct MeView: View {
             Text(Words.meRowRemembered)
           }
           .accessibilityIdentifier("me-row-remembered")
+          NavigationLink {
+            WhatIDidView(model: model)
+          } label: {
+            Text(Words.meRowDid)
+          }
+          .accessibilityIdentifier("me-row-did")
         }
         .listRowBackground(Theme.Palette.card)
         Section {

@@ -23,6 +23,7 @@ struct RememberedView: View {
       (Words.rememberedGroupNotes, .obstacle), (Words.rememberedGroupReflections, .reflection),
       (Words.rememberedGroupPatterns, .pattern), (Words.rememberedGroupSettings, .setting),
       (Words.rememberedGroupClasses, .course),
+      (Words.rememberedGroupProgress, .progress),
     ]
   }
 
@@ -129,6 +130,12 @@ struct RememberedView: View {
           .foregroundStyle(Theme.Palette.ink)
           .frame(maxWidth: .infinity, alignment: .leading)
           .accessibilityIdentifier("remembered-line")
+      }
+      if line.kind == .progress {
+        // Which assignment: its plain date, so the lines can be told apart.
+        Text(line.date, style: .date)
+          .font(Theme.Typography.small)
+          .foregroundStyle(Theme.Palette.quiet)
       }
       Text(line.source == .app ? Words.rememberedAppNoted : Words.rememberedYouWrote)
         .font(Theme.Typography.small)

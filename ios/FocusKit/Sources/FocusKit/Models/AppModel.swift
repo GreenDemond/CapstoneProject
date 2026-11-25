@@ -217,6 +217,7 @@ public final class AppModel {
 
   private func began(_ new: SavedWork) {
     saved = new
+    writeProgressLine(new)
     planning = false
     ladders = [:]
     refreshWelcome()
@@ -279,6 +280,8 @@ public final class AppModel {
     updated.savedOn = now
     if choice == .drifted { updated.drifted += 1 }
     let ask = choice == .done && asksRecall(kindId: saved.kindId)
+    // The first step done is remembered with the same save as the step, so it cannot be lost.
+    if choice == .done, updated.firstDoneOn == nil { updated.firstDoneOn = now }
     let wrote = save(updated)
     // If the last step cannot be saved, the step stays open so the student can tap Done again.
     if !wrote, choice == .done, after.allDone {
@@ -289,6 +292,8 @@ public final class AppModel {
     if wrote, choice == .done, after.allDone {
       writeCourseLine(updated)
     }
+    // The line follows the plan: a step done, or a split that made the plan longer.
+    if wrote, choice == .done || choice == .drifted { writeProgressLine(updated) }
 
     switch choice {
     case .later:
@@ -501,6 +506,28 @@ public final class AppModel {
     saveLearner()
   }
 
+  /// The one line for this assignment in What I did, rewritten as steps are done. Plain counts of
+  /// what happened. A line the student deleted is not written back, and a failed save simply
+  /// leaves the line unwritten.
+  func writeProgressLine(_ work: SavedWork) {
+    let id = WhatIDid.id(for: work.assignmentId)
+    guard !learner.wasDeleted(id), !work.work.steps.isEmpty else { return }
+    let soon: Bool =
+      work.firstDoneOn.flatMap { done in
+        work.plannedOn.map { WhatIDid.days(from: $0, to: done) <= WhatIDid.soonDays }
+      } ?? false
+    let text = WhatIDid.text(
+      planned: work.work.steps.count, finished: work.work.steps.filter(\.done).count,
+      firstStepSoon: soon, suggested: work.suggested)
+    let before = learner
+    learner.remove(id: id)
+    learner.add(
+      LearnerRecord.Entry(
+        id: id, kind: .progress, date: work.plannedOn ?? clock.now, text: text, source: .app))
+    // A failed write is rolled back, so the screen matches what is on the device.
+    if !saveLearner() { learner = before }
+  }
+
   /// Brings the note lines up to date with the Me notes: a line for each note, with the note's own
   /// id, and no line for a note that is gone (deleted, or dropped past the notes cap). This runs
   /// after each successful notes save, so a note whose earlier save failed still gets its line, and
@@ -589,6 +616,15 @@ public final class AppModel {
         source: .app))
     saveLearner()
   }
+
+  // MARK: What I did (PROG1)
+
+  /// Plain counts for the last 30 days, read from the lines under How it went.
+  public var progressSummary: WhatIDid.Summary {
+    WhatIDid.summary(in: learner, now: clock.now)
+  }
+
+  public var hasProgress: Bool { WhatIDid.hasAny(in: learner) }
 
   // MARK: Weekly look-back (C5)
 

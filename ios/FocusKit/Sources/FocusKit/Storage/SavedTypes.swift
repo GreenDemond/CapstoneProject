@@ -22,11 +22,17 @@ public struct SavedWork: Storable {
   /// Stable for one assignment, so its course line can be written once. Older saved work gets an
   /// id made from its save time, which does not change between loads.
   public var assignmentId: String
+  /// For What I did: the day the steps reached the editor, whether any step was a suggestion, and
+  /// the day the first step was marked done. All optional; older saved work has none.
+  public var plannedOn: Date?
+  public var suggested: Bool
+  public var firstDoneOn: Date?
 
   public init(
     work: Work, kindId: String? = nil, savedOn: Date? = nil, doneLines: [String: String] = [:],
     course: String? = nil, stuck: Int = 0, drifted: Int = 0,
-    assignmentId: String = UUID().uuidString
+    assignmentId: String = UUID().uuidString, plannedOn: Date? = nil, suggested: Bool = false,
+    firstDoneOn: Date? = nil
   ) {
     self.work = work
     self.kindId = kindId
@@ -36,10 +42,14 @@ public struct SavedWork: Storable {
     self.stuck = stuck
     self.drifted = drifted
     self.assignmentId = assignmentId
+    self.plannedOn = plannedOn
+    self.suggested = suggested
+    self.firstDoneOn = firstDoneOn
   }
 
   private enum CodingKeys: String, CodingKey {
-    case work, kindId, savedOn, doneLines, course, stuck, drifted, assignmentId
+    case work, kindId, savedOn, doneLines, course, stuck, drifted, assignmentId, plannedOn
+    case suggested, firstDoneOn
   }
 
   public init(from decoder: Decoder) throws {
@@ -55,6 +65,9 @@ public struct SavedWork: Storable {
     assignmentId =
       try values.decodeIfPresent(String.self, forKey: .assignmentId)
       ?? "legacy-\(savedOn?.timeIntervalSince1970 ?? 0)"
+    plannedOn = (try? values.decodeIfPresent(Date.self, forKey: .plannedOn)) ?? nil
+    suggested = (try? values.decodeIfPresent(Bool.self, forKey: .suggested)) ?? false
+    firstDoneOn = (try? values.decodeIfPresent(Date.self, forKey: .firstDoneOn)) ?? nil
   }
 
   /// Drops steps that are blank or have a bad or repeated number, cuts long steps, keeps at most

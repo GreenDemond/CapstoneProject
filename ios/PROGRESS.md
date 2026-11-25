@@ -58,6 +58,7 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 
 ## Next (in order)
 
+- **What I did (PROG1, 2026-11-25):** a new Me row with plain counts of what the student did this past month, from lines the student can see and delete under What the app remembers about me. It is the parent's request for coaching that helps students improve, built so it never claims improvement. Parent to confirm the wording before classmates use it.
 - **Coaching queue 2026-11-25:** done: M1, M3, M4, C6, C9, R5, C4, C5. Deferred by the parent: C8 (no source of tags). Not built, decision needed: C7 (already true on screen). Not started: C3 (R1, the comeback screen, must be built first; sketch and two questions in `design/slices/C3-comeback-slice.md`) and M2 (recommend waiting; see its note). T14-C needs a person and a phone. Build 20 is on the parent's iPhone and iPad and archived.
 - **Done 2026-11-24:** ME1, S1, S2, S3 and IPAD1 (the app now runs on iPad; content column up to 820 points; "iPhone" wording is now "this device"). Build 18 is on the parent's iPhone and iPad. The iPad UI run is manual: `xcodebuild test ... -destination id=CF3E2364-10CE-42CF-B887-84D437CD08ED` (iPad Air 11-inch M4 simulator), it takes about 13 minutes. Device checks 91 (S2) and 92 (S3) wait for the parent.
 
