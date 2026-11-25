@@ -21,6 +21,51 @@ struct EditorView: View {
         }
         .listRowBackground(Color.clear)
       }
+      if planner.canCheckRequirements || planner.checkingRequirements
+        || planner.requirementsResult != nil
+      {
+        Section {
+          Button(
+            planner.checkingRequirements ? Words.checkingAssignment : Words.checkAgainstAssignment
+          ) {
+            Task { await planner.checkRequirements() }
+          }
+          .buttonStyle(LinkButtonStyle())
+          .disabled(!planner.canCheckRequirements)
+          .frame(minHeight: 44, alignment: .leading)
+          .accessibilityIdentifier("check-requirements")
+          if let own = planner.ownServiceLabel() {
+            Text(Words.checkAssignmentOwn(label: own))
+              .font(Theme.Typography.small)
+              .foregroundStyle(Theme.Palette.quiet)
+          }
+          switch planner.requirementsResult {
+          case .lines?:
+            if let uncovered = planner.uncoveredRequirements, !uncovered.isEmpty {
+              ForEach(uncovered, id: \.self) { line in
+                Text(verbatim: Words.requirementNotCovered(line))
+                  .font(Theme.Typography.small)
+                  .accessibilityIdentifier("requirement-uncovered")
+              }
+            } else {
+              Text(Words.requirementsAllCovered)
+                .font(Theme.Typography.small)
+                .foregroundStyle(Theme.Palette.quiet)
+                .accessibilityIdentifier("requirements-all-covered")
+            }
+          case .nothing?:
+            Text(Words.requirementsNone)
+              .font(Theme.Typography.small)
+              .foregroundStyle(Theme.Palette.quiet)
+          case .unclear?:
+            Text(Words.requirementsUnclear)
+              .font(Theme.Typography.small)
+              .foregroundStyle(Theme.Palette.quiet)
+          case nil:
+            EmptyView()
+          }
+        }
+      }
       Section {
         ForEach(planner.draft.steps) { step in
           StepRow(planner: planner, step: step)

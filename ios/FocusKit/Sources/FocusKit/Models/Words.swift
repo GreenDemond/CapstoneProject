@@ -46,6 +46,18 @@ public enum Words {
   public static let stepNoteVague = "Which part will you do first?"
   public static let stepNoteSkip = "Skip"
   public static let splitStep = "Split"
+  public static let checkAgainstAssignment = "Check my steps against the assignment"
+  public static let checkingAssignment = "Checking the assignment"
+  public static let requirementsAllCovered = "Every part the assignment names has a step."
+  public static let requirementsNone = "The assignment doesn't list anything extra to check."
+  public static let requirementsUnclear =
+    "I couldn't read the assignment's list clearly. Check it yourself."
+  public static func requirementNotCovered(_ line: String) -> String {
+    "The assignment mentions \"\(line)\". Is that in your steps yet?"
+  }
+  public static func checkAssignmentOwn(label: String) -> String {
+    "The assignment goes to \(label), the AI service you added in Me."
+  }
   public static func stepNote(_ note: StepNote) -> String {
     note == .tooLong ? stepNoteTooLong : stepNoteVague
   }

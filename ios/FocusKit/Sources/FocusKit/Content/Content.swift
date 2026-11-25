@@ -56,6 +56,10 @@ public struct Content: Codable, Equatable, Sendable {
   public struct StepReview: Codable, Equatable, Sendable {
     public let maxWords: Int
     public let vaguePhrases: [String]
+    /// The rules for copying the assignment's requirements (the AI's copying step, S3).
+    public let extractRules: String
+    /// Words that never count as a requirement's key words.
+    public let stopWords: [String]
   }
 
   public struct CoachMoveText: Codable, Equatable, Sendable {

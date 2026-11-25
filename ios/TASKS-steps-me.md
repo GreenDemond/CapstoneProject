@@ -12,8 +12,8 @@ Background, if needed: `research/08-phone-ai.md` sections 9 to 11 (why these des
 |---|---|---|---|---|
 | ME1 Me tab: a short list of screens | done | | 2026-11-24 | `checks/check.sh` ALL CHECKS PASSED (463 unit, 40 UI, incl. new testEveryMeRowOpensItsScreenAndComesBack). Gate 2 FIX FIRST, fixes applied and re-checked |
 | S1 New step-suggestion rules and checks | done | | 2026-11-24 | Fresh Checker: `checks/check.sh` ALL CHECKS PASSED, 0 SKIPPED, 0 FAIL. Gate 2 STOP x2 on the guardrail question, answered yes by parent, recorded in DECISIONS 2026-11-24. Eval `H-2026-11-24-review-fixes.txt`: 4 of 5 AI step sets; distress shows the line. Build 16 on phone and archived |
-| S2 Review notes on each step | waiting | S1 | | |
-| S3 Check the steps against the assignment | waiting | S2 | | |
+| S2 Review notes on each step | done | S1 | 2026-11-24 | `checks/check.sh` ALL CHECKS PASSED (483 unit, UI, no SKIPPED). Gate 1 FIX FIRST (4) applied; gate 2 FIX FIRST (1, note wording) applied. Fresh Checker not run for S2/S3 (same-model reviewer only) |
+| S3 Check the steps against the assignment | done | S2 | 2026-11-24 | `checks/check.sh` ALL CHECKS PASSED (501 unit, UI, no SKIPPED; an earlier run failed 22 UI tests after I killed a prior run mid-way, and passed on a clean rerun). Gate 1 FIX FIRST (6) and gate 2 FIX FIRST (4) applied. Eval `I-2026-11-24-requirements.txt`. D8 row awaits parent. Fresh Checker not run |
 
 Do ME1 and S1 in either order. Take the first task whose status is `ready`, or `waiting` with every Depends-on task `done` (then set it to `in progress`).
 

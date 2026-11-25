@@ -31,6 +31,10 @@ public final class PlannerModel {
   private var nudgeEpoch = 0
   /// Steps whose review question the student skipped in this editing session. Not saved.
   private var reviewDismissed: Set<Int> = []
+  /// The last "Check my steps" result, with the assignment text it was made from. Memory only.
+  private var requirementsCheck: (assignment: String, result: RequirementsCheck)?
+  /// True while the check is running. A second tap does nothing.
+  public private(set) var checkingRequirements = false
 
   /// One idea for the next step, waiting for the student to use it or not.
   public private(set) var idea: Idea?
@@ -393,6 +397,7 @@ public final class PlannerModel {
     nudgeAsked = []
     nudgeQuestions = [:]
     reviewDismissed = []
+    requirementsCheck = nil
     nudgeEpoch += 1
   }
 
@@ -403,6 +408,50 @@ public final class PlannerModel {
       let step = draft.steps.first(where: { $0.id == id })
     else { return nil }
     return StepReview.note(for: step.text, in: content)
+  }
+
+  /// The check's result for the assignment as it is now, or nil when none or when the text changed.
+  public var requirementsResult: RequirementsCheck? {
+    guard coach?.isAvailable == true, let check = requirementsCheck,
+      check.assignment == PastedText.clean(draft.text)
+    else {
+      return nil
+    }
+    return check.result
+  }
+
+  /// Requirements from the last check that no step covers yet. Recomputed from the steps as they
+  /// change, so it needs no new tap. Nil unless the check found lines.
+  public var uncoveredRequirements: [String]? {
+    guard case .lines(let lines)? = requirementsResult else { return nil }
+    return StepReview.uncovered(lines, steps: draft.steps.map(\.text), in: content)
+  }
+
+  /// The check button shows only with an AI, some assignment text, and no check already running.
+  public var canCheckRequirements: Bool {
+    coach?.isAvailable == true && hasAssignmentText && !checkingRequirements
+  }
+
+  /// Asks the AI for the assignment's requirements, once per tap. A safety stop shows the line.
+  public func checkRequirements() async {
+    guard canCheckRequirements, let coach else { return }
+    checkingRequirements = true
+    defer { checkingRequirements = false }
+    let assignment = PastedText.clean(draft.text)
+    let outcome = await coach.requirements(assignment: assignment)
+    // The safety line is shown even if the student has changed the assignment meanwhile.
+    if outcome == .trustedAdult { aiNote = content.safety.line }
+    guard assignment == PastedText.clean(draft.text) else { return }
+    switch outcome {
+    case .found(let lines):
+      requirementsCheck = (assignment, lines.isEmpty ? .nothing : .lines(lines))
+    case .unclear:
+      requirementsCheck = (assignment, .unclear)
+    case .trustedAdult:
+      break
+    case .unavailable:
+      requirementsCheck = nil
+    }
   }
 
   /// Skip: hide the review question for this step until the editor is reset. Nothing is saved.
@@ -523,4 +572,11 @@ public final class PlannerModel {
     let second = Text.trimmed(String(text[best...]))
     return first.isEmpty || second.isEmpty ? nil : (first, second)
   }
+}
+
+/// What "Check my steps against the assignment" found.
+public enum RequirementsCheck: Equatable, Sendable {
+  case lines([String])
+  case nothing
+  case unclear
 }

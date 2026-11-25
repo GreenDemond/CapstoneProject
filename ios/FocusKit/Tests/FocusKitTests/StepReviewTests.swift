@@ -110,3 +110,165 @@ import Testing
     #expect(planner.start())
   }
 }
+
+@MainActor
+@Suite struct StepRequirementTests {
+  let content: Content
+  let store: MemoryStore
+  let fake = FakeLanguageModel()
+  static let lab = "Lab report. Include a graph of your data."
+
+  init() throws {
+    content = try loadContent()
+    store = MemoryStore(limits: content.limits)
+  }
+
+  private func check(_ assignment: String, reply: FakeLanguageModel.Reply) async
+    -> StepCoach.RequirementsOutcome
+  {
+    fake.enqueue(reply)
+    return await StepCoach(model: fake, content: content).requirements(assignment: assignment)
+  }
+
+  private func planner(_ text: String, steps: [String] = [], model: FakeLanguageModel? = nil)
+    -> PlannerModel
+  {
+    let app = AppModel(
+      content: content, store: store, clock: FakeClock(),
+      services: Services(languageModel: model ?? fake))
+    app.planner.setText(text)
+    return app.planner
+  }
+
+  // MARK: Matching
+
+  @Test func aWholeWordRunIsFoundAndAPartOfAWordIsNot() {
+    #expect(StepReview.containsWords("Write a paragraph", "paragraph"))
+    #expect(!StepReview.containsWords("Write a paragraph", "rap"))
+    #expect(StepReview.containsWords(Self.lab, "Include a graph of your data"))
+    #expect(!StepReview.containsWords(Self.lab, "graph of data"))
+  }
+
+  @Test func aRequirementWithNoKeyWordsIsNeverReported() {
+    #expect(StepReview.uncovered(["Use it if you can"], steps: [], in: content).isEmpty)
+  }
+
+  @Test func aStepNeedsAllTheKeyWordsOfARequirement() {
+    let needs = ["Include a graph of your data"]
+    #expect(StepReview.uncovered(needs, steps: ["Collect data"], in: content) == needs)
+    #expect(StepReview.uncovered(needs, steps: ["Make the graph"], in: content) == needs)
+    #expect(StepReview.uncovered(needs, steps: ["Make the graph of the data"], in: content).isEmpty)
+    #expect(
+      StepReview.uncovered(needs, steps: ["Collect data", "Draw a graph"], in: content) == needs)
+  }
+
+  @Test func aNumberCoversAStepWithTheSameNumber() {
+    let needs = ["At least 500 words"]
+    #expect(StepReview.uncovered(needs, steps: ["Write 500 words"], in: content).isEmpty)
+    #expect(StepReview.uncovered(needs, steps: ["Write 300 words"], in: content) == needs)
+  }
+
+  // MARK: What the AI gave
+
+  @Test func linesCopiedWordForWordAreKept() async {
+    let outcome = await check(
+      Self.lab, reply: .init(["Include a graph of your data\nInclude a video"]))
+    #expect(outcome == .found(["Include a graph of your data"]))
+  }
+
+  @Test func nothingToListIsNothingFound() async {
+    #expect(await check(Self.lab, reply: .init(["NOTHING"])) == .found([]))
+  }
+
+  @Test func linesThatFailTheCheckAreUnclearNotNothing() async {
+    #expect(await check(Self.lab, reply: .init(["Include a video"])) == .unclear)
+    #expect(await check("Write a paragraph", reply: .init(["rap"])) == .unclear)
+  }
+
+  @Test func theSafetyWordGivesTheTrustedAdultOutcome() async {
+    #expect(await check(Self.lab, reply: .init(["TRUSTED_ADULT"])) == .trustedAdult)
+  }
+
+  @Test func aGuardrailStopGivesTheTrustedAdultOutcome() async {
+    #expect(await check(Self.lab, reply: .failing(.guardrail)) == .trustedAdult)
+  }
+
+  @Test func aRefusalIsUnavailable() async {
+    #expect(await check(Self.lab, reply: .failing(.refusal)) == .unavailable)
+  }
+
+  @Test func atMostSixLinesAreKept() async {
+    let assignment =
+      "Alpha item. Beta item. Gamma item. Delta item. Epsilon item. Zeta item. Eta item. Theta item."
+    let lines = [
+      "Alpha item", "Beta item", "Gamma item", "Delta item", "Epsilon item", "Zeta item",
+      "Eta item", "Theta item",
+    ]
+    let outcome = await check(assignment, reply: .init([lines.joined(separator: "\n")]))
+    #expect(outcome == .found(Array(lines.prefix(6))))
+  }
+
+  // MARK: In the planner
+
+  @Test func withNoAINothingShowsAndTheCheckIsOff() {
+    let planner = planner(Self.lab, model: FakeLanguageModel(availability: .notEnabled))
+    #expect(!planner.canCheckRequirements)
+    #expect(planner.requirementsResult == nil)
+  }
+
+  @Test func aChangedAssignmentHidesTheResult() async {
+    fake.enqueue(.init(["Include a graph of your data"]))
+    let planner = planner(Self.lab)
+    await planner.checkRequirements()
+    #expect(planner.requirementsResult == .lines(["Include a graph of your data"]))
+    planner.setText("A different assignment")
+    #expect(planner.requirementsResult == nil)
+    #expect(planner.uncoveredRequirements == nil)
+  }
+
+  @Test func aDoubleTapMakesOneCall() async {
+    fake.enqueue(.init(["Include a graph of your data"]))
+    let planner = planner(Self.lab)
+    async let first: Void = planner.checkRequirements()
+    async let second: Void = planner.checkRequirements()
+    _ = await (first, second)
+    #expect(fake.calls.count == 1)
+  }
+
+  @Test func uncoveredRequirementsFollowTheStepsAsTheyChange() async {
+    fake.enqueue(.init(["Include a graph of your data"]))
+    let planner = planner(Self.lab)
+    planner.beginSaying()
+    planner.addSaid("Write the method")
+    planner.thatsAll()
+    await planner.checkRequirements()
+    #expect(planner.uncoveredRequirements == ["Include a graph of your data"])
+    planner.setStepText(planner.draft.steps[0].id, "Make the graph of your data")
+    #expect(planner.uncoveredRequirements?.isEmpty == true)
+  }
+
+  @Test func theSafetyLineShowsEvenWhenTheStudentChangedTheAssignment() async {
+    fake.enqueue(.init(["TRUSTED_ADULT"]))
+    let planner = planner(Self.lab)
+    await planner.checkRequirements()
+    #expect(planner.aiNote == content.safety.line)
+    #expect(planner.requirementsResult == nil)
+  }
+
+  @Test func aCheckResultIsHiddenOnceTheAIIsGone() async {
+    fake.enqueue(.init(["Include a graph of your data"]))
+    let planner = planner(Self.lab)
+    await planner.checkRequirements()
+    #expect(planner.requirementsResult != nil)
+    planner.coach = nil
+    #expect(planner.requirementsResult == nil)
+    #expect(planner.uncoveredRequirements == nil)
+  }
+
+  @Test func pluralsMatch() {
+    #expect(
+      StepReview.uncovered(["Use two sources"], steps: ["Read one source"], in: content).isEmpty)
+    #expect(
+      StepReview.uncovered(["Use two sources"], steps: ["Read one book"], in: content).count == 1)
+  }
+}

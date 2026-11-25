@@ -15,6 +15,7 @@ The app's words and rules, and the cases its logic must pass. Written once on 20
 | `chat` | The fixed opening question, the AI rules, the default guide, reply lengths, the rules reminder, the look-up line |
 | `stepCoach.rules` | The AI rules for suggesting steps |
 | `stepReview.maxWords`, `stepReview.vaguePhrases` | The word limit (20, the same as AI steps) and the short list of vague steps the review asks about. Exact matches only |
+| `stepReview.extractRules`, `stepReview.stopWords` | The rules for copying the assignment's requirements, and words that never count as a requirement's key words |
 | `coach` | The AI rules every coaching move shares (`common`), the word meaning "nothing to add" (`nothingWord`), and one entry per move under `moves` (`rules`, `ask`, allowed question `starts`, non-AI `fallback`), the fact names (`facts`) and how a fact line is written (`factTemplate`) |
 | `pickup` | The two welcome lines. Neither mentions how long the student was away |
 | `howILikeToWork` | The four one-tap questions and their answers |

@@ -63,4 +63,36 @@ final class StepReviewUITests: XCTestCase {
     skip.tap()
     XCTAssertFalse(app.element("review-note-0").exists)
   }
+
+  /// Check my steps asks which step covers a part the assignment names. Adding a step that covers
+  /// it removes the question.
+  func testCheckingShowsAPartNoStepCoversAndAStepThatCoversItRemovesIt() {
+    let app = XCUIApplication()
+    app.launchArguments = ["-focus-fresh-data", "-focus-fake-ai-requirements"]
+    app.launch()
+    app.buttons["welcome-start"].tap()
+    let box = app.textViews["assignment-text"]
+    box.tap()
+    box.typeText("Lab report. Include a graph of your data.")
+    app.putKeyboardAway()
+    app.buttons["say-steps"].tap()
+    let field = app.textFields["said-step"]
+    field.tap()
+    field.typeText("Write the method")
+    app.putKeyboardAway()
+    app.buttons["add-said"].tap()
+    app.buttons["thats-all"].tap()
+    app.buttons["check-requirements"].tap()
+    let question = app.element("requirement-uncovered")
+    XCTAssertTrue(question.waitForExistence(timeout: 5))
+    XCTAssertEqual(
+      question.label,
+      "The assignment mentions \"Include a graph of your data\". Is that in your steps yet?")
+    app.buttons["add-step"].tap()
+    let newStep = app.element("step-text-1")
+    newStep.tap()
+    newStep.typeText("Make the graph of the data")
+    app.putKeyboardAway()
+    XCTAssertTrue(app.element("requirement-uncovered").waitForNonExistence(timeout: 5))
+  }
 }

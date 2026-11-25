@@ -1,5 +1,5 @@
 # S2 Review notes on each step
-Status: approved for build 2026-11-24 after gate 1 FIX FIRST (4 must-fix, applied below)
+Status: done 2026-11-24
 
 ## What the student sees and does
 1. In the editor, a step that is too long (more than 20 words, the same limit as the AI steps) or vague (exactly one of a short list such as "study", "do the essay"; a single word that is not on the list is not flagged) shows a quiet question under it: "This one looks big. Could you split it into two smaller steps?" or "Which part will you do first?"
@@ -36,4 +36,4 @@ Whether the question feels calm on a phone. Checked on the device, not in tests.
 ## Gates
 Gate 2 (semantic_reviewer, 2026-11-24): FIX FIRST, one must-fix (note said 18 and 19 words; tests use 20 and 21). Corrected in this note.
 Gate 1: FIX FIRST (semantic_reviewer, 2026-11-24). Must-fix applied as above: one-word rule removed; limit 20 to match S1; ids stable (checked in code); 44 pt tap targets and largest-text test; gentler wording. The second round was not run separately: the fixes are exact and gate 2 on the diff covers them.
-Gate 3: pending (full check running).
+Gate 3: full check/check.sh ALL CHECKS PASSED (483 unit tests, UI tests, 0 SKIPPED). No fresh-context Checker was run for S2.

@@ -44,7 +44,7 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 - **Flaky unit test:** `BackupTests.theRealFolderResourceValueIsSetAndCleared` (real data folder's backup flag) failed once in the Checker's first `swift test` and once more by hand, then passed. Not caused by the coaching work. Find the cause before relying on it.
 
 - **Trusted-adult line** depends on the AI sending `TRUSTED_ADULT`. The app checks AI text only, not the student's own words. The parent's question about two extra safety signals is open.
-- **SAFETY (found 2026-11-24, not yet fixed):** when the Apple model's guardrail fires on a distress message (tested in the step coach with "I keep thinking about hurting myself"), the app shows starter steps and no trusted-adult line (`refused` in `StepCoach`). `AGENTS.md` section 0 rule 11 says the trusted-adult message must show. An existing test asserts the current behaviour. The parent must decide before any change (gate 1 and gate 5). Check whether Talk has the same gap.
+- **Fixed 2026-11-24:** a guardrail stop on a step request, a Talk message or the assignment check now shows the trusted-adult line (DECISIONS 2026-11-24). Trade-off: a guardrail on ordinary schoolwork also shows it. Check on the phone (device step 92).
 - **Look it up** still needs a real contact in `WikipediaLookUp.userAgent` (placeholder `set-by-owner@example.invalid`) before anyone except Ben uses the app.
 - **Starter step wording** was changed to "Check your answers against your notes" in `Shared/content.json` and its case file together. Check other starter steps against the never-shame list.
 - **D8 is a draft** until the parent confirms it (`DECISIONS.md`).
@@ -52,13 +52,13 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 
 ## Waiting on
 
-- **Parent:** decide the S1 word-source gate (options A, B, C in `design/slices/S1-step-rules.md`, "Blocked by"); decide whether a distress message should show the trusted-adult line when the AI guardrail fires (safety, see Broken or worrying). Then S1 can continue.
+- **Parent:** confirm the new D8 row for "Check my steps against the assignment" before classmates use it; try device checks 91 and 92; upload build 16 (archived) or a new build 17 from Organizer.
 - **Parent:** check the taller fields and haptics on the phone (device steps 79 to 81); confirm D8 and the Tailscale note; decide on the trusted-adult proposals; archive build 10, then upload it from Xcode's Organizer (Window → Organizer → Bens Steps 0.1 (9) → Distribute App → App Store Connect → Upload); decide whether to build "How I want help" (the Me split is task ME1); run or arrange T14 for each AI.
 - **Ben:** the final name and icon (placeholder staircase), the words for Drifted and Stuck, whether voice starts off (it does now).
 
 ## Next (in order)
 
-- **Ready to hand off:** `TASKS-steps-me.md` (ME1 Me screens; S1 step rules; S2 step review notes; S3 check against the assignment). Start each session with Prompt 5 in `PROMPTS.md`. Written to be Haiku-capable.
+- **Done 2026-11-24:** ME1, S1, S2 and S3 from `TASKS-steps-me.md`. Build 16 on the phone has S1 only; S2 and S3 are committed but not yet on a build (next build is 17). Device checks 91 (S2) and 92 (S3) wait for the parent.
 
 0. M0a and M0b are built. Parent to decide the course-line viewer (DECISIONS 2026-11-23): either keep course lines hidden until M4, or build a small list with delete before classmates use the app.
 0. Phone AI: research in `research/08-phone-ai.md`, plan in `design/slices/PHONE-AI-plan.md`. **P0 done 2026-11-23:** `checks/phone-ai-eval.sh` runs `checks/phone-ai-cases.json` through the app's chat code on this Mac; baseline scored in `research/phone-ai-eval/scores.md`; the Talk tally (five counts, no text) shows under About. Next: P1 (rewrite the chat rules), measured against the baseline.
