@@ -47,9 +47,17 @@ echo "ran: xcodebuild build-for-testing (generic iOS device: app and UI tests co
 
 echo "== 4. UI tests =="
 # Only simulators running iOS 26 or later work with this Xcode; skip older runtimes (e.g. iOS 18).
+# Prefer the iPhone 15 Pro Max (the simulator the suite is known to pass on). Another iPhone has
+# crashed whole groups of UI tests with "signal kill". Set FOCUS_SIM to a simulator id to override.
+PREFERRED=$(xcrun simctl list devices available 2>/dev/null | awk '
+  /^-- .* --$/ { v = 0; if ($2 == "iOS") { split($3, a, "."); v = a[1] + 0 } ; next }
+  v >= 26 && /iPhone 15 Pro Max/ { if (match($0, /\([0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}\)/)) { print substr($0, RSTART + 1, 36); exit } }')
+DEST="${FOCUS_SIM:-$PREFERRED}"
+if [ -z "$DEST" ]; then
 DEST=$(xcrun simctl list devices available 2>/dev/null | awk '
   /^-- .* --$/ { v = 0; if ($2 == "iOS") { split($3, a, "."); v = a[1] + 0 } ; next }
   v >= 26 && /iPhone/ { if (match($0, /\([0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}\)/)) { print substr($0, RSTART + 1, 36); exit } }')
+fi
 if [ -n "$DEST" ]; then
   xcodebuild test -project App/FocusApp.xcodeproj -scheme FocusApp \
     -destination "id=$DEST" CODE_SIGNING_ALLOWED=NO > /tmp/focusapp-uitests.log 2>&1 \

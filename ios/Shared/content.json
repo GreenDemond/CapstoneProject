@@ -229,7 +229,24 @@
           "where"
         ],
         "maxWords": 20,
-        "fallback": "What is the very first small thing this step asks you to do?"
+        "fallback": "What is the very first small thing this step asks you to do?",
+        "sees": [
+          {
+            "kind": "pattern",
+            "tags": [
+              "stuck",
+              "starting"
+            ],
+            "limit": 2,
+            "thisCourse": false
+          },
+          {
+            "kind": "course",
+            "tags": [],
+            "limit": 1,
+            "thisCourse": true
+          }
+        ]
       },
       "splitNudge": {
         "rules": "The student wrote one step that may hold two jobs. Reply with exactly one question, under 15 words, that helps them decide whether to split it. Do not rewrite the step. Do not suggest words for either part.",
@@ -259,7 +276,8 @@
           "together"
         ],
         "maxWords": 15,
-        "fallback": "This looks like two steps. Split it?"
+        "fallback": "This looks like two steps. Split it?",
+        "sees": []
       }
     },
     "facts": {

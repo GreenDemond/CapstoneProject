@@ -12,8 +12,8 @@ A task is `ready` when every task it depends on is `done`. Every task here needs
 | C1 Stuck question | done | C0 | 2026-11-22 | Gates 1 and 2 by `semantic_reviewer` (Claude, same family): must-fix applied. fresh Checker: every done-when item PASS; `check.sh` ALL CHECKS PASSED on its second run (415 unit, 38 UI). Device steps 82 to 85 are for the parent |
 | C2 Split nudge | done | C0 | 2026-11-22 | As C1. D8 row awaits the parent |
 | M0 Learner record and courses | done (M0a and M0b). The Plan viewer and per-line delete are waiting on the parent (DECISIONS 2026-11-23) | C0 | 2026-11-23 | M0b: gates 1 and 2 by `semantic_reviewer` (model not stated), must-fix applied. `checks/check.sh` ALL CHECKS PASSED (446 unit, 39 UI) |
-| M3 Feedback under AI lines | waiting | C1, M0 | | |
-| M1 Rule selector | waiting | M0 | | |
+| M3 Feedback under AI lines | in progress (design approved) | C1, M0 | | Scope cut recorded 2026-11-24 (gate 1): no "why" box until M4 gives a viewer (rule 5); the bias applies to the Stuck question only (the split nudge already shows its fixed line first; a chat reply has no fixed line); totals belong to M4 |
+| M1 Rule selector | done | M0 | 2026-11-24 | `checks/check.sh` ALL CHECKS PASSED (518 unit, UI, 0 SKIPPED) on the iPhone 15 Pro Max. Built before its note; gates 1 and 2 combined on the diff (FIX FIRST, five must-fix, applied). No fresh-context Checker. Classmate builds need M4 first so each line can be seen and deleted |
 | C3 Comeback slice | waiting | M1, R1 | | |
 | C6 Tidy my question | waiting | M1 | | |
 | M4 How I work screen | waiting | M0 | | |

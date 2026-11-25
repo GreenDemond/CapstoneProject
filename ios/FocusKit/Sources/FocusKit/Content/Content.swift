@@ -73,6 +73,20 @@ public struct Content: Codable, Equatable, Sendable {
     /// The most words the line may have. Zero means no cap.
     public let maxWords: Int
     public let fallback: String
+    /// What the learner record may show this move (M1). Empty means nothing. Reviewed at gate 2.
+    public let sees: [Sees]
+  }
+
+  /// One allow-list rule: which kind of record line, with which tags, and how many.
+  public struct Sees: Codable, Equatable, Sendable {
+    /// A `LearnerRecord.Kind` raw value.
+    public let kind: String
+    /// Any of these tags qualifies. Empty means any line of the kind.
+    public let tags: [String]
+    /// The newest this many lines.
+    public let limit: Int
+    /// Only lines for the current course label.
+    public let thisCourse: Bool
   }
 
   public struct CoachFacts: Codable, Equatable, Sendable {

@@ -68,7 +68,9 @@ public final class LadderModel {
 
   /// Asks the AI for one question about the step. `stepText` and `kindLabel` come from the saved
   /// step, not from the boxes the student can edit. Never writes anything down.
-  public func askQuestion(stepText: String, kindLabel: String) async {
+  public func askQuestion(
+    stepText: String, kindLabel: String, record: [LearnerRecord.Entry] = []
+  ) async {
     guard let coach, canAskQuestion else { return }
     isAsking = true
     defer { isAsking = false }
@@ -82,9 +84,15 @@ public final class LadderModel {
     if !Text.trimmed(tried).isEmpty {
       facts.append(CoachText.fact(names.tried, tried, content: content))
     }
+    // What the record may show this move, in the student's own words (M1).
+    facts += record.map { CoachText.fact($0.kind.rawValue, $0.text, content: content) }
     // The question may only use words from the step, what the student tried, the kind of work, and
     // the move's short list, so it cannot bring in facts about the subject.
-    let source = [stepText, tried, kindLabel].joined(separator: " ")
+    // Only a pattern line's words widen this: those are the student's own words about how they work.
+    // A course line holds steps from an earlier assignment, which may be the AI's, so its words
+    // never count.
+    let own = record.filter { $0.kind == .pattern }.map(\.text)
+    let source = ([stepText, tried, kindLabel] + own).joined(separator: " ")
     switch await coach.run(moveKey: key, facts: facts, shape: .question, source: source) {
     case .line(let line):
       coachNote = nil

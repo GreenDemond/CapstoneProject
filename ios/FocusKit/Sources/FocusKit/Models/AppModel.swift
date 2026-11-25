@@ -312,7 +312,10 @@ public final class AppModel {
   /// step, not from the boxes the student can edit.
   public func askQuestion(_ ladder: LadderModel, for step: Step) async {
     let label = content.kinds.first { $0.id == saved?.kindId }?.label ?? "Something else"
-    await ladder.askQuestion(stepText: step.text, kindLabel: label)
+    let record = LearnerSelector.entries(
+      context: SelectorContext(moveKey: "stuckQuestion", course: saved?.course),
+      record: learner, content: content)
+    await ladder.askQuestion(stepText: step.text, kindLabel: label, record: record)
   }
 
   /// Hints with no step, for the Talk screen when there is no AI.
