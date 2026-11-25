@@ -148,6 +148,24 @@ struct StepRow: View {
           }
         }
       }
+      if let note = planner.reviewNote(for: step.id) {
+        HStack {
+          Text(Words.stepNote(note))
+            .font(Theme.Typography.small)
+            .foregroundStyle(Theme.Palette.quiet)
+            .accessibilityIdentifier("review-note-\(step.id)")
+          Spacer()
+          if note == .tooLong, planner.canSplit(step.id) {
+            Button(Words.splitStep) { planner.split(step.id) }
+              .frame(minHeight: 44)
+              .accessibilityIdentifier("review-split-\(step.id)")
+          }
+          Button(Words.stepNoteSkip) { planner.dismissReview(step.id) }
+            .frame(minHeight: 44)
+            .accessibilityIdentifier("review-skip-\(step.id)")
+        }
+        .buttonStyle(.borderless)
+      }
       if showDoneLine || !step.doneLine.isEmpty {
         TextField(
           Words.doneLinePrompt,

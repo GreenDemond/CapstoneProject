@@ -41,6 +41,14 @@ public enum Words {
   public static let addGetReady = "Add a Get ready step"
   public static let addPutAway = "Add a Put it away step"
   public static let looksLikeTwo = "This looks like two steps. Split it?"
+  public static let stepNoteTooLong =
+    "This one looks big. Could you split it into two smaller steps?"
+  public static let stepNoteVague = "Which part will you do first?"
+  public static let stepNoteSkip = "Skip"
+  public static let splitStep = "Split"
+  public static func stepNote(_ note: StepNote) -> String {
+    note == .tooLong ? stepNoteTooLong : stepNoteVague
+  }
   public static let doneLinePrompt = "How will I know it's done?"
   public static let noSteps = "Add a step first."
   public static let startButton = "Start"

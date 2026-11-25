@@ -29,6 +29,8 @@ public final class PlannerModel {
   private var nudgeQuestions: [Int: (text: String, question: String)] = [:]
   /// Bumped when the draft is replaced, so a late answer for an older draft is dropped.
   private var nudgeEpoch = 0
+  /// Steps whose review question the student skipped in this editing session. Not saved.
+  private var reviewDismissed: Set<Int> = []
 
   /// One idea for the next step, waiting for the student to use it or not.
   public private(set) var idea: Idea?
@@ -390,7 +392,31 @@ public final class PlannerModel {
   private func forgetNudges() {
     nudgeAsked = []
     nudgeQuestions = [:]
+    reviewDismissed = []
     nudgeEpoch += 1
+  }
+
+  /// The quiet review question for one step, or nil. The split nudge takes precedence, so a step
+  /// never shows two questions, and a step the student said No to splitting gets none.
+  public func reviewNote(for id: Int) -> StepNote? {
+    guard !reviewDismissed.contains(id), !looksLikeTwo(id), !draft.nudgeDismissed.contains(id),
+      let step = draft.steps.first(where: { $0.id == id })
+    else { return nil }
+    return StepReview.note(for: step.text, in: content)
+  }
+
+  /// Skip: hide the review question for this step until the editor is reset. Nothing is saved.
+  public func dismissReview(_ id: Int) {
+    reviewDismissed.insert(id)
+  }
+
+  /// Whether the Split button can split this step: there is room for one more step and the text
+  /// has a split point. Mirrors `split`.
+  public func canSplit(_ id: Int) -> Bool {
+    guard let step = draft.steps.first(where: { $0.id == id }),
+      draft.steps.count < content.limits.savedSteps
+    else { return false }
+    return Self.splitParts(Text.trimmed(step.text)) != nil
   }
 
   /// The answer No: the step stays as it is and the nudge does not come back.

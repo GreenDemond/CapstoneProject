@@ -52,6 +52,12 @@ public struct Content: Codable, Equatable, Sendable {
     public let rules: String
   }
 
+  /// The word limit and the short list of vague steps the step review asks about.
+  public struct StepReview: Codable, Equatable, Sendable {
+    public let maxWords: Int
+    public let vaguePhrases: [String]
+  }
+
   public struct CoachMoveText: Codable, Equatable, Sendable {
     public let rules: String
     /// The one request line sent after the facts.
@@ -112,6 +118,7 @@ public struct Content: Codable, Equatable, Sendable {
   public let safety: Safety
   public let chat: Chat
   public let stepCoach: StepCoach
+  public let stepReview: StepReview
   public let coach: Coach
   public let pickup: Pickup
   public let howILikeToWork: HowILikeToWork

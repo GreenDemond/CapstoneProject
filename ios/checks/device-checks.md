@@ -140,3 +140,5 @@ Use keys you own. Steps 62 to 78 replace the single-service steps of build 5.
 
 89. **Does the phone's AI get the instructions?** On Talk, check the top line says "This AI runs on this iPhone" (not a service name). Under Me → How the AI talks, type: *Begin every reply with the single word PINEAPPLE.* Open Talk, start a new chat, and send any message. The reply should begin with PINEAPPLE. Then clear the box. If it does not begin with PINEAPPLE, report which AI the top line names; that means the instructions are not arriving.
 90. Me → How I like to work: each question shows once, with **Choose one** under it.
+
+91. **Step review (S2).** In Today, type an assignment, then type a step that is only "Study" and open the editor. A quiet question appears under it: "Which part will you do first?" with a Skip button. Tap Skip: the question goes. Tap Start: the work screen opens. Then type a long step over 20 words: the question "This one looks big…" shows with Split (if the step has a split point). Note whether the question feels calm or like a challenge; report it either way.
