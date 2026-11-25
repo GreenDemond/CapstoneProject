@@ -155,6 +155,10 @@ public struct Settings: Storable {
   /// True only for settings read from build 5's single service: the list was made from the old
   /// fields and the app should save it and move the old key. Never written.
   public var movedFromSingleService = false
+  /// The day the weekly look-back card was last handled (Done or Not now). Nil until the first
+  /// visit to Plan starts the clock. Independent of the reflection lines, so deleting them does
+  /// not bring the card back.
+  public var lastReflectionHandled: Date?
 
   public init(
     readAloud: Bool = false, talk: Bool = false, headphonesOnly: Bool = true,
@@ -178,7 +182,7 @@ public struct Settings: Storable {
 
   private enum CodingKeys: String, CodingKey {
     case readAloud, talk, voiceMode, headphonesOnly, voiceId, speechRate, guides, lengths
-    case howILikeToWork, includeInBackup, ownAIServices, chosenServiceId
+    case howILikeToWork, includeInBackup, ownAIServices, chosenServiceId, lastReflectionHandled
     // Build 5's single service. Read, never written.
     case ownAIOn, ownAIEndpoint, ownAIModelId, ownAIChosen
   }
@@ -201,6 +205,8 @@ public struct Settings: Storable {
     self.howILikeToWork =
       try c.decodeIfPresent([String: String].self, forKey: .howILikeToWork) ?? [:]
     self.includeInBackup = (try? c.decodeIfPresent(Bool.self, forKey: .includeInBackup)) ?? true
+    self.lastReflectionHandled =
+      (try? c.decodeIfPresent(Date.self, forKey: .lastReflectionHandled)) ?? nil
     let listed = try? c.decodeIfPresent([LossyService].self, forKey: .ownAIServices)
     if let listed {
       self.ownAIServices = listed.compactMap(\.service)
@@ -247,6 +253,7 @@ public struct Settings: Storable {
     try c.encode(includeInBackup, forKey: .includeInBackup)
     try c.encode(ownAIServices, forKey: .ownAIServices)
     try c.encodeIfPresent(chosenServiceId, forKey: .chosenServiceId)
+    try c.encodeIfPresent(lastReflectionHandled, forKey: .lastReflectionHandled)
   }
 
   public func limited(by limits: Content.Limits) -> Settings {

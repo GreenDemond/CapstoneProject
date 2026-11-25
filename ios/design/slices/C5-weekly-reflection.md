@@ -1,5 +1,5 @@
 # C5 Weekly reflection
-Status: approved for build 2026-11-25 after gate 1 FIX FIRST (applied below)
+Status: done 2026-11-25
 
 ## What the student sees and does
 1. On the Plan tab, once seven days have passed since the student last did a reflection (or on the first visit after seven days of use), a card offers **A quick look back at your week**. It never nags: it is one card, not a pop-up, and it goes away when the student does it or taps Not now (it returns after seven more days).
@@ -32,7 +32,7 @@ Seven-day rule with the fake clock (shows on day 7, not day 6; Not now defers se
 Whether a real model restates faithfully. Phone check later.
 
 ## Gates
-Gate 1 (semantic_reviewer, a fresh read-only agent, 2026-11-24): FIX FIRST, applied in the Gate 1 response below. Gate 2: pending. Gate 3: pending.
+Gate 1 (semantic_reviewer, a fresh read-only agent, 2026-11-24): FIX FIRST, applied in the Gate 1 response below. Gate 2 (semantic_reviewer, 2026-11-25, one review for C4 and C5): FIX FIRST, one must-fix, applied: last week's reply is cleared at the top of Done, so a swiped-away sheet cannot show it (test added). Suggestions taken: abbreviation check on whole words ("problems." is not "ms."; test added), the card stacks at large text sizes, the reply is announced for VoiceOver. Accepted gap, recorded: with no AI, a distressed answer gets the fixed line, not the trusted-adult line, as for other moves; test distress input on a real phone. Gate 3: full `checks/check.sh` ALL CHECKS PASSED (633 unit tests, UI tests, 0 SKIPPED). No fresh-context Checker was run.
 
 ## Gate 1 response (changes to this design)
 - **When the card shows.** A small stored date in Settings, the day the reflection card was last handled (Done with words, Done with nothing, or Not now). The seven days run from there. With no date, the first visit to Plan starts the clock and shows nothing. Deleting reflection lines never brings the card back, so a student is not prompted again for deleting their own words. Not now waits seven days, like Done; it is as easy to tap as the action.

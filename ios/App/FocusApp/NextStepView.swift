@@ -59,11 +59,54 @@ struct PlanListView: View {
   @State private var pendingDelete: String?
   /// Kept apart from `pendingDelete`: the dialog clears that before its buttons run.
   @State private var chosenDelete: String?
+  @State private var lookingBack = false
 
   private var steps: [Step] { model.work?.steps ?? [] }
   private var hasThoughts: Bool { !model.parked.items.isEmpty || !model.recall.items.isEmpty }
 
   var body: some View {
+    planBody
+      // One quiet card when seven days have passed. Not now is as easy to tap as Take a look.
+      .safeAreaInset(edge: .top) {
+        if model.reflectionDue {
+          reflectionCard
+        }
+      }
+      .onAppear { model.startReflectionClock() }
+      .sheet(isPresented: $lookingBack) {
+        ReflectionView(model: model) { lookingBack = false }
+      }
+  }
+
+  private var reflectionCard: some View {
+    VStack(alignment: .leading, spacing: Theme.Space.small) {
+      Text(Words.reflectionCard)
+        .font(Theme.Typography.body)
+        .foregroundStyle(Theme.Palette.ink)
+      // Side by side; stacked when the text size is too large for one row.
+      ViewThatFits(in: .horizontal) {
+        HStack(spacing: Theme.Space.small) { reflectionButtons }
+        VStack(spacing: Theme.Space.small) { reflectionButtons }
+      }
+    }
+    .padding(Theme.Space.medium)
+    .frame(maxWidth: .infinity, alignment: .leading)
+    .background(Theme.Palette.card)
+    .accessibilityElement(children: .contain)
+    .accessibilityIdentifier("reflection-card")
+  }
+
+  @ViewBuilder
+  private var reflectionButtons: some View {
+    Button(Words.reflectionOpen) { lookingBack = true }
+      .buttonStyle(QuietButtonStyle())
+      .accessibilityIdentifier("reflection-open")
+    Button(Words.reflectionNotNow) { model.laterReflection() }
+      .buttonStyle(QuietButtonStyle())
+      .accessibilityIdentifier("reflection-later")
+  }
+
+  private var planBody: some View {
     Group {
       if !steps.isEmpty || hasThoughts {
         List {

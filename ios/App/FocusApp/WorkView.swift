@@ -40,6 +40,11 @@ struct WorkView: View {
     .keyboardDoneButton()
     .accessibilityElement(children: .contain)
     .accessibilityIdentifier("work-screen")
+    .onDisappear { model.dismissBlockFollowUp() }
+    .onChange(of: model.currentStep?.id) { model.dismissBlockFollowUp() }
+    .onChange(of: model.blockFollowUp?.line) { _, line in
+      if let line { AccessibilityNotification.Announcement(line).post() }
+    }
     .sheet(item: $stuckStep) { target in
       StuckView(model: model, target: target)
     }
@@ -63,6 +68,7 @@ struct WorkView: View {
             .accessibilityIdentifier("step-position")
         }
         if let minutes = askMinutes { blockQuestion(minutes) }
+        if let followUp = model.blockFollowUp { blockFollowUp(followUp) }
         stepCard(step)
         readButton(step)
         ChoiceGrid(choices: ChoiceGrid.layout) { choice in choose(choice, step: step) }
@@ -103,12 +109,14 @@ struct WorkView: View {
           timerEnds = nil
           timerMinutes = nil
           askMinutes = nil
+          model.dismissBlockFollowUp()
         }
         ForEach(BlockLength.lengths, id: \.self) { minutes in
           Button(timerLabel(minutes)) {
             timerEnds = Date().addingTimeInterval(Double(minutes) * Self.secondsPerMinute)
             timerMinutes = minutes
             askMinutes = nil
+            model.dismissBlockFollowUp()
           }
         }
       } label: {
@@ -139,6 +147,21 @@ struct WorkView: View {
     .cardStyle()
   }
 
+  /// After Shorter or Longer: one question for next time, or a moment of thinking. Done closes it.
+  private func blockFollowUp(_ followUp: AppModel.BlockFollowUp) -> some View {
+    VStack(alignment: .leading, spacing: Theme.Space.small) {
+      Text(followUp.line ?? Words.blockFollowUpThinking)
+        .font(Theme.Typography.body)
+        .foregroundStyle(followUp.line == nil ? Theme.Palette.quiet : Theme.Palette.ink)
+        .accessibilityIdentifier("block-followup")
+      Button(Words.blockFollowUpDone) { model.dismissBlockFollowUp() }
+        .buttonStyle(LinkButtonStyle())
+        .accessibilityIdentifier("block-followup-done")
+    }
+    .frame(maxWidth: .infinity, alignment: .leading)
+    .cardStyle()
+  }
+
   @ViewBuilder
   private func blockButtons(_ minutes: Int) -> some View {
     ForEach(BlockLength.Answer.allCases.filter { BlockLength.offers($0, at: minutes) }, id: \.self)
@@ -146,6 +169,7 @@ struct WorkView: View {
       answer in
       Button(blockLabel(answer)) {
         model.answerBlockLength(minutes: minutes, answer)
+        model.startBlockFollowUp(minutes: minutes, answer)
         askMinutes = nil
       }
       .buttonStyle(QuietButtonStyle())

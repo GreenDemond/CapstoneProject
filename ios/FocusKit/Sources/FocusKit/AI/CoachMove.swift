@@ -64,7 +64,9 @@ enum CoachText {
 public struct CoachMove: Sendable {
   /// `askLine` is one line ending in a single question mark, any first word: a student's own
   /// question reworded for a person.
-  public enum Shape: Sendable { case question, shortLine, askLine }
+  /// `twoSentences` is a restatement then one question: exactly one boundary, one question mark
+  /// as the last character, and a start word on the second sentence.
+  public enum Shape: Sendable { case question, shortLine, askLine, twoSentences }
 
   public enum Outcome: Equatable, Sendable {
     /// Passed every check.
@@ -167,7 +169,7 @@ public struct CoachMove: Sendable {
     if bare.caseInsensitiveCompare(nothing) == .orderedSame { return .success(nil) }
 
     // A question for a person can be longer than a step.
-    let cap = shape == .askLine ? max(limit, 300) : limit
+    let cap = (shape == .askLine || shape == .twoSentences) ? max(limit, 300) : limit
     if text.utf16.count > cap { return .failure(.notProcess) }
     if AnswerGuard.looksFinished(text, length: "short") { return .failure(.notProcess) }
     if CoachText.hasLongQuote(text) { return .failure(.notProcess) }
@@ -181,11 +183,36 @@ public struct CoachMove: Sendable {
       guard allowed.contains(letters) else { return .failure(.notProcess) }
     case .shortLine:
       if text.hasSuffix("?") || CoachText.hasColonSentence(text) { return .failure(.notProcess) }
+    case .twoSentences:
+      guard let second = Self.secondSentence(of: text), text.hasSuffix("?"),
+        text.filter({ $0 == "?" }).count == 1, !CoachText.hasColonSentence(text)
+      else { return .failure(.notProcess) }
+      let firstWord = second.split(whereSeparator: { $0.isWhitespace }).first.map(String.init) ?? ""
+      let letters = firstWord.lowercased().filter { $0.isLetter }
+      let allowed = starts.isEmpty ? questionWords : Set(starts)
+      guard allowed.contains(letters) else { return .failure(.notProcess) }
     case .askLine:
       guard text.hasSuffix("?"), text.filter({ $0 == "?" }).count == 1,
         !CoachText.hasColonSentence(text)
       else { return .failure(.notProcess) }
     }
     return .success(text)
+  }
+
+  /// Abbreviations whose full stop would look like a sentence boundary. A reply with one falls
+  /// back to the fixed line rather than guess.
+  private static let abbreviations = [
+    "e.g.", "i.e.", "mr.", "mrs.", "ms.", "dr.", "p.m.", "a.m.", "vs.", "etc.", "u.s.",
+  ]
+
+  /// The second sentence of a reply that has exactly one boundary (a full stop or exclamation mark,
+  /// a space, then a capital letter or a digit), or nil.
+  static func secondSentence(of text: String) -> String? {
+    // Whole words only, so "problems." is not read as "ms.".
+    let lower = " " + text.lowercased()
+    guard !abbreviations.contains(where: { lower.contains(" " + $0) }) else { return nil }
+    let boundaries = text.matches(of: /[.!]\s+(?=[A-Z0-9])/)
+    guard boundaries.count == 1, let boundary = boundaries.first else { return nil }
+    return String(text[boundary.range.upperBound...])
   }
 }

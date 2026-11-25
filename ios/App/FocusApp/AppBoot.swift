@@ -16,8 +16,20 @@ enum AppBoot {
   static let fakeAIYesNoArgument = "-focus-fake-ai-yesno"
   static let fakeAIRequirementsArgument = "-focus-fake-ai-requirements"
   static let fakeAITidyArgument = "-focus-fake-ai-tidy"
+  static let fakeAIFollowUpArgument = "-focus-fake-ai-followup"
+  static let fakeAIReflectionArgument = "-focus-fake-ai-reflection"
+  /// The weekly look-back card is due now (the last one was eight days ago).
+  static let reflectionDueArgument = "-focus-reflection-due"
 
   static func make() -> AppModel? {
+    guard let model = build() else { return nil }
+    if CommandLine.arguments.contains(reflectionDueArgument) {
+      model.updateSettings { $0.lastReflectionHandled = Date().addingTimeInterval(-8 * 86_400) }
+    }
+    return model
+  }
+
+  private static func build() -> AppModel? {
     guard let content = try? Content.bundled() else { return nil }
     let folder = dataFolder()
     let store = FileStore(folder: folder, limits: content.limits)
@@ -50,6 +62,8 @@ enum AppBoot {
       arguments.contains(fakeAIArgument) || arguments.contains(fakeAIDistressArgument)
         || arguments.contains(fakeAIQuestionArgument) || arguments.contains(fakeAIYesNoArgument)
         || arguments.contains(fakeAIRequirementsArgument) || arguments.contains(fakeAITidyArgument)
+        || arguments.contains(fakeAIFollowUpArgument)
+        || arguments.contains(fakeAIReflectionArgument)
     else {
       return nil
     }
@@ -60,6 +74,11 @@ enum AppBoot {
       model.enqueue(.init(["Is that one job or two?"]))
     } else if arguments.contains(fakeAIRequirementsArgument) {
       model.enqueue(.init(["Include a graph of your data"]))
+    } else if arguments.contains(fakeAIReflectionArgument) {
+      model.enqueue(
+        .init(["You said talking it through helped. Would you like to try that again next week?"]))
+    } else if arguments.contains(fakeAIFollowUpArgument) {
+      model.enqueue(.init(["Would you like to try 5 minutes next time?"]))
     } else if arguments.contains(fakeAITidyArgument) {
       model.enqueue(
         .init(["Could you tell me what the prompt is asking, since I tried to read the prompt?"]))

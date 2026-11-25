@@ -36,6 +36,17 @@ public enum BlockLength {
     }
   }
 
+  /// The length to try next after Shorter or Longer: the next shorter or longer entry, or nil at
+  /// either end and for About right.
+  public static func target(from minutes: Int, _ answer: Answer) -> Int? {
+    guard let index = lengths.firstIndex(of: minutes) else { return nil }
+    switch answer {
+    case .shorter: return index > 0 ? lengths[index - 1] : nil
+    case .longer: return index < lengths.count - 1 ? lengths[index + 1] : nil
+    case .aboutRight: return nil
+    }
+  }
+
   /// The text of the record line for one answer, for example "12-minute block: too long".
   public static func text(minutes: Int, answer: Answer) -> String {
     let feel: String
@@ -86,5 +97,20 @@ public enum BlockLength {
   /// Whether to raise the question: the countdown has ended, and not long ago.
   public static func shouldAsk(end: Date, now: Date) -> Bool {
     now >= end && now.timeIntervalSince(end) <= freshSeconds
+  }
+
+  /// Number and size words a follow-up question may not use, besides the one length it names.
+  private static let sizeWords: Set<String> = [
+    "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "twenty",
+    "half", "double", "triple", "hour", "hours", "second", "seconds",
+  ]
+
+  /// A follow-up question must name the new length, and no other number or size.
+  public static func namesOnly(_ target: Int, in line: String) -> Bool {
+    let digits = line.split(whereSeparator: { !$0.isNumber }).map(String.init)
+    // It must name the new length, and only that: a reply with no number can point the wrong way.
+    guard digits == [String(target)] else { return false }
+    let words = line.lowercased().split(whereSeparator: { !$0.isLetter }).map(String.init)
+    return !words.contains { sizeWords.contains($0) }
   }
 }

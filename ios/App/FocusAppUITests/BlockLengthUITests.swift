@@ -91,4 +91,32 @@ final class BlockLengthUITests: XCTestCase {
     }
     XCTAssertTrue(longer.isHittable, "Longer cannot be reached at the largest text size")
   }
+
+  /// After Shorter at 12 minutes, one question names the new length. Done closes it.
+  func testShorterAtTwelveGivesAQuestionNamingFiveMinutes() {
+    let app = startWork(extra: ["-focus-fake-ai-followup"])
+    app.element("timer-menu").tap()
+    app.buttons["12 minutes"].tap()
+    XCTAssertTrue(app.element("block-question").waitForExistence(timeout: 10))
+    app.buttons["block-shorter"].tap()
+    let question = app.element("block-followup")
+    XCTAssertTrue(question.waitForExistence(timeout: 5))
+    let said = expectation(
+      for: NSPredicate(format: "label == %@", "Would you like to try 5 minutes next time?"),
+      evaluatedWith: question)
+    wait(for: [said], timeout: 5)
+    app.buttons["block-followup-done"].tap()
+    XCTAssertTrue(app.element("block-followup").waitForNonExistence(timeout: 5))
+  }
+
+  /// About right asks nothing more.
+  func testAboutRightGivesNoFollowUp() {
+    let app = startWork(extra: ["-focus-fake-ai-followup"])
+    app.element("timer-menu").tap()
+    app.buttons["12 minutes"].tap()
+    XCTAssertTrue(app.element("block-question").waitForExistence(timeout: 10))
+    app.buttons["block-aboutRight"].tap()
+    XCTAssertTrue(app.element("block-question").waitForNonExistence(timeout: 5))
+    XCTAssertFalse(app.element("block-followup").exists)
+  }
 }

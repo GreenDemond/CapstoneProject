@@ -590,6 +590,151 @@ public final class AppModel {
     saveLearner()
   }
 
+  // MARK: Weekly look-back (C5)
+
+  /// The look-back reply: the AI's two sentences, or the fixed line. `fixed` replies cannot be
+  /// rated.
+  public struct ReflectionReply: Equatable, Sendable {
+    public let line: String
+    public let fixed: Bool
+  }
+
+  public private(set) var reflectionReply: ReflectionReply?
+  public private(set) var reflectionBusy = false
+  public private(set) var reflectionRated = false
+
+  public var reflectionDue: Bool {
+    Reflection.isDue(lastHandled: settings.lastReflectionHandled, now: clock.now)
+  }
+
+  /// The first visit to Plan starts the seven days. Nothing is shown before they pass.
+  public func startReflectionClock() {
+    guard settings.lastReflectionHandled == nil else { return }
+    updateSettings { $0.lastReflectionHandled = clock.now }
+  }
+
+  /// Not now, or Done: seven more days. Deleting the reflection lines never brings the card back.
+  public func laterReflection() {
+    updateSettings { $0.lastReflectionHandled = clock.now }
+  }
+
+  /// Done: the answers become the student's own lines (deletable under What the app remembers about
+  /// me), then one reply. Only the two answers go to the AI. With nothing written, nothing is
+  /// saved and no call is made.
+  public func submitReflection(helped: String, next: String) async {
+    guard !reflectionBusy else { return }
+    let helped = Text.trimmed(helped)
+    let next = Text.trimmed(next)
+    laterReflection()
+    // Last week's reply never shows for this one, even if the sheet was swiped away.
+    reflectionReply = nil
+    reflectionRated = false
+    guard !helped.isEmpty || !next.isEmpty else { return }
+    reflectionBusy = true
+    defer { reflectionBusy = false }
+    for (label, answer) in [(Reflection.helpedLabel, helped), (Reflection.nextLabel, next)]
+    where !answer.isEmpty {
+      learner.add(
+        LearnerRecord.Entry(
+          kind: .reflection, date: clock.now, text: Reflection.line(label, answer),
+          source: .student))
+    }
+    saveLearner()
+    let fixed = ReflectionReply(line: Words.reflectionFixed, fixed: true)
+    let move = CoachMove(model: switcher, content: content)
+    guard move.isAvailable else {
+      reflectionReply = fixed
+      return
+    }
+    var facts: [String] = []
+    if !helped.isEmpty {
+      facts.append(CoachText.fact("What helped this week", helped, content: content))
+    }
+    if !next.isEmpty {
+      facts.append(CoachText.fact("One thing to try next week", next, content: content))
+    }
+    let outcome = await move.run(
+      moveKey: "weeklyReflection", facts: facts, shape: .twoSentences,
+      source: [helped, next].joined(separator: " "))
+    switch outcome {
+    case .line(let line):
+      reflectionReply = ReflectionReply(line: line, fixed: false)
+    case .trustedAdult:
+      // The student's own words may say they are in distress: show the line, never a reply.
+      reflectionReply = ReflectionReply(line: content.safety.line, fixed: true)
+    case .nothing, .fallback:
+      // NOTHING, a refusal, a failed check or no AI: the fixed line.
+      reflectionReply = fixed
+    }
+  }
+
+  public func rateReflection(_ rating: FeedbackRating) {
+    guard let reply = reflectionReply, !reply.fixed, !reflectionRated else { return }
+    reflectionRated = true
+    rate(move: "weeklyReflection", rating)
+  }
+
+  /// Closing the screen drops the reply. It is never saved.
+  public func closeReflection() {
+    reflectionReply = nil
+    reflectionRated = false
+  }
+
+  // MARK: Block follow-up (C4)
+
+  /// The question under the block answer: the length it names, and the line once it is ready.
+  public struct BlockFollowUp: Equatable, Sendable {
+    public let minutes: Int
+    public let target: Int
+    public var line: String?
+  }
+
+  public private(set) var blockFollowUp: BlockFollowUp?
+  private var followUpTask: Task<Void, Never>?
+  private var followUpId = 0
+
+  /// After Shorter or Longer: one question suggesting the next length. About right, and a length
+  /// with nowhere to go, get nothing. The AI sees only code-built facts (the length tried, how it
+  /// felt, the new length), never a student's words. Any failure shows the fixed line.
+  public func startBlockFollowUp(minutes: Int, _ answer: BlockLength.Answer) {
+    dismissBlockFollowUp()
+    guard let target = BlockLength.target(from: minutes, answer) else { return }
+    let fixed = Words.blockFollowUpFixed(target)
+    let move = CoachMove(model: switcher, content: content)
+    guard move.isAvailable else {
+      blockFollowUp = BlockFollowUp(minutes: minutes, target: target, line: fixed)
+      return
+    }
+    blockFollowUp = BlockFollowUp(minutes: minutes, target: target, line: nil)
+    followUpId += 1
+    let id = followUpId
+    followUpTask = Task { [weak self] in
+      guard let self else { return }
+      let names = ["The block length the student tried", "How it felt", "The new length to try"]
+      let felt = answer == .shorter ? "too long" : "too short"
+      let texts = ["\(minutes) minutes", felt, "\(target) minutes"]
+      let facts = zip(names, texts).map { CoachText.fact($0, $1, content: self.content) }
+      let outcome = await move.run(
+        moveKey: "settingFollowUp", facts: facts, shape: .question,
+        source: texts.joined(separator: " "))
+      guard !Task.isCancelled, self.followUpId == id else { return }
+      var line = fixed
+      // A safety word is spurious here (no student words are sent), so it shows the fixed line.
+      if case .line(let reply) = outcome, BlockLength.namesOnly(target, in: reply) {
+        line = reply
+      }
+      self.blockFollowUp?.line = line
+    }
+  }
+
+  /// Done, or leaving the step: drops the question and cancels a call still running.
+  public func dismissBlockFollowUp() {
+    followUpTask?.cancel()
+    followUpTask = nil
+    followUpId += 1
+    blockFollowUp = nil
+  }
+
   /// Removes every rating. The fixed-line-first choice for the Stuck question starts over.
   public func clearRatings() {
     learnerNote = nil
@@ -604,7 +749,7 @@ public final class AppModel {
   /// Per move, how many of each rating. Moves with no ratings are left out.
   public var ratingCounts: [RatingCount] {
     let all = learner.entries(of: .feedback).compactMap(Feedback.parse)
-    let known = ["stuckQuestion", "splitNudge", "chat"]
+    let known = ["stuckQuestion", "splitNudge", "chat", "weeklyReflection"]
     let other = Set(all.map(\.move)).subtracting(known).sorted()
     return (known + other).compactMap { move in
       let mine = all.filter { $0.move == move }

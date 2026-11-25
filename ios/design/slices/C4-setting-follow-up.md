@@ -1,5 +1,5 @@
 # C4 Setting follow-up
-Status: approved for build 2026-11-25 after gate 1 FIX FIRST (applied below)
+Status: done 2026-11-25
 
 ## What the student sees and does
 1. After the student answers "Was 12 minutes about right?" with **Shorter** or **Longer** (R5), the card shows one short question suggesting one small change to try next time, for example "Would you like to try 5 minutes next time?". It is the AI's question when an AI is on, and the app's own fixed line when not: "Want to try the other length next time?".
@@ -32,7 +32,7 @@ About right makes no call; Shorter and Longer make exactly one call each; the fi
 Whether a real model gives a useful question. Phone check later.
 
 ## Gates
-Gate 1 (semantic_reviewer, a fresh read-only agent, 2026-11-24): FIX FIRST, applied in the Gate 1 response below. Gate 2: pending. Gate 3: pending.
+Gate 1 (semantic_reviewer, a fresh read-only agent, 2026-11-24): FIX FIRST, applied in the Gate 1 response below. Gate 2 (semantic_reviewer, 2026-11-25, one review for C4 and C5): FIX FIRST, one must-fix, applied: the reply must name exactly the new length (a reply with no number could point the wrong way; test added). Suggestions taken: the follow-up is dismissed when the step changes, and the text is announced for VoiceOver. Gate 3: full `checks/check.sh` ALL CHECKS PASSED (633 unit tests, UI tests, 0 SKIPPED). No fresh-context Checker was run.
 
 ## Gate 1 response (changes to this design)
 - **The AI sees no record lines and no student words.** The three lengths are 5, 12 and 25, so "the other length" is ambiguous. The code works out the target the same way R5 does: Shorter means the next shorter entry in `BlockLength.lengths`, Longer the next longer one. The facts sent are built in code from the answer just given: the length tried, the answer, and the target length. `sees` for this move is empty, so no stored line leaves the phone for it. The D8 row names only these three facts.

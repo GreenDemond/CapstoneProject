@@ -65,6 +65,7 @@ public enum Words {
     case "stuckQuestion": "Stuck question"
     case "splitNudge": "Split-step question"
     case "chat": "Talk replies"
+    case "weeklyReflection": "Weekly look-back"
     default: "AI lines"
     }
   }
@@ -84,6 +85,21 @@ public enum Words {
   public static func blockLearnedLine(_ minutes: Int) -> String {
     "Your answers so far point to \(minutes) minutes."
   }
+  public static let blockFollowUpThinking = "Thinking of a question"
+  public static let blockFollowUpDone = "Done"
+  public static func blockFollowUpFixed(_ minutes: Int) -> String {
+    "Want to try \(minutes) minutes next time?"
+  }
+  public static let reflectionCard = "A quick look back at your week"
+  public static let reflectionOpen = "Take a look"
+  public static let reflectionNotNow = "Not now"
+  public static let reflectionTitle = "Your week"
+  public static let reflectionHelpedQuestion = "What helped this week?"
+  public static let reflectionNextQuestion = "One thing to try next week?"
+  public static let reflectionDone = "Done"
+  public static let reflectionClose = "Close"
+  public static let reflectionThinking = "Thinking about what you said"
+  public static let reflectionFixed = "Noted. Same two questions next week."
   public static let timerLearned = "suggested"
   public static let tidyIt = "Tidy it"
   public static let tidying = "Tidying"
