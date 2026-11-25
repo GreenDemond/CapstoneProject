@@ -40,6 +40,19 @@ public enum Words {
   public static let putAwayStep = "Save. Write down what's next."
   public static let addGetReady = "Add a Get ready step"
   public static let addPutAway = "Add a Put it away step"
+  public static let feedbackHelped = "Helped"
+  public static let feedbackMeh = "Meh"
+  public static let feedbackNotThis = "Not this"
+  public static let feedbackThanks = "Thanks."
+  public static let seeAIQuestion = "See the AI's question"
+  public static let aiWasToldTitle = "From your notes, the AI was told"
+  public static func feedbackLabel(_ rating: FeedbackRating) -> String {
+    switch rating {
+    case .helped: feedbackHelped
+    case .meh: feedbackMeh
+    case .notthis: feedbackNotThis
+    }
+  }
   public static let looksLikeTwo = "This looks like two steps. Split it?"
   public static let stepNoteTooLong =
     "This one looks big. Could you split it into two smaller steps?"

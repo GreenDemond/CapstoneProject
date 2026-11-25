@@ -34,6 +34,11 @@ public struct ChatTurn: Identifiable, Equatable, Sendable {
 @Observable
 public final class ChatModel {
   public private(set) var turns: [ChatTurn] = []
+  /// AI replies rated so far in this app run. Memory only; a rating stores no reply text.
+  private var ratedTurns: Set<UUID> = []
+  /// Replies from a chat opened from the list: rated in an earlier run or not, they are not asked again.
+  private var reopenedTurns: Set<UUID> = []
+  public var onFeedback: ((String, FeedbackRating) -> Void)?
   public var draft = ""
   public private(set) var isReplying = false
   public private(set) var availability: ModelAvailability
@@ -127,6 +132,20 @@ public final class ChatModel {
 
   // MARK: Chats
 
+  /// Only a finished AI reply can be rated, once. The safety line and the app's own lines cannot.
+  public func canRate(_ turn: ChatTurn) -> Bool {
+    turn.role == .assistant && turn.kind == .normal && !turn.inProgress && !turn.text.isEmpty
+      && !ratedTurns.contains(turn.id) && !reopenedTurns.contains(turn.id)
+  }
+
+  public func isRated(_ turn: ChatTurn) -> Bool { ratedTurns.contains(turn.id) }
+
+  public func rate(_ turn: ChatTurn, _ rating: FeedbackRating) {
+    guard canRate(turn) else { return }
+    ratedTurns.insert(turn.id)
+    onFeedback?("chat", rating)
+  }
+
   public func newChat() {
     stopAndKeep()
     startFresh(kind: nil, step: nil)
@@ -152,6 +171,7 @@ public final class ChatModel {
     chatAIId = chat.aiId
     step = nil
     turns = chat.messages.map { ChatTurn(role: $0.role, text: $0.text) }
+    reopenedTurns = Set(turns.map(\.id))
     cancelDeletes()
   }
 

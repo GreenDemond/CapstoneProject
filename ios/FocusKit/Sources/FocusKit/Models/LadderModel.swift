@@ -26,6 +26,16 @@ public final class LadderModel {
   /// The trusted-adult line, shown instead of a question.
   public private(set) var coachNote: String?
   private var fallbackShown = false
+  /// Set by the app before each ask: the student's recent ratings say show the fixed line first.
+  public var fixedFirst = false
+  /// The fixed line is up and the AI has not been asked yet. The student can tap to see the AI's.
+  public private(set) var heldBack = false
+  /// The record lines sent with the AI question, in the student's own words, for "What the AI was told".
+  public private(set) var sentRecord: [LearnerRecord.Entry] = []
+  /// The line on screen is the AI's, not the fixed one: only then can it be rated.
+  private var questionIsAI = false
+  public private(set) var questionRated = false
+  public var onFeedback: ((FeedbackRating) -> Void)?
 
   private let content: Content
 
@@ -63,19 +73,48 @@ public final class LadderModel {
   /// The Ask me a question button shows when the AI is on, a hint is up, and the ceiling is not hit.
   public var canAskQuestion: Bool {
     coach?.isAvailable == true && !hintsShown.isEmpty && aiAsks < Self.maxAIAsks && !isAsking
-      && !fallbackShown
+      && !fallbackShown && !heldBack
+  }
+
+  /// After the fixed line was shown first, the AI's question on a tap.
+  public var canSeeAIQuestion: Bool {
+    heldBack && coach?.isAvailable == true && !isAsking && aiAsks < Self.maxAIAsks
+  }
+
+  public var canRate: Bool { questionIsAI && !questionRated && coachNote == nil }
+
+  /// One rating per AI question. A second tap does nothing.
+  public func rate(_ rating: FeedbackRating) {
+    guard canRate else { return }
+    questionRated = true
+    onFeedback?(rating)
   }
 
   /// Asks the AI for one question about the step. `stepText` and `kindLabel` come from the saved
   /// step, not from the boxes the student can edit. Never writes anything down.
   public func askQuestion(
-    stepText: String, kindLabel: String, record: [LearnerRecord.Entry] = []
+    stepText: String, kindLabel: String, record: [LearnerRecord.Entry] = [], forceAI: Bool = false
   ) async {
-    guard let coach, canAskQuestion else { return }
+    guard let coach, forceAI ? canSeeAIQuestion : canAskQuestion else { return }
+    let key = "stuckQuestion"
+    // Ratings say this move has not helped lately: show the fixed line, make no AI call, and
+    // let the student tap to see the AI's question. Nothing says why.
+    if fixedFirst && !forceAI {
+      coachNote = nil
+      coachQuestion = coach.fallbackLine(for: key)
+      questionIsAI = false
+      questionRated = false
+      heldBack = true
+      sentRecord = []
+      return
+    }
+    heldBack = false
     isAsking = true
     defer { isAsking = false }
     aiAsks += 1
-    let key = "stuckQuestion"
+    questionIsAI = false
+    questionRated = false
+    sentRecord = record
     let names = content.coach.facts
     var facts = [
       CoachText.fact(names.kind, kindLabel, content: content),
@@ -97,6 +136,7 @@ public final class LadderModel {
     case .line(let line):
       coachNote = nil
       coachQuestion = line
+      questionIsAI = true
     case .nothing:
       break
     case .trustedAdult:

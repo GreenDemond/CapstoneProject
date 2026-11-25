@@ -1,5 +1,5 @@
 # M3 Feedback under AI lines
-Status: approved for build 2026-11-24 after gate 1 FIX FIRST (six must-fix, applied below)
+Status: done 2026-11-24
 
 ## What the student sees and does
 1. Under an AI question on the Stuck sheet, under an AI question in the editor's split nudge, and under each AI chat reply on Talk: three small equal buttons, "Helped", "Meh", "Not this". One tap, a light haptic. Once tapped, the three buttons are replaced by one quiet line, "Thanks.", for that line only. No score and no totals.
@@ -50,4 +50,5 @@ Whether "Helped / Meh / Not this" read well to a student. Check on a phone.
 
 ## Gates
 Gate 1 (semantic_reviewer, 2026-11-24): FIX FIRST, six must-fix, applied above: rating-first storage format; no stored "why"; "What the AI was told" shows exactly what was sent; chat ratings carry no content and the per-move cap; the bias rules and call timing named; missing tests added. Scope cut recorded in TASKS-coaching.md.
-Gate 2: pending. Gate 3: pending.
+Gate 2 (semantic_reviewer, a fresh read-only agent, 2026-11-24): FIX FIRST, three must-fix, applied: the rated state resets when the fixed line is held back (test added); replies in a reopened chat are never asked about again (test added); each button names the line it rates for VoiceOver. Suggestion taken: the disclosure now reads "From your notes, the AI was told", because it lists only record lines, not the step text. Suggestion not taken: distinct identifiers per chat reply.
+Gate 3: full `checks/check.sh` ALL CHECKS PASSED (539 unit tests, UI tests, 0 SKIPPED) on the iPhone 15 Pro Max simulator. No fresh-context Checker was run.

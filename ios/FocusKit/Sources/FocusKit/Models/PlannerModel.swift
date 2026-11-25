@@ -31,6 +31,9 @@ public final class PlannerModel {
   private var nudgeEpoch = 0
   /// Steps whose review question the student skipped in this editing session. Not saved.
   private var reviewDismissed: Set<Int> = []
+  /// AI split-nudge questions already rated in this editing session. Memory only.
+  private var ratedNudges: Set<Int> = []
+  public var onFeedback: ((String, FeedbackRating) -> Void)?
   /// The last "Check my steps" result, with the assignment text it was made from. Memory only.
   private var requirementsCheck: (assignment: String, result: RequirementsCheck)?
   /// True while the check is running. A second tap does nothing.
@@ -397,6 +400,7 @@ public final class PlannerModel {
     nudgeAsked = []
     nudgeQuestions = [:]
     reviewDismissed = []
+    ratedNudges = []
     requirementsCheck = nil
     nudgeEpoch += 1
   }
@@ -408,6 +412,19 @@ public final class PlannerModel {
       let step = draft.steps.first(where: { $0.id == id })
     else { return nil }
     return StepReview.note(for: step.text, in: content)
+  }
+
+  /// Only the AI's question can be rated, once. The fixed line has nothing to rate.
+  public func canRateNudge(_ id: Int) -> Bool {
+    nudgeQuestion(for: id) != nil && !ratedNudges.contains(id)
+  }
+
+  public func nudgeRated(_ id: Int) -> Bool { ratedNudges.contains(id) }
+
+  public func rateNudge(_ id: Int, _ rating: FeedbackRating) {
+    guard canRateNudge(id) else { return }
+    ratedNudges.insert(id)
+    onFeedback?("splitNudge", rating)
   }
 
   /// The check's result for the assignment as it is now, or nil when none or when the text changed.

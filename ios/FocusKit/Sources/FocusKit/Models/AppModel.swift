@@ -101,6 +101,8 @@ public final class AppModel {
     self.ownAI.change = { [weak self] change in self?.updateSettings(change) }
     self.ownAI.onChoiceChanged = { [weak self] in self?.chooseModel() }
     self.talk.ownServiceLabel = { [weak self] in self?.ownAI.chosen?.label }
+    self.talk.onFeedback = { [weak self] in self?.rate(move: $0, $1) }
+    self.planner.onFeedback = { [weak self] in self?.rate(move: $0, $1) }
     self.talk.currentAIId = { [weak self] in self?.ownAI.chosenId }
     self.talk.ownServiceUsesHttp = { [weak self] in
       self?.ownAI.chosen?.config.needsUnencryptedWarning == true
@@ -304,6 +306,7 @@ public final class AppModel {
     if let existing = ladders[step.id] { return existing }
     let made = LadderModel(content: content, stepText: step.text)
     made.coach = CoachMove(model: switcher, content: content)
+    made.onFeedback = { [weak self] in self?.rate(move: "stuckQuestion", $0) }
     ladders[step.id] = made
     return made
   }
@@ -311,11 +314,33 @@ public final class AppModel {
   /// Asks the AI for one question about this step. The step text and kind come from the saved
   /// step, not from the boxes the student can edit.
   public func askQuestion(_ ladder: LadderModel, for step: Step) async {
+    ladder.fixedFirst = Feedback.showFixedFirst(
+      move: "stuckQuestion", in: learner, now: clock.now)
+    await ask(ladder, for: step, forceAI: false)
+  }
+
+  /// "See the AI's question", after the fixed line was shown first.
+  public func seeAIQuestion(_ ladder: LadderModel, for step: Step) async {
+    await ask(ladder, for: step, forceAI: true)
+  }
+
+  private func ask(_ ladder: LadderModel, for step: Step, forceAI: Bool) async {
     let label = content.kinds.first { $0.id == saved?.kindId }?.label ?? "Something else"
     let record = LearnerSelector.entries(
       context: SelectorContext(moveKey: "stuckQuestion", course: saved?.course),
       record: learner, content: content)
-    await ladder.askQuestion(stepText: step.text, kindLabel: label, record: record)
+    await ladder.askQuestion(
+      stepText: step.text, kindLabel: label, record: record, forceAI: forceAI)
+  }
+
+  /// Writes one rating. The line holds the rating and the move only: nothing the student typed and
+  /// nothing the AI said.
+  public func rate(move: String, _ rating: FeedbackRating) {
+    learner.add(
+      LearnerRecord.Entry(
+        kind: .feedback, date: clock.now, text: Feedback.text(rating, move: move),
+        source: .student))
+    saveLearner()
   }
 
   /// Hints with no step, for the Talk screen when there is no AI.

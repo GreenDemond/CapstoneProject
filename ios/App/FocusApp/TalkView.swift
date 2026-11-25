@@ -91,7 +91,18 @@ struct ChatScreen: View {
             .cardStyle()
             .accessibilityIdentifier("talk-opening")
           ForEach(talk.turns) { turn in
-            bubble(turn).id(turn.id)
+            VStack(alignment: .leading, spacing: Theme.Space.small) {
+              bubble(turn)
+              // Outside the bubble, which reads as one element for VoiceOver.
+              if talk.canRate(turn) || talk.isRated(turn) {
+                FeedbackRow(
+                  rated: talk.isRated(turn), idPrefix: "talk-feedback", about: "the AI reply"
+                ) {
+                  talk.rate(turn, $0)
+                }
+              }
+            }
+            .id(turn.id)
           }
           if !talk.offeredSteps.isEmpty {
             Button(Words.talkUseSteps) { talk.useAsSteps() }

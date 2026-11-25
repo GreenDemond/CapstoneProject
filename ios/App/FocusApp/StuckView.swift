@@ -106,6 +106,31 @@ struct LadderBody: View {
         .cardStyle()
         .accessibilityIdentifier("stuck-question")
     }
+    if ladder.canRate || (ladder.questionRated && !ladder.heldBack) {
+      FeedbackRow(rated: ladder.questionRated, idPrefix: "stuck-feedback", about: "the AI question")
+      {
+        ladder.rate($0)
+      }
+    }
+    if !ladder.sentRecord.isEmpty {
+      DisclosureGroup(Words.aiWasToldTitle) {
+        VStack(alignment: .leading, spacing: Theme.Space.tiny) {
+          ForEach(ladder.sentRecord) { line in
+            Text(verbatim: "\(line.kind.rawValue): \(line.text)")
+              .font(Theme.Typography.small)
+              .foregroundStyle(Theme.Palette.quiet)
+              .frame(maxWidth: .infinity, alignment: .leading)
+          }
+        }
+      }
+      .font(Theme.Typography.small)
+      .accessibilityIdentifier("stuck-ai-told")
+    }
+    if ladder.canSeeAIQuestion {
+      Button(Words.seeAIQuestion) { Task { await model.seeAIQuestion(ladder, for: step) } }
+        .buttonStyle(QuietButtonStyle())
+        .accessibilityIdentifier("see-ai-question")
+    }
     if ladder.isAsking {
       Text(Words.askQuestionThinking)
         .font(Theme.Typography.body)

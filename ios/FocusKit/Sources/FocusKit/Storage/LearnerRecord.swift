@@ -14,6 +14,8 @@ public struct LearnerRecord: Storable {
   public static let reflectionLimit = 26
   public static let courseLimit = 20
   public static let feedbackLimit = 500
+  /// Feedback lines kept for one move, newest first, so a busy move cannot push out another's.
+  public static let feedbackPerMoveLimit = 100
   /// One line, in UTF-16 units, as the other stored text.
   public static let entryLength = 300
   /// The class label, in UTF-16 units (MEMORY-plan 2.2).
@@ -139,6 +141,15 @@ public struct LearnerRecord: Storable {
     for kind in Kind.allCases {
       var ofKind = entries.filter { $0.kind == kind && !$0.text.isEmpty }
         .sorted { $0.date > $1.date }
+      if kind == .feedback {
+        var perMove: [String: Int] = [:]
+        ofKind = ofKind.filter { entry in
+          let move = Feedback.parse(entry)?.move ?? ""
+          let seen = perMove[move, default: 0] + 1
+          perMove[move] = seen
+          return seen <= Self.feedbackPerMoveLimit
+        }
+      }
       if kind == .course {
         var perClass: [String: Int] = [:]
         ofKind = ofKind.filter { entry in

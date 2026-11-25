@@ -181,6 +181,13 @@ struct StepRow: View {
             .accessibilityIdentifier("nudge-no-\(step.id)")
         }
         .buttonStyle(.borderless)
+        // Only the AI's question can be rated, never the fixed line.
+        if planner.nudgeQuestion(for: step.id) != nil {
+          FeedbackRow(
+            rated: planner.nudgeRated(step.id), idPrefix: "nudge-feedback-\(step.id)",
+            about: "the AI question"
+          ) { planner.rateNudge(step.id, $0) }
+        }
         if planner.canAskNudge(step.id) {
           Button(Words.askNudge) { Task { await planner.askNudge(step.id) } }
             .font(Theme.Typography.small)
