@@ -100,6 +100,14 @@ public final class MeModel {
     showGoalInLookBack ? Reflection.goal(in: profile) : nil
   }
 
+  // MARK: Step tips (R6)
+
+  public var stepTipsHidden: Bool { settings().stepTipsHidden }
+
+  public func setStepTipsHidden(_ hidden: Bool) {
+    change { $0.stepTipsHidden = hidden }
+  }
+
   // MARK: How I like to work
 
   public var questions: [Content.Question] { content.howILikeToWork.questions }

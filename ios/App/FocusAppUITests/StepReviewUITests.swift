@@ -58,8 +58,9 @@ final class StepReviewUITests: XCTestCase {
     app.buttons["add-said"].tap()
     app.buttons["thats-all"].tap()
     let skip = app.buttons["review-skip-0"]
-    XCTAssertTrue(skip.waitForExistence(timeout: 5))
-    XCTAssertTrue(skip.isHittable)
+    // The step tips card sits above the steps, so the student scrolls to the step's question.
+    app.scrollTo(skip, maxSwipes: 15)
+    XCTAssertTrue(skip.exists && skip.isHittable)
     skip.tap()
     XCTAssertFalse(app.element("review-note-0").exists)
   }
@@ -82,6 +83,9 @@ final class StepReviewUITests: XCTestCase {
     app.putKeyboardAway()
     app.buttons["add-said"].tap()
     app.buttons["thats-all"].tap()
+    // The step tips card has its own tests; hide it so the new step row is on screen.
+    app.buttons["step-tips-got-it"].tap()
+
     app.buttons["check-requirements"].tap()
     let question = app.element("requirement-uncovered")
     XCTAssertTrue(question.waitForExistence(timeout: 5))
@@ -90,6 +94,7 @@ final class StepReviewUITests: XCTestCase {
       "The assignment mentions \"Include a graph of your data\". Is that in your steps yet?")
     app.buttons["add-step"].tap()
     let newStep = app.element("step-text-1")
+    XCTAssertTrue(newStep.waitForExistence(timeout: 5))
     newStep.tap()
     newStep.typeText("Make the graph of the data")
     app.putKeyboardAway()

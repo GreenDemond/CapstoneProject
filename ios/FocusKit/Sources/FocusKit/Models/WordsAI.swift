@@ -82,6 +82,12 @@ extension Words {
   public static let meTrustedAdult =
     "If something serious is getting in the way, talk to an adult you trust."
   public static let meHowILike = "How I like to work"
+  public static let meStepTips = "Show step tips"
+  public static let stepTipsTitle = "What makes a step easy to start"
+  public static let stepTipsDo = "It starts with something you do, like read, write, list or find."
+  public static let stepTipsSmall = "It's small enough to begin in about two minutes."
+  public static let stepTipsExample = "For example: Write down what the question asks for."
+  public static let stepTipsGotIt = "Got it"
   public static let meGuessTitle = "A first guess"
   public static let meChoose = "Choose one"
   public static let meGuessNote =

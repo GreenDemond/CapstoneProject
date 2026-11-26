@@ -242,6 +242,11 @@ struct MeScreen: View {
 
   private var howILikeToWork: some View {
     Section(Words.meHowILike) {
+      Toggle(
+        Words.meStepTips,
+        isOn: Binding(get: { !me.stepTipsHidden }, set: { me.setStepTipsHidden(!$0) })
+      )
+      .accessibilityIdentifier("me-step-tips")
       ForEach(me.questions, id: \.id) { question in
         VStack(alignment: .leading, spacing: Theme.Space.tiny) {
           Text(question.text).font(Theme.Typography.body).foregroundStyle(Theme.Palette.ink)

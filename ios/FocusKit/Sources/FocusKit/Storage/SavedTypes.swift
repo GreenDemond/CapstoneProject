@@ -177,6 +177,8 @@ public struct Settings: Storable {
   /// Let the goal and the answer about it go into the AI's reply request. Off until the student
   /// turns it on, so no goal text reaches an AI service by default.
   public var sendGoalToAI: Bool
+  /// Hide the "what makes a step easy to start" card on the editor (R6). Shown at first.
+  public var stepTipsHidden: Bool
 
   public init(
     readAloud: Bool = false, talk: Bool = false, headphonesOnly: Bool = true,
@@ -184,7 +186,7 @@ public struct Settings: Storable {
     speechRate: Double = 0.5, guides: [String: String] = [:], lengths: [String: String] = [:],
     howILikeToWork: [String: String] = [:], includeInBackup: Bool = true,
     ownAIServices: [OwnAIService] = [], chosenServiceId: String? = nil,
-    showGoalInLookBack: Bool = true, sendGoalToAI: Bool = false
+    showGoalInLookBack: Bool = true, sendGoalToAI: Bool = false, stepTipsHidden: Bool = false
   ) {
     self.readAloud = readAloud
     self.talk = talk
@@ -199,12 +201,13 @@ public struct Settings: Storable {
     self.chosenServiceId = chosenServiceId
     self.showGoalInLookBack = showGoalInLookBack
     self.sendGoalToAI = sendGoalToAI
+    self.stepTipsHidden = stepTipsHidden
   }
 
   private enum CodingKeys: String, CodingKey {
     case readAloud, talk, voiceMode, headphonesOnly, voiceId, speechRate, guides, lengths
     case howILikeToWork, includeInBackup, ownAIServices, chosenServiceId, lastReflectionHandled
-    case showGoalInLookBack, sendGoalToAI
+    case showGoalInLookBack, sendGoalToAI, stepTipsHidden
     // Build 5's single service. Read, never written.
     case ownAIOn, ownAIEndpoint, ownAIModelId, ownAIChosen
   }
@@ -232,6 +235,7 @@ public struct Settings: Storable {
     self.showGoalInLookBack =
       (try? c.decodeIfPresent(Bool.self, forKey: .showGoalInLookBack)) ?? true
     self.sendGoalToAI = (try? c.decodeIfPresent(Bool.self, forKey: .sendGoalToAI)) ?? false
+    self.stepTipsHidden = (try? c.decodeIfPresent(Bool.self, forKey: .stepTipsHidden)) ?? false
     let listed = try? c.decodeIfPresent([LossyService].self, forKey: .ownAIServices)
     if let listed {
       self.ownAIServices = listed.compactMap(\.service)
@@ -281,6 +285,7 @@ public struct Settings: Storable {
     try c.encodeIfPresent(lastReflectionHandled, forKey: .lastReflectionHandled)
     try c.encode(showGoalInLookBack, forKey: .showGoalInLookBack)
     try c.encode(sendGoalToAI, forKey: .sendGoalToAI)
+    try c.encode(stepTipsHidden, forKey: .stepTipsHidden)
   }
 
   public func limited(by limits: Content.Limits) -> Settings {

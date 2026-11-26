@@ -25,6 +25,26 @@ struct EditorView: View {
         }
         .listRowBackground(Color.clear)
       }
+      if !model.me.stepTipsHidden {
+        Section {
+          VStack(alignment: .leading, spacing: Theme.Space.small) {
+            Text(Words.stepTipsTitle).font(Theme.Typography.title)
+              .foregroundStyle(Theme.Palette.ink)
+            Text(Words.stepTipsDo).font(Theme.Typography.body).foregroundStyle(Theme.Palette.ink)
+            Text(Words.stepTipsSmall).font(Theme.Typography.body)
+              .foregroundStyle(Theme.Palette.ink)
+            Text(Words.stepTipsExample).font(Theme.Typography.small)
+              .foregroundStyle(Theme.Palette.quiet)
+            Button(Words.stepTipsGotIt) { model.me.setStepTipsHidden(true) }
+              .buttonStyle(LinkButtonStyle())
+              .frame(minHeight: 44, alignment: .leading)
+              .accessibilityIdentifier("step-tips-got-it")
+          }
+          .accessibilityElement(children: .contain)
+          .accessibilityIdentifier("step-tips")
+        }
+        .listRowBackground(Theme.Palette.card)
+      }
       if planner.canCheckRequirements || planner.checkingRequirements
         || planner.requirementsResult != nil
       {
