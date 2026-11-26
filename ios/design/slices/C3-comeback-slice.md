@@ -14,6 +14,10 @@ Status: NOT STARTED 2026-11-25 (sketch only, no review yet)
 - `sees` rows: `setting` tagged time (newest 1) and `pattern` tagged starting (1). Nothing writes those tags yet (see C8), so today this sends the step only.
 - A D8 row is needed (the step text, quoted, to the student's own service).
 
+## Decided 2026-11-26 (parent)
+1. The app must not shorten a step for the student on its own. Any shorter piece is offered, and the student approves it before it is used. So the sketch above changes: R1 offers "Just this" (the piece) and "The whole step" as two choices the student picks between, and C3's AI piece is shown only as a suggestion the student can take or leave, never swapped in.
+2. Still open: see below.
+
 ## Questions for the parent and Ben before building
 1. Should the app ever shorten a step for the student on its own? The Drifted split asks the student; this does it first. Rule 2 and the "student does the thinking" principle both need an answer.
 2. Is "Just this" different from "The whole step" if both open the same screen? The sketch makes the piece a reminder on the work screen. Confirm that is what Ben wants.
