@@ -88,7 +88,37 @@ import Testing
   @Test func twentyStepsKeepsTheFirstFew() async {
     let many = (1...20).map { "Write line \($0)" }.joined(separator: "\n")
     let outcome = await suggest(.init([many]), count: 5)
-    #expect(outcome == .steps((1...5).map { "Write line \($0)" }))
+    #expect(outcome == .steps((1...8).map { "Write line \($0)" }))
+  }
+
+  @Test func theCountIsAGuideNotARule() async {
+    func lines(_ n: Int) -> String { (1...n).map { "Write line \($0)" }.joined(separator: "\n") }
+    func expected(_ n: Int) -> CoachOutcome { .steps((1...n).map { "Write line \($0)" }) }
+    // (steps the AI gave, count asked for, steps kept)
+    let cases = [(3, 5, 3), (7, 5, 7), (7, 3, 6), (12, 8, 11), (1, 8, 1)]
+    for (gave, asked, kept) in cases {
+      let fresh = FakeLanguageModel()
+      fresh.enqueue(.init([lines(gave)]))
+      let outcome = await coach(fresh).suggest(
+        assignment: "Five paragraphs on courage", kindLabel: "Essay", count: asked)
+      #expect(outcome == expected(kept), "gave \(gave), asked \(asked)")
+    }
+  }
+
+  @Test func theRequestAndTheRulesSayTheCountIsApproximate() async throws {
+    _ = await suggest(.init(["Write line 1"]), count: 5)
+    let call = try #require(model.calls.first)
+    let text = try #require(call.messages.first?.text)
+    #expect(text.contains("Give about 5 steps."))
+    #expect(text.contains("fewer or a few more"))
+    #expect(call.instructions.contains("fewer or a few more"))
+    #expect(call.instructions.contains("TRUSTED_ADULT"))
+  }
+
+  @Test func oneBadStepStillFailsWhateverTheCount() async {
+    let bad = "Read this: \"Courage is not the man with a gun in his hand\""
+    let outcome = await suggest(.init(["Write line 1\n\(bad)\nWrite line 3"]), count: 3)
+    #expect(outcome == .fallback(.notProcess))
   }
 
   @Test func aVeryLongStepFallsBack() async {
