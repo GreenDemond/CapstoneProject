@@ -1,5 +1,5 @@
 # A1 Any model (own AI services)
-Status: draft 2026-11-26. Asked for by the parent: "give it an option to select any, but not for openrouter, that can get expensive."
+Status: not needed 2026-11-26 (parent: typing `any` as the model name works on his server, Polystrata, an Ollama fork; no code change). Asked for by the parent: "give it an option to select any, but not for openrouter, that can get expensive."
 
 ## What the student sees and does
 1. In the editor for an own AI service, below the address, a switch "Use whichever model this service offers" (off at first). It shows only when the address is not OpenRouter's.
