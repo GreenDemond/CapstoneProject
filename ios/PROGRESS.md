@@ -2,7 +2,13 @@
 
 Read this first in any session. It is the memory between sessions. Rewrite it each session; do not let it grow into a diary. Task history is in `TASKS.md`, decisions in `DECISIONS.md`.
 
-**As of 2026-11-23, build 13 (`CURRENT_PROJECT_VERSION = 13`).** Build 13 is archived as `Bens Steps 0.1 (13).xcarchive` (not uploaded) and a signed phone build is ready at `~/Desktop/BensSteps-build13/` (run `install.sh` with the phone unlocked and connected). The phone was unavailable, so build 13 is not installed. Build 13 adds the thinking level per own AI service and the Talk reply counts under About. The parent uploads from Xcode's Organizer (Window → Organizer → Bens Steps 0.1 (13) → Distribute App → App Store Connect → Upload). Nothing has been pushed to a remote.
+**As of 2026-11-26, build 25 (`CURRENT_PROJECT_VERSION = 25`).** Build 24 is installed on the parent's iPhone and iPad. Build 25 (the same app code, build number bumped) is archived as `Bens Steps 0.1 (25).xcarchive` in Organizer and waits for the parent to upload it to TestFlight (use the stable Xcode, not the beta). Everything is pushed to the `craighagan` fork (never `origin`). Last full check: ALL CHECKS PASSED (683 unit tests plus UI tests, 0 skipped).
+
+**Recent work (2026-11-25 to 26):** coaching queue finished (M1, M3, M4, C4 to C6, C9, R5), What I did (PROG1), goal in the weekly look-back (PROG2), step count as a guide (A2), good-step card (R6), iPad support (IPAD1). Not needed or skipped: C7 (no change), A1 (type `any` as the model name for the parent's Polystrata server), M2 (skipped). Deferred: C8. Held: C3 and R1 comeback.
+
+**The plan for what comes next is `design/coaching-roadmap-plan.md`** (expert-panel approved 2026-11-26): R0 beta readiness, R1 reset plan, R2 timer (no Pomodoro), R3 comeback, R4 delayed recall. Nothing in it is built; each part waits for the approvals in its section 7.
+
+**Xcode note:** the parent's iPhone runs an iOS 27.3 beta. Installing from the Mac needs `DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer` and the phone unlocked. Archives for TestFlight use the stable `/Applications/Xcode.app`.
 
 ## What the app is
 
@@ -60,7 +66,7 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 
 - **The goal in the look-back (PROG2, 2026-11-25):** the weekly look-back can show the student's own goal (week, else month, else year) with an optional third question. Showing it is on; letting it go into the AI's reply is a separate switch in Me, off at first. The app never says a goal was reached or is near. Parent to confirm the data-sharing row and decide the distress question below.
 - **What I did (PROG1, 2026-11-25):** a new Me row with plain counts of what the student did this past month, from lines the student can see and delete under What the app remembers about me. It is the parent's request for coaching that helps students improve, built so it never claims improvement. Parent to confirm the wording before classmates use it.
-- **Coaching queue 2026-11-25:** done: M1, M3, M4, C6, C9, R5, C4, C5. Deferred by the parent: C8 (no source of tags). Not built, decision needed: C7 (already true on screen). Not started: C3 (R1, the comeback screen, must be built first; sketch and two questions in `design/slices/C3-comeback-slice.md`) and M2 (recommend waiting; see its note). T14-C needs a person and a phone. Build 20 is on the parent's iPhone and iPad and archived.
+- **Coaching queue 2026-11-26:** done: M1, M3, M4, C4, C5, C6, C7 (no change), C9, R5, R6. Deferred: C8. Skipped: M2. Held: C3 (the app never shortens a step on its own; the student approves) and R1. T14-C needs a person and a phone, and blocks classmate use.
 - **Done 2026-11-24:** ME1, S1, S2, S3 and IPAD1 (the app now runs on iPad; content column up to 820 points; "iPhone" wording is now "this device"). Build 18 is on the parent's iPhone and iPad. The iPad UI run is manual: `xcodebuild test ... -destination id=CF3E2364-10CE-42CF-B887-84D437CD08ED` (iPad Air 11-inch M4 simulator), it takes about 13 minutes. Device checks 91 (S2) and 92 (S3) wait for the parent.
 
 0. M0a and M0b are built. Parent to decide the course-line viewer (DECISIONS 2026-11-23): either keep course lines hidden until M4, or build a small list with delete before classmates use the app.
