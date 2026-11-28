@@ -439,3 +439,10 @@ Needs an AI helper set up in Settings.
 4. Type a different class, or clear the box: the offer goes. Finish an assignment with no class: nothing new is kept.
 5. Me, then What the app remembers: "Steps I used for a class" lists History with its steps. Press **Delete** on it: it goes, and typing History no longer offers anything.
 6. Phone width and keyboard only: Tab reaches the offer button; nothing overlaps the bottom tabs.
+
+## A class on calendar items (web)
+
+1. Me tab, then My calendar, **Add something**. Fill What is it?, a due date and time, and Class (optional) = History. Press **Add to my calendar**.
+2. The item shows "Class: History" beside its category. Reload: it is still there.
+3. Add a trip with the class box left blank: no "Class:" appears. Type `<b>Art</b>`: it shows as plain text.
+4. Phone width and keyboard only: Tab reaches the class box between the category and Notes.

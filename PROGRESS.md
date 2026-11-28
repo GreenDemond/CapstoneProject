@@ -40,6 +40,8 @@ The only memory between sessions. Keep it current; rewrite it, do not let it gro
 
 **Course memory (web) is built** (`design/course-memory.md`): finishing an assignment with a class keeps its steps for that class; typing the same class on the paste screen offers **Use my <class> steps from last time**, which opens them in the editor to change; a line-by-line deletable list "Steps I used for a class" is in What the app remembers. No AI, nothing leaves the device. Wording awaits the parent's okay.
 
+**A class on calendar items (web) is built** (`design/calendar-class.md`): an optional Class (optional) box on the add form; items show "Class: <name>". Student's own words, nothing leaves the device.
+
 Nothing. The whole-app review plan (`design/review-plan-2026-11-17.md`) is finished; see its Progress list.
 
 ## Known gaps

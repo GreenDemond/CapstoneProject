@@ -163,3 +163,15 @@ test("events are kept out of the priority groups", () => {
   assert.deepEqual(groups.urgent.map((i) => i.id), ["t"]);
   assert.equal(Object.values(groups).flat().some((i) => i.id === "e"), false);
 });
+
+test("a class on a task or event: kept tidy, left out when blank, and kept when read back", async () => {
+  const { makeItem, makeEvent, normalizeCalendarItems } = await import("../../js/logic/calendar.js");
+  const task = makeItem({ title: "Essay", day: "2026-12-01", time: "10:00", classLabel: "  History  " }, "a").item;
+  assert.equal(task.classLabel, "History");
+  assert.equal("classLabel" in makeItem({ title: "Essay", day: "2026-12-01", time: "10:00", classLabel: "   " }, "b").item, false);
+  assert.equal(makeItem({ title: "E", day: "2026-12-01", time: "10:00", classLabel: "x".repeat(90) }, "c").item.classLabel.length, 40);
+  const trip = makeEvent({ title: "Trip", start: "2026-12-01", end: "2026-12-03", classLabel: "Geography" }, "d").item;
+  assert.equal(trip.classLabel, "Geography");
+  const back = normalizeCalendarItems([task, trip, { ...task, id: "e", classLabel: 5 }]);
+  assert.deepEqual(back.map((i) => i.classLabel), ["History", "Geography", undefined]);
+});

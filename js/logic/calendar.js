@@ -1,5 +1,6 @@
 // Items the student adds, sorted by how soon they are due (design/calendar.md).
 // Pure logic: no browser APIs. Times are the device's local time.
+import { normalizeClassLabel } from "./class-label.js";
 
 export const MAX_TITLE = 200;
 export const MAX_NOTES = 2000;
@@ -97,7 +98,7 @@ export function parseLinks(text) {
 }
 
 // Returns { ok: true, item } or { ok: false, reason }.
-export function makeItem({ title, day, time, notes = "", links = "", category = "other" }, id) {
+export function makeItem({ title, day, time, notes = "", links = "", category = "other", classLabel = "" }, id) {
   const cleaned = typeof title === "string" ? title.trim().slice(0, MAX_TITLE) : "";
   if (cleaned === "") {
     return { ok: false, reason: "Write what it is first." };
@@ -119,6 +120,7 @@ export function makeItem({ title, day, time, notes = "", links = "", category = 
       notes: String(notes ?? "").trim().slice(0, MAX_NOTES),
       links: parsedLinks.links,
       category: CATEGORIES.some((c) => c.id === category) ? category : "other",
+      ...(normalizeClassLabel(classLabel) ? { classLabel: normalizeClassLabel(classLabel) } : {}),
       status: "open",
       completedOn: null,
     },
@@ -195,7 +197,7 @@ export function parseDay(text) {
 }
 
 // Returns { ok: true, item } or { ok: false, reason }.
-export function makeEvent({ title, start, end, notes = "", links = "", category = "other" }, id) {
+export function makeEvent({ title, start, end, notes = "", links = "", category = "other", classLabel = "" }, id) {
   const cleaned = typeof title === "string" ? title.trim().slice(0, MAX_TITLE) : "";
   if (cleaned === "") {
     return { ok: false, reason: "Write what it is first." };
@@ -223,6 +225,7 @@ export function makeEvent({ title, start, end, notes = "", links = "", category 
       notes: String(notes ?? "").trim().slice(0, MAX_NOTES),
       links: parsedLinks.links,
       category: CATEGORIES.some((c) => c.id === category) ? category : "other",
+      ...(normalizeClassLabel(classLabel) ? { classLabel: normalizeClassLabel(classLabel) } : {}),
       status: "open",
       completedOn: null,
     },
@@ -262,6 +265,7 @@ export function normalizeCalendarItems(items) {
         ? item.links.filter((link) => typeof link === "string" && link.startsWith("https://"))
         : [],
       category: ["school", "personal", "family", "friends", "other"].includes(item.category) ? item.category : "other",
+      ...(normalizeClassLabel(item.classLabel) ? { classLabel: normalizeClassLabel(item.classLabel) } : {}),
       status: ["open", "in progress", "completed"].includes(item.status) ? item.status : "open",
       completedOn: typeof item.completedOn === "string" ? item.completedOn : null,
     }));

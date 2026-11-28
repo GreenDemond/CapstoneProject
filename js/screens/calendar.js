@@ -1,6 +1,7 @@
 // "My calendar": items the student adds with a due time, sorted into groups by how soon they are due,
 // plus Day, Week and Month views (design/calendar.md, design/time-blocks.md). Saved only on this device.
 import { loadCalendarItems, saveCalendarItems, loadCompletionCounts, saveCompletionCounts } from "../storage.js";
+import { CLASS_LABEL_MAX, CLASS_LABEL_TITLE, CLASS_LABEL_HINT, classLine } from "../logic/class-label.js";
 import { GROUPS, CATEGORIES, groupItems, makeItem, makeEvent, isEvent, removeItem, parseDue, setStatus, completedItems, bucketFor } from "../logic/calendar.js";
 import { buildIcs } from "../logic/ics.js";
 import { addCompletion, removeCompletion, totals } from "../logic/counter.js";
@@ -38,7 +39,7 @@ let confirmArmedAt = 0;
 let lastCalAction = 0;
 
 function blankDraft() {
-  return { title: "", kind: "task", day: "", end: "", time: "", notes: "", links: "", category: "other" };
+  return { title: "", kind: "task", day: "", end: "", time: "", notes: "", links: "", category: "other", classLabel: "" };
 }
 
 // The add form's current values, or null when the form is closed.
@@ -56,6 +57,7 @@ function readCalendarDraft() {
     notes: value("cal-notes"),
     links: value("cal-links"),
     category: value("cal-category"),
+    classLabel: value("cal-class"),
   };
 }
 
@@ -99,6 +101,8 @@ function buildCalendarForm(draft) {
     catBox.append(el("option", c.label, { value: c.id }));
   }
   catBox.value = draft.category;
+  const classBox = el("input", undefined, { type: "text", id: "cal-class", maxlength: String(CLASS_LABEL_MAX), autocomplete: "off", "aria-describedby": "cal-class-hint" });
+  classBox.value = draft.classLabel;
   form.append(
     field(el("label", "What is it?", { for: "cal-title" }), titleBox),
     field(el("label", "Type", { for: "cal-kind" }), kindBox),
@@ -106,6 +110,8 @@ function buildCalendarForm(draft) {
     field(endLabel, endBox),
     timeField,
     field(el("label", "What part of life is it?", { for: "cal-category" }), catBox),
+    field(el("label", CLASS_LABEL_TITLE, { for: "cal-class" }), classBox),
+    el("p", CLASS_LABEL_HINT, { class: "hint", id: "cal-class-hint" }),
     field(el("label", "Notes (as much as you want)", { for: "cal-notes" }), notesBox),
     field(el("label", "Web links, one per line (must start with https://)", { for: "cal-links" }), linksBox),
   );
@@ -223,7 +229,7 @@ function renderCalendarList() {
     for (const item of groups[group.id]) {
       const row = el("li", undefined, { tabindex: "-1", "data-id": item.id });
       row.append(el("span", `${item.title}, ${dueText(item.due)}`), " ");
-      row.append(el("span", ` · ${categoryLabel(item.category)} · ${statusLabel(item.status)}`, { class: "tag" }));
+      row.append(el("span", ` · ${categoryLabel(item.category)}${classTag(item)} · ${statusLabel(item.status)}`, { class: "tag" }));
       if (item.notes) {
         row.append(el("p", item.notes, { class: "item-notes" }));
       }
@@ -250,7 +256,7 @@ function renderCalendarList() {
     const tripList = el("ul", undefined, { class: "cal-list" });
     for (const trip of trips) {
       const row = el("li", undefined, { tabindex: "-1", "data-id": trip.id });
-      row.append(el("span", `${trip.title}, ${trip.start} to ${trip.end}`), " ");
+      row.append(el("span", `${trip.title}, ${trip.start} to ${trip.end}${classTag(trip)}`), " ");
       const actions = el("div", undefined, { class: "row-actions" });
       actions.append(icsButton(trip), deleteButtons(trip));
       row.append(actions);
@@ -265,7 +271,7 @@ function renderCalendarList() {
     const list = el("ul", undefined, { class: "cal-list completed" });
     for (const item of done) {
       const row = el("li", undefined, { tabindex: "-1", "data-id": item.id });
-      row.append(el("span", `${item.title}, finished ${item.completedOn}`), " ");
+      row.append(el("span", `${item.title}, finished ${item.completedOn}${classTag(item)}`), " ");
       const actions = el("div", undefined, { class: "row-actions" });
       actions.append(button("Reopen", () => changeStatus(item.id, "open"), "small"), deleteButtons(item));
       row.append(actions);
@@ -273,6 +279,12 @@ function renderCalendarList() {
     }
     calendarBody.append(list);
   }
+}
+
+// " · Class: History" for an item with a class, otherwise nothing.
+function classTag(item) {
+  const line = classLine(item.classLabel);
+  return line === "" ? "" : ` · ${line}`;
 }
 
 function categoryLabel(id) {
@@ -350,7 +362,7 @@ function addCalendarItem() {
   // A trip, or a task with an "Ends on" date, becomes a spanning item drawn as a bar.
   const spans = draft.kind === "event" || (draft.kind === "task" && draft.end !== "");
   const result = spans
-    ? makeEvent({ title: draft.title, start: draft.day, end: draft.end, notes: draft.notes, links: draft.links, category: draft.category }, calendarId())
+    ? makeEvent({ title: draft.title, start: draft.day, end: draft.end, notes: draft.notes, links: draft.links, category: draft.category, classLabel: draft.classLabel }, calendarId())
     : makeItem(draft, calendarId());
   if (!result.ok) {
     renderCalendar(result.reason);
