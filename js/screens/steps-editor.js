@@ -17,6 +17,8 @@ import {
   cleanSteps,
   noteFor,
 } from "../logic/step-editor.js";
+import { STEP_TIPS_TITLE, STEP_TIPS_LINES } from "../logic/step-count.js";
+import { loadStepTipsHidden, saveStepTipsHidden } from "../storage.js";
 import { el, button } from "../ui/dom.js";
 
 const view = document.getElementById("steps-view");
@@ -29,6 +31,8 @@ let onDone = null;
 let getSteps = null;
 let status = "";
 let focusTarget = null; // a selector to focus after the next redraw
+let tipsOpen = false; // the good-step card is folded each time the editor opens
+let tipsHidden = false;
 
 function fillNote(holder, index) {
   holder.replaceChildren();
@@ -89,10 +93,58 @@ function rowFor(index) {
   return row;
 }
 
+// The good-step card: fixed words, never looks at what the student typed (design/step-count-w2.md).
+// It redraws only itself, so focus stays where the student was.
+function fillTips(holder, focusSelector) {
+  holder.replaceChildren();
+  if (tipsHidden) {
+    holder.append(
+      button("Show step tips", () => {
+        tipsHidden = false;
+        tipsOpen = true;
+        saveStepTipsHidden(false);
+        fillTips(holder, ".step-tips-toggle");
+      }, "small"),
+    );
+  } else {
+    const toggle = button(STEP_TIPS_TITLE, () => {
+      tipsOpen = !tipsOpen;
+      fillTips(holder, ".step-tips-toggle");
+    }, "small");
+    toggle.classList.add("step-tips-toggle");
+    toggle.setAttribute("aria-expanded", String(tipsOpen));
+    holder.append(toggle);
+    if (tipsOpen) {
+      const body = el("div", undefined, { class: "step-tips-body" });
+      for (const line of STEP_TIPS_LINES) {
+        body.append(el("p", line));
+      }
+      body.append(
+        button("Got it", () => {
+          tipsHidden = true;
+          tipsOpen = false;
+          saveStepTipsHidden(true);
+          fillTips(holder, "#editor-heading");
+        }, "small"),
+      );
+      holder.append(body);
+    }
+  }
+  if (focusSelector) {
+    const target = holder.querySelector(focusSelector) || editor.querySelector(focusSelector);
+    if (target) {
+      target.focus();
+    }
+  }
+}
+
 function render() {
   editor.replaceChildren();
   editor.append(el("h3", "Change my steps", { tabindex: "-1", id: "editor-heading" }));
   editor.append(el("p", "Change the words, move a step, split it in two, or add your own. Nothing is saved until you press Start.", { class: "hint" }));
+  const tips = el("div", undefined, { class: "step-tips" });
+  fillTips(tips, null);
+  editor.append(tips);
   const list = el("ol", undefined, { class: "editor-rows" });
   draft.forEach((_, index) => list.append(rowFor(index)));
   editor.append(list);
@@ -172,6 +224,8 @@ export function closeEditor() {
 function openEditor() {
   draft = getSteps().slice();
   dismissed = new Set();
+  tipsOpen = false;
+  tipsHidden = loadStepTipsHidden();
   status = "";
   focusTarget = "#editor-heading";
   view.hidden = true;

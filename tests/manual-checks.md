@@ -255,3 +255,13 @@ No key needed. Do this on a phone as well as a computer.
 8. Refresh the page while editing: you are back on the paste screen.
 9. Check at phone width and with the keyboard only (Tab through the buttons).
 
+## Step count and the good-step card (web, W2)
+
+1. On the paste screen, under the kind buttons, find "About how many steps?" with 3, 5 and 8. 5 is picked.
+2. Paste "Read chapter 2 and answer the questions.", pick Reading, press Show my steps: 5 steps. Pick 3 steps and press Show my steps again: 3 steps and "Showing 3 of 7. Show more steps adds the rest." Press Show more steps: all 7.
+3. Pick 8 steps with a pasted list of five lines: 8 steps show. Press Give me a two-minute start: still 8 steps, the timer step first.
+4. Refresh the page: back to 5 steps.
+5. Press Change my steps. A folded row "What makes a step easy to start" is under the intro line. Press it: three lines and Got it appear. Move a step: the steps still change normally.
+6. Press Got it: the row goes and a small "Show step tips" appears. Refresh, paste again, open Change my steps: the card stays away. Press Show step tips: the card opens.
+7. Leave my steps as they were, then Change my steps again: the card is folded again.
+8. Check the words are calm, at phone width, and with the keyboard only (Tab to the radios, arrow between them, Tab to the card).

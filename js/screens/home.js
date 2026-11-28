@@ -5,6 +5,7 @@
 import { cleanPastedText, limitPaste } from "../logic/clean-text.js";
 import { KINDS, DEFAULT_STEP_COUNT, starterStepsFor, withTwoMinuteStart, showingLine } from "../logic/starter-steps.js";
 import { suggestKind, findRequirements } from "../logic/heuristics.js";
+import { normalizeStepCount, DEFAULT_PICKED_COUNT } from "../logic/step-count.js";
 import { loadWork } from "../storage.js";
 import { pickupLine } from "../logic/home.js";
 import { currentIndex, allDone } from "../logic/work.js";
@@ -92,6 +93,14 @@ function showRequirements(text) {
   requirementsBox.hidden = lines.length === 0;
 }
 
+// The step count the student picked (3, 5 or 8). It is how many steps show first, a guide not a limit.
+const countRadios = document.querySelectorAll('input[name="step-count"]');
+
+function pickedCount() {
+  const chosen = Array.from(countRadios).find((radio) => radio.checked);
+  return normalizeStepCount(chosen ? chosen.value : DEFAULT_PICKED_COUNT);
+}
+
 // How many steps are on screen. Start runs exactly these.
 let shownCount = DEFAULT_STEP_COUNT;
 
@@ -134,7 +143,7 @@ showButton.addEventListener("click", async () => {
 
   allSteps = starterStepsFor(chosenKind, cleanPastedText(text));
   ready.textContent = "";
-  renderSteps(DEFAULT_STEP_COUNT);
+  renderSteps(pickedCount());
   showRequirements(text);
   message.textContent = truncated
     ? "That's a long one. The first 6,000 characters are kept."
@@ -144,7 +153,7 @@ showButton.addEventListener("click", async () => {
 
 document.getElementById("two-minute").addEventListener("click", () => {
   allSteps = withTwoMinuteStart(allSteps);
-  renderSteps(DEFAULT_STEP_COUNT);
+  renderSteps(pickedCount());
   stepsList.focus();
 });
 
@@ -282,7 +291,7 @@ async function suggestWithChosenService(text) {
     message.textContent = `${result.error} Here are the starter steps instead.`;
   }
   ready.textContent = "";
-  renderSteps(DEFAULT_STEP_COUNT);
+  renderSteps(pickedCount());
   showRequirements(text);
   openStepsPreview();
 }

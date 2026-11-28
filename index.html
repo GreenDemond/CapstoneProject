@@ -49,6 +49,13 @@
           <button type="button" id="kind-suggestion-use">Use this</button>
         </p>
 
+        <fieldset class="kinds step-count">
+          <legend>About how many steps?</legend>
+          <label><input type="radio" name="step-count" value="3"> 3 steps</label>
+          <label><input type="radio" name="step-count" value="5" checked> 5 steps</label>
+          <label><input type="radio" name="step-count" value="8"> 8 steps</label>
+        </fieldset>
+
         <div id="ai-box" hidden>
           <p><label><input type="checkbox" id="ai-use" checked> <span id="ai-use-label">Use an AI helper to suggest steps</span></label></p>
           <p class="hint" id="ai-privacy">If this is ticked, pressing Show my steps sends this text to an AI service to suggest steps. Don't paste your name or anything private.</p>

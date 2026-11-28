@@ -681,3 +681,32 @@ button {
   color: var(--muted);
   margin: 0.4rem 0 0;
 }
+
+/* Step count choice (design/step-count-w2.md) */
+.step-count label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.75rem;
+  margin-right: 1rem;
+}
+
+.step-count input[type="radio"] {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+/* Good-step card in the steps editor (design/step-count-w2.md) */
+.step-tips {
+  margin: 0.5rem 0 1rem;
+}
+
+.step-tips-body {
+  border-left: 3px solid var(--accent);
+  margin: 0.5rem 0;
+  padding: 0.25rem 0.75rem;
+}
+
+.step-tips-body p {
+  margin: 0.4rem 0;
+}
