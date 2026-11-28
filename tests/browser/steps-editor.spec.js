@@ -4,7 +4,7 @@ async function openSteps(page, text) {
   await page.goto("/");
   await page.getByLabel("Assignment text").fill(text);
   await page.getByRole("button", { name: "Reading" }).click();
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await expect(page.locator("#steps li").first()).toBeVisible();
 }
 
@@ -86,14 +86,14 @@ test("a step cannot be split when it is too short, and a refresh mid-edit goes b
   await page.getByRole("button", { name: "Split step 1" }).click();
   await expect(page.getByLabel("Step 1", { exact: true })).toHaveValue("Read it");
   await page.reload();
-  await expect(page.getByRole("button", { name: "Show my steps" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Suggest some to start" })).toBeVisible();
   await expect(page.locator("#steps-editor")).toBeHidden();
 });
 
-test("pressing Show my steps again closes the editor", async ({ page }) => {
+test("pressing Suggest some to start again closes the editor", async ({ page }) => {
   await openSteps(page, LIST);
   await page.getByRole("button", { name: "Change my steps" }).click();
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await expect(page.locator("#steps-editor")).toBeHidden();
   await expect(page.locator("#steps li").first()).toBeVisible();
 });

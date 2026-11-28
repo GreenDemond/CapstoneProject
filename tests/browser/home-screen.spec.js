@@ -75,7 +75,7 @@ test("New assignment shows the form and says it replaces the saved steps", async
   await expect(page.getByText("Starting new steps replaces the ones you have saved.")).toBeVisible();
   await page.getByLabel("Assignment text").fill("1. Only step");
   await page.getByRole("button", { name: "Reading" }).click();
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await page.getByRole("button", { name: "Start", exact: true }).click();
   await expect(page.locator(".current-step")).toHaveText("Only step");
   await page.reload();

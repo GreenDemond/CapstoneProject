@@ -61,10 +61,11 @@
 
         <div id="ai-box" hidden>
           <p><label><input type="checkbox" id="ai-use" checked> <span id="ai-use-label">Use an AI helper to suggest steps</span></label></p>
-          <p class="hint" id="ai-privacy">If this is ticked, pressing Show my steps sends this text to an AI service to suggest steps. Don't paste your name or anything private.</p>
+          <p class="hint" id="ai-privacy">If this is ticked, pressing Suggest some to start sends this text to an AI service to suggest steps. Don't paste your name or anything private.</p>
           <p class="hint">Suggestions come from an AI, not a person. The app stores none of it.</p>
         </div>
-        <button type="button" id="show-steps" class="primary">Show my steps</button>
+        <button type="button" id="write-steps" class="primary">I'll write my steps</button>
+        <button type="button" id="show-steps">Suggest some to start</button>
         <p id="ai-status" class="hint" aria-live="polite"></p>
         <p id="ai-choice-row" hidden><label for="ai-choice">Which AI helper?</label> <select id="ai-choice"></select></p>
         <p id="message" class="message" role="status" aria-live="polite"></p>

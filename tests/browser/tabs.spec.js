@@ -40,7 +40,7 @@ test("the bar is hidden on the work screen and back after", async ({ page }) => 
   await page.goto("/");
   await page.getByLabel("Assignment text").fill("1. Find three sources\n2. Take notes");
   await page.getByRole("button", { name: "Essay" }).click();
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await page.getByRole("button", { name: "Start", exact: true }).click();
   await expect(page.locator("#tabbar")).toBeHidden();
   await page.getByRole("button", { name: "Back to home" }).click();
@@ -49,7 +49,7 @@ test("the bar is hidden on the work screen and back after", async ({ page }) => 
 
 test("the bar does not cover the last button at the bottom of the page", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "Show my steps" }).scrollIntoViewIfNeeded();
+  await page.getByRole("button", { name: "Suggest some to start" }).scrollIntoViewIfNeeded();
   await page.evaluate(() => globalThis.scrollTo(0, globalThis.document.body.scrollHeight));
   const box = await page.locator("#welcome-hide").boundingBox();
   const bar = await page.locator("#tabbar").boundingBox();

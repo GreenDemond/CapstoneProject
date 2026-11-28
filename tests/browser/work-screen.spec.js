@@ -115,7 +115,7 @@ test("Start after seeing 5 of 10 steps gives Step 1 of 5", async ({ page }) => {
   await page.goto("/");
   await page.getByLabel("Assignment text").fill("1. Find three sources\n2. Take notes\n3. Write a draft");
   await page.getByRole("button", { name: "Essay" }).click();
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await expect(page.locator("#showing-note")).toHaveText("Showing 5 of 10. Show more steps adds the rest.");
   await page.getByRole("button", { name: "Start", exact: true }).click();
   await expect(page.getByText("Step 1 of 5")).toBeVisible();
@@ -125,7 +125,7 @@ test("Start after Show more steps gives the full count and no Showing line", asy
   await page.goto("/");
   await page.getByLabel("Assignment text").fill("1. Find three sources\n2. Take notes\n3. Write a draft");
   await page.getByRole("button", { name: "Essay" }).click();
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await page.getByRole("button", { name: "Show more steps" }).click();
   await expect(page.locator("#showing-note")).toHaveText("");
   await page.getByRole("button", { name: "Start", exact: true }).click();

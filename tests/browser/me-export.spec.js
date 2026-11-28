@@ -190,7 +190,7 @@ test("Delete everything: needs a second tap, No keeps data, Yes removes saved da
   await expect(page.locator("#me-status")).toContainText("Everything is deleted");
   expect(await page.evaluate(() => Object.keys(globalThis.localStorage).filter((k) => k.startsWith("focusapp")))).toEqual([]);
   await page.getByRole("button", { name: "Back to home" }).click();
-  await expect(page.getByRole("button", { name: "Show my steps" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Suggest some to start" })).toBeVisible();
 });
 
 test("Awkward: Delete everything with nothing saved, and refresh in the middle of the question", async ({ page }) => {

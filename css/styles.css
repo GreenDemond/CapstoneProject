@@ -835,3 +835,13 @@ body.has-tabs { padding-bottom: 5rem; }
   #app { padding: 2rem 2rem; }
   body.has-tabs { padding-bottom: 5.5rem; }
 }
+
+.pasted-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 9rem;
+  overflow-y: auto;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #c9c9c9;
+  border-radius: 0.5rem;
+}

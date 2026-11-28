@@ -14,7 +14,7 @@ async function visibleScreens(page) {
 async function showSteps(page) {
   await page.getByRole("button", { name: "Essay" }).click();
   await page.locator("#assignment-text").fill("Write about a book.");
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await expect(page.locator("#steps-screen")).toBeVisible();
 }
 
@@ -36,13 +36,13 @@ test("every top button opens exactly one screen, and Back returns home", async (
   }
 });
 
-test("focus moves to the steps heading after Show my steps", async ({ page }) => {
+test("focus moves to the steps heading after Suggest some to start", async ({ page }) => {
   await page.goto("/");
   await showSteps(page);
   await expect(page.locator("#steps-heading")).toBeFocused();
 });
 
-test("Settings after Show my steps hides the steps, and Back brings them back", async ({ page }) => {
+test("Settings after Suggest some to start hides the steps, and Back brings them back", async ({ page }) => {
   await page.goto("/");
   await showSteps(page);
   expect(await visibleScreens(page)).toEqual(["paste-screen", "steps-screen"]);
@@ -79,18 +79,18 @@ test("leaving while the AI is thinking shows nothing from its late reply", async
   await standIn(page, { chatDelay: 1500, content: "1. Open the book\n2. Read one page" });
   await page.getByRole("button", { name: "Back" }).click();
   await showStepsNoWait(page);
-  await expect(page.getByRole("button", { name: "Show my steps" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Suggest some to start" })).toBeDisabled();
   await page.getByRole("button", { name: "My calendar", exact: true }).click();
   await page.waitForTimeout(2200);
   expect(await visibleScreens(page)).toEqual(["calendar-screen"]);
   await page.locator("#calendar-screen").getByRole("button", { name: /^Back/ }).first().click();
   expect(await visibleScreens(page)).toEqual(["paste-screen"]);
-  await expect(page.getByRole("button", { name: "Show my steps" })).toBeEnabled();
+  await expect(page.getByRole("button", { name: "Suggest some to start" })).toBeEnabled();
   await expect(page.locator("#message")).toHaveText("");
 });
 
 async function showStepsNoWait(page) {
   await page.getByRole("button", { name: "Essay" }).click();
   await page.locator("#assignment-text").fill("Write about a book.");
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
 }

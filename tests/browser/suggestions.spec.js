@@ -20,7 +20,7 @@ test("a kind is suggested, tapping Use this picks it, and the assignment's own l
   await expect(page.locator("#kind-suggestion")).toBeHidden();
   await expect(page.getByRole("button", { name: "Essay", exact: true })).toBeFocused();
 
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await expect(page.getByRole("heading", { name: "What your assignment says" })).toBeVisible();
   await expect(page.getByText("Copied from what you pasted. Does each one have a step?")).toBeVisible();
   await expect(page.locator("#requirements-list li")).toHaveText(["Include a clear thesis.", "Use at least 3 sources.", "Due Friday."]);
@@ -39,7 +39,7 @@ test("a range of problems becomes chunks, and the requirement line is shown", as
   await page.goto("/");
   await page.getByLabel("Assignment text").fill(WORKSHEET);
   await page.getByRole("button", { name: "Use this" }).click();
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await expect(page.locator("#steps li")).toHaveText(["Do problems 1 to 2", "Do problems 3 to 4", "Do problems 5 to 6", "Do problems 7 to 8", "Do problems 9 to 10"]);
   await expect(page.locator("#requirements-list li")).toHaveText(["Show your work for each one."]);
 });
@@ -50,7 +50,7 @@ test("nonsense or nothing pasted gives no suggestion and no requirements box", a
   await page.getByLabel("Assignment text").fill("asdf qwer zxcv");
   await expect(page.locator("#kind-suggestion")).toBeHidden();
   await page.getByRole("button", { name: "Something else" }).click();
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await expect(page.locator("#steps li").first()).toBeVisible();
   await expect(page.locator("#requirements")).toBeHidden();
 });
@@ -69,7 +69,7 @@ test("a requirement line containing HTML is shown as plain text", async ({ page 
   await page.goto("/");
   await page.getByLabel("Assignment text").fill("You must include <b>bold</b> and <img src=x onerror=window.hacked=1> words.");
   await page.getByRole("button", { name: "Something else" }).click();
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await expect(page.locator("#requirements-list li")).toHaveText("You must include <b>bold</b> and <img src=x onerror=window.hacked=1> words.");
   await expect(page.locator("#requirements-list b, #requirements-list img")).toHaveCount(0);
   expect(await page.evaluate(() => globalThis.hacked)).toBeUndefined();
@@ -81,6 +81,6 @@ test("a very long paste does not freeze or break the suggestion", async ({ page 
   await page.getByLabel("Assignment text").fill(`${ESSAY} ${"You must try. ".repeat(3000)}`);
   await expect(page.locator("#kind-suggestion")).toBeVisible();
   await page.getByRole("button", { name: "Use this" }).click();
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   expect(await page.locator("#requirements-list li").count()).toBeLessThanOrEqual(6);
 });

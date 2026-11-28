@@ -10,7 +10,7 @@ async function startKind(page, kindName, text = STEPS) {
   await page.goto("/");
   await page.getByLabel("Assignment text").fill(text);
   await page.getByRole("button", { name: kindName, exact: true }).click();
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await page.getByRole("button", { name: "Start", exact: true }).click();
   await expect(page.locator(".current-step")).toBeVisible();
 }

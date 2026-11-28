@@ -19,6 +19,14 @@ import {
 } from "../logic/step-editor.js";
 import { STEP_TIPS_TITLE, STEP_TIPS_LINES } from "../logic/step-count.js";
 import { loadStepTipsHidden, saveStepTipsHidden } from "../storage.js";
+import {
+  ownMissing,
+  OWN_EDITOR_TITLE,
+  OWN_EDITOR_HINT,
+  PASTED_HEADING,
+  OWN_DONE_LABEL,
+  OWN_LEAVE_LABEL,
+} from "../logic/own-steps.js";
 import { el, button } from "../ui/dom.js";
 import { fillCheck } from "./step-check.js";
 import { checkSteps } from "../logic/step-check.js";
@@ -37,6 +45,10 @@ let status = "";
 let focusTarget = null; // a selector to focus after the next redraw
 let tipsOpen = false; // the good-step card is folded each time the editor opens
 let tipsHidden = false;
+let fresh = false; // true when the student is writing their own steps from nothing (design/own-steps-w10.md)
+let pastedText = "";
+let freshDone = null;
+let freshCancel = null;
 
 function fillNote(holder, index) {
   holder.replaceChildren();
@@ -156,8 +168,13 @@ function fillTips(holder, focusSelector) {
 
 function render() {
   editor.replaceChildren();
-  editor.append(el("h3", "Change my steps", { tabindex: "-1", id: "editor-heading" }));
-  editor.append(el("p", "Change the words, move a step, split it in two, or add your own. Nothing is saved until you press Start.", { class: "hint" }));
+  editor.append(el("h3", fresh ? OWN_EDITOR_TITLE : "Change my steps", { tabindex: "-1", id: "editor-heading" }));
+  editor.append(
+    el("p", fresh ? OWN_EDITOR_HINT : "Change the words, move a step, split it in two, or add your own. Nothing is saved until you press Start.", { class: "hint" }),
+  );
+  if (fresh && pastedText !== "") {
+    editor.append(el("h4", PASTED_HEADING), el("p", pastedText, { class: "pasted-text" }));
+  }
   const tips = el("div", undefined, { class: "step-tips" });
   fillTips(tips, null);
   editor.append(tips);
@@ -208,8 +225,8 @@ function render() {
   editor.append(el("p", status, { class: "message", role: "status", "aria-live": "polite" }));
   const finish = el("div", undefined, { class: "editor-extra" });
   finish.append(
-    button("Done changing", finishEditing, "primary"),
-    button("Leave my steps as they were", closeEditor),
+    button(fresh ? OWN_DONE_LABEL : "Done changing", finishEditing, "primary"),
+    button(fresh ? OWN_LEAVE_LABEL : "Leave my steps as they were", leaveEditor),
   );
   editor.append(finish);
 
@@ -223,13 +240,23 @@ function render() {
 function finishEditing() {
   const steps = cleanSteps(draft);
   if (steps.length === 0) {
-    status = "Add at least one step to go on.";
-    focusTarget = "#editor-heading";
+    status = fresh ? ownMissing(draft) : "Add at least one step to go on.";
+    focusTarget = fresh ? '[data-name="text-1"]' : "#editor-heading";
     render();
     return;
   }
+  const done = fresh ? freshDone : onDone;
   closeEditor();
-  onDone(steps);
+  done(steps);
+}
+
+// "Leave" in the normal editor keeps the steps; when writing from nothing it goes back to the paste box.
+function leaveEditor() {
+  const cancel = fresh ? freshCancel : null;
+  closeEditor();
+  if (cancel !== null) {
+    cancel();
+  }
 }
 
 // Shows the normal steps view again. Safe to call when the editor is not open.
@@ -240,6 +267,8 @@ export function closeEditor() {
   checkHolder = null;
   view.hidden = false;
   draft = [];
+  fresh = false;
+  pastedText = "";
   if (wasOpen) {
     openButton.focus();
   }
@@ -252,6 +281,28 @@ function openEditor() {
   tipsHidden = loadStepTipsHidden();
   status = "";
   focusTarget = "#editor-heading";
+  view.hidden = true;
+  editor.hidden = false;
+  render();
+}
+
+// True while the student is writing steps from nothing, so a second press keeps what they typed.
+export function freshEditorOpen() {
+  return fresh && !editor.hidden;
+}
+
+// Opens the editor with one empty box, to write steps from nothing. text is the assignment (may be empty).
+export function openFreshEditor(text, startDraft, done, cancel) {
+  draft = startDraft.slice();
+  dismissed = new Set();
+  tipsOpen = false;
+  tipsHidden = loadStepTipsHidden();
+  status = "";
+  fresh = true;
+  pastedText = text;
+  freshDone = done;
+  freshCancel = cancel;
+  focusTarget = '[data-name="text-1"]';
   view.hidden = true;
   editor.hidden = false;
   render();

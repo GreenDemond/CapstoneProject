@@ -13,15 +13,18 @@ import { inUseHelper, usableServices, pasteStatus, isReady, effortRefusedLine } 
 import { readKey } from "../keystore.js";
 import { askService } from "../ai-direct.js";
 import { initSettings, getAiSettings, onAiChange, setChosenHelper } from "../settings.js";
-import { showScreen, currentScreenName, openStepsPreview, registerOnLeaveHome } from "../ui/screens.js";
+import { showScreen, currentScreenName, openStepsPreview, setStepsPreviewOpen, registerOnLeaveHome } from "../ui/screens.js";
 import { where } from "../ui/helpers.js";
 import { openWorkScreen, stepListNode } from "./work.js";
-import { initStepsEditor, closeEditor } from "./steps-editor.js";
+import { initStepsEditor, closeEditor, openFreshEditor, freshEditorOpen } from "./steps-editor.js";
+import { ownStart, OWN_STEPS_HEADING, STARTER_STEPS_HEADING } from "../logic/own-steps.js";
 import { fillCheck } from "./step-check.js";
 
 const textBox = document.getElementById("assignment-text");
 const kindButtons = document.getElementById("kind-buttons");
 const showButton = document.getElementById("show-steps");
+const writeButton = document.getElementById("write-steps");
+const stepsHeading = document.getElementById("steps-heading");
 const message = document.getElementById("message");
 const stepsList = document.getElementById("steps");
 const showMore = document.getElementById("show-more");
@@ -151,6 +154,7 @@ showButton.addEventListener("click", async () => {
   }
 
   allSteps = starterStepsFor(chosenKind, cleanPastedText(text));
+  stepsHeading.textContent = STARTER_STEPS_HEADING;
   ready.textContent = "";
   renderSteps(pickedCount());
   showRequirements(text);
@@ -158,6 +162,39 @@ showButton.addEventListener("click", async () => {
     ? "That's a long one. The first 6,000 characters are kept."
     : "";
   openStepsPreview();
+});
+
+// "I'll write my steps": the main path. The assignment text and the kind are optional; the student types
+// the steps in the editor, starting from one empty box (design/own-steps-w10.md).
+writeButton.addEventListener("click", () => {
+  if (freshEditorOpen()) {
+    document.getElementById("editor-heading").focus(); // already writing: keep what was typed
+    return;
+  }
+  const start = ownStart(textBox.value);
+  allSteps = [];
+  shownCount = 0;
+  ready.textContent = "";
+  stepsHeading.textContent = OWN_STEPS_HEADING;
+  renderSteps(0);
+  showRequirements(start.text);
+  message.textContent = start.truncated ? "That's a long one. The first 6,000 characters are kept." : "";
+  openStepsPreview();
+  openFreshEditor(
+    start.text,
+    start.draft,
+    (edited) => {
+      allSteps = edited;
+      renderSteps(edited.length);
+      stepsList.focus();
+    },
+    () => {
+      allSteps = [];
+      setStepsPreviewOpen(false);
+      document.getElementById("steps-screen").hidden = true;
+      writeButton.focus();
+    },
+  );
 });
 
 document.getElementById("two-minute").addEventListener("click", () => {
@@ -240,11 +277,11 @@ function refreshAiStatus() {
   refreshPasteHint();
   if (helperReady) {
     aiUseLabel.textContent = `Use ${current.label} to suggest steps`;
-    aiPrivacy.textContent = `If this is ticked, pressing Show my steps sends this text to the AI service ${where(current)} to suggest steps. Don't paste your name or anything private.`;
+    aiPrivacy.textContent = `If this is ticked, pressing Suggest some to start sends this text to the AI service ${where(current)} to suggest steps. Don't paste your name or anything private.`;
   }
 }
 
-// Show my steps asks the AI helper when one is ready and the tick box is on. A second press while a
+// Suggest some to start asks the AI helper when one is ready and the tick box is on. A second press while a
 // request is running is ignored (one call at a time).
 let suggesting = false;
 
@@ -304,6 +341,7 @@ async function suggestWithChosenService(text) {
     allSteps = starterStepsFor(chosenKind, cleanPastedText(text));
     message.textContent = `${result.error} Here are the starter steps instead.`;
   }
+  stepsHeading.textContent = STARTER_STEPS_HEADING;
   ready.textContent = "";
   renderSteps(pickedCount());
   showRequirements(text);
@@ -365,7 +403,7 @@ export function getChosenKind() {
 // Runs when the work screen closes: shows the right home view and puts focus on its main button.
 export function afterWorkClosed() {
   refreshHome();
-  (pickup.hidden ? showButton : pickupStart).focus();
+  (pickup.hidden ? writeButton : pickupStart).focus();
 }
 
 // Settings: the AI helpers screens live in js/settings.js. The paste screen follows them.

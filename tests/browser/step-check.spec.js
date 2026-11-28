@@ -10,7 +10,7 @@ async function openSteps(page, text) {
   await page.goto("/");
   await page.getByLabel("Assignment text").fill(text);
   await page.getByRole("button", { name: "Essay", exact: true }).click();
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await expect(page.locator("#steps li").first()).toBeVisible();
 }
 

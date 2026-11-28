@@ -13,11 +13,11 @@ const LIST = "1. Find sources and take notes\n2. study for the test\n3. Write a 
 test("nothing picked gives five steps; 3 steps shows three and Show more steps adds the rest", async ({ page }) => {
   await paste(page, "Read chapter 2 and answer the questions.");
   await expect(page.getByLabel("5 steps")).toBeChecked();
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await expect(page.locator("#steps li")).toHaveCount(5);
 
   await page.getByLabel("3 steps").check();
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await expect(page.locator("#steps li")).toHaveCount(3);
   await expect(page.locator("#showing-note")).toHaveText("Showing 3 of 7. Show more steps adds the rest.");
   await page.getByRole("button", { name: "Show more steps" }).click();
@@ -29,7 +29,7 @@ test("nothing picked gives five steps; 3 steps shows three and Show more steps a
 test("8 steps shows eight of a longer list, and Start runs exactly the eight", async ({ page }) => {
   await paste(page, LIST);
   await page.getByLabel("8 steps").check();
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await expect(page.locator("#steps li")).toHaveCount(8);
   await expect(page.locator("#showing-note")).toHaveText("Showing 8 of 12. Show more steps adds the rest.");
   await page.getByRole("button", { name: "Start", exact: true }).click();
@@ -39,7 +39,7 @@ test("8 steps shows eight of a longer list, and Start runs exactly the eight", a
 test("the two-minute start keeps the picked count", async ({ page }) => {
   await paste(page, LIST);
   await page.getByLabel("3 steps").check();
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await page.getByRole("button", { name: "Give me a two-minute start" }).click();
   await expect(page.locator("#steps li")).toHaveCount(3);
   await expect(page.locator("#steps li").first()).toContainText("Set a timer for 2 minutes");
@@ -54,7 +54,7 @@ test("a refresh goes back to 5 steps; the pick is not saved", async ({ page }) =
 
 test("the good-step card is folded, opens, and Got it hides it for good; Show step tips brings it back", async ({ page }) => {
   await paste(page, LIST);
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await page.getByRole("button", { name: "Change my steps" }).click();
 
   const toggle = page.getByRole("button", { name: "What makes a step easy to start" });
@@ -78,7 +78,7 @@ test("the good-step card is folded, opens, and Got it hides it for good; Show st
   // Gone for good: after a refresh and a new plan the card stays hidden.
   await page.reload();
   await paste(page, LIST);
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await page.getByRole("button", { name: "Change my steps" }).click();
   await expect(page.getByRole("button", { name: "What makes a step easy to start" })).toBeHidden();
   await page.getByRole("button", { name: "Show step tips" }).click();
@@ -91,14 +91,14 @@ test("damaged saved tips data shows the card and does not crash", async ({ page 
     globalThis.localStorage.setItem("focusapp.v1", JSON.stringify({ schemaVersion: 1, tips: "yes" }));
   });
   await paste(page, LIST);
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await page.getByRole("button", { name: "Change my steps" }).click();
   await expect(page.getByRole("button", { name: "What makes a step easy to start" })).toBeVisible();
 });
 
 test("the card is folded again each time the editor opens", async ({ page }) => {
   await paste(page, LIST);
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await page.getByRole("button", { name: "Change my steps" }).click();
   await page.getByRole("button", { name: "What makes a step easy to start" }).click();
   await page.getByRole("button", { name: "Leave my steps as they were" }).click();

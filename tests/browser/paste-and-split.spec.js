@@ -14,7 +14,7 @@ test("paste, pick a kind, see starter steps, show more, and press Start", async 
   await page.getByLabel("Assignment text").fill(ASSIGNMENT);
   await page.getByRole("button", { name: "Essay" }).click();
   await expect(page.getByRole("button", { name: "Essay" })).toHaveAttribute("aria-pressed", "true");
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
 
   const steps = page.locator("#steps li");
   await expect(steps).toHaveCount(5);
@@ -34,10 +34,10 @@ test("paste, pick a kind, see starter steps, show more, and press Start", async 
 });
 
 // Awkward path 1: nothing pasted. A gentle message, no steps, no red text.
-test("pressing Show my steps with nothing pasted asks for text", async ({ page }) => {
+test("pressing Suggest some to start with nothing pasted asks for text", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "Essay" }).click();
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await expect(page.getByText("Paste something to start.")).toBeVisible();
   await expect(page.locator("#steps-screen")).toBeHidden();
 });
@@ -46,7 +46,7 @@ test("pressing Show my steps with nothing pasted asks for text", async ({ page }
 test("pasting without picking a kind asks the student to pick one", async ({ page }) => {
   await page.goto("/");
   await page.getByLabel("Assignment text").fill("Read chapter 4.");
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await expect(page.getByText("Tap the kind of work it is")).toBeVisible();
   await expect(page.locator("#steps-screen")).toBeHidden();
 });
@@ -56,7 +56,7 @@ test("pasted HTML is shown as text and does not run", async ({ page }) => {
   await page.goto("/");
   await page.getByLabel("Assignment text").fill('- <img src=x onerror="window.hacked = true"> <b>bold</b>');
   await page.getByRole("button", { name: "Reading" }).click();
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await expect(page.locator("#steps li").first()).toHaveText('<img src=x onerror="window.hacked = true"> <b>bold</b>');
   expect(await page.evaluate(() => globalThis.hacked)).toBeUndefined();
 });
@@ -66,7 +66,7 @@ test("a paste over 6,000 characters is cut and the student is told", async ({ pa
   await page.goto("/");
   await page.getByLabel("Assignment text").fill("Read this. ".repeat(600));
   await page.getByRole("button", { name: "Problem set" }).click();
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await expect(page.getByText("The first 6,000 characters are kept.")).toBeVisible();
   await expect(page.locator("#steps li")).toHaveCount(5);
 });
@@ -76,7 +76,7 @@ test("the two-minute start goes first and the work screen begins with it", async
   await page.goto("/");
   await page.getByLabel("Assignment text").fill("Read chapter 4.");
   await page.getByRole("button", { name: "Essay" }).click();
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await page.getByRole("button", { name: "Give me a two-minute start" }).click();
   await expect(page.locator("#steps li").first()).toContainText("Set a timer for 2 minutes");
   await page.getByRole("button", { name: "Start", exact: true }).click();

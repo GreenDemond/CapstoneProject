@@ -255,7 +255,7 @@ test("the kind saved with the steps is pre-selected after a refresh", async ({ p
   await page.getByRole("button", { name: "Back" }).click();
   await page.getByLabel("Assignment text").fill("1. Read chapter one\n2. Note three ideas");
   await page.getByRole("button", { name: "Reading" }).click();
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await page.getByRole("button", { name: "Start", exact: true }).click();
   await expect(page.getByText("Step 1 of")).toBeVisible();
   await page.reload();

@@ -159,7 +159,7 @@ test("a service that rejects the fields with Low: still answers via the retry, s
   await expect(page.getByText(IGNORED)).toHaveCount(0);
 });
 
-test("Show my steps sends the effort too, and says so once if the AI refuses it", async ({ page }) => {
+test("Suggest some to start sends the effort too, and says so once if the AI refuses it", async ({ page }) => {
   await standIn(page, OPENROUTER);
   await openSettings(page);
   await addOpenRouter(page);
@@ -168,13 +168,13 @@ test("Show my steps sends the effort too, and says so once if the AI refuses it"
   await page.getByRole("button", { name: "Back" }).click();
   await page.getByLabel("Assignment text").fill("Write an essay about owls");
   await page.getByRole("button", { name: "Essay" }).click();
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await expect(page.locator("#message")).toContainText("Suggested by an AI");
   expect(bodies(seen).at(-1).reasoning).toEqual({ effort: "low" });
   await expect(page.locator("#message")).not.toContainText(IGNORED);
 
   seen = await standIn(page, { ...OPENROUTER, content: steps, rejectReasoning: true });
-  await page.getByRole("button", { name: "Show my steps" }).click();
+  await page.getByRole("button", { name: "Suggest some to start" }).click();
   await expect(page.locator("#message")).toContainText(IGNORED);
   expect(bodies(seen).length).toBe(2);
 });

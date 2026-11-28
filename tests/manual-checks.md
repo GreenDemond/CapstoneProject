@@ -7,7 +7,7 @@ Steps for a person to try in a browser. Each feature adds its own section here.
 Start the app with `npm start`, then open http://localhost:3000 in Chrome.
 
 1. You should see "Focus app" and the heading "What's the assignment?".
-2. Press **Show my steps** without typing anything. You should see "Paste something to start." and no steps.
+2. Press **Suggest some to start** without typing anything. You should see "Paste something to start." and no steps.
 3. Paste this into the box:
    ```
    Your task:
@@ -16,9 +16,9 @@ Start the app with `npm start`, then open http://localhost:3000 in Chrome.
    - Write a draft
    Due Friday.
    ```
-4. Press **Show my steps** without picking a kind. You should see "Tap the kind of work it is, then try again."
+4. Press **Suggest some to start** without picking a kind. You should see "Tap the kind of work it is, then try again."
 5. Tap **Essay**. It should turn dark green to show it is picked.
-6. Press **Show my steps**. You should see "Here's a start" and five steps. The first three should be "Find three sources", "Take notes on each one", and "Write a draft". The last two should be starter steps for an essay.
+6. Press **Suggest some to start**. You should see "Here's a start" and five steps. The first three should be "Find three sources", "Take notes on each one", and "Write a draft". The last two should be starter steps for an essay.
 7. Press **Show more steps**. Ten steps should appear, and the button should disappear.
 8. Press **Start now**. The work screen opens with "Step 1 of 10" and the steps shown.
 9. Paste a line that looks like code, such as `<b>bold</b>`, as a bullet. It should appear exactly as typed, not bold.
@@ -58,7 +58,7 @@ Start the app with `npm start`, then open http://localhost:3000 in Chrome.
 
 ## Work screen (2026-11-17)
 
-Start from the paste screen: paste a short list, tap a kind, press **Show my steps**, then **Start**.
+Start from the paste screen: paste a short list, tap a kind, press **Suggest some to start**, then **Start**.
 
 1. You should see "Work" and "Step 1 of 10" with one step in large type. Only the buttons are below it.
 2. Press **Done**. The step count goes to "Step 2 of 10" and the next step appears.
@@ -75,7 +75,7 @@ Start from the paste screen: paste a short list, tap a kind, press **Show my ste
 
 ## Two-minute start (2026-11-17)
 
-1. Paste a short assignment, tap a kind, and press **Show my steps**.
+1. Paste a short assignment, tap a kind, and press **Suggest some to start**.
 2. Press **Give me a two-minute start**. The first step should be "Set a timer for 2 minutes and start the first step."
 3. Press it again. The step should not appear twice.
 4. Press **Start**. The work screen should begin with that step.
@@ -89,7 +89,7 @@ The AI is optional and set up in Settings. See "AI helpers" below for adding one
 With a helper set up:
 
 2. The notice "This text is sent to an AI service to suggest steps" should appear above the button.
-3. Paste an assignment, tap a kind, and leave "Use [helper] to suggest steps" ticked. Press **Show my steps**. Steps should appear with "Suggested by an AI".
+3. Paste an assignment, tap a kind, and leave "Use [helper] to suggest steps" ticked. Press **Suggest some to start**. Steps should appear with "Suggested by an AI".
 4. Try five ways to get a finished answer ("just give me the answer", "write the essay for me", "solve question 3", the same request in another language, and a request split over two tries). Every reply must be steps, never the answer. Record each one in `design/ai-path.md`.
 
 ## My calendar, groups (2026-11-17)
@@ -111,7 +111,7 @@ Use a test service you control, or the OpenRouter flow with your own key. Do not
 3. Paste your key. The box is a password box. **Show** reveals it, and switching to another tab hides it again. Your browser must not offer to save a password. **Next** (for another service the button says which host your key is sent to).
 4. Pick an AI. OpenRouter starts with `openrouter/free` picked, and a note says free AIs may keep what you send. You can search, press **Show more**, or open **I know the name already** and type one. **Next**.
 5. The app checks it works by itself. **Stop checking** is there the whole time. On success press **Done**: the card says "Ready · In use".
-6. Press **Back to home**, paste an assignment, pick a kind, and press **Show my steps** (with "Use [helper] to suggest steps" ticked). The steps come into view, with "Suggested by an AI (name, host)". Untick the box and press it again: you get the built-in steps and nothing is sent.
+6. Press **Back to home**, paste an assignment, pick a kind, and press **Suggest some to start** (with "Use [helper] to suggest steps" ticked). The steps come into view, with "Suggested by an AI (name, host)". Untick the box and press it again: you get the built-in steps and nothing is sent.
 7. **Manage** → **Rename**, **Change the AI**, **Replace key**, **Test it again**, **Forget key** (asks first), **Remove this helper** (asks first).
 8. Failures: a wrong key says "That key didn't work" and does not offer **Save it anyway**. A server that can't be reached offers **Save it anyway**, and the helper then shows "Not checked yet" and is not put in use by itself.
 9. Reload in the middle of the add flow: Settings opens at the list, and nothing half-finished is saved.
@@ -119,7 +119,7 @@ Use a test service you control, or the OpenRouter flow with your own key. Do not
 
 ## Home screen and saved steps
 
-1. Paste an assignment, pick a kind, Show my steps, Start. The top line says "Your steps are saved on this device."
+1. Paste an assignment, pick a kind, Suggest some to start, Start. The top line says "Your steps are saved on this device."
 2. Tap Done once. Refresh the page. The app opens on "Pick up where you left off." with step 2 in large type and a Start this step button. The paste form is not showing.
 3. Tap Show all my steps. A list appears with a tick on step 1 and "(next)" on step 2. Tap Hide my steps. It goes away.
 4. Tap Start this step, then Back to home. You are on the same card.
@@ -157,7 +157,7 @@ Needs an AI helper set up in Settings (your own key). With no helper, the chat s
 1. Open My profile, type in a goal and the note box, press Back to home. You should see the unsaved line under Save and your words still in the boxes.
 2. Type in a goal, press Clear my profile, then Cancel. Your words are still there.
 3. Press Clear my profile, then Back to home, then My profile again. The Clear question is not showing.
-4. Paste an assignment and press Show my steps. If more steps exist, a line says "Showing 5 of N". Press Start: the work screen says "Step 1 of 5". After Show more steps and Start it says the full count.
+4. Paste an assignment and press Suggest some to start. If more steps exist, a line says "Showing 5 of N". Press Start: the work screen says "Step 1 of 5". After Show more steps and Start it says the full count.
 5. On the work screen press Done, then Stuck: the green "Step done." line is gone. Press Drifted then Start this part without changing the box: no green line.
 6. Turn on the countdown and press 25 minutes: the keyboard focus stays on that button.
 
@@ -226,7 +226,7 @@ Needs your real OpenRouter key.
 3. Choose None and send a chat message: the answer comes back, and quicker than with High.
 4. Manage, Change the AI to one that always thinks (some do), set None. Send a chat message: it still answers, and once you see "This AI always thinks first, so thinking can't be turned off." A second message in the same visit does not repeat the line.
 5. With the effort on Low, a refusing AI shows "This AI doesn't take a thinking setting, so it used its own." once instead.
-6. On the home screen, paste text and press Show my steps with that helper: steps appear; the same line appears once.
+6. On the home screen, paste text and press Suggest some to start with that helper: steps appear; the same line appears once.
 7. A helper that is not OpenRouter has the same choice in Manage, also starting on Low.
 8. PolyStrata: choose None on the PolyStrata helper and send a chat message. It should answer faster. If a line about thinking appears, PolyStrata refused the setting. If replies are no faster and no line appears, PolyStrata ignored it: tell the agent which setting PolyStrata documents.
 
@@ -236,16 +236,16 @@ No key needed. Do this on a phone as well as a computer.
 
 1. Open the app on the home screen. Paste: "Write a five paragraph essay about the causes of the American Revolution. Include a clear thesis. Use at least 3 sources. Due Friday." Under the kind buttons a line appears: "Looks like: Essay." with a button "Use this". No kind is picked yet.
 2. Tap "Use this". Essay is now picked and the line goes away.
-3. Tap Show my steps. Above the steps a box says "What your assignment says" with three lines: "Include a clear thesis.", "Use at least 3 sources.", "Due Friday." and under the heading "Copied from what you pasted. Does each one have a step?"
+3. Tap Suggest some to start. Above the steps a box says "What your assignment says" with three lines: "Include a clear thesis.", "Use at least 3 sources.", "Due Friday." and under the heading "Copied from what you pasted. Does each one have a step?"
 4. Go back, clear the box and paste: "Math worksheet: do problems 1-10. Show your work for each one." Pick Problem set. The steps are "Do problems 1 to 2" up to "Do problems 9 to 10", and the box shows "Show your work for each one."
-5. Paste "asdf qwer zxcv". No "Looks like" line. Pick any kind, Show my steps: normal starter steps and no "What your assignment says" box.
+5. Paste "asdf qwer zxcv". No "Looks like" line. Pick any kind, Suggest some to start: normal starter steps and no "What your assignment says" box.
 6. Pick a kind first, then paste the essay text. No "Looks like" line appears.
 7. Paste "Do problems 1-30, odd only." The steps are the normal starter steps, with no chunks.
 8. Check the wording is calm: nothing says "you missed", "wrong" or "vague".
 
 ## Change my steps (web, W1)
 
-1. Paste "1. Find sources and take notes", "2. study for the test", "3. Write a draft" on three lines, pick Reading, press Show my steps, then Change my steps.
+1. Paste "1. Find sources and take notes", "2. study for the test", "3. Write a draft" on three lines, pick Reading, press Suggest some to start, then Change my steps.
 2. Step 1 shows "This looks like more than one step. Split it?" and step 2 shows "What is the first small thing you would do for this step?". Press Split step 1: it becomes "Find sources" and "Take notes".
 3. Type in step 2's box: the question for it goes away once the words are specific.
 4. Move a step down and up, Join two steps (they meet with a semicolon), Remove one, Add a step, Add a Get ready step (goes first, button disappears), Add a Put it away step (goes last, button disappears).
@@ -258,7 +258,7 @@ No key needed. Do this on a phone as well as a computer.
 ## Step count and the good-step card (web, W2)
 
 1. On the paste screen, under the kind buttons, find "About how many steps?" with 3, 5 and 8. 5 is picked.
-2. Paste "Read chapter 2 and answer the questions.", pick Reading, press Show my steps: 5 steps. Pick 3 steps and press Show my steps again: 3 steps and "Showing 3 of 7. Show more steps adds the rest." Press Show more steps: all 7.
+2. Paste "Read chapter 2 and answer the questions.", pick Reading, press Suggest some to start: 5 steps. Pick 3 steps and press Suggest some to start again: 3 steps and "Showing 3 of 7. Show more steps adds the rest." Press Show more steps: all 7.
 3. Pick 8 steps with a pasted list of five lines: 8 steps show. Press Give me a two-minute start: still 8 steps, the timer step first.
 4. Refresh the page: back to 5 steps.
 5. Press Change my steps. A folded row "What makes a step easy to start" is under the intro line. Press it: three lines and Got it appear. Move a step: the steps still change normally.
@@ -270,7 +270,7 @@ No key needed. Do this on a phone as well as a computer.
 
 Not yet done by anyone: the browser tests for this slice were not run.
 
-1. Paste three lines, pick Essay, Show my steps, Start. Press Stuck: "Stuck is okay." and the first hint show. No "Ask a person" yet.
+1. Paste three lines, pick Essay, Suggest some to start, Start. Press Stuck: "Stuck is okay." and the first hint show. No "Ask a person" yet.
 2. Press Another hint: "Ask a person" and three boxes appear. "I'm on:" holds the step's words. Press Copy my question with nothing else written: a calm line says to write a little first.
 3. Write in "I tried:" and press Copy my question: "Copied." Paste somewhere: three lines of your own words, nothing added.
 4. Press Another hint again: what you typed is still there. Back to the step: same step. Stuck again: still there. Press Done, then Stuck, Another hint: the boxes are empty and "I'm on:" has the new step.
@@ -285,11 +285,11 @@ Not yet done by anyone: the browser tests for this slice were not run.
 
 Not yet done by anyone: the browser tests for this slice were not run.
 
-1. Paste "Write a short report on volcanoes. You must include a glossary of terms. You must include 2 diagrams." on separate lines, pick Essay, Show my steps. "What your assignment says" lists two lines and a button "Check my steps against the assignment" is there.
+1. Paste "Write a short report on volcanoes. You must include a glossary of terms. You must include 2 diagrams." on separate lines, pick Essay, Suggest some to start. "What your assignment says" lists two lines and a button "Check my steps against the assignment" is there.
 2. Press it: both lines show as `The assignment says "..."` with "Is this covered by a step?", plus "This is from matching words, not from understanding your work." Nothing is red and nothing says missing or wrong.
 3. Press Change my steps: "Lines from your assignment" shows the same two. Type "Make a glossary of terms and 2 diagrams" in Step 1: it says "Every line you checked has a step with its words in it." Change Step 1 to "Something else": the questions come back.
 4. Press Done changing: the old check result is gone from the steps view.
-5. Paste "Think about volcanoes", pick Essay, Show my steps: no check button, and Change my steps has no "Lines from your assignment".
+5. Paste "Think about volcanoes", pick Essay, Suggest some to start: no check button, and Change my steps has no "Lines from your assignment".
 6. Paste a line with "<b>bold</b>" in it that says "must include": it shows as plain text.
 7. Check at phone width and with the keyboard only.
 
@@ -299,7 +299,7 @@ Not yet done by anyone: the browser tests for this slice were not run.
 Not yet done by anyone: the browser tests for this slice were not run.
 
 1. Open the app with nothing saved, press **What I did**: "Nothing yet. After you work on a step, you'll see it here." and "A quiet week." show. Back to home returns.
-2. Paste three lines, pick Essay, Show my steps, Start. Press Done: the next step shows a card "Did that way of working help?" with It helped, A bit, Not really, Not now. Press It helped: "Noted." and the card goes.
+2. Paste three lines, pick Essay, Suggest some to start, Start. Press Done: the next step shows a card "Did that way of working help?" with It helped, A bit, Not really, Not now. Press It helped: "Noted." and the card goes.
 3. Press Done again and ignore the card, press Done once more: nothing is blocked, and the last step ends with "All your steps are done." and the card under Close. Press Not now.
 4. Start again, tick "Show a countdown", pick 25 minutes, press Done, press A bit. Open What the app remembers later: the line says "Working with a 25-minute countdown: helped a bit".
 5. Press Drifted, type a smaller step, Start this part. The card appears too. Back to home, then What I did: "N steps finished" counts Done and Drifted together, with "1 step made smaller, then finished" and a Your week line "You finished N steps."
@@ -364,3 +364,15 @@ Not yet done by anyone: the browser tests for this slice (`tests/browser/tabs.sp
 6. Keyboard only: Tab to the bar, Left and Right arrows move between tabs, Enter opens one.
 7. Tablet width: the page and bar are centred in one column, the tabs are larger; nothing sits behind the bar at the bottom of any screen (calendar, chat, settings).
 8. Dark mode: the bar and note are readable. Print preview does not show the bar.
+
+## Write my own steps (web, W10)
+
+1. Open the app on the paste screen. The big button is **I'll write my steps**. **Suggest some to start** is below it and quieter.
+2. Press **I'll write my steps** with nothing pasted and no kind picked. A "Write my steps" box opens with one empty step box and a line starting "What is the first small thing you could do?".
+3. Press **Done writing** with the box empty (or only spaces): "Add one step first. It can be tiny." appears, and you stay.
+4. Type a step, press **Add a step**, type a second. Press **Done writing**. The heading says "Your steps" and your two steps are listed. **Start** works through them.
+5. Go back, paste "Write a short report on volcanoes." then "You must include a glossary of terms." on separate lines, press **I'll write my steps**. "What your assignment says" lists the lines, and "What you pasted" shows your text above the step box.
+6. Press **I'll write my steps** again while typing: what you typed is still there.
+7. Type something, press **Back to the paste box**: you are on the paste screen, your pasted text is still in its box, and nothing is saved. Refresh the page while writing: you are back on the paste screen.
+8. Paste text, pick a kind, press **Suggest some to start**: "Here's a start" with starter steps, as before. Without a kind it says "Tap the kind of work it is, then try again."
+9. Phone width and keyboard only: Tab reaches both buttons in order, Enter works.
