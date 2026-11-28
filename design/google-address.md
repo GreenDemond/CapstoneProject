@@ -16,4 +16,4 @@ Nothing new stored. The key stays encrypted on the device and goes only to the t
 Only the one extra path `/v1beta/openai`, only for `generativelanguage.googleapis.com`. Google's native `generateContent` addresses, `/models/...` addresses and Vertex AI are still refused with the existing plain message.
 
 ## Not verified
-Browser CORS from Google, and how Google handles the thinking-effort fields (the app retries without them if refused). Try once with a real key.
+Confirmed 2026-11-28 by the parent: the browser is allowed to call Google, and the thinking-effort fields do not break it. Still unverified: Google's current terms and whether the `-latest` model name stays available.

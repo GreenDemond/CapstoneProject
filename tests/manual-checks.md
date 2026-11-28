@@ -468,7 +468,7 @@ Needs an AI helper set up in Settings.
 
 1. Settings, Add an AI helper, Another service. Type `https://generativelanguage.googleapis.com/v1beta/openai` and Next. Paste the key.
 2. Pick an AI: the pull-down starts on `models/gemini-flash-lite-latest` (even if Google's list lacks it). You can pick another. Leave it alone, Next. (Whether Google still serves that name is not verified; if not, write down the exact error.)
-3. The check passes and Done shows. If the browser blocks the request (CORS) or Google refuses the thinking setting, write down exactly what shows; neither has been tried against the real service.
+3. The check passes and Done shows. The parent confirmed on 2026-11-28 that the browser is allowed to call Google and the thinking setting does not break it; if anything else shows, write down exactly what.
 4. Talk it through: send a message; a reply comes. Try `https://generativelanguage.googleapis.com/v1beta/models/x:generateContent`: the app asks for "the address the service gives".
 
 ## Google Gemini quick setup (web, needs the parent's real Gemini key)
@@ -476,7 +476,7 @@ Needs an AI helper set up in Settings.
 1. Settings, Add an AI helper. Three choices show: OpenRouter, Google Gemini, Another service.
 2. Pick Google Gemini and Next. No address box. The key step shows 3 numbered steps, a link **Open Google AI Studio**, "Google may have renamed these buttons." and the privacy line (what you type goes to Google).
 3. Parent: click the link once. It should open Google AI Studio in a new tab on the API key page. If the address or the button names (Get API key, Create API key) are wrong, tell the agent what Google shows.
-4. Paste the key, Next. The pull-down starts on `models/gemini-flash-lite-latest` and the name box says Gemini. Next, then Done: Gemini shows Ready. (Not tried with a real key.)
+4. Paste the key, Next. The pull-down starts on `models/gemini-flash-lite-latest` and the name box says Gemini. Next, then Done: Gemini shows Ready. (Browser access to Google confirmed 2026-11-28; Google's terms and the `-latest` name are still unverified.)
 5. Cancel at any step: nothing is saved. Back from the key step keeps Google Gemini chosen. Switching to Another service afterwards leaves the name box empty.
 6. A wrong key gives "That key didn't work." If Google's free limit is used up the check says "Gemini says you've used the free quota for now. Wait a bit and try again."
 7. Phone width and keyboard only: Tab, Space and Enter reach every part.
