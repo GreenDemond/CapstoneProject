@@ -53,7 +53,9 @@ function showResults(results) {
       li.append(el("p", item.extract));
     }
     const link = el("a", "Read it on Wikipedia", { href: item.url, target: "_blank", rel: "noopener noreferrer", "aria-label": `Read it on Wikipedia: ${item.title}` });
-    li.append(el("p")).lastChild.append(link);
+    const linkLine = el("p");
+    linkLine.append(link);
+    li.append(linkLine);
     list.append(li);
   }
   resultsNode.append(list);
