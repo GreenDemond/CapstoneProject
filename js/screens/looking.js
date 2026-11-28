@@ -2,9 +2,10 @@
 // It only reads what the student saved and lets them delete it. Student text goes on screen as text.
 import { doingLines, weeklyLines, helpLine, shortDate, removeById, plural } from "../logic/looking-back.js";
 import { removeCourse, courseLine, COURSE_HEADING } from "../logic/courses.js";
+import { blockAnswerLine, removeBlockAnswerAt, BLOCK_ANSWERS_HEADING } from "../logic/block-length.js";
 import { removeItem } from "../logic/work-extras.js";
 import {
-  loadMoments, saveMoments, loadHelps, saveHelps, loadParked, saveParked, loadRecall, saveRecall, loadCourses, saveCourses, deleteRemembered,
+  loadMoments, saveMoments, loadHelps, saveHelps, loadParked, saveParked, loadRecall, saveRecall, loadCourses, saveCourses, loadBlockAnswers, saveBlockAnswers, deleteRemembered,
 } from "../storage.js";
 import { profileNotes, deleteProfileNote } from "./profile.js";
 import { el, button, announce } from "../ui/dom.js";
@@ -20,7 +21,7 @@ let statusText = "";
 let dataChanged = null; // set by app.js: lets the home screen redraw its list of set-aside thoughts
 
 function readAll() {
-  return { moments: loadMoments(), helps: loadHelps(), parked: loadParked(), recall: loadRecall(), courses: loadCourses() };
+  return { moments: loadMoments(), helps: loadHelps(), parked: loadParked(), recall: loadRecall(), courses: loadCourses(), blocks: loadBlockAnswers() };
 }
 
 function lineList(lines) {
@@ -94,7 +95,7 @@ function renderRemembers() {
   body.append(status);
   announce(status, statusText);
 
-  const empty = data.parked.length + data.recall.length + data.helps.length + data.moments.length + data.courses.length + notes.length === 0;
+  const empty = data.parked.length + data.recall.length + data.helps.length + data.moments.length + data.courses.length + data.blocks.length + notes.length === 0;
   if (empty) {
     body.append(el("p", "Nothing yet. As you use the app, the things you save will show up here.", { class: "hint" }));
   }
@@ -103,6 +104,9 @@ function renderRemembers() {
   group("What I wrote after reading or studying", data.recall, (r) => withDate(r.answer, r.date), (r) => afterDelete(saveRecall(removeItem(data.recall, r.id))));
   group("Did that help?", data.helps, (h) => withDate(helpLine(h), h.date), (h) => afterDelete(saveHelps(removeById(data.helps, h.id))));
   group(COURSE_HEADING, data.courses, (c) => withDate(courseLine(c), c.on), (c) => afterDelete(saveCourses(removeCourse(data.courses, c.label))));
+  // Each answer is deleted by its place in the list, because two answers can read the same.
+  const blockRows = data.blocks.map((answer, index) => ({ ...answer, index }));
+  group(BLOCK_ANSWERS_HEADING, blockRows, (b) => withDate(blockAnswerLine(b), b.on), (b) => afterDelete(saveBlockAnswers(removeBlockAnswerAt(data.blocks, b.index))));
   group("Notes from My profile", notes, (n) => n.text, (n) => afterDelete(deleteProfileNote(n.id)));
 
   if (data.moments.length > 0) {

@@ -42,6 +42,8 @@ The only memory between sessions. Keep it current; rewrite it, do not let it gro
 
 **A class on calendar items (web) is built** (`design/calendar-class.md`): an optional Class (optional) box on the add form; items show "Class: <name>". Student's own words, nothing leaves the device.
 
+**Block-length answers list (web) is built** (`design/block-answers-list.md`): What the app remembers lists each saved answer to "Did that time feel about right?" with its own Delete.
+
 Nothing. The whole-app review plan (`design/review-plan-2026-11-17.md`) is finished; see its Progress list.
 
 ## Known gaps

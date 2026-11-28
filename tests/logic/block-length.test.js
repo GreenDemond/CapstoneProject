@@ -197,3 +197,22 @@ test("Drifted starts with the first part of a long step, cut like Change my step
   assert.equal(driftStart("Take notes"), "Take notes");
   assert.equal(driftStart(""), "");
 });
+
+test("each saved answer has a plain line, and one can be removed by place", async () => {
+  const { blockAnswerLine, removeBlockAnswerAt } = await import("../../js/logic/block-length.js");
+  assert.equal(blockAnswerLine({ minutes: 25, answer: "shorter" }), "25 minutes felt too long");
+  assert.equal(blockAnswerLine({ minutes: 12, answer: "longer" }), "12 minutes felt too short");
+  assert.equal(blockAnswerLine({ minutes: 12, answer: "aboutRight" }), "12 minutes felt about right");
+  const items = [1, 2, 3].map((n) => ({ minutes: 25, answer: "shorter", on: `2026-11-0${n}T10:00:00.000Z` }));
+  assert.deepEqual(removeBlockAnswerAt(items, 1).map((i) => i.on[9]), ["1", "3"]);
+  assert.equal(removeBlockAnswerAt(items, 7), items);
+  assert.equal(removeBlockAnswerAt(items, -1), items);
+  assert.equal(removeBlockAnswerAt(items, "1"), items);
+});
+
+test("deleting an answer changes the suggestion at once", async () => {
+  const { removeBlockAnswerAt } = await import("../../js/logic/block-length.js");
+  const items = many(25, "shorter", [1, 2, 3]);
+  assert.equal(suggestedLength(items, NOW), 12);
+  assert.equal(suggestedLength(removeBlockAnswerAt(items, 0), NOW), null);
+});

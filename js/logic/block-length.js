@@ -74,6 +74,19 @@ export function normalizeBlockAnswers(raw) {
   return items;
 }
 
+export const BLOCK_ANSWERS_HEADING = "How long a block felt";
+
+// One plain line for a saved answer, as shown in What the app remembers.
+export function blockAnswerLine(item) {
+  const feel = { shorter: "felt too long", aboutRight: "felt about right", longer: "felt too short" }[item.answer];
+  return `${item.minutes} minutes ${feel}`;
+}
+
+// A smaller list without the answer at this position. Anything out of range changes nothing.
+export function removeBlockAnswerAt(items, index) {
+  return Number.isInteger(index) && index >= 0 && index < items.length ? items.filter((_, i) => i !== index) : items;
+}
+
 // The length the answers point to, or null. For one length: at least three of its newest five answers
 // from the last 30 days point the same way, and none the other way. If two lengths each point
 // somewhere, the one with the newest answer wins.

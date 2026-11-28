@@ -446,3 +446,11 @@ Needs an AI helper set up in Settings.
 2. The item shows "Class: History" beside its category. Reload: it is still there.
 3. Add a trip with the class box left blank: no "Class:" appears. Type `<b>Art</b>`: it shows as plain text.
 4. Phone width and keyboard only: Tab reaches the class box between the category and Notes.
+
+## Block-length answers list (web)
+
+1. Start steps and let a countdown end. Answer **Longer** or **Shorter** on the "Did that time feel about right?" card, on two or three steps.
+2. Me, then What the app remembers: "How long a block felt" lists each answer, for example "12 minutes felt too short", with a short date and its own **Delete**.
+3. Press **Delete** on one: only that line goes and "Deleted." shows. If three agreed, the "Your answers so far point to..." line on the work screen goes after deleting one.
+4. Delete the last one: the heading goes. With nothing else saved, the page says "Nothing yet."
+5. Phone width and keyboard only: Tab reaches each Delete.
