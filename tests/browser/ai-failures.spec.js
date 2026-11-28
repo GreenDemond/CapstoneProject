@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { KEY, standIn, openSettings, setUpOther, nextButton, pageTop } from "./helpers/ai.js";
+import { openScreen } from "./helpers/nav.js";
 
 const message = (page) => page.getByRole("status").last();
 
@@ -32,7 +33,7 @@ test("when the service can't be reached, Save it anyway keeps it as Not checked 
   await expect(page.getByText("saved, but not checked yet")).toBeVisible();
   await page.getByRole("button", { name: "Back" }).click();
   await expect(page.locator("#ai-status")).not.toContainText("Using:");
-  await page.getByRole("button", { name: "Settings" }).click();
+  await openScreen(page, "Settings");
   await expect(page.getByRole("button", { name: /^Use / })).toBeVisible();
 });
 

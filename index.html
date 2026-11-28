@@ -13,16 +13,6 @@
       <h1>Focus app</h1>
 
       <section id="paste-screen" aria-labelledby="paste-heading">
-        <nav id="top-nav" class="top-nav" aria-label="Screens">
-          <button type="button" id="open-chat">Talk it through</button>
-          <button type="button" id="open-calendar">My calendar</button>
-          <button type="button" id="open-profile">My profile</button>
-          <button type="button" id="open-looking">What I did</button>
-          <button type="button" id="open-intake">How I like to work</button>
-          <button type="button" id="open-settings">Settings</button>
-          <button type="button" id="open-me">Me and my data</button>
-          <button type="button" id="open-lookup" hidden>Look it up</button>
-        </nav>
 
         <div id="lookback-card" class="lookback-card" hidden>
           <p id="lookback-line"></p>
@@ -53,8 +43,13 @@
           <p class="hint" id="thoughts-hint"></p>
         </div>
 
+        <div id="welcome-note" class="welcome-note" hidden>
+          <p class="hint" id="welcome-line"></p>
+          <button type="button" id="welcome-hide"></button>
+        </div>
+
         <div id="paste-form">
-        <h2 id="paste-heading">What's the assignment?</h2>
+        <h2 id="paste-heading" tabindex="-1">What's the assignment?</h2>
         <p class="hint" id="paste-hint">Paste the instructions or what you have to do. This stays on your device.</p>
         <p class="hint" id="replace-note" hidden>Starting new steps replaces the ones you have saved.</p>
 
@@ -95,10 +90,6 @@
         <p id="message" class="message" role="status" aria-live="polite"></p>
         </div>
 
-        <div id="welcome-note" class="welcome-note" hidden>
-          <p class="hint" id="welcome-line"></p>
-          <button type="button" id="welcome-hide"></button>
-        </div>
       </section>
 
       <section id="calendar-screen" hidden aria-labelledby="calendar-heading">
@@ -172,6 +163,17 @@
         <p id="ready" class="message" role="status" aria-live="polite"></p>
       </section>
     </main>
+    <!-- Screen openers. Never shown: the tabs, the Me screen and the Today screen press these, so each screen keeps one way in. -->
+    <div id="screen-openers" hidden>
+      <button type="button" id="open-chat">Talk it through</button>
+      <button type="button" id="open-calendar">My calendar</button>
+      <button type="button" id="open-profile">My profile</button>
+      <button type="button" id="open-looking">What I did</button>
+      <button type="button" id="open-intake">How I like to work</button>
+      <button type="button" id="open-settings">Settings</button>
+      <button type="button" id="open-me">Me and my data</button>
+      <button type="button" id="open-lookup" hidden>Look it up</button>
+    </div>
     <div id="tabbar" class="tabbar" role="tablist" aria-label="Main tabs" hidden></div>
     <div id="print-area" hidden></div>
     <script type="module" src="js/app.js"></script>

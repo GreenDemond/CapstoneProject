@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { standIn, openSettings, addOther } from "./helpers/ai.js";
+import { openScreen } from "./helpers/nav.js";
 
 const A = "https://a.example.test";
 const B = "https://b.example.test";
@@ -53,7 +54,7 @@ test("a helper that needs an AI picked is not replaced by another, and Finish se
   await expect(page.locator("#ai-status")).toContainText("isn't ready yet");
   await expect(page.locator("#ai-box")).toBeHidden();
   await expect(page.locator("#ai-choice")).toHaveValue("");
-  await page.getByRole("button", { name: "Settings" }).click();
+  await openScreen(page, "Settings");
   await expect(page.locator(".helper-card").nth(0)).toContainText("Needs an AI picked");
   await page.getByRole("button", { name: /^Finish setting up/ }).click();
   await expect(page.getByRole("heading", { name: /Pick an AI/ })).toBeFocused();

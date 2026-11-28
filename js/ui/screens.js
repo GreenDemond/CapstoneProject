@@ -48,6 +48,8 @@ export function showScreen(name) {
   }
   stepsScreen.hidden = !(name === "home" && stepsPreviewOpen);
   screenChangeCallback?.(name);
+  // The screen openers are hidden, so a screen cannot hand focus back to its button. Land on the heading.
+  if (name === "home") document.getElementById("paste-heading")?.focus({ preventScroll: true });
 }
 
 // Shows the steps preview. It appears at once on the home screen, or when the student returns home.

@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { openScreen } from "./helpers/nav.js";
 
 // Bottom tabs and the welcome note (design/tabs-w3.md). Tabs have role=tab, so they are not buttons.
 const tab = (page, name) => page.getByRole("tab", { name, exact: true });
@@ -28,12 +29,20 @@ test("the four tabs open Talk, Plan, Me and Today, and the selected one is marke
   expect(await visibleScreens(page)).toEqual(["paste-screen"]);
 });
 
-test("the old buttons still work and the tab follows", async ({ page }) => {
+test("the old row of buttons is gone, and everything it opened is reachable from Me", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "My calendar", exact: true }).click();
-  await expect(tab(page, "Plan")).toHaveAttribute("aria-selected", "true");
-  await page.locator("#calendar-screen").getByRole("button", { name: /^Back/ }).first().click();
+  await expect(page.locator("#top-nav")).toHaveCount(0);
+  await expect(page.locator("#paste-screen").getByRole("button", { name: "Settings" })).toHaveCount(0);
+  await openScreen(page, "My profile");
+  await expect(tab(page, "Me")).toHaveAttribute("aria-selected", "true");
+  await page.locator("#profile-screen").getByRole("button", { name: /^Back/ }).first().click();
   await expect(tab(page, "Today")).toHaveAttribute("aria-selected", "true");
+  for (const [name, id] of [["How I like to work", "intake-screen"], ["What I did", "looking-screen"], ["Settings", "settings-screen"], ["My calendar", "calendar-screen"]]) {
+    await tab(page, "Me").click();
+    await page.locator("#me-screen").getByRole("button", { name, exact: true }).click();
+    await expect(page.locator("#" + id)).toBeVisible();
+    await tab(page, "Today").click();
+  }
 });
 
 test("the bar is hidden on the work screen and back after", async ({ page }) => {
@@ -70,10 +79,31 @@ test("pressing the current tab does nothing, and the arrow keys move between tab
 
 test("a tab will not drop unsaved profile changes", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "My profile", exact: true }).click();
+  await openScreen(page, "My profile");
   await page.locator("#profile-screen input, #profile-screen textarea").first().fill("something typed");
   await tab(page, "Talk").click();
   expect(await visibleScreens(page)).toEqual(["profile-screen"]);
+});
+
+test("the welcome note sits above the paste box", async ({ page }) => {
+  await page.goto("/");
+  const note = await page.locator("#welcome-note").boundingBox();
+  const box = await page.locator("#assignment-text").boundingBox();
+  const heading = await page.locator("#paste-heading").boundingBox();
+  expect(note.y + note.height).toBeLessThanOrEqual(heading.y);
+  expect(heading.y).toBeLessThan(box.y);
+});
+
+test("the bar never covers the Class field, even when it is focused", async ({ page }) => {
+  await page.goto("/");
+  await page.locator("#class-label").focus();
+  const field = await page.locator("#class-label").boundingBox();
+  const bar = await page.locator("#tabbar").boundingBox();
+  expect(field.y + field.height).toBeLessThanOrEqual(bar.y);
+  await page.evaluate(() => globalThis.scrollTo(0, globalThis.document.body.scrollHeight));
+  const last = await page.locator("#ai-status").boundingBox();
+  const bar2 = await page.locator("#tabbar").boundingBox();
+  expect(last.y + last.height).toBeLessThanOrEqual(bar2.y);
 });
 
 test("the welcome note shows once, can be hidden, and stays hidden after a refresh", async ({ page }) => {

@@ -365,6 +365,12 @@ Not yet done by anyone: the browser tests for this slice (`tests/browser/tabs.sp
 7. Tablet width: the page and bar are centred in one column, the tabs are larger; nothing sits behind the bar at the bottom of any screen (calendar, chat, settings).
 8. Dark mode: the bar and note are readable. Print preview does not show the bar.
 
+### Update: no row of buttons on Today (web finish)
+1. Open the app: no row of buttons at the top. The welcome note is above "What's the assignment?".
+2. Press Me: **My profile, How I like to work, My calendar, What I did, What the app remembers, Settings** are all there and open.
+3. Press Talk and Plan: they open Talk it through and My calendar.
+4. Tap the **Class (optional)** box on a phone: it stays visible above the tab bar. With 20+ steps and a very long saved thought, Plan and Today never scroll sideways and the last line is above the bar.
+
 ## Write my own steps (web, W10)
 
 1. Open the app on the paste screen. The big button is **I'll write my steps**. **Suggest some to start** is below it and quieter.

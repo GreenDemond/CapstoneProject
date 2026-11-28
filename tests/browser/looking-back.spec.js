@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { openScreen } from "./helpers/nav.js";
 
 // Looking back (design/looking-back-w6.md): Did that help, What I did, the weekly lines, and
 // What the app remembers with Delete.
@@ -93,7 +94,7 @@ test("Did that help: the countdown length goes with the mark", async ({ page }) 
 
 test("What I did: empty at first, with a calm line", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "What I did", exact: true }).click();
+  await openScreen(page, "What I did");
   await expect(page.locator("#looking-screen")).toBeVisible();
   await expect(page.locator("#paste-screen")).toBeHidden();
   await expect(page.getByText("Nothing yet. After you work on a step, you'll see it here.")).toBeVisible();
@@ -110,7 +111,7 @@ test("What I did: Done and Drifted both count as finished, with weekly lines", a
   await page.locator("#split-text").fill("Jot two lines");
   await page.getByRole("button", { name: "Start this part" }).click();
   await page.getByRole("button", { name: "Back to home" }).click();
-  await page.getByRole("button", { name: "What I did", exact: true }).click();
+  await openScreen(page, "What I did");
   await expect(page.getByText("2 steps finished")).toBeVisible();
   await expect(page.getByText("1 step made smaller, then finished")).toBeVisible();
   await expect(page.getByText("You finished 2 steps.")).toBeVisible();
@@ -121,7 +122,7 @@ test("What I did: Done and Drifted both count as finished, with weekly lines", a
   expect(text).not.toMatch(/missed|streak|behind|score|grade|rank/i);
   // Still there after a refresh.
   await page.reload();
-  await page.getByRole("button", { name: "What I did", exact: true }).click();
+  await openScreen(page, "What I did");
   await expect(page.getByText("2 steps finished")).toBeVisible();
 });
 
@@ -130,7 +131,7 @@ test("What I did: damaged saved data does not crash the screen", async ({ page }
     globalThis.localStorage.setItem("focusapp.v1", JSON.stringify({ schemaVersion: 1, moments: "oops", helps: [null, 3], parked: { a: 1 } }));
   });
   await page.goto("/");
-  await page.getByRole("button", { name: "What I did", exact: true }).click();
+  await openScreen(page, "What I did");
   await expect(page.getByText("Nothing yet. After you work on a step, you'll see it here.")).toBeVisible();
   await page.getByRole("button", { name: "What the app remembers" }).click();
   await expect(page.getByText("Nothing yet. As you use the app, the things you save will show up here.")).toBeVisible();
@@ -153,7 +154,7 @@ async function seed(page) {
     }));
   });
   await page.goto("/");
-  await page.getByRole("button", { name: "What I did", exact: true }).click();
+  await openScreen(page, "What I did");
   await page.getByRole("button", { name: "What the app remembers" }).click();
 }
 
@@ -212,7 +213,7 @@ test("What the app remembers: a deleted thought is gone from the work screen too
   await page.getByLabel("A thought for later").fill("ask about the quiz");
   await page.getByLabel("A thought for later").press("Enter");
   await page.getByRole("button", { name: "Back to home" }).click();
-  await page.getByRole("button", { name: "What I did", exact: true }).click();
+  await openScreen(page, "What I did");
   await page.getByRole("button", { name: "What the app remembers" }).click();
   await page.getByRole("button", { name: "Delete: ask about the quiz" }).click();
   await page.getByRole("button", { name: "Back to What I did" }).first().click();

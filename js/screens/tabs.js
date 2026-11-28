@@ -93,7 +93,20 @@ function initWelcome() {
   note.hidden = false;
 }
 
+// A fixed bar can sit over a field the keyboard just focused. Scroll the field clear of it.
+function keepFocusClear() {
+  document.addEventListener("focusin", (event) => {
+    const target = event.target;
+    const bar = document.getElementById("tabbar");
+    if (bar.hidden || !target || !target.getBoundingClientRect || target.closest("#tabbar")) return;
+    const rect = target.getBoundingClientRect();
+    const top = bar.getBoundingClientRect().top;
+    if (rect.bottom > top) target.scrollIntoView({ block: "center" });
+  });
+}
+
 export function initTabs() {
+  keepFocusClear();
   buildBar();
   registerOnScreenChange(paint);
   paint(currentScreenName());

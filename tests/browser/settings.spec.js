@@ -1,12 +1,13 @@
 import { test, expect } from "@playwright/test";
 import { HOST, KEY, standIn, openSettings, setUpOther, addOther, nextButton, pageTop } from "./helpers/ai.js";
+import { openScreen } from "./helpers/nav.js";
 
 // Main path: add a service end to end, see it Ready and In use, and the paste screen follows.
 test("adding an AI helper end to end makes it Ready and In use", async ({ page }) => {
   await standIn(page);
   await page.goto("/");
   await expect(page.locator("#ai-status")).toContainText("No AI is set up yet");
-  await page.getByRole("button", { name: "Settings" }).click();
+  await openScreen(page, "Settings");
   await expect(page.getByText("Without one, you still get the built-in steps.")).toBeVisible();
 
   await addOther(page);
@@ -20,7 +21,7 @@ test("adding an AI helper end to end makes it Ready and In use", async ({ page }
   await expect(page.locator("#ai-status")).toContainText("Using: ai.example.test");
 
   await page.reload();
-  await page.getByRole("button", { name: "Settings" }).click();
+  await openScreen(page, "Settings");
   await expect(page.locator(".helper-card")).toContainText("Ready · In use");
 });
 
@@ -99,6 +100,6 @@ test("cancelling at any step saves nothing, and a reload mid-setup starts again"
   await page.reload();
   const stored = await page.evaluate(() => localStorage.getItem("focusapp.v1"));
   expect(stored ?? "").not.toContain(KEY);
-  await page.getByRole("button", { name: "Settings" }).click();
+  await openScreen(page, "Settings");
   await expect(page.locator(".helper-card")).toHaveCount(0);
 });

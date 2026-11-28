@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { standIn, openSettings, addOther } from "./helpers/ai.js";
+import { openScreen } from "./helpers/nav.js";
 
 // Browser tests for saved chats (design/chat-history.md). A stand-in AI service answers; no real service is used.
 const CHATS_KEY = "focusapp.v1.chats";
@@ -20,7 +21,7 @@ async function openChat(page, { failChats = false, ...options } = {}) {
   await addOther(page);
   const seen = await standIn(page, options);
   await page.getByRole("button", { name: "Back" }).click();
-  await page.getByRole("button", { name: "Talk it through" }).click();
+  await openScreen(page, "Talk it through");
   await expect(page.getByRole("heading", { name: "Talk it through" })).toBeVisible();
   return seen;
 }
@@ -32,7 +33,7 @@ async function say(page, text) {
 
 async function reopen(page) {
   await page.reload();
-  await page.getByRole("button", { name: "Talk it through" }).click();
+  await openScreen(page, "Talk it through");
 }
 
 const daysAgo = (n) => new Date(Date.now() - n * 86400000).toISOString();
@@ -63,7 +64,7 @@ test("Back to home and returning keeps the chat, and a new message carries the o
   await say(page, "first");
   await expect(page.locator(".chat-ai")).toHaveCount(2);
   await page.getByRole("button", { name: "Back to home" }).click();
-  await page.getByRole("button", { name: "Talk it through" }).click();
+  await openScreen(page, "Talk it through");
   await expect(page.locator(".chat-you")).toHaveCount(1);
   await say(page, "second");
   await expect(page.locator(".chat-ai")).toHaveCount(3);
@@ -259,7 +260,7 @@ test("the kind saved with the steps is pre-selected after a refresh", async ({ p
   await page.getByRole("button", { name: "Start", exact: true }).click();
   await expect(page.getByText("Step 1 of")).toBeVisible();
   await page.reload();
-  await page.getByRole("button", { name: "Talk it through" }).click();
+  await openScreen(page, "Talk it through");
   await expect(page.getByRole("button", { name: "Reading" })).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByRole("button", { name: "Essay" })).toHaveAttribute("aria-pressed", "false");
 });
@@ -268,7 +269,7 @@ test("with no AI helper, saved chats can still be opened and read", async ({ pag
   await page.goto("/");
   await seed(page, [seedChat("old", daysAgo(0), "read me")]);
   await page.reload();
-  await page.getByRole("button", { name: "Talk it through" }).click();
+  await openScreen(page, "Talk it through");
   await expect(page.getByText("Add an AI helper in Settings first.")).toBeVisible();
   await expect(page.locator(".chat-you")).toHaveText(/read me/);
   await page.getByRole("button", { name: "My chats" }).click();
@@ -283,7 +284,7 @@ test("damaged saved chats do not crash the chat", async ({ page }) => {
   await page.goto("/");
   await page.evaluate((key) => globalThis.localStorage.setItem(key, "{not json"), CHATS_KEY);
   await page.reload();
-  await page.getByRole("button", { name: "Talk it through" }).click();
+  await openScreen(page, "Talk it through");
   await expect(page.getByText("Add an AI helper in Settings first.")).toBeVisible();
   expect(await page.evaluate(() => globalThis.localStorage.getItem("focusapp.v1.chats.backup"))).toBe("{not json");
 });

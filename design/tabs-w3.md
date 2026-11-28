@@ -42,3 +42,11 @@ A full-screen welcome page; a two-column tablet layout; sticky tabs on the work 
 
 ## Student-visible wording (awaits the parent's okay)
 Tabs: Today, Talk, Plan, Me. Bar label (read aloud): "Main tabs". Welcome: "Welcome. Paste an assignment above to begin, or use the tabs at the bottom." Button: "Hide this note".
+
+## Update: the row of seven buttons is gone (web finish, FEAT-003)
+- **What the student sees:** Today no longer has a row of buttons across the top. Talk and Plan are tabs. Everything else (My profile, How I like to work, What I did, What the app remembers, Settings, My calendar) is a button on the Me screen. "Take a look" on the look-back card still opens What I did. Look it up (when switched on) is a button on the work screen.
+- **Research:** none needed; design judgment, to be tested. It matches the iPhone app, which has only tabs.
+- **How:** the old buttons live on in a hidden `#screen-openers` box so each screen has one way in; no student sees them. Going back to Today puts focus on the "What's the assignment?" heading.
+- **Welcome note:** now sits directly above the paste box heading, not at the end of the page.
+- **Tab bar overlap:** page bottom padding raised, fields scroll clear of the bar when focused (`focusin` in `js/screens/tabs.js`), tested for the Class field and the last item on Today and Plan, at phone and desktop width.
+- **Found by the new Plan test:** long unbroken text in a saved thought widened the whole page on a phone. Lists now wrap such text.

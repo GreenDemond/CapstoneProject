@@ -474,12 +474,6 @@ summary { min-height: 2.75rem; padding: 0.6rem 0; cursor: pointer; color: var(--
 .choice-pull select { width: 100%; box-sizing: border-box; min-height: 2.75rem; font: inherit; padding: 0.4rem 0.6rem; }
 
 /* Home screen (design/home-screen.md): a row of real buttons, then the next step. */
-.top-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 0.5rem 0 1rem;
-}
 
 .pickup {
   margin: 1rem 0 1.5rem;
@@ -598,7 +592,7 @@ button {
   margin: 0 0.5rem 0.5rem 0;
 }
 .kind-buttons button, .row-actions button, .delete-box button, .view-bar button,
-.nav-row button, .actions button, .key-row button, .top-nav button, .pickup-more button {
+.nav-row button, .actions button, .key-row button, .pickup-more button {
   margin: 0;
 }
 .chat-list .chat-open {
@@ -821,9 +815,10 @@ button {
   border-top-color: var(--accent);
 }
 /* Room under the page so the last buttons are never behind the bar. */
-body.has-tabs { padding-bottom: 5rem; }
+body.has-tabs { padding-bottom: 7rem; }
+body.has-tabs input, body.has-tabs textarea, body.has-tabs select, body.has-tabs button { scroll-margin-bottom: 6rem; }
 .welcome-note {
-  margin-top: 1rem;
+  margin: 0 0 1rem;
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--border);
   border-radius: 0.5rem;
@@ -834,7 +829,7 @@ body.has-tabs { padding-bottom: 5rem; }
   .tabbar { max-width: 46rem; }
   .tabbar button { min-height: 3.5rem; font-size: 1.15rem; }
   #app { padding: 2rem 2rem; }
-  body.has-tabs { padding-bottom: 5.5rem; }
+  body.has-tabs { padding-bottom: 7.5rem; }
 }
 
 .pasted-text {
@@ -869,3 +864,6 @@ body.has-tabs { padding-bottom: 5rem; }
   width: 100%;
   margin-top: 0.25rem;
 }
+
+/* Long text with no spaces (a pasted link, say) wraps inside lists on Today and Plan instead of widening the page. */
+.thoughts li, .looking-list li, .plan-steps li, .steps li, .pickup-step { overflow-wrap: anywhere; }

@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { readFileSync } from "node:fs";
+import { openScreen } from "./helpers/nav.js";
 
 // Me and my data (design/me-export-w7.md): save a copy, load a copy, delete everything.
 // These tests were written but NOT run when the slice was built (Chrome could not start in that sandbox).
@@ -25,7 +26,7 @@ async function seed(page, main = SAVED, chats = { schemaVersion: 1, chats: [CHAT
 }
 
 async function openMe(page) {
-  await page.getByRole("button", { name: "Me and my data" }).click();
+  await openScreen(page, "Me and my data");
   await expect(page.getByRole("heading", { name: "Me and my data", level: 2 })).toBeVisible();
 }
 
@@ -67,7 +68,7 @@ test("Me screen: shows its links and Back to home works", async ({ page }) => {
   await page.getByRole("button", { name: "My profile", exact: true }).click();
   await expect(page.getByRole("heading", { name: "My profile", level: 2 })).toBeVisible();
   await page.getByRole("button", { name: "Back to home" }).first().click(); // My profile has Back to home at the top and the bottom
-  await page.getByRole("button", { name: "Me and my data" }).click();
+  await openScreen(page, "Me and my data");
   await page.getByRole("button", { name: "What the app remembers", exact: true }).click();
   await expect(page.getByRole("heading", { name: "What the app remembers", level: 2 })).toBeVisible();
   await expect(page.locator("#looking-body").getByText("email Sam")).toBeVisible();

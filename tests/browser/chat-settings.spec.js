@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { standIn, openSettings, addOther } from "./helpers/ai.js";
+import { openScreen } from "./helpers/nav.js";
 
 async function openTalkSettings(page) {
   await page.getByRole("button", { name: "How the AI talks" }).click();
@@ -24,7 +25,7 @@ test("a saved Essay guide and length are used by the chat, and Reading keeps the
   await page.getByRole("button", { name: "Back" }).first().click();
   await page.getByRole("button", { name: "Back" }).first().click();
   const seen = await standIn(page, { content: "ok" });
-  await page.getByRole("button", { name: "Talk it through" }).click();
+  await openScreen(page, "Talk it through");
   await page.getByRole("button", { name: "Essay" }).click();
   await page.getByLabel("Your message").fill("hi");
   await page.getByRole("button", { name: "Send", exact: true }).click();
@@ -54,7 +55,7 @@ test("an All kinds guide is used by other kinds and is still there after a reloa
   await page.getByRole("button", { name: "Save", exact: true }).click();
   await expect(page.getByText("Saved on this device.")).toBeVisible();
   await page.reload();
-  await page.getByRole("button", { name: "Settings" }).click();
+  await openScreen(page, "Settings");
   await openTalkSettings(page);
   await expect(page.locator(".helper-card", { hasText: "Reading" }).getByText("Using your All kinds guide")).toBeVisible();
   await page.getByRole("button", { name: "Change Reading" }).click();
@@ -148,7 +149,7 @@ test("Help me write it drafts a guide that is not saved until Save", async ({ pa
   await expect(page.getByRole("button", { name: "Medium" })).toHaveAttribute("aria-pressed", "true");
   // Not saved yet: leaving shows the warning, and a reload shows nothing saved.
   await page.reload();
-  await page.getByRole("button", { name: "Settings" }).click();
+  await openScreen(page, "Settings");
   await openTalkSettings(page);
   await expect(page.locator(".helper-card", { hasText: "Essay" }).getByText("Using the default")).toBeVisible();
 });
@@ -158,7 +159,7 @@ test("damaged saved chat settings are ignored", async ({ page }) => {
   await page.goto("/");
   await page.evaluate(() => localStorage.setItem("focusapp.v1", JSON.stringify({ schemaVersion: 1, chat: { guides: 5, lengths: "x" } })));
   await page.reload();
-  await page.getByRole("button", { name: "Settings" }).click();
+  await openScreen(page, "Settings");
   await openTalkSettings(page);
   await expect(page.getByText("Using the default")).toHaveCount(7);
 });

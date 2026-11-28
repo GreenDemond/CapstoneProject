@@ -1,9 +1,10 @@
 import { test, expect } from "@playwright/test";
+import { openScreen } from "./helpers/nav.js";
 
 // Main path: four taps, the first-guess card shows the picks, and Change works.
 test("four taps make a first-guess card, and Change goes back to the card", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "How I like to work" }).click();
+  await openScreen(page, "How I like to work");
   await page.getByRole("button", { name: "Start" }).click();
 
   await page.getByRole("button", { name: "Quiet", exact: true }).click();
@@ -30,7 +31,7 @@ test("four taps make a first-guess card, and Change goes back to the card", asyn
 // Awkward path: Not sure on every question shows "Not sure yet", not a failure.
 test("Not sure on every question shows Not sure yet on the card", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "How I like to work" }).click();
+  await openScreen(page, "How I like to work");
   await page.getByRole("button", { name: "Start" }).click();
   await page.getByRole("button", { name: "Not sure", exact: true }).click();
   await page.getByRole("button", { name: "Not sure", exact: true }).click();
@@ -43,7 +44,7 @@ test("Not sure on every question shows Not sure yet on the card", async ({ page 
 // Awkward path: Back on a question goes to the one before, and Close clears everything.
 test("Back returns to the earlier question, and Close leaves nothing behind", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "How I like to work" }).click();
+  await openScreen(page, "How I like to work");
   await page.getByRole("button", { name: "Start" }).click();
   await page.getByRole("button", { name: "Quiet", exact: true }).click();
   await page.getByRole("button", { name: "Back", exact: true }).click();
@@ -52,6 +53,6 @@ test("Back returns to the earlier question, and Close leaves nothing behind", as
   await page.getByRole("button", { name: "Back to home" }).first().click();
   await expect(page.locator("#intake-screen")).toBeHidden();
   await expect(page.locator("#paste-screen")).toBeVisible();
-  await page.getByRole("button", { name: "How I like to work" }).click();
+  await openScreen(page, "How I like to work");
   await expect(page.getByRole("button", { name: "Start" })).toBeVisible();
 });

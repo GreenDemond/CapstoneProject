@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { startWork } from "./helpers/work.js";
+import { openScreen } from "./helpers/nav.js";
 
 // Main path: do one step, refresh, and the app opens on the next step.
 test("after a refresh the app opens on the next step and Start this step continues", async ({ page }) => {
@@ -113,7 +114,7 @@ test("damaged saved steps are ignored", async ({ page }) => {
 test("the top row opens a screen and Back returns to the pick-up card", async ({ page }) => {
   await startWork(page);
   await page.getByRole("button", { name: "Back to home" }).click();
-  await page.getByRole("button", { name: "My calendar" }).click();
+  await openScreen(page, "My calendar");
   await expect(page.getByRole("heading", { name: "My calendar" })).toBeVisible();
   await page.getByRole("button", { name: "Back" }).first().click();
   await expect(page.locator("#pickup-step")).toHaveText("Find three sources");

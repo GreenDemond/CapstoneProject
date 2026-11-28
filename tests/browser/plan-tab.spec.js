@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { openScreen } from "./helpers/nav.js";
 
 // Slice W13 (design/plan-tab-w13.md): steps and saved thoughts on the Plan tab, tabs that leave a sub-view,
 // and Load a copy not bringing the welcome note back. No AI is used anywhere here.
@@ -97,7 +98,7 @@ test("a tab press from a sub-view reaches every tab", async ({ page }) => {
 test("Awkward: the profile still asks before a tab press throws away unsaved changes", async ({ page }) => {
   await page.goto("/");
   await tab(page, "Me").click();
-  await page.getByRole("button", { name: "My profile" }).click();
+  await openScreen(page, "My profile");
   await expect(page.locator("#profile-screen")).toBeVisible();
   await page.locator("#profile-screen textarea").first().fill("something I typed");
   await tab(page, "Talk").click();
@@ -127,4 +128,19 @@ test("Awkward: Load a copy on a device that never hid the note also keeps it awa
   await expect(page.locator("#me-status")).toContainText("Your copy is loaded");
   await tab(page, "Today").click();
   await expect(page.locator("#welcome-note")).toBeHidden();
+});
+
+test("A long Plan screen has no sideways scroll, and its last item is reachable above the tab bar", async ({ page }) => {
+  await page.goto("/");
+  const steps = Array.from({ length: 30 }, (_, i) => ({ id: i, text: "Step number " + i + " with some longer words to make the line wrap onto a second row at phone width", done: i % 3 === 0 }));
+  const parked = Array.from({ length: 15 }, (_, i) => ({ id: i + 1, text: "a thought I set aside number " + i + " " + "word".repeat(30), date: "2026-11-18T10:00:00.000Z" }));
+  await seed(page, { work: { steps, nextId: 30, savedOn: "2026-11-20T10:00:00.000Z" }, parked });
+  await tab(page, "Plan").click();
+  await expect(page.locator("#calendar-screen")).toBeVisible();
+  const sideways = await page.evaluate(() => globalThis.document.documentElement.scrollWidth > globalThis.document.documentElement.clientWidth);
+  expect(sideways).toBe(false);
+  await page.evaluate(() => globalThis.scrollTo(0, globalThis.document.body.scrollHeight));
+  const last = await page.locator("#calendar-screen li, #calendar-screen button").last().boundingBox();
+  const bar = await page.locator("#tabbar").boundingBox();
+  expect(last.y + last.height).toBeLessThanOrEqual(bar.y);
 });

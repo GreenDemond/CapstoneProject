@@ -1,4 +1,5 @@
 // Shared helpers for the calendar browser tests.
+import { openScreen } from "./nav.js";
 
 export function dayFromNow(days) {
   const d = new Date();
@@ -9,7 +10,7 @@ export function dayFromNow(days) {
 
 export async function openCalendar(page) {
   await page.goto("/");
-  await page.getByRole("button", { name: "My calendar" }).click();
+  await openScreen(page, "My calendar");
 }
 
 // Opens the add form if it is closed.

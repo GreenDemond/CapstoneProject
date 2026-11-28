@@ -1,4 +1,5 @@
 import { expect } from "@playwright/test";
+import { openScreen } from "./nav.js";
 
 export const KEY = "sk-test-helper-1234567890";
 export const HOST = "https://ai.example.test";
@@ -51,7 +52,7 @@ export async function standIn(page, { host = HOST, base = "/v1", models = ["smal
 
 export async function openSettings(page) {
   await page.goto("/");
-  await page.getByRole("button", { name: "Settings" }).click();
+  await openScreen(page, "Settings");
   await expect(page.getByRole("heading", { name: "AI helpers" })).toBeVisible();
 }
 

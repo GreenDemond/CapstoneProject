@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { KEY, standIn, openSettings, addOther, nextButton } from "./helpers/ai.js";
+import { openScreen } from "./helpers/nav.js";
 
 // Browser tests for the Search the web box (design/web-search.md, slice 1). Stand-in services only.
 const OPENROUTER = { host: "https://openrouter.ai", base: "/api/v1" };
@@ -25,7 +26,7 @@ async function openChat(page, options = {}, { openRouter = true } = {}) {
   else await addOther(page);
   const seen = await standIn(page, { ...(openRouter ? OPENROUTER : {}), ...options });
   await page.getByRole("button", { name: "Back" }).click();
-  await page.getByRole("button", { name: "Talk it through" }).click();
+  await openScreen(page, "Talk it through");
   await expect(page.getByRole("heading", { name: "Talk it through" })).toBeVisible();
   await page.getByRole("button", { name: "Essay" }).click();
   return seen;
@@ -110,7 +111,7 @@ test("sources survive a reload, the box is unticked, and sources are not sent ba
   await say(page, "first question");
   await expect(page.locator(".chat-sources a")).toHaveCount(1);
   await page.reload();
-  await page.getByRole("button", { name: "Talk it through" }).click();
+  await openScreen(page, "Talk it through");
   await expect(page.locator(".chat-sources a")).toHaveCount(1);
   await expect(page.locator(".chat-sources a")).toHaveAttribute("href", "https://example.org/a");
   await expect(box(page)).not.toBeChecked();

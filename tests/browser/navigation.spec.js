@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { standIn, openSettings, addOther } from "./helpers/ai.js";
+import { openScreen } from "./helpers/nav.js";
 
 const SECTIONS = ["paste-screen", "steps-screen", "intake-screen", "profile-screen", "work-screen", "calendar-screen", "chat-screen", "settings-screen"];
 
@@ -18,7 +19,7 @@ async function showSteps(page) {
   await expect(page.locator("#steps-screen")).toBeVisible();
 }
 
-test("every top button opens exactly one screen, and Back returns home", async ({ page }) => {
+test("every screen opens from the tabs or Me, one at a time, and Back returns home", async ({ page }) => {
   await page.goto("/");
   expect(await visibleScreens(page)).toEqual(["paste-screen"]);
   const trips = [
@@ -29,7 +30,7 @@ test("every top button opens exactly one screen, and Back returns home", async (
     ["Settings", "settings-screen"],
   ];
   for (const [name, id] of trips) {
-    await page.getByRole("button", { name, exact: true }).click();
+    await openScreen(page, name);
     expect(await visibleScreens(page)).toEqual([id]);
     await page.locator(`#${id}`).getByRole("button", { name: /^(Back|Close)/ }).first().click();
     expect(await visibleScreens(page)).toEqual(["paste-screen"]);
@@ -46,7 +47,7 @@ test("Settings after Suggest some to start hides the steps, and Back brings them
   await page.goto("/");
   await showSteps(page);
   expect(await visibleScreens(page)).toEqual(["paste-screen", "steps-screen"]);
-  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await openScreen(page, "Settings");
   expect(await visibleScreens(page)).toEqual(["settings-screen"]);
   await page.locator("#settings-screen").getByRole("button", { name: /^Back/ }).first().click();
   expect(await visibleScreens(page)).toEqual(["paste-screen", "steps-screen"]);
@@ -56,7 +57,7 @@ test("the steps preview survives a visit to the calendar", async ({ page }) => {
   await page.goto("/");
   await showSteps(page);
   const before = await page.locator("#steps li").allTextContents();
-  await page.getByRole("button", { name: "My calendar", exact: true }).click();
+  await openScreen(page, "My calendar");
   expect(await visibleScreens(page)).toEqual(["calendar-screen"]);
   await page.locator("#calendar-screen").getByRole("button", { name: /^Back/ }).first().click();
   expect(await visibleScreens(page)).toEqual(["paste-screen", "steps-screen"]);
@@ -80,7 +81,7 @@ test("leaving while the AI is thinking shows nothing from its late reply", async
   await page.getByRole("button", { name: "Back" }).click();
   await showStepsNoWait(page);
   await expect(page.getByRole("button", { name: "Suggest some to start" })).toBeDisabled();
-  await page.getByRole("button", { name: "My calendar", exact: true }).click();
+  await openScreen(page, "My calendar");
   await page.waitForTimeout(2200);
   expect(await visibleScreens(page)).toEqual(["calendar-screen"]);
   await page.locator("#calendar-screen").getByRole("button", { name: /^Back/ }).first().click();

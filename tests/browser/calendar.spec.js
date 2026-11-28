@@ -1,9 +1,10 @@
 import { test, expect } from "@playwright/test";
 import { dayFromNow, openForm, addItem, deleteWithConfirm } from "./helpers/calendar.js";
+import { openScreen } from "./helpers/nav.js";
 
 async function openCalendar(page) {
   await page.goto("/");
-  await page.getByRole("button", { name: "My calendar" }).click();
+  await openScreen(page, "My calendar");
   await openForm(page);
 }
 
@@ -49,7 +50,7 @@ test("items survive a reload and can be deleted", async ({ page }) => {
   await page.getByLabel("Due time").fill("10:00");
   await page.getByRole("button", { name: "Add to my calendar" }).click();
   await page.reload();
-  await page.getByRole("button", { name: "My calendar" }).click();
+  await openScreen(page, "My calendar");
   await expect(page.locator("ul.cal-list").getByText("Lab report")).toBeVisible();
   await deleteWithConfirm(page.locator("ul.cal-list li", { hasText: "Lab report" }));
   await expect(page.locator("ul.cal-list").getByText("Lab report")).toHaveCount(0);
@@ -134,7 +135,7 @@ test("running totals survive a reload and deleting a finished item", async ({ pa
   await page.getByRole("button", { name: "Add to my calendar" }).click();
   await page.locator("ul.cal-list li", { hasText: "History notes" }).getByRole("button", { name: "Complete" }).click();
   await page.reload();
-  await page.getByRole("button", { name: "My calendar" }).click();
+  await openScreen(page, "My calendar");
   await expect(page.getByText("all time 1")).toBeVisible();
   await deleteWithConfirm(page.locator("ul.completed li", { hasText: "History notes" }));
   await expect(page.getByText("all time 1")).toBeVisible();
@@ -252,7 +253,7 @@ test("no confetti when the device asks for reduced motion", async ({ page }) => 
 
 test("the list comes first and the form opens with Add something", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "My calendar" }).click();
+  await openScreen(page, "My calendar");
   await expect(page.getByLabel("What is it?")).toHaveCount(0);
   await page.getByRole("button", { name: "Add something" }).click();
   await expect(page.getByLabel("What is it?")).toBeVisible();
@@ -263,7 +264,7 @@ test("the list comes first and the form opens with Add something", async ({ page
 
 test("after Add the form closes and the new item gets focus", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "My calendar" }).click();
+  await openScreen(page, "My calendar");
   await addItem(page, { title: "Focus me" });
   await expect(page.getByLabel("What is it?")).toHaveCount(0);
   await expect(page.locator("ul.cal-list li", { hasText: "Focus me" })).toBeFocused();
@@ -271,7 +272,7 @@ test("after Add the form closes and the new item gets focus", async ({ page }) =
 
 test("what was typed in the form survives a view switch, navigation and a Complete", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "My calendar" }).click();
+  await openScreen(page, "My calendar");
   await addItem(page, { title: "Existing" });
   await openForm(page);
   await page.getByLabel("What is it?").fill("Half typed");
@@ -297,7 +298,7 @@ test("what was typed in the form survives a view switch, navigation and a Comple
 
 test("Delete needs two taps, Keep it cancels, and a double click deletes nothing else", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "My calendar" }).click();
+  await openScreen(page, "My calendar");
   await addItem(page, { title: "First one", days: 3, time: "09:00" });
   await addItem(page, { title: "Second one", days: 3, time: "10:00" });
   const first = page.locator("ul.cal-list li", { hasText: "First one" });
@@ -318,7 +319,7 @@ test("Delete needs two taps, Keep it cancels, and a double click deletes nothing
 
 test("Fire it Up shows only right after a Complete, not after a later Delete", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "My calendar" }).click();
+  await openScreen(page, "My calendar");
   await addItem(page, { title: "Done soon" });
   await addItem(page, { title: "Delete me" });
   await page.locator("ul.cal-list li", { hasText: "Done soon" }).getByRole("button", { name: "Complete" }).click();
@@ -331,7 +332,7 @@ test("Fire it Up shows only right after a Complete, not after a later Delete", a
 
 test("a past item sits under Time has passed, not Urgent", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "My calendar" }).click();
+  await openScreen(page, "My calendar");
   await addItem(page, { title: "Old task", days: -3 });
   const passed = page.locator("h3", { hasText: "Time has passed" }).locator("xpath=following-sibling::ul[1]");
   await expect(passed).toContainText("Old task");
@@ -343,7 +344,7 @@ test("a past item sits under Time has passed, not Urgent", async ({ page }) => {
 
 test("zero totals are hidden until something is finished", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "My calendar" }).click();
+  await openScreen(page, "My calendar");
   await expect(page.getByText("Finished so far")).toHaveCount(0);
   await addItem(page, { title: "Count me" });
   await expect(page.getByText("Finished so far")).toHaveCount(0);
@@ -358,7 +359,7 @@ test("Day view hour labels are in order and no security-policy errors appear", a
   });
   page.on("pageerror", (err) => problems.push(err.message));
   await page.goto("/");
-  await page.getByRole("button", { name: "My calendar" }).click();
+  await openScreen(page, "My calendar");
   await addItem(page, { title: "Timed", days: 0, time: "10:00" });
   await page.getByRole("button", { name: "Day", exact: true }).click();
   const seven = await page.getByText("7:00", { exact: true }).boundingBox();

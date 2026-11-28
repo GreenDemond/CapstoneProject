@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { KEY, standIn, openSettings, nextButton } from "./helpers/ai.js";
+import { openScreen } from "./helpers/nav.js";
 
 // Several OpenRouter helpers with different AIs and names (design/settings-ux.md, "Several helpers at one address").
 // Stand-in service only: no real key or service is used.
@@ -119,7 +120,7 @@ test("the chat has a Which AI helper? menu when two are ready, and the next mess
 
   const seen = await standIn(page, OPENROUTER);
   await page.getByRole("button", { name: "Back to home" }).click();
-  await page.getByRole("button", { name: "Talk it through" }).click();
+  await openScreen(page, "Talk it through");
   await page.getByRole("button", { name: "Essay" }).click();
 
   const menu = page.locator("#chat-helper");

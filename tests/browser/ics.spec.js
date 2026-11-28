@@ -3,6 +3,7 @@
 import { test, expect } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { dayFromNow, openCalendar, addItem } from "./helpers/calendar.js";
+import { openScreen } from "./helpers/nav.js";
 
 async function downloadFor(page, row) {
   const waiting = page.waitForEvent("download");
@@ -46,7 +47,7 @@ test("awkward text is escaped, and the file survives a page refresh", async ({ p
   await openCalendar(page);
   await addItem(page, { title: "Math; ch 1, 2 <b>x</b>", days: 2 });
   await page.reload();
-  await page.getByRole("button", { name: "My calendar" }).click();
+  await openScreen(page, "My calendar");
   const row = page.locator("li[data-id]", { hasText: "Math" });
   const { text } = await downloadFor(page, row);
   expect(text).toContain("SUMMARY:Math\\; ch 1\\, 2 <b>x</b>\r\n");

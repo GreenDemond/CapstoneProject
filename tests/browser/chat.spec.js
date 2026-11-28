@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { KEY, standIn, openSettings, addOther } from "./helpers/ai.js";
+import { openScreen } from "./helpers/nav.js";
 
 // Sets up a working stand-in helper, goes home, and opens the chat.
 // The helper is added with a normal stand-in; the behaviour under test is then put in front of it.
@@ -9,7 +10,7 @@ async function openChat(page, options = {}) {
   await addOther(page);
   const seen = await standIn(page, options);
   await page.getByRole("button", { name: "Back" }).click();
-  await page.getByRole("button", { name: "Talk it through" }).click();
+  await openScreen(page, "Talk it through");
   await expect(page.getByRole("heading", { name: "Talk it through" })).toBeVisible();
   return seen;
 }
@@ -72,7 +73,7 @@ test("sending without picking a kind asks for one and keeps the words", async ({
 // Awkward path: no helper set up.
 test("with no AI helper the chat says to add one in Settings", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "Talk it through" }).click();
+  await openScreen(page, "Talk it through");
   await expect(page.getByText("Add an AI helper in Settings first.")).toBeVisible();
   await expect(page.getByLabel("Your message")).toHaveCount(0);
 });
@@ -176,7 +177,7 @@ test("Back while waiting ignores the late reply", async ({ page }) => {
   await page.getByRole("button", { name: "Essay" }).click();
   await say(page, "slow");
   await page.getByRole("button", { name: "Back to home" }).click();
-  await page.getByRole("button", { name: "Talk it through" }).click();
+  await openScreen(page, "Talk it through");
   await page.waitForTimeout(1800);
   await expect(page.locator("body")).not.toContainText("late answer");
 });
@@ -228,7 +229,7 @@ test("New chat starts an empty chat, and Back to home keeps today's chat", async
   await say(page, "again");
   await expect(page.locator(".chat-ai")).toHaveCount(2);
   await page.getByRole("button", { name: "Back to home" }).click();
-  await page.getByRole("button", { name: "Talk it through" }).click();
+  await openScreen(page, "Talk it through");
   await expect(page.locator(".chat-you")).toHaveCount(1);
   await expect(page.locator(".chat-you")).toContainText("again");
 });

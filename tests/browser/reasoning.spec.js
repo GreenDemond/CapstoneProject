@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { KEY, standIn, openSettings, addOther, nextButton } from "./helpers/ai.js";
+import { openScreen } from "./helpers/nav.js";
 
 // Each helper has a thinking effort (None, Low, Medium, High), Low by default. Stand-in services only:
 // no real key or service is used.
@@ -23,7 +24,7 @@ const bodies = (seen) => seen.chat.map((c) => JSON.parse(c.body));
 
 async function toChat(page) {
   await page.getByRole("button", { name: "Back" }).click();
-  await page.getByRole("button", { name: "Talk it through" }).click();
+  await openScreen(page, "Talk it through");
   await page.getByRole("button", { name: "Essay" }).click();
 }
 
@@ -68,7 +69,7 @@ test("Manage: the choice is there with its hint, defaults to Low, and None and H
   expect(bodies(seen).at(-1).reasoning).toEqual({ effort: "none" });
 
   await page.getByRole("button", { name: "Back" }).click();
-  await page.getByRole("button", { name: "Settings" }).click();
+  await openScreen(page, "Settings");
   await chooseEffort(page, "High (slowest, uses more credit)");
   await toChat(page);
   const before = seen.chat.length;
@@ -85,7 +86,7 @@ test("the chosen effort is still there after a reload", async ({ page }) => {
   await page.getByLabel(LABEL).selectOption({ label: "Medium" });
   await expect(page.getByRole("status").last()).toContainText("Saved.");
   await page.reload();
-  await page.getByRole("button", { name: "Settings" }).click();
+  await openScreen(page, "Settings");
   await page.getByRole("button", { name: /^Manage/ }).click();
   await expect(page.getByLabel(LABEL)).toHaveValue("medium");
 });
@@ -104,7 +105,7 @@ test("another service: None sends all three fields, Medium sends reasoning and r
   expect(none.chat_template_kwargs).toEqual({ enable_thinking: false });
 
   await page.getByRole("button", { name: "Back" }).click();
-  await page.getByRole("button", { name: "Settings" }).click();
+  await openScreen(page, "Settings");
   await chooseEffort(page, "Medium");
   await toChat(page);
   const before = seen.chat.length;
