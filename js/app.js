@@ -14,7 +14,7 @@ import { initTabs } from "./screens/tabs.js";
 initWork({ onClose: afterWorkClosed, getChosenKind, getClassLabel });
 initIntake();
 initProfile();
-initLooking();
+initLooking({ onDataChanged: refreshHome });
 initHome();
 initCalendar({ onThoughtsChanged: refreshHome });
 initChat({ getChosenKind, useSteps: openStepsFromChat });

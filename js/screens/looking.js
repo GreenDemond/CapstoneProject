@@ -16,6 +16,7 @@ const openButton = document.getElementById("open-looking");
 let view = "overview"; // "overview" or "remembers"
 let confirmAll = false;
 let statusText = "";
+let dataChanged = null; // set by app.js: lets the home screen redraw its list of set-aside thoughts
 
 function readAll() {
   return { moments: loadMoments(), helps: loadHelps(), parked: loadParked(), recall: loadRecall() };
@@ -75,6 +76,7 @@ function withDate(text, iso) {
 // Saves a smaller list and redraws. If the browser did not confirm, the line stays and says so.
 function afterDelete(saved) {
   statusText = saved ? "Deleted." : "That didn't delete. Try again.";
+  dataChanged?.();
   renderRemembers();
   focusIntro();
 }
@@ -139,6 +141,7 @@ function deleteEverything() {
   }
   confirmAll = false;
   statusText = savedLists && savedNotes ? "Everything is deleted." : "Some of it didn't delete. Try again.";
+  dataChanged?.();
   renderRemembers();
   focusIntro();
 }
@@ -184,6 +187,7 @@ export function openRemembers() {
   heading.focus();
 }
 
-export function initLooking() {
+export function initLooking({ onDataChanged } = {}) {
+  dataChanged = onDataChanged ?? null;
   openButton.addEventListener("click", openLooking);
 }
