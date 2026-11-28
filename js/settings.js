@@ -19,6 +19,14 @@ import {
   stepToFix,
   setupMessage,
   isOpenRouter,
+  isGoogle,
+  GEMINI_NAME,
+  GEMINI_STEPS,
+  GEMINI_LINK_TEXT,
+  GEMINI_LINK_HINT,
+  GEMINI_RENAMED,
+  GEMINI_PRIVACY,
+  GOOGLE_KEY_PAGE,
 } from "./logic/settings-flow.js";
 import { testService, listModels } from "./ai-direct.js";
 import { announce } from "./ui/dom.js";
@@ -232,6 +240,7 @@ function startFlow(mode, item) {
     address: "",
     model: item?.model ?? "",
     label: item?.label ?? "",
+    autoName: false, // true while the name is the automatic "Gemini", so switching service can clear it
     name: "", // the name typed on the pick step (add only); blank means automatic
     keyHint: item?.keyHint ?? "",
     path,
@@ -338,6 +347,7 @@ function renderServiceStep() {
     { class: "choices" },
     el("legend", { class: "visually-hidden", text: "Which service?" }),
     radioOption("service-openrouter", "OpenRouter", "A popular service with many AIs. You need a key. An adult may need to make the account.", flow.provider === "openrouter"),
+    radioOption("service-gemini", "Google Gemini", "Google's AI. You need a key from a Google account. An adult may need to make it.", flow.provider === "google"),
     radioOption("service-other", "Another service", "An AI on a computer or service you already have.", flow.provider === "other"),
   );
   const addressInput = el("input", { id: "flow-address", type: "text", autocomplete: "off", spellcheck: "false", value: flow.address });
@@ -367,7 +377,13 @@ function renderServiceStep() {
 
   navButtons(actions, {
     onNext: () => {
-      const provider = body.querySelector("#service-openrouter").checked ? "openrouter" : body.querySelector("#service-other").checked ? "other" : null;
+      const provider = body.querySelector("#service-openrouter").checked
+        ? "openrouter"
+        : body.querySelector("#service-gemini").checked
+          ? "google"
+          : body.querySelector("#service-other").checked
+            ? "other"
+            : null;
       if (!provider) {
         setMessage("Pick one first.");
         return;
@@ -383,6 +399,13 @@ function renderServiceStep() {
       }
       flow.provider = provider;
       flow.url = result.url;
+      if (provider === "google" && flow.name === "") {
+        flow.name = GEMINI_NAME;
+        flow.autoName = true;
+      } else if (provider !== "google" && flow.autoName) {
+        flow.name = "";
+        flow.autoName = false;
+      }
       nextStep();
     },
   });
@@ -461,8 +484,36 @@ function renderKeyStep() {
       body.append(reuse);
     }
   }
+  const keyHelp = isGoogle(flow.url)
+    ? el(
+        "div",
+        { id: "gemini-steps" },
+        el("p", { text: "Get a key from Google in 3 steps:" }),
+        el(
+          "ol",
+          {},
+          el(
+            "li",
+            {},
+            el("span", { text: `${GEMINI_STEPS[0]} ` }),
+            el("a", { href: GOOGLE_KEY_PAGE, target: "_blank", rel: "noopener noreferrer", text: GEMINI_LINK_TEXT }),
+            el("span", { class: "hint", text: ` ${GEMINI_LINK_HINT}` }),
+          ),
+          el("li", { text: GEMINI_STEPS[1] }),
+          el("li", { text: GEMINI_STEPS[2] }),
+        ),
+        el("p", { class: "hint", text: GEMINI_RENAMED }),
+        el("p", { class: "hint", id: "gemini-privacy", text: GEMINI_PRIVACY }),
+      )
+    : null;
+  if (keyHelp && keyInput) {
+    // The steps come before the key box, so they are read first.
+    keyInput.closest(".key-row").previousElementSibling.before(keyHelp);
+  } else if (keyHelp) {
+    body.append(keyHelp);
+  }
   body.append(
-    el("details", {}, el("summary", { text: "Where do I get a key?" }), el("p", { class: "hint", text: "Ask the adult who manages the AI account. Or make one at openrouter.ai, which needs an adult." })),
+    ...(keyHelp ? [] : [el("details", {}, el("summary", { text: "Where do I get a key?" }), el("p", { class: "hint", text: "Ask the adult who manages the AI account. Or make one at openrouter.ai, which needs an adult." }))]),
     el(
       "details",
       {},
@@ -556,6 +607,9 @@ function renderPickStep() {
       const model = name.slice(0, 100);
       if (nameInput) {
         flow.name = nameInput.value.trim();
+        if (flow.name !== GEMINI_NAME) {
+          flow.autoName = false;
+        }
         if (flow.name !== "" && nameTaken(aiSettings.services, flow.name)) {
           setMessage(NAME_TAKEN);
           nameInput.focus();
@@ -665,7 +719,7 @@ async function renderCheckStep() {
     return;
   }
   flow.lastKind = result.kind;
-  setMessage(setupMessage(result.kind));
+  setMessage(setupMessage(result.kind, flow.url));
   const retry = button("Try again", () => goStep("check"), { primary: true, id: "flow-retry" });
   actions.append(retry);
   const fixStep = stepToFix(result.kind);
@@ -919,7 +973,7 @@ async function testAgain(item) {
     manage = { id: item.id, mode: null, message: "It works." };
     renderManage("#test-again");
   } else {
-    setMessage(setupMessage(result.kind));
+    setMessage(setupMessage(result.kind, item.url));
   }
 }
 

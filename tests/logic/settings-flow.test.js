@@ -14,6 +14,10 @@ import {
   failureKindForStatus,
   setupMessage,
   looksLikeOpenRouter,
+  GOOGLE_BASE,
+  GEMINI_NAME,
+  GOOGLE_BUSY,
+  isGoogle,
 } from "../../js/logic/settings-flow.js";
 import { addService, normalizeServices, readModelIds, inUseHelper } from "../../js/logic/ai-services.js";
 
@@ -140,4 +144,31 @@ test("renaming refuses a name another helper has, ignoring case, but allows the 
   assert.match(renameService(list, "b", " maths ").error, /already have a helper called that/);
   assert.equal(renameService(list, "a", "MATHS").error, null);
   assert.equal(renameService(list, "b", "Writing").list[1].label, "Writing");
+});
+
+test("Google Gemini needs no typed address and ends up the same as adding the address by hand", () => {
+  const checked = checkService("google", "");
+  assert.equal(checked.ok, true);
+  assert.equal(checked.url, "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions");
+  assert.equal(checkService("google", "ignored").url, checked.url);
+  assert.equal(isGoogle(checked.url), true);
+  assert.equal(isGoogle("https://openrouter.ai/api/v1/chat/completions"), false);
+  assert.equal(checkService("other", GOOGLE_BASE).url, checked.url);
+  assert.equal(defaultModel(checked.url, [], ""), "models/gemini-flash-lite-latest");
+  const quick = addService([], { label: GEMINI_NAME, url: checked.url, model: defaultModel(checked.url, [], ""), keyHint: "1234", keyReady: true });
+  const byHand = addService([], { label: "Gemini", url: GOOGLE_BASE, model: "", keyHint: "1234", keyReady: true });
+  assert.equal(quick.error, null);
+  const { id: quickId, ...quickFields } = quick.list[0];
+  const { id: handId, ...handFields } = byHand.list[0];
+  assert.ok(quickId && handId);
+  assert.deepEqual(quickFields, handFields);
+  assert.equal(quick.list[0].effort, "low");
+  assert.equal(quick.list[0].keyHint, "1234");
+});
+
+test("the busy line is Google-specific only for the Google address", () => {
+  assert.equal(setupMessage("busy", "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"), GOOGLE_BUSY);
+  assert.notEqual(setupMessage("busy", "https://openrouter.ai/api/v1/chat/completions"), GOOGLE_BUSY);
+  assert.notEqual(setupMessage("busy"), GOOGLE_BUSY);
+  assert.doesNotMatch(GOOGLE_BUSY, /\b(4\d\d|5\d\d)\b/);
 });

@@ -471,6 +471,16 @@ Needs an AI helper set up in Settings.
 3. The check passes and Done shows. If the browser blocks the request (CORS) or Google refuses the thinking setting, write down exactly what shows; neither has been tried against the real service.
 4. Talk it through: send a message; a reply comes. Try `https://generativelanguage.googleapis.com/v1beta/models/x:generateContent`: the app asks for "the address the service gives".
 
+## Google Gemini quick setup (web, needs the parent's real Gemini key)
+
+1. Settings, Add an AI helper. Three choices show: OpenRouter, Google Gemini, Another service.
+2. Pick Google Gemini and Next. No address box. The key step shows 3 numbered steps, a link **Open Google AI Studio**, "Google may have renamed these buttons." and the privacy line (what you type goes to Google).
+3. Parent: click the link once. It should open Google AI Studio in a new tab on the API key page. If the address or the button names (Get API key, Create API key) are wrong, tell the agent what Google shows.
+4. Paste the key, Next. The pull-down starts on `models/gemini-flash-lite-latest` and the name box says Gemini. Next, then Done: Gemini shows Ready. (Not tried with a real key.)
+5. Cancel at any step: nothing is saved. Back from the key step keeps Google Gemini chosen. Switching to Another service afterwards leaves the name box empty.
+6. A wrong key gives "That key didn't work." If Google's free limit is used up the check says "Gemini says you've used the free quota for now. Wait a bit and try again."
+7. Phone width and keyboard only: Tab, Space and Enter reach every part.
+
 ## The look (web)
 
 1. Open the app on a phone and on a computer. Today, Plan, Talk, Me and Settings should look like the same app: sand background, white cards, olive buttons, nothing cut off.

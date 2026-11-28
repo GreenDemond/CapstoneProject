@@ -2,6 +2,26 @@
 import { chatAddress, isReady, OPENROUTER_DEFAULT_MODEL, GOOGLE_DEFAULT_MODEL, GOOGLE_HOST, hostOf, nameTaken, MAX_LABEL, NAME_TAKEN } from "./ai-services.js";
 
 export const OPENROUTER_BASE = "https://openrouter.ai/api/v1";
+export const GOOGLE_BASE = "https://generativelanguage.googleapis.com/v1beta/openai";
+export const GEMINI_NAME = "Gemini";
+export const GOOGLE_KEY_PAGE = "https://aistudio.google.com/apikey";
+
+// The three steps shown on the key step for Google (design/gemini-quick-setup.md).
+export const GEMINI_STEPS = [
+  "Open Google AI Studio and sign in with a Google account (an adult's account).",
+  "Choose Get API key, then Create API key.",
+  "Copy the key and paste it below.",
+];
+export const GEMINI_LINK_TEXT = "Open Google AI Studio";
+export const GEMINI_LINK_HINT = "This opens Google's website in a new tab.";
+export const GEMINI_RENAMED = "Google may have renamed these buttons.";
+export const GEMINI_PRIVACY =
+  "What you type to Gemini goes to Google. Free plans may use it to improve Google's products. Don't type your name or anything private. This is for you and Ben, not for classmates. Check Google's current terms.";
+export const GOOGLE_BUSY = "Gemini says you've used the free quota for now. Wait a bit and try again.";
+
+export function isGoogle(chatUrl) {
+  return hostOf(chatUrl) === GOOGLE_HOST;
+}
 
 // One status word per helper, with the action it offers. Needs a key comes first when both are missing.
 export function helperStatus(service) {
@@ -71,8 +91,8 @@ export function looksLikeOpenRouter(typed) {
 
 // Step 1 checks, before any key is typed. Returns { ok, url } or { ok: false, kind }.
 export function checkService(provider, typedAddress) {
-  const typed = provider === "openrouter" ? OPENROUTER_BASE : typedAddress;
-  if (provider !== "openrouter") {
+  const typed = provider === "openrouter" ? OPENROUTER_BASE : provider === "google" ? GOOGLE_BASE : typedAddress;
+  if (provider === "other") {
     if (typeof typed !== "string" || typed.trim() === "") {
       return { ok: false, kind: "notAddress" };
     }
@@ -175,6 +195,9 @@ const MESSAGES = {
   listSaveFailed: "Couldn't save on this device, so nothing was saved.",
 };
 
-export function setupMessage(kind) {
+export function setupMessage(kind, chatUrl = null) {
+  if (kind === "busy" && chatUrl && isGoogle(chatUrl)) {
+    return GOOGLE_BUSY;
+  }
   return MESSAGES[kind] ?? MESSAGES.network;
 }
