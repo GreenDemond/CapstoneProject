@@ -67,6 +67,32 @@ How to add one: date, who asked, one-line request in their words, then rule conf
 - **Needs before building:** D6 change, a D8 row, the same safety and answer checks, T14 for it, and off by default.
 - **Next:** none for the beta, which uses the on-device model only.
 
+### F6. Better no-AI heuristics (the app must be fully usable without AI)
+- **Asked by:** parent. "lets keep the app usable without ai, may want to look into making the non ai have better heuristics." Agreed 2026-11-26 after the free-tier and minors discussion: classmates under 18 should not use external AI, and iPhone 11 and older phones have no Apple Intelligence.
+- **Status:** assessed. Not designed or built.
+- **What the no-AI path does today (read from the code):**
+  - Starter steps: 7 fixed steps per kind of work (`Shared/content.json` `kinds`), plus numbered or bulleted lines found in the pasted text, copied word for word (`StarterSteps.listItems`). The number picked (3, 5 or 8) cuts the list.
+  - A two-minute first step and Get ready / Put it away steps.
+  - Step notes (S2): "too long" over 20 words, and "vague" only for an exact match on a short list of phrases like "study" or "finish" (`StepReview`).
+  - Splitting a step: at " and " when present, otherwise at the space nearest the middle (`PlannerModel.splitParts`). The midpoint split can make awkward halves.
+  - Nothing reads the assignment beyond bullet lines. Check my steps (S3) needs an AI.
+- **Candidate improvements, all plain code on the student's own text:**
+  1. **Pick the kind from keywords.** Suggest a kind chip from words like "essay", "chapter", "problems", "quiz", "test", "project". The student confirms or changes it. Never silent.
+  2. **Find the requirements without an AI.** Pull lines that contain cues such as "include", "must", "at least", a number plus "paragraphs/pages/words/sources/problems", "cite", "due", "show your work". Show them word for word (the same safe rule as S3). Use them for a no-AI Check my steps.
+  3. **Turn numbered questions into chunks.** "Answer questions 1 to 10" becomes steps for questions 1 to 3, 4 to 6 and so on, sized by the step count the student picked. Each step must still start with something the student does.
+  4. **Better splitting.** Split at commas, "then", "after", semicolons and lists before falling back to the midpoint; refuse a split that leaves a fragment under two words. This also improves Drifted and the editor's split.
+  5. **Smarter vague-step notes.** Match "study for the test" and "do chapter 4" patterns (verb + very general object), not only exact phrases. Still a question, never a rewrite.
+  6. **Reuse the student's own earlier steps for the same class.** The record already keeps course lines (C9 sends them to an AI). A no-AI version would offer "Use your History steps from last time" as a suggestion the student edits. It is the student's own words and is deletable.
+  7. **Kind-specific step count.** Fewer fixed steps for short work, with the "what to do first" step taken from the assignment's first sentence verb when it is one of the app's allowed process verbs.
+- **Rules to hold:**
+  - Rule 1: no heuristic writes subject content or answers. They sort, copy and split the student's text, and the fixed steps are process steps.
+  - The student does the thinking: every result opens in the editor and nothing skips it (P12).
+  - Label what the app suggested ("Suggested from your assignment text") and never say it understood the assignment.
+  - Never shame: no "your steps are vague" wording, only questions.
+  - Fail closed: if a heuristic is unsure, use today's starter steps.
+- **How to know it is better:** build a fixture set of 30 to 50 realistic assignment texts (essay, reading, problem set, project, test prep, messy copy-pasted text, empty and very long text) with the steps and requirement lines a person expects, and score each heuristic against them. Do not tune on a few examples. No claim that it improves outcomes.
+- **Next:** pick which of 1 to 7 matter most to Ben. My recommendation is 2 (requirements) and 4 (splitting), because they feed Check my steps and Drifted and keep to copying the student's own words. Then a design note and a fixture set before any code.
+
 ---
 
 ## Earlier ideas now tracked elsewhere
