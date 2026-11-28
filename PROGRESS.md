@@ -22,7 +22,7 @@ The only memory between sessions. Keep it current; rewrite it, do not let it gro
 
 ## In progress
 
-- **Getting the web app as close to the iPhone app as a browser can, for classmates who cannot use TestFlight** (`design/web-parity-plan.md`; slices H1, W1 to W9, D1). Plain web, not required to be a PWA, no offline needed (parent, 2026-11-27). **H1 is built** (see Working). **D1 is built** (`design/deploy.md`): `npm run build:site` makes a clean `site/`, `scripts/deploy-site.sh` copies it; not yet run by the parent. Next: W1, the steps editor.
+- **Getting the web app as close to the iPhone app as a browser can, for classmates who cannot use TestFlight** (`design/web-parity-plan.md`; slices H1, W1 to W9, D1). Plain web, not required to be a PWA, no offline needed (parent, 2026-11-27). **H1 is built** (see Working). **D1 is built** (`design/deploy.md`): `npm run build:site` makes a clean `site/`, `scripts/deploy-site.sh` copies it; not yet run by the parent. **W1 (Change my steps) is built** (`design/steps-editor-w1.md`): edit, move, split, join, add, remove, Get ready and Put it away, better splitting and vague-step questions. Logic tests pass; its 5 browser tests have **not been run** (Chrome would not start in the author's sandbox), so run `tests/browser/steps-editor.spec.js` first. Wording awaits the parent's okay. Next: W2.
 
 Nothing. The whole-app review plan (`design/review-plan-2026-11-17.md`) is finished; see its Progress list.
 

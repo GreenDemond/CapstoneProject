@@ -15,6 +15,7 @@ import { initSettings, getAiSettings, onAiChange, setChosenHelper } from "../set
 import { showScreen, currentScreenName, openStepsPreview, registerOnLeaveHome } from "../ui/screens.js";
 import { where } from "../ui/helpers.js";
 import { openWorkScreen, stepListNode } from "./work.js";
+import { initStepsEditor, closeEditor } from "./steps-editor.js";
 
 const textBox = document.getElementById("assignment-text");
 const kindButtons = document.getElementById("kind-buttons");
@@ -95,6 +96,7 @@ function showRequirements(text) {
 let shownCount = DEFAULT_STEP_COUNT;
 
 function renderSteps(count) {
+  closeEditor();
   shownCount = count;
   stepsList.replaceChildren();
   for (const step of allSteps.slice(0, count)) {
@@ -150,6 +152,16 @@ showMore.addEventListener("click", () => {
   renderSteps(allSteps.length);
   stepsList.focus();
 });
+
+// The editor changes the steps on screen; any steps not shown yet stay behind them for Show more steps.
+initStepsEditor(
+  () => allSteps.slice(0, shownCount),
+  (edited) => {
+    allSteps = edited.concat(allSteps.slice(shownCount));
+    renderSteps(edited.length);
+    stepsList.focus();
+  },
+);
 
 startButton.addEventListener("click", () => {
   openWorkScreen(allSteps.slice(0, shownCount));

@@ -25,8 +25,8 @@ Apple's on-device AI, voice input, haptics, the Apple calendar sheet (a download
 
 | Slice | What the student gets | iPhone equivalent | Status |
 |---|---|---|---|
-| H1 | Suggestions from the pasted text: a suggested kind of work, the assignment's own requirement lines, numbered-question ranges turned into chunks | F6 items 1, 2, 3 | next |
-| W1 | Steps editor: change, reorder, split, join, Get ready and Put it away; better splitting and vague-step questions | EditorView, F6 items 4, 5 | |
+| H1 | Suggestions from the pasted text: a suggested kind of work, the assignment's own requirement lines, numbered-question ranges turned into chunks | F6 items 1, 2, 3 | built |
+| W1 | Steps editor: change, reorder, split, join, Get ready and Put it away; better splitting and vague-step questions | EditorView, F6 items 4, 5 | built; browser tests unrun |
 | W2 | Step count (3, 5, 8) and the good-step card | A2, R6 | |
 | W3 | Four-tab layout (Today, Talk, Plan, Me), welcome screen, phone and tablet widths | RootView, IPAD1 | |
 | W4 | Work screen extras: the Stuck sheet, park a thought, recall question after study steps | StuckView, WorkView | |

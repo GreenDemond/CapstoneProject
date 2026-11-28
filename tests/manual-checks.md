@@ -242,3 +242,16 @@ No key needed. Do this on a phone as well as a computer.
 6. Pick a kind first, then paste the essay text. No "Looks like" line appears.
 7. Paste "Do problems 1-30, odd only." The steps are the normal starter steps, with no chunks.
 8. Check the wording is calm: nothing says "you missed", "wrong" or "vague".
+
+## Change my steps (web, W1)
+
+1. Paste "1. Find sources and take notes", "2. study for the test", "3. Write a draft" on three lines, pick Reading, press Show my steps, then Change my steps.
+2. Step 1 shows "This looks like more than one step. Split it?" and step 2 shows "What is the first small thing you would do for this step?". Press Split step 1: it becomes "Find sources" and "Take notes".
+3. Type in step 2's box: the question for it goes away once the words are specific.
+4. Move a step down and up, Join two steps (they meet with a semicolon), Remove one, Add a step, Add a Get ready step (goes first, button disappears), Add a Put it away step (goes last, button disappears).
+5. Remove every step and press Done changing: "Add at least one step to go on." appears.
+6. Press Done changing with steps: the preview shows your steps. Start works through exactly those.
+7. Reopen, change something, press Leave my steps as they were: nothing changed.
+8. Refresh the page while editing: you are back on the paste screen.
+9. Check at phone width and with the keyboard only (Tab through the buttons).
+
