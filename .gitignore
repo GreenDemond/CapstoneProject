@@ -14,5 +14,8 @@ site/
 # Kept on disk until Ben decides whether to delete it.
 web-app/
 
+# Temporary Playwright configs made by the isolated test runner
+*.tmp.config.js
+
 # macOS
 .DS_Store

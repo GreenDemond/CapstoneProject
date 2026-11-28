@@ -43,3 +43,6 @@ npx playwright install chromium
 Then `npm run check` runs everything. Playwright's Chromium is a separate download, so it does not touch your normal Chrome.
 
 Why this is needed: Playwright's browser is not installed on this Mac, and the installed Google Chrome aborts at launch (SIGABRT in macOS window-server registration) when started from inside an agent's sandbox, even with `--headless`. Chrome works from a normal Terminal, so a fallback without the download is a temporary config that sets `channel: "chrome"` on the `phone` and `desktop` projects, run with `npx playwright test -c <that file>`.
+
+### Running the browser tests one at a time (sandboxes)
+Where Chromium crashes after its first test (for example inside an agent sandbox), run `npm run test:browser:isolated`. It lists every test, runs each in its own Playwright run with `--single-process --no-zygote`, and prints PASS or FAIL per test and a total. Options: `npm run test:browser:isolated -- --project=phone tests/browser/tabs.spec.js`. It writes a temporary `pw-isolated-*.tmp.config.js` and deletes it afterwards. `npm run check` is unchanged.
