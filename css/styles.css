@@ -1,32 +1,75 @@
-/* Colors are placeholders until Ben chooses the look (DECISIONS.md "Still Ben's to decide"). */
-/* Earthy palette (chosen by Ben, 2026-11-17). Text pairs pass 4.5:1 in both modes. */
+/* =====================================================================
+   THE LOOK: change these values to change how the whole app looks.
+   Everything below this block reads from here. See design/look.md.
+   Keep text colours dark on light (or light on dark): a text colour
+   needs at least 4.5 to 1 contrast against the colour behind it.
+   ===================================================================== */
 :root {
-  --bg: #fbf6ec;      /* warm sand paper */
-  --border: #8a8174;  /* track lines, 3.4:1 on --bg */
-  --text: #2e2a24;    /* earthy dark brown */
-  --muted: #6b6257;   /* taupe for hints */
-  --accent: #4f6b3a;  /* olive moss */
-  --clay: #b5653d;    /* warm accent, used sparingly */
+  /* Colours (light mode) */
+  --bg: #fbf6ec;        /* page background: warm sand paper */
+  --surface: #fffdf8;   /* cards and input boxes, a little lighter than the page */
+  --soft: #f3ecdb;      /* quiet tinted panels (notes, options) */
+  --border: #8a8174;    /* edges of things you press or type in, 3.4:1 on --bg */
+  --line: #ddd3bd;      /* faint dividers and card edges (decoration only) */
+  --text: #2e2a24;      /* main text: earthy dark brown */
+  --muted: #6b6257;     /* hints and small notes: taupe */
+  --accent: #4f6b3a;    /* main colour: olive moss (buttons, headings, focus ring) */
+  --on-accent: #fbf6ec; /* text on top of --accent */
+  --clay: #b5653d;      /* warm colour, used sparingly (celebration) */
+
+  /* Shape */
+  --radius: 0.9rem;       /* cards and panels */
+  --radius-small: 0.6rem; /* buttons and boxes you type in */
+  --radius-tiny: 0.4rem;  /* little calendar blocks */
+
+  /* Space: small steps used for gaps and padding */
+  --space-1: 0.5rem;
+  --space-2: 0.75rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+
+  /* Text sizes */
+  --font-base: 1.05rem;   /* normal text */
+  --font-small: 0.95rem;  /* small buttons and tags */
+  --font-title: 1.75rem;  /* the app name at the top */
+  --font-step: 1.35rem;   /* the step you are working on */
+
+  /* Depth and size */
+  --shadow: 0 1px 2px rgba(46, 42, 36, 0.10), 0 2px 8px rgba(46, 42, 36, 0.06); /* soft lift on cards */
+  --tap: 2.75rem;         /* smallest height of anything you press (44px) */
+  --width: 40rem;         /* page width on a phone or small window */
+  --width-wide: 46rem;    /* page width on a big screen */
 }
 
+/* Colours (dark mode). Only colours change here. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #26231e;
+    --surface: #2f2b25;
+    --soft: #34302a;
     --border: #7d7568;
+    --line: #4a443a;
     --text: #f1ebe0;
     --muted: #c2b8a6;
     --accent: #a9c08f;
+    --on-accent: #26231e;
     --clay: #d9956f;
+    --shadow: none;
   }
 }
 
 :root[data-theme="dark"] {
   --bg: #26231e;
+  --surface: #2f2b25;
+  --soft: #34302a;
   --border: #7d7568;
+  --line: #4a443a;
   --text: #f1ebe0;
   --muted: #c2b8a6;
   --accent: #a9c08f;
+  --on-accent: #26231e;
   --clay: #d9956f;
+  --shadow: none;
 }
 
 *,
@@ -40,20 +83,20 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 1.05rem;
+  font-size: var(--font-base);
   line-height: 1.5;
 }
 
 #app {
-  max-width: 40rem;
+  max-width: var(--width);
   margin: 0 auto;
-  padding: 1.5rem 1rem;
+  padding: var(--space-4) var(--space-3);
 }
 
 h1 {
   color: var(--accent);
-  font-size: 1.75rem;
-  margin: 0 0 0.5rem;
+  font-size: var(--font-title);
+  margin: 0 0 var(--space-1);
 }
 
 h2 {
@@ -71,8 +114,8 @@ textarea {
   font: inherit;
   padding: 0.6rem;
   border: 1px solid var(--muted);
-  border-radius: 0.5rem;
-  background: var(--bg);
+  border-radius: var(--radius-small);
+  background: var(--surface);
   color: var(--text);
   resize: vertical;
 }
@@ -96,10 +139,10 @@ legend {
 
 button {
   font: inherit;
-  min-height: 2.75rem;
+  min-height: var(--tap);
   padding: 0.5rem 0.9rem;
   border: 1px solid var(--accent);
-  border-radius: 0.5rem;
+  border-radius: var(--radius-small);
   background: var(--bg);
   color: var(--text);
   cursor: pointer;
@@ -107,13 +150,13 @@ button {
 
 button.primary {
   background: var(--accent);
-  color: var(--bg);
+  color: var(--on-accent);
   margin-top: 0.5rem;
 }
 
 button[aria-pressed="true"] {
   background: var(--accent);
-  color: var(--bg);
+  color: var(--on-accent);
 }
 
 button:focus-visible,
@@ -171,7 +214,7 @@ ul.card li {
 button.small {
   min-height: 2.25rem;
   padding: 0.25rem 0.7rem;
-  font-size: 0.95rem;
+  font-size: var(--font-small);
 }
 
 h3 {
@@ -181,7 +224,7 @@ h3 {
 
 .current-step,
 .pickup-step {
-  font-size: 1.35rem;
+  font-size: var(--font-step);
   line-height: 1.4;
   margin: 0.25rem 0 1rem;
 }
@@ -195,8 +238,13 @@ h3 {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  min-height: 2.75rem;
+  min-height: var(--tap);
   margin: 0.75rem 0;
+}
+
+input[type="radio"],
+input[type="checkbox"] {
+  accent-color: var(--accent);
 }
 
 .timer-toggle input {
@@ -250,7 +298,7 @@ h3 {
   overflow-wrap: anywhere; /* a long title with no spaces must not push the buttons off the screen */
   padding: 0.5rem 0.7rem;
   margin-bottom: 0.4rem;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-small);
   color: var(--text);
   background: var(--bg);
   border: 1px solid var(--muted);
@@ -306,7 +354,7 @@ h3 {
 
 .row-actions, .delete-box { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .row-actions { margin-top: 0.4rem; }
-#calendar-screen button.small { min-height: 2.75rem; }
+#calendar-screen button.small { min-height: var(--tap); }
 #calendar-screen .view-bar button, #calendar-screen > div > button.primary { margin-top: 0; }
 #cal-open { margin: 0.75rem 0 0.25rem; }
 
@@ -315,8 +363,8 @@ h3 {
 .calendar-form .field { margin: 0 0 1rem; }
 .calendar-form label { display: block; font-weight: 600; margin-bottom: 0.3rem; }
 .calendar-form input, .calendar-form select, .calendar-form textarea {
-  display: block; width: 100%; min-height: 2.75rem; font: inherit; padding: 0.5rem 0.6rem;
-  border: 1px solid var(--muted); border-radius: 0.5rem; background: var(--bg); color: var(--text);
+  display: block; width: 100%; min-height: var(--tap); font: inherit; padding: 0.5rem 0.6rem;
+  border: 1px solid var(--muted); border-radius: var(--radius-small); background: var(--surface); color: var(--text);
 }
 .calendar-form textarea.big-notes { min-height: 9rem; }
 
@@ -391,20 +439,20 @@ h3 {
 .block {
   position: absolute; left: 0.25rem; right: 0.25rem; min-height: 2.25rem;
   text-align: left; font-size: 0.95rem; color: #2e2a24; border: 1px solid #2e2a24;
-  border-radius: 0.4rem; background: var(--bg); overflow: hidden; padding: 0.2rem 0.4rem;
+  border-radius: var(--radius-tiny); background: var(--bg); overflow: hidden; padding: 0.2rem 0.4rem;
 }
 .block[data-group="event"] { background: #d9c9a8; border-style: dashed; }
-.event-band { background: #d9c9a8; color: #2e2a24; border-radius: 0.4rem; padding: 0.3rem 0.5rem; margin: 0.4rem 0; }
+.event-band { background: #d9c9a8; color: #2e2a24; border-radius: var(--radius-tiny); padding: 0.3rem 0.5rem; margin: 0.4rem 0; }
 .block[data-group="done"] { background: #d8d2c4; text-decoration: line-through; }
 .week-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr)); gap: 0.4rem; }
-.week-col { border: 1px solid var(--muted); border-radius: 0.4rem; padding: 0.3rem; }
+.week-col { border: 1px solid var(--muted); border-radius: var(--radius-tiny); padding: 0.3rem; }
 .col-head { font-weight: 700; margin: 0 0 0.3rem; }
 .week-col .block { position: static; display: block; width: 100%; margin-bottom: 0.3rem; }
 .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
 .month-head { font-weight: 700; text-align: center; font-size: 0.85rem; }
 .month-cell {
   min-height: 4.5rem; text-align: left; padding: 0.2rem; border: 1px solid var(--muted);
-  background: var(--bg); color: var(--text); font-size: 0.8rem; overflow: hidden; border-radius: 0.3rem;
+  background: var(--bg); color: var(--text); font-size: 0.8rem; overflow: hidden; border-radius: var(--radius-tiny);
 }
 .month-cell.empty { border-color: transparent; background: transparent; }
 .day-num { display: block; font-weight: 700; }
@@ -425,7 +473,7 @@ h3 {
 .bar-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin: 0.4rem 0; }
 .span-bar {
   min-height: 2rem; text-align: left; padding: 0.2rem 0.5rem; font-size: 0.9rem;
-  color: #2e2a24; background: #d9c9a8; border: 1px dashed #2e2a24; border-radius: 0.4rem;
+  color: #2e2a24; background: #d9c9a8; border: 1px dashed #2e2a24; border-radius: var(--radius-tiny);
   overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
 }
 .month-bars { grid-column: 1 / -1; }
@@ -450,7 +498,7 @@ h3 {
 
 /* AI helpers screens (design/settings-ux.md) */
 .helper-cards { list-style: none; padding: 0; margin: 1rem 0; display: grid; gap: 0.75rem; }
-.helper-card { border: 1px solid var(--accent); border-radius: 0.6rem; padding: 0.75rem; }
+.helper-card { border: 1px solid var(--line); border-radius: var(--radius); padding: var(--space-2); background: var(--surface); box-shadow: var(--shadow); }
 .helper-card .status { margin: 0.25rem 0 0.5rem; color: var(--muted); }
 .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.5rem 0; }
 .actions .hint { flex-basis: 100%; margin: 0; }
@@ -461,17 +509,17 @@ h3 {
 .step-body input[type="text"],
 .step-body input[type="search"],
 .step-body input[type="password"],
-.manage-row input[type="text"] { width: 100%; box-sizing: border-box; min-height: 2.75rem; font: inherit; padding: 0.4rem 0.6rem; }
+.manage-row input[type="text"] { width: 100%; box-sizing: border-box; min-height: var(--tap); font: inherit; padding: 0.4rem 0.6rem; }
 .choices { border: 0; padding: 0; margin: 0.5rem 0; }
-.choice { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.4rem 0; min-height: 2.75rem; }
+.choice { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.4rem 0; min-height: var(--tap); }
 .choice input[type="radio"] { width: 1.4rem; height: 1.4rem; margin-top: 0.2rem; flex: none; }
 .choice label { flex: 1; overflow-wrap: anywhere; }
 .manage-row { margin: 0.75rem 0; }
 .manage-row p { margin: 0.25rem 0; overflow-wrap: anywhere; }
-summary { min-height: 2.75rem; padding: 0.6rem 0; cursor: pointer; color: var(--accent); text-decoration: underline; }
+summary { min-height: var(--tap); padding: 0.6rem 0; cursor: pointer; color: var(--accent); text-decoration: underline; }
 .actions button.primary { margin-top: 0; }
 .choice-pull label { display: block; margin: 0.5rem 0 0.25rem; }
-.choice-pull select { width: 100%; box-sizing: border-box; min-height: 2.75rem; font: inherit; padding: 0.4rem 0.6rem; }
+.choice-pull select { width: 100%; box-sizing: border-box; min-height: var(--tap); font: inherit; padding: 0.4rem 0.6rem; }
 
 /* Home screen (design/home-screen.md): a row of real buttons, then the next step. */
 
@@ -492,7 +540,7 @@ summary { min-height: 2.75rem; padding: 0.6rem 0; cursor: pointer; color: var(--
 
 @media (min-width: 48rem) {
   #app {
-    max-width: 46rem;
+    max-width: var(--width-wide);
   }
   .pickup-step,
   .current-step {
@@ -511,8 +559,9 @@ summary { min-height: 2.75rem; padding: 0.6rem 0; cursor: pointer; color: var(--
 .chat-msg {
   margin: 0.5rem 0;
   padding: 0.6rem 0.8rem;
-  border: 1px solid var(--muted);
-  border-radius: 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
   overflow-wrap: anywhere;
 }
 
@@ -560,7 +609,7 @@ summary { min-height: 2.75rem; padding: 0.6rem 0; cursor: pointer; color: var(--
   display: block;
   width: 100%;
   text-align: left;
-  min-height: 2.75rem;
+  min-height: var(--tap);
 }
 
 .chat-row-title {
@@ -682,7 +731,7 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  min-height: 2.75rem;
+  min-height: var(--tap);
   margin-right: 1rem;
 }
 
@@ -723,8 +772,8 @@ button {
   padding: 0.6rem;
   margin-bottom: 0.5rem;
   border: 1px solid var(--muted);
-  border-radius: 0.5rem;
-  background: var(--bg);
+  border-radius: var(--radius-small);
+  background: var(--surface);
   color: var(--text);
 }
 
@@ -762,12 +811,13 @@ button {
 /* Looking back (design/looking-back-w6.md): calm lists, no colours that mean good or bad. */
 .looking-list { padding-left: 1.25rem; }
 .looking-list li { margin: 0.4rem 0; }
-#looking-screen button.small { min-height: 2.75rem; }
+#looking-screen button.small { min-height: var(--tap); }
 .help-card {
   margin: 1rem 0;
   padding: 0.75rem 1rem;
-  border: 1px solid var(--accent, #1a4fa0);
-  border-radius: 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--soft);
 }
 .help-card p { margin: 0 0 0.5rem; }
 .help-card button { margin-right: 0.5rem; }
@@ -791,7 +841,7 @@ button {
   bottom: 0;
   z-index: 20;
   display: flex;
-  max-width: 40rem;
+  max-width: var(--width);
   margin: 0 auto;
   background: var(--bg);
   border-top: 2px solid var(--border);
@@ -820,13 +870,14 @@ body.has-tabs input, body.has-tabs textarea, body.has-tabs select, body.has-tabs
 .welcome-note {
   margin: 0 0 1rem;
   padding: 0.5rem 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--soft);
 }
 .welcome-note p { margin: 0 0 0.5rem; }
 
 @media (min-width: 48rem) {
-  .tabbar { max-width: 46rem; }
+  .tabbar { max-width: var(--width-wide); }
   .tabbar button { min-height: 3.5rem; font-size: 1.15rem; }
   #app { padding: 2rem 2rem; }
   body.has-tabs { padding-bottom: 7.5rem; }
@@ -838,8 +889,9 @@ body.has-tabs input, body.has-tabs textarea, body.has-tabs select, body.has-tabs
   max-height: 9rem;
   overflow-y: auto;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #c9c9c9;
-  border-radius: 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-small);
+  background: var(--surface);
 }
 
 /* Return visit (design/class-and-return-w11.md): the look-back card, set-aside thoughts and the all-done line. */
