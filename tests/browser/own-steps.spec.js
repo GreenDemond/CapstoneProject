@@ -11,7 +11,8 @@ test("I'll write my steps is the main button, Suggest some to start is the quiet
   await expect(suggest).not.toHaveClass(/primary/);
   const a = await write.boundingBox();
   const b = await suggest.boundingBox();
-  expect(a.y).toBeLessThan(b.y);
+  // On a phone the buttons stack; on a wide screen they sit side by side. Either way the main one comes first.
+  expect(a.y < b.y || (a.y === b.y && a.x < b.x)).toBe(true);
 });
 
 test("writing my own steps with no text and no kind works, then Start runs them", async ({ page }) => {
