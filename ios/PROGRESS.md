@@ -62,6 +62,7 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 
 ## Waiting on
 
+- **Parent (2026-11-27):** may a student's words go to Google's Gemini API free tier? Google says free-tier prompts may be used to improve its products and that users must be 18 or older. Until you answer, classmates are not pointed at a Google key. Also: after the next build, try your own Google key in Me, My AI services (see `design/slices/GOOGLE1-more-provider-addresses.md`, device check) and tell me the status line, never the key.
 - **Parent:** confirm the new D8 row for "Check my steps against the assignment" before classmates use it; try device checks 91 and 92; upload build 16 (archived) or a new build 17 from Organizer.
 - **Parent:** check the taller fields and haptics on the phone (device steps 79 to 81); confirm D8 and the Tailscale note; decide on the trusted-adult proposals; archive build 10, then upload it from Xcode's Organizer (Window → Organizer → Bens Steps 0.1 (9) → Distribute App → App Store Connect → Upload); decide whether to build "How I want help" (the Me split is task ME1); run or arrange T14 for each AI.
 - **Ben:** the final name and icon (placeholder staircase), the words for Drifted and Stuck, whether voice starts off (it does now).

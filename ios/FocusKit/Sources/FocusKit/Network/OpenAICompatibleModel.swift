@@ -117,13 +117,16 @@ public struct OwnAIConfig: Equatable, Sendable {
   /// Turns the base address a provider shows (for example `https://openrouter.ai/api/v1`,
   /// `https://api.openai.com`, or `http://localhost:11434`) into the chat address. The app adds
   /// `/chat/completions`, and OpenRouter's `/api` prefix, when they are missing.
+  ///
+  /// A path that ends in a version marker (`/v2`, `/v1beta`) or in `openai` is also a base address
+  /// (Google's `/v1beta/openai`, Groq's `/openai/v1`): it gets `/chat/completions`, and a lone
+  /// `/openai` gets `/v1` first. Any other path is the student's own and is kept as typed.
   static func chatPath(host: String, path: String) -> String {
     var base = path
     while base.hasSuffix("/") { base.removeLast() }
     if base.hasSuffix("/chat/completions") { return base }
-    // Only a base address is completed. Any other path is the student's own and is kept as typed.
     let isBase = base.isEmpty || base == "/api" || base == "/v1" || base == "/api/v1"
-    guard isBase else { return base }
+    guard isBase else { return providerBasePath(base) }
     if host.lowercased() == "openrouter.ai", !base.hasPrefix("/api") {
       base = "/api" + base
     }
@@ -131,6 +134,23 @@ public struct OwnAIConfig: Equatable, Sendable {
       base += "/v1"
     }
     return base + "/chat/completions"
+  }
+
+  /// The chat path for a base address with some other path, or the path as typed.
+  private static func providerBasePath(_ base: String) -> String {
+    let segments = base.split(separator: "/").map(String.init)
+    guard let last = segments.last else { return base }
+    if isVersionSegment(last) { return base + "/chat/completions" }
+    guard last == "openai" else { return base }
+    if segments.dropLast().last.map(isVersionSegment) == true {
+      return base + "/chat/completions"
+    }
+    return base + "/v1/chat/completions"
+  }
+
+  /// A version marker such as `v1`, `v2`, `v10`, `v1beta` or `v2beta3`. Exact, lower case.
+  static func isVersionSegment(_ text: String) -> Bool {
+    text.wholeMatch(of: /v[0-9]+((alpha|beta)[0-9]*)?/) != nil
   }
 
   /// False for a good http address: the key and the messages would travel unencrypted.
@@ -353,7 +373,9 @@ public enum ModelLister {
   }
 
   /// Plain names only: letters, digits and . _ : / ~ -, 1 to 100 characters.
-  static func readNames(_ data: Data) -> [String] {
+  /// `stripPrefix` is taken off the front of each name once, before the checks (Google lists its
+  /// models as `models/<name>`; chat takes `<name>`). Nothing else is changed.
+  static func readNames(_ data: Data, stripPrefix: String? = nil) -> [String] {
     struct Reply: Decodable {
       struct Item: Decodable { var id: String? }
       var data: [Item]?
@@ -365,8 +387,9 @@ public enum ModelLister {
     var seen = Set<String>()
     var names: [String] = []
     for item in reply.data ?? [] {
-      guard let id = item.id?.trimmingCharacters(in: .whitespacesAndNewlines),
-        (1...100).contains(id.count), id.allSatisfy(allowed.contains), seen.insert(id).inserted
+      guard var id = item.id?.trimmingCharacters(in: .whitespacesAndNewlines) else { continue }
+      if let stripPrefix, id.hasPrefix(stripPrefix) { id = String(id.dropFirst(stripPrefix.count)) }
+      guard (1...100).contains(id.count), id.allSatisfy(allowed.contains), seen.insert(id).inserted
       else { continue }
       names.append(id)
       if names.count == most { break }
@@ -397,7 +420,9 @@ public enum ModelLister {
     }
     switch status {
     case 200...299:
-      let names = readNames(data)
+      // Google lists models as `models/<name>`; chat takes `<name>`. Only that exact host.
+      let google = config.url?.host?.lowercased() == "generativelanguage.googleapis.com"
+      let names = readNames(data, stripPrefix: google ? "models/" : nil)
       return names.isEmpty ? .problem : .found(names)
     case 401, 403: return .keyNotAccepted
     case 429: return .busy
