@@ -1,0 +1,11 @@
+{
+  "task_id": "task-web-look",
+  "task_description": "Visual redesign of the web app (CSS tokens Ben can tweak, button hierarchy, calmer Today and Work screens, consistent look). Behavior unchanged.",
+  "status": "in_progress",
+  "feature_order": [
+    "FEAT-001",
+    "FEAT-002",
+    "FEAT-003"
+  ],
+  "blocked_reason": null
+}

@@ -1,0 +1,24 @@
+{
+  "id": "FEAT-003",
+  "type": "feat",
+  "description": "Responsive, new layout tests, final screenshots, docs, full suite (1-2 commits). Depends on FEAT-002.",
+  "status": "pending",
+  "steps": [
+    "Desktop: centered readable column with max-width; check 768 tablet; honor prefers-reduced-motion; dark mode only if cheap else note skipped.",
+    "Add tests/browser/look-layout.spec.js: (a) no overlapping interactive bounding boxes on Work at 360 and 1280, (b) the five answer buttons have identical computed background/color/border/height (rule 6) and are at least the tap-target height, (c) tab bar does not cover last control on Today, Plan, Me at phone width, (d) no horizontal scroll on Today, Work, Plan at 360. No pixel diffs.",
+    "Final screenshots into design/look-screens/ (phone and desktop of the 8 screens, modest size); LOOK at them and fix overlaps, clipping, contrast, wrapping; mention in design/look.md.",
+    "Update PROGRESS.md and tests/manual-checks.md (re-read first, stage by name) and design/web-parity-plan.md if relevant. Run npm run lint, test:logic and detached npm run test:browser:isolated; report exact counts."
+  ],
+  "acceptance_criteria": [
+    "New spec passes and would fail on the old overlap",
+    "Full isolated suite passes except known flaky ai-choice.spec.js:44",
+    "design/look.md, look-screens, PROGRESS.md, manual-checks updated"
+  ],
+  "verification": [
+    "npm run lint",
+    "npm run test:logic",
+    "npm run test:browser:isolated"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

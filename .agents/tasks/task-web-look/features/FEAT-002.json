@@ -1,0 +1,22 @@
+{
+  "id": "FEAT-002",
+  "type": "feat",
+  "description": "Work screen, other screens, header and tab bar (3 commits). Depends on FEAT-001.",
+  "status": "completed",
+  "steps": [
+    "Commit 4: Work screen (js/screens/work.js markup only if needed, mostly CSS): step in large card 1.5-1.75rem, thin progress bar plus keep 'Step N of M' text, ALL FIVE answer buttons (Done, Still working, Stuck, Drifted, Later) stay identical in look (AGENTS rule 6, home-screen.spec.js:34): make them one equal, large, comfortable grid/row, NOT Done-as-primary, extras in a separate quiet group, FIX countdown label overlapping Show all my steps. Keep focus behavior and DOM order.",
+    "Commit 5: apply tokens/cards/button hierarchy to steps preview (Start primary), steps editor, calendar, Plan, Me, Talk (CSS only, no chat.js edits), Settings; list items with spacing and subtle dividers.",
+    "Commit 6: header polish (title text 'Focus app' kept, easy to change in index.html), tab bar clearer selected state, good tap size, never covers content (tabs.spec.js)."
+  ],
+  "acceptance_criteria": [
+    "Work screen shows no overlapping controls at 360px and 1280px",
+    "The five answer buttons look identical (rule 6) and are large and evenly laid out",
+    "Tab bar does not cover last control on Today, Plan, Me"
+  ],
+  "verification": [
+    "npm run lint",
+    "relevant browser specs: work-screen, work-extras, during-a-step, steps-editor, calendar, plan-tab, me-export, settings, tabs, navigation"
+  ],
+  "blocked_reason": null,
+  "findings": "Answer buttons kept equal (rule 6); progress bar is a native progress element added in work.js. Isolated specs all pass."
+}

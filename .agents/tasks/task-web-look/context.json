@@ -1,0 +1,27 @@
+{
+  "project_type": "Plain HTML/CSS/JS web app (no framework, no build), Node only for tooling; dev server dev-server.mjs",
+  "language": "JavaScript, CSS",
+  "build_system": "npm scripts, no build step",
+  "test_framework": "node --test for tests/logic; Playwright for tests/browser/*.spec.js (helpers in tests/browser/helpers)",
+  "build_command": "PATH=/opt/homebrew/opt/node@24/bin:$PATH npm run lint",
+  "test_command": "npm run test:logic; npm run test:browser:isolated (about 16 min, run detached; Chromium here survives one test per browser; known flaky ai-choice.spec.js:44; chat.spec.js:160 phone skipped on purpose)",
+  "verification_instructions": "Lint, logic tests, then isolated browser suite. Screenshots via /tmp/shots/shoot.mjs (node shoot.mjs <w> <h> <tag>, dev server PORT=3100 node dev-server.mjs, uses --single-process --no-zygote). Read the PNGs and fix visible problems.",
+  "snapshot_or_generated_files": "site/ is built by scripts/build-site.mjs; do not commit tarballs",
+  "setup_instructions": "Use Node 24: PATH=/opt/homebrew/opt/node@24/bin:$PATH. Read SETUP.md.",
+  "environment_constraints": "Another coder concurrently edits js/screens/chat.js, js/logic/ai-services.js, tests/browser/*helper*.spec.js, design/talk-ai-choice.md, PROGRESS.md, tests/manual-checks.md. Do NOT edit chat.js or ai-services.js. Re-read PROGRESS.md and tests/manual-checks.md right before editing; stage only own files by name. No push.",
+  "contribution_requirements": "AGENTS.md: no shame, no red, hints not answers, student text via textContent, no innerHTML, no third-party code, no web fonts, old-browser CSS only (no :has, container queries, @layer, color-mix, inset shorthand, aspect-ratio; add fallbacks). Commit with git -c user.email=hagan@cih.com commit, Conventional Commits, one per step.",
+  "key_patterns": "css/styles.css (869 lines) uses :root vars --bg --border --text --muted --accent --clay, light/dark via prefers-color-scheme and data-theme; tests use element ids and getByRole name substring matching; palette doc design/palette.md; iPhone look reference ios/App/FocusApp/Theme/Theme.swift (read only).",
+  "relevant_files": [
+    "css/styles.css",
+    "index.html",
+    "design/palette.md",
+    "tests/browser/tabs.spec.js",
+    "tests/browser/work-screen.spec.js",
+    "tests/browser/home-screen.spec.js",
+    "js/screens/work.js",
+    "js/screens/home.js",
+    "tests/manual-checks.md",
+    "PROGRESS.md"
+  ],
+  "directory_structure": "css/, js/screens, js/logic, tests/browser, tests/logic, design/, ios/ (separate, read only), scripts/"
+}

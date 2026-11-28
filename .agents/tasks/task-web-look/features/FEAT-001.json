@@ -1,0 +1,26 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Baseline plus design tokens, button hierarchy, Today screen restyle (3 commits). Independent of nothing; do first.",
+  "status": "completed",
+  "steps": [
+    "Run lint, test:logic and a quick browser subset to confirm baseline green; take BEFORE screenshots (phone 390x844, desktop 1280x800) of Today, steps preview, Work, Plan, Me, Calendar, Talk, Settings with /tmp/shots/shoot.mjs (extend it) into design/look-screens/before-*.png at 1x or modest size.",
+    "Commit 1: top of css/styles.css gets commented tokens in :root (colors incl. dark-mode overrides, radii, spacing scale, font sizes, shadow, tap-target size); replace hard-coded values with tokens; accent-color on radios/checkboxes from tokens; write design/look.md (tokens, how to change accent/radius/spacing, 2-3 example swaps, screenshots list). Keep palette family, check AA for any new pair.",
+    "Commit 2: button hierarchy: primary (filled, one per screen), secondary (outlined/soft), quiet (link style for Back to home, Hide this note, Show all my steps). Apply via CSS classes added in index.html/screens (not js/screens/chat.js); keep ids, text, aria, DOM order.",
+    "Commit 3: Today screen: assignment box + two buttons as main area; kind/class/step count as lighter Options card (visible, grouped; <details> only if no test needs edits); soft welcome card; shared textarea/input styling; calmer hint and status text.",
+    "Run lint, logic tests and relevant browser specs (home, home-screen, paste-and-split, own-steps, focus-intake, step-count, tabs) before each commit."
+  ],
+  "acceptance_criteria": [
+    "Tokens at top of css/styles.css and design/look.md exist",
+    "One primary button per screen is visually distinct from secondary and quiet",
+    "Today screen is visibly shorter/grouped with unchanged ids and passing tests",
+    "lint and logic tests pass"
+  ],
+  "verification": [
+    "npm run lint",
+    "npm run test:logic",
+    "npx playwright test --trace off for the specs listed (isolated runner if Chromium crashes)"
+  ],
+  "blocked_reason": null,
+  "findings": "3 commits (tokens + look.md; quiet/primary buttons; Today Options card). Rule 6 test requires Done to look identical to the other four answers, so no primary on the Work screen. Today DOM order unchanged (options card wraps class..ai-box; buttons still after it), so buttons sit below the card; page ~7% shorter (1326 to 1237px at phone width). Lint, 511 logic tests, and isolated phone runs of home, home-screen, plan-tab, calendar, profile, me-export, looking-back, lookup, paste-and-split, own-steps, focus-intake, step-count, tabs, work-screen all pass. Desktop project not run. Screenshots in design/look-screens (before-/after-, phone and desktop; fullPage shots show the fixed tab bar mid-page, a capture artifact). Calendar and Settings screenshots not taken."
+}
