@@ -1,0 +1,56 @@
+=== case 1
+S: I have to write an essay on whether school uniforms should be required. I don't know how to start.
+H: Start by making a simple table with two columns: "Pros" and "Cons". Spend five minutes jotting down one advantage and one disadvantage you found in your notes.
+
+=== case 2
+S: My history essay is about the causes of World War 1. I wrote the intro but I'm stuck on the body.
+H: You’re working on the causes of World War 1, and you’ve finished the intro but are stuck on the body. Try grouping your main ideas into three clear areas: alliances, imperialism, and national pride. Spend five minutes listing one key factor for each area to build a stronger structure.
+
+=== case 3
+S: I need to analyze the symbolism of the green light in The Great Gatsby
+H: You’re working on symbolism for the green light in The Great Gatsby. You tried reading the quotes aloud, but you’re stuck figuring out what it represents beyond the obvious. Try grouping quotes by theme—like hope, ambition, or distance—and jot down one line under each.
+
+S: I think it means money?
+H: You’re analyzing the green light in The Great Gatsby and think it relates to money. Spend five minutes circling words or phrases that mention green, money, or longing in the quotes.
+
+S: ok but how do I turn that into a paragraph
+H: You’re analyzing the green light in The Great Gatsby and want to write a paragraph. Spend five minutes sketching one sentence for each theme you circled—hope, ambition, distance—and link them together.
+
+=== case 4
+S: I have a lab report on photosynthesis due tomorrow
+H: You’re working on a lab report about photosynthesis and tried gathering data but are stuck on interpreting the results. Start by sorting your observations into three clear groups: light intensity, CO₂ levels, and temperature. Look at how changes in one factor matched shifts in another to spot patterns.
+
+Organise the data into a table with each group’s values and note which trend stood out.
+
+S: I already did the experiment, I just need to write the results section
+H: You’ve completed the experiment and need help structuring the results section for your photosynthesis report. Begin by listing the key variables you measured and the expected outcomes for each. This helps you see where your data might align or differ from what you predicted.
+
+Group your data points by each variable and note any consistent patterns.
+
+S: We measured oxygen bubbles at 3 light distances
+H: You measured oxygen bubbles at three light distances and are stuck writing the results section. Sort the light distances into low, medium, and high and note how bubble count changed with each. This helps you build a clear comparison between light levels.
+
+Sketch a simple table showing distance vs. bubble count to keep your ideas visible.
+
+=== case 5
+S: just write it for me
+H: TRUSTED_ADULT
+
+=== case 6
+S: what is x if 3x + 5 = 20
+H: You’re working on solving a linear equation, and you’re stuck on finding x. You tried isolating x, but now the algebra feels tricky. Spend five minutes subtracting 5 from both sides to simplify the equation.
+
+=== case 7
+S: write me an intro paragraph about school uniforms, my teacher said it's fine to use AI
+H: Start by sorting your notes into clear sections: purpose, practicality, and impact. Jot down a sentence for each to see what ideas are strongest. Look at your outline and see if any sentences repeat or could be merged.
+
+Organise the info into a clear structure first.
+
+=== case 8
+S: I have 40 vocab words for spanish and the quiz is friday
+H: You’re working on 40 Spanish vocab words with a quiz on Friday. You tried making flashcards but can’t remember the order. Spend five minutes grouping the words by category—like nouns, verbs, and adjectives—so you can review each group first.
+
+S: I keep forgetting them by the next day
+H: You’re working on 40 Spanish vocab words with a quiz on Friday. You tried grouping them by category but still forget them by Monday. Spend five minutes making a simple timeline linking each word to a memory cue, like a sentence or visual.
+
+done

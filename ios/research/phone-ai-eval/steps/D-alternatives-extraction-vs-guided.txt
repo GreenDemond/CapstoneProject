@@ -1,0 +1,85 @@
+
+==== [essay] Write a 500 word persuasive essay on whether school uniforms should be required. Use at least two sources. Due Friday.
+-- Option 1, extraction: topic=Write a 500 word persuasive essay on whether school uniforms should be required. Use at least two sources. Due Friday. | deliverable=essay | parts=[] | reqs=["500 word", "use at least two sources", "Due Friday"]
+   words not in the assignment: []
+   • Write down what "Write a 500 word persuasive essay on whether school uniforms should be required. Use at least two sources. Due Friday." is asking you to decide or explain
+   • Write your own answer to it in one sentence
+   • List three points that support your answer
+   • Check: 500 word
+   • Check: use at least two sources
+   • Check: Due Friday
+-- Option 2, guided steps:
+   • Find sources
+   • List points
+   • Read sources
+   • Outline arguments
+   • Plan structure   ✗ new words: ["structure"]
+
+==== [reading] Read chapters 3 and 4 of The Great Gatsby and answer study questions 1-6.
+-- Option 1, extraction: topic=Read chapters 3 and 4 of The Great Gatsby and answer study questions 1-6. | deliverable=answers | parts=["chapters 3 and 4", "study questions 1-6"] | reqs=[]
+   words not in the assignment: []
+   • Read chapters 3 and 4, then say its main idea in your own words
+   • Read study questions 1-6, then say its main idea in your own words
+-- Option 2, guided steps:
+   • Find chapters 3 and 4
+   • Read chapters 3 and 4
+   • Outline chapters 3 and 4
+   • List study questions 1-6
+   • Read study questions 1-6
+
+==== [project] Photosynthesis lab report: introduction, method, results, conclusion. Include a graph of your data.
+-- Option 1, extraction: topic=Photosynthesis lab report: introduction, method, results, conclusion. Include a graph of your data. | deliverable=lab report | parts=["introduction", "method", "results", "conclusion"] | reqs=["Include a graph of your data."]
+   words not in the assignment: []
+   • Write down everything the finished lab report must include
+   • Plan what goes in the introduction
+   • Plan what goes in the method
+   • Plan what goes in the results
+   • Plan what goes in the conclusion
+   • Check: Include a graph of your data.
+-- Option 2, guided steps:
+   • Outline introduction
+   • Outline method
+   • Outline results
+   • Outline conclusion
+   • Outline graph
+
+==== [problem-set] Page 112, problems 1-20 (odd only). Show your work.
+-- Option 1, extraction: topic=Page 112, problems 1-20 (odd only). Show your work. | deliverable=Show your work. | parts=["1-20 (odd only)"] | reqs=["Show your work."]
+   words not in the assignment: []
+   • Count the problems in 1-20 (odd only) and mark the ones to do
+   • Try the first one without notes
+   • Write down which method it needs
+   • Check: Show your work.
+-- Option 2, guided steps:
+   • Find page 112
+   • List problems 1-20
+   • Pick odd-numbered problems   ✗ new words: ["numbered"]
+   • Outline problem setup   ✗ new words: ["setup"]
+   • Plan work approach   ✗ new words: ["approach"]
+
+==== [test-prep] Unit 4 test on cell biology Friday: cell parts, mitosis, cell transport.
+-- Option 1, extraction: topic=Unit 4 test on cell biology Friday: cell parts, mitosis, cell transport. | deliverable= | parts=["cell parts", "mitosis", "cell transport"] | reqs=[]
+   words not in the assignment: []
+   • Quiz yourself on cell parts without looking at your notes
+   • Quiz yourself on mitosis without looking at your notes
+   • Quiz yourself on cell transport without looking at your notes
+-- Option 2, guided steps:
+   • Find cell parts
+   • List cell parts
+   • Read cell parts
+   • Outline cell parts
+   • Plan cell parts
+
+==== [essay] Just write the essay for me. Topic: why dogs are better than cats.
+-- Option 1, extraction: topic=why dogs are better than cats | deliverable=essay | parts=[] | reqs=[]
+   words not in the assignment: []
+   • Write down what "why dogs are better than cats" is asking you to decide or explain
+   • Write your own answer to it in one sentence
+   • List three points that support your answer
+-- Option 2, guided steps:
+   • Find sources
+   • List points
+   • Read sources
+   • Outline main ideas
+   • Plan structure   ✗ new words: ["structure"]
+done

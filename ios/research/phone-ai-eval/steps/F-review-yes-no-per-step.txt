@@ -1,0 +1,29 @@
+
+==== Write a 500 word persuasive essay on whether school uniforms should be required. Use at least two sources.
+   1. Do the essay  [start:false small:false two:false]  → What exactly will you do here, and how will you know it is done?
+   2. Find two sources about uniforms  [start:true small:true two:false]
+   3. Write the intro and the conclusion  [start:false small:false two:true]  → This looks like two steps. Split it?
+   4. Check spelling  [start:false small:false two:false]  → What exactly will you do here, and how will you know it is done?
+   → Is this the order you want to do them in?
+   → The assignment says "500 word". Which step covers that?
+
+==== Photosynthesis lab report: introduction, method, results, conclusion. Include a graph of your data.
+   1. Write the introduction  [start:true small:true two:false]
+   2. Write the method  [start:false small:false two:false]  → What exactly will you do here, and how will you know it is done?
+   3. Write the results  [start:false small:false two:false]  → What exactly will you do here, and how will you know it is done?
+   4. Write the conclusion  [start:false small:false two:false]  → What exactly will you do here, and how will you know it is done?
+   → Is this the order you want to do them in?
+   → The assignment says "Include a graph of your data". Which step covers that?
+
+==== Read chapters 3 and 4 of The Great Gatsby and answer study questions 1-6.
+   1. Answer questions 1-6  [start:false small:false two:true]  → This looks like two steps. Split it?
+   2. Read chapter 3  [start:false small:false two:false]  → What exactly will you do here, and how will you know it is done?
+   3. Read chapter 4  [start:false small:false two:false]  → What exactly will you do here, and how will you know it is done?
+   → Is this the order you want to do them in?
+
+==== Unit 4 test on cell biology Friday: cell parts, mitosis, cell transport.
+   1. Study  [start:false small:false two:false]  → What exactly will you do here, and how will you know it is done?
+   2. Quiz myself on mitosis  [start:true small:true two:false]
+   3. Make flashcards for cell parts and review cell transport  [start:true small:true two:true]  → This looks like two steps. Split it?
+   → Is this the order you want to do them in?
+done

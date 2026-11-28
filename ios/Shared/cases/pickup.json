@@ -1,0 +1,36 @@
+{
+  "note": "times are local; 'now' is 2026-11-20 15:00 local time",
+  "function": "pickupLine(savedOn, now)",
+  "cases": [
+    {
+      "name": "same day, earlier",
+      "savedOnLocal": "Fri Nov 20 2026 08:00:00",
+      "savedOnValid": true,
+      "result": "Pick up where you left off."
+    },
+    {
+      "name": "yesterday late",
+      "savedOnLocal": "Thu Nov 19 2026 23:00:00",
+      "savedOnValid": true,
+      "result": "Welcome back. Pick up where you left off."
+    },
+    {
+      "name": "a week ago",
+      "savedOnLocal": "Fri Nov 13 2026 15:00:00",
+      "savedOnValid": true,
+      "result": "Welcome back. Pick up where you left off."
+    },
+    {
+      "name": "not a date",
+      "savedOnLocal": "Invalid Date",
+      "savedOnValid": false,
+      "result": "Pick up where you left off."
+    },
+    {
+      "name": "missing",
+      "savedOnLocal": null,
+      "savedOnValid": false,
+      "result": "Pick up where you left off."
+    }
+  ]
+}

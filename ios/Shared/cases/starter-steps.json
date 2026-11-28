@@ -1,0 +1,270 @@
+{
+  "function": "starterStepsFor(kindId, pastedText); withTwoMinuteStart(result)",
+  "cases": [
+    {
+      "kind": "essay",
+      "pastedText": "",
+      "result": [
+        "Read the instructions again and write down what the question asks",
+        "Write your main answer in one sentence",
+        "List three points that support it",
+        "Write a rough first paragraph. It doesn't have to be perfect",
+        "Read it once and fix one thing",
+        "Check that your answer does what the question asks",
+        "Write a short conclusion"
+      ],
+      "withTwoMinuteStart": [
+        "Set a timer for 2 minutes and start the first step. You can stop when the timer ends.",
+        "Read the instructions again and write down what the question asks",
+        "Write your main answer in one sentence",
+        "List three points that support it",
+        "Write a rough first paragraph. It doesn't have to be perfect",
+        "Read it once and fix one thing",
+        "Check that your answer does what the question asks",
+        "Write a short conclusion"
+      ]
+    },
+    {
+      "kind": "essay",
+      "pastedText": "Write an essay.",
+      "result": [
+        "Read the instructions again and write down what the question asks",
+        "Write your main answer in one sentence",
+        "List three points that support it",
+        "Write a rough first paragraph. It doesn't have to be perfect",
+        "Read it once and fix one thing",
+        "Check that your answer does what the question asks",
+        "Write a short conclusion"
+      ],
+      "withTwoMinuteStart": [
+        "Set a timer for 2 minutes and start the first step. You can stop when the timer ends.",
+        "Read the instructions again and write down what the question asks",
+        "Write your main answer in one sentence",
+        "List three points that support it",
+        "Write a rough first paragraph. It doesn't have to be perfect",
+        "Read it once and fix one thing",
+        "Check that your answer does what the question asks",
+        "Write a short conclusion"
+      ]
+    },
+    {
+      "kind": "essay",
+      "pastedText": "1. Read chapter 3\n2. Answer questions 1-5\n- Bring the book",
+      "result": [
+        "Read chapter 3",
+        "Answer questions 1-5",
+        "Bring the book",
+        "Read the instructions again and write down what the question asks",
+        "Write your main answer in one sentence",
+        "List three points that support it",
+        "Write a rough first paragraph. It doesn't have to be perfect",
+        "Read it once and fix one thing",
+        "Check that your answer does what the question asks",
+        "Write a short conclusion"
+      ],
+      "withTwoMinuteStart": [
+        "Set a timer for 2 minutes and start the first step. You can stop when the timer ends.",
+        "Read chapter 3",
+        "Answer questions 1-5",
+        "Bring the book",
+        "Read the instructions again and write down what the question asks",
+        "Write your main answer in one sentence",
+        "List three points that support it",
+        "Write a rough first paragraph. It doesn't have to be perfect",
+        "Read it once and fix one thing",
+        "Check that your answer does what the question asks",
+        "Write a short conclusion"
+      ]
+    },
+    {
+      "kind": "essay",
+      "pastedText": "* one\n* one\nplain line",
+      "result": [
+        "one",
+        "one",
+        "Read the instructions again and write down what the question asks",
+        "Write your main answer in one sentence",
+        "List three points that support it",
+        "Write a rough first paragraph. It doesn't have to be perfect",
+        "Read it once and fix one thing",
+        "Check that your answer does what the question asks",
+        "Write a short conclusion"
+      ],
+      "withTwoMinuteStart": [
+        "Set a timer for 2 minutes and start the first step. You can stop when the timer ends.",
+        "one",
+        "one",
+        "Read the instructions again and write down what the question asks",
+        "Write your main answer in one sentence",
+        "List three points that support it",
+        "Write a rough first paragraph. It doesn't have to be perfect",
+        "Read it once and fix one thing",
+        "Check that your answer does what the question asks",
+        "Write a short conclusion"
+      ]
+    },
+    {
+      "kind": "essay",
+      "pastedText": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n1. yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+      "result": [
+        "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+        "Read the instructions again and write down what the question asks",
+        "Write your main answer in one sentence",
+        "List three points that support it",
+        "Write a rough first paragraph. It doesn't have to be perfect",
+        "Read it once and fix one thing",
+        "Check that your answer does what the question asks",
+        "Write a short conclusion"
+      ],
+      "withTwoMinuteStart": [
+        "Set a timer for 2 minutes and start the first step. You can stop when the timer ends.",
+        "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+        "Read the instructions again and write down what the question asks",
+        "Write your main answer in one sentence",
+        "List three points that support it",
+        "Write a rough first paragraph. It doesn't have to be perfect",
+        "Read it once and fix one thing",
+        "Check that your answer does what the question asks",
+        "Write a short conclusion"
+      ]
+    },
+    {
+      "kind": "reading",
+      "pastedText": "",
+      "result": [
+        "Skim the headings and the first and last paragraphs",
+        "Write the question you want this reading to answer",
+        "Read the first section",
+        "Stop and say its main idea in your own words",
+        "Write one thing you want to remember",
+        "Read the next section",
+        "Write down a question you still have"
+      ],
+      "withTwoMinuteStart": [
+        "Set a timer for 2 minutes and start the first step. You can stop when the timer ends.",
+        "Skim the headings and the first and last paragraphs",
+        "Write the question you want this reading to answer",
+        "Read the first section",
+        "Stop and say its main idea in your own words",
+        "Write one thing you want to remember",
+        "Read the next section",
+        "Write down a question you still have"
+      ]
+    },
+    {
+      "kind": "problem-set",
+      "pastedText": "",
+      "result": [
+        "Read the instructions and count how many problems there are",
+        "Try the first problem without notes",
+        "Write down which rule or method it needs",
+        "Check your notes or book for a worked example",
+        "Do the rest, and mark the ones you are stuck on",
+        "Check one answer by working it a second way",
+        "Write down what you would ask a teacher"
+      ],
+      "withTwoMinuteStart": [
+        "Set a timer for 2 minutes and start the first step. You can stop when the timer ends.",
+        "Read the instructions and count how many problems there are",
+        "Try the first problem without notes",
+        "Write down which rule or method it needs",
+        "Check your notes or book for a worked example",
+        "Do the rest, and mark the ones you are stuck on",
+        "Check one answer by working it a second way",
+        "Write down what you would ask a teacher"
+      ]
+    },
+    {
+      "kind": "project",
+      "pastedText": "",
+      "result": [
+        "Write down what the finished project must include",
+        "List the parts that need separate work",
+        "Pick the smallest part and do it first",
+        "Set a date for a first rough version",
+        "Write what you will do in the next session",
+        "Ask someone to look at your plan",
+        "Note what could go wrong and how to handle it"
+      ],
+      "withTwoMinuteStart": [
+        "Set a timer for 2 minutes and start the first step. You can stop when the timer ends.",
+        "Write down what the finished project must include",
+        "List the parts that need separate work",
+        "Pick the smallest part and do it first",
+        "Set a date for a first rough version",
+        "Write what you will do in the next session",
+        "Ask someone to look at your plan",
+        "Note what could go wrong and how to handle it"
+      ]
+    },
+    {
+      "kind": "test-prep",
+      "pastedText": "",
+      "result": [
+        "Write down the topics the test covers",
+        "Look at your notes for the first topic",
+        "Quiz yourself on it without looking",
+        "Check your answers against your notes",
+        "Schedule the next short review",
+        "List the terms you could not explain",
+        "Review those terms once more"
+      ],
+      "withTwoMinuteStart": [
+        "Set a timer for 2 minutes and start the first step. You can stop when the timer ends.",
+        "Write down the topics the test covers",
+        "Look at your notes for the first topic",
+        "Quiz yourself on it without looking",
+        "Check your answers against your notes",
+        "Schedule the next short review",
+        "List the terms you could not explain",
+        "Review those terms once more"
+      ]
+    },
+    {
+      "kind": "other",
+      "pastedText": "",
+      "result": [
+        "Read the instructions again and write down what they ask for",
+        "Do the first small part of the work",
+        "Pick the next part",
+        "Check your work against the instructions",
+        "Note what is still left to do",
+        "Write down what you are unsure about",
+        "Take a short break before the next part"
+      ],
+      "withTwoMinuteStart": [
+        "Set a timer for 2 minutes and start the first step. You can stop when the timer ends.",
+        "Read the instructions again and write down what they ask for",
+        "Do the first small part of the work",
+        "Pick the next part",
+        "Check your work against the instructions",
+        "Note what is still left to do",
+        "Write down what you are unsure about",
+        "Take a short break before the next part"
+      ]
+    },
+    {
+      "kind": "not-a-kind",
+      "pastedText": "",
+      "result": [
+        "Read the instructions again and write down what they ask for",
+        "Do the first small part of the work",
+        "Pick the next part",
+        "Check your work against the instructions",
+        "Note what is still left to do",
+        "Write down what you are unsure about",
+        "Take a short break before the next part"
+      ],
+      "withTwoMinuteStart": [
+        "Set a timer for 2 minutes and start the first step. You can stop when the timer ends.",
+        "Read the instructions again and write down what they ask for",
+        "Do the first small part of the work",
+        "Pick the next part",
+        "Check your work against the instructions",
+        "Note what is still left to do",
+        "Write down what you are unsure about",
+        "Take a short break before the next part"
+      ]
+    }
+  ]
+}

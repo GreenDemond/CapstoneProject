@@ -38,8 +38,11 @@ Do these before anything else:
 | `04-design-and-gamification-ideas.md` | Designing a screen or a reward |
 | `05-adhd-ideation.md` | Looking for ideas, or checking whether an idea was already judged a trap |
 | `03-recommendations-and-plan.md` | You need the way to test the tool with students. Its build plan is out of date; `DECISIONS.md` wins |
+| `ROADMAP.md` | Planning what to build next in the web app. A plan, not a set of decisions; `DECISIONS.md` wins |
 
 Do not state a research finding from memory. If a claim is not in these files, say it is unverified.
+
+**The `ios/` folder is a separate, self-contained project** (the iPhone app, "Ben's Steps", built as of 2026-11-21) with its own `AGENTS.md`, `DECISIONS.md`, `PROGRESS.md` and task list. When working on the web app, do not read rules from it or change anything in it. When working on the iPhone app, open `ios/` as the project and follow its files instead of these; start with `ios/PROGRESS.md`. If a request does not say which app, ask which one before changing anything.
 
 ## Rules that always apply
 

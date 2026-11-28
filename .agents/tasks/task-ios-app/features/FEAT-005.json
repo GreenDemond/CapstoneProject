@@ -1,0 +1,22 @@
+{
+  "id": "FEAT-005",
+  "type": "chore",
+  "description": "T16 whole-app review, T17a/T17b prep: run a Checker-style review of the whole app, fix findings, update ios/checks/device-checks.md, write numbered parent-only steps (ios/PARENT-STEPS.md) for signing, installing on Ben's iPhone 15 Pro Max, TestFlight, and a list of open questions for parent and Ben (D6, D7, D8 confirmation, Apple Intelligence on, backup exclusion, name, wording). Update PROGRESS.md and TASKS.md; produce the AGENTS.md section 12 report in PROGRESS.md.",
+  "status": "completed",
+  "steps": [
+    "Review every Swift file against AGENTS.md rules and design",
+    "Write ios/PARENT-STEPS.md",
+    "Mark T17a/T17b as waiting on parent with exact reason",
+    "Final PROGRESS.md rewrite"
+  ],
+  "acceptance_criteria": [
+    "Build and tests pass",
+    "PARENT-STEPS.md exists with numbered steps and no credentials",
+    "Open questions listed in plain words with recommendations"
+  ],
+  "verification": [
+    "ios/checks/check.sh"
+  ],
+  "blocked_reason": null,
+  "findings": "check.sh exit 3 (no simulator), 247 tests pass. Self-review found no code defects. Starter step 'Check what you missed' is in Shared/ (not edited), flagged. No independent Checker/Advisor. T14/T17a/T17b marked waiting on parent."
+}

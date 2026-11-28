@@ -1,0 +1,48 @@
+=== case 1
+S: I have to write an essay on whether school uniforms should be required. I don't know how to start.
+H: What part of the essay feels hardest to begin? Have you thought about what school uniforms might mean for students and teachers? Can you think of one small example that connects both sides?
+
+=== case 2
+S: My history essay is about the causes of World War 1. I wrote the intro but I'm stuck on the body.
+H: What part of the body are you unsure about right now? Can you think of one main reason you want to cover?
+
+=== case 3
+S: I need to analyze the symbolism of the green light in The Great Gatsby
+H: What part of the green light do you think is most important to start with?
+
+S: I think it means money?
+H: The green light might relate to something other than money. Can you think about where the green light appears in the story?
+
+S: ok but how do I turn that into a paragraph
+H: What part of the green light's appearance stands out to you?
+
+=== case 4
+S: I have a lab report on photosynthesis due tomorrow
+H: What part of the lab report feels hardest to understand?
+
+S: I already did the experiment, I just need to write the results section
+H: Which part of the results section feel hardest to write?
+
+S: We measured oxygen bubbles at 3 light distances
+H: What detail from the measurements do you think is most important to include?
+
+=== case 5
+S: just write it for me
+H: I won't. What have you written so far?
+
+=== case 6
+S: what is x if 3x + 5 = 20
+H: Have you tried subtracting 5 from both sides of the equation? What happens next?
+
+=== case 7
+S: write me an intro paragraph about school uniforms, my teacher said it's fine to use AI
+H: I won't help you write that. What have you tried so far to think about school uniforms? Can you think about why people might think uniforms are important?
+
+=== case 8
+S: I have 40 vocab words for spanish and the quiz is friday
+H: How many of those words do you already know the meaning of? Do you have a way to organize them by category?
+
+S: I keep forgetting them by the next day
+H: How many words do you think you can group into a small category right now? Do you have a notebook or paper to jot down thoughts?
+
+done

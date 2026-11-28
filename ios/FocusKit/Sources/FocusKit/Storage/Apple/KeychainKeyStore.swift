@@ -1,0 +1,75 @@
+#if canImport(Security)
+  import Foundation
+  import Security
+
+  /// Keeps each key in the iOS Keychain as a generic password, one item per account. A key is
+  /// readable only while the phone is unlocked, stays on this phone (never in a backup, never
+  /// synced to iCloud), and is sent nowhere except in the Authorization header to the address the
+  /// student entered for that service.
+  /// Declarations verified in the SDK's Security headers (SecItem.h); see
+  /// design/slices/AI-own-service-and-backup.md.
+  public final class KeychainKeyStore: KeyStore, @unchecked Sendable {
+    private let service: String
+
+    public init(service: String = "com.craighagan.benssteps.own-ai") {
+      self.service = service
+    }
+
+    private func match(_ account: String) -> [String: Any] {
+      [
+        kSecClass as String: kSecClassGenericPassword,
+        kSecAttrService as String: service,
+        kSecAttrAccount as String: account,
+        kSecAttrSynchronizable as String: false,
+      ]
+    }
+
+    public func hasKey(account: String) -> Bool {
+      var query = match(account)
+      query[kSecMatchLimit as String] = kSecMatchLimitOne
+      return SecItemCopyMatching(query as CFDictionary, nil) == errSecSuccess
+    }
+
+    public func read(account: String) -> String? {
+      var query = match(account)
+      query[kSecMatchLimit as String] = kSecMatchLimitOne
+      query[kSecReturnData as String] = true
+      var found: CFTypeRef?
+      guard SecItemCopyMatching(query as CFDictionary, &found) == errSecSuccess,
+        let data = found as? Data
+      else { return nil }
+      return String(data: data, encoding: .utf8)
+    }
+
+    public func save(_ key: String, account: String) -> Bool {
+      let data = Data(key.utf8)
+      let update: [String: Any] = [
+        kSecValueData as String: data,
+        kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+      ]
+      let status = SecItemUpdate(match(account) as CFDictionary, update as CFDictionary)
+      if status == errSecSuccess { return true }
+      guard status == errSecItemNotFound else { return false }
+      var add = match(account)
+      add[kSecValueData as String] = data
+      add[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+      return SecItemAdd(add as CFDictionary, nil) == errSecSuccess
+    }
+
+    public func delete(account: String) -> Bool {
+      let status = SecItemDelete(match(account) as CFDictionary)
+      return status == errSecSuccess || status == errSecItemNotFound
+    }
+
+    /// Every item under this app's Keychain service, whatever its account.
+    public func deleteAll() -> Bool {
+      let everything: [String: Any] = [
+        kSecClass as String: kSecClassGenericPassword,
+        kSecAttrService as String: service,
+        kSecAttrSynchronizable as String: kSecAttrSynchronizableAny,
+      ]
+      let status = SecItemDelete(everything as CFDictionary)
+      return status == errSecSuccess || status == errSecItemNotFound
+    }
+  }
+#endif
