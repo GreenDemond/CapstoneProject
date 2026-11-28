@@ -1075,3 +1075,44 @@ body.has-tabs input, body.has-tabs textarea, body.has-tabs select, body.has-tabs
   #work-body .current-step { font-size: 1.75rem; }
   #work-body .answers { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
+
+/* Other screens (design/look.md): steps preview, editor, calendar, Plan, Me, Talk, Settings.
+   Same cards, spacing and faint dividers as Today and Work. */
+#steps-screen #steps {
+  margin: var(--space-2) 0;
+  padding: var(--space-2) var(--space-3) var(--space-2) 2.4rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+#steps-screen #steps li {
+  padding: 0.5rem 0;
+  margin: 0;
+  border-bottom: 1px solid var(--line);
+}
+#steps-screen #steps li:last-child { border-bottom: 0; }
+#steps-screen .steps-check,
+.step-tips {
+  background: var(--soft);
+  border-radius: var(--radius);
+}
+.step-tips { padding: 0 var(--space-3); border: 1px solid var(--line); }
+
+.editor-row { border-bottom: 1px solid var(--line); padding-bottom: var(--space-2); }
+.editor-row:last-child { border-bottom: 0; }
+
+#calendar-screen .view-bar button { min-width: 4.5rem; }
+.cal-list li { box-shadow: var(--shadow); }
+#calendar-screen h3 { margin-top: var(--space-4); }
+
+.me-links { margin: var(--space-2) 0; }
+.me-links li { margin: 0; }
+.me-links button { width: 100%; text-align: left; margin: var(--space-1) 0; }
+#me-body, #settings-screen { line-height: 1.5; }
+
+.looking-list li, .plan-steps li { padding: 0.25rem 0; }
+.looking-list, .plan-steps { margin: var(--space-2) 0; }
+
+.chat-msg { box-shadow: var(--shadow); }
+.chat-you { background: var(--soft); }
