@@ -135,8 +135,8 @@ export async function askService(service, key, text, kind, signal) {
 export const SEARCH_NEEDS_CREDIT = "Web search needs credit on your OpenRouter account. Untick Search the web to keep chatting for free.";
 
 // One chat turn. Returns { text, cutOff }, { empty, cutOff }, { trustedAdult }, { aborted }, or { error }.
-export async function askChat(service, key, { kind, guide, length, messages, search = false }, signal) {
-  const result = await postWithThinking(service, key, buildChatRequest({ model: service.model, kind, guide, length, messages, search }), signal);
+export async function askChat(service, key, { kind, guide, length, messages, search = false, step = "" }, signal) {
+  const result = await postWithThinking(service, key, buildChatRequest({ model: service.model, kind, guide, length, messages, search, step }), signal);
   if (result.failed === "aborted") {
     return { aborted: true };
   }

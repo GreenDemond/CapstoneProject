@@ -39,6 +39,7 @@ Apple's on-device AI, voice input, haptics, the Apple calendar sheet (a download
 | W11 | Class name on an assignment; return visit: weekly look-back card, set-aside thoughts, all-done line | M0b, C5, NextStepView | Built, browser tests not run. See `design/class-and-return-w11.md` |
 | W12 | During a step: Done when: line, "Did that time feel about right?" with a length suggestion, Drifted uses the better split | WorkView, BlockLength | Built, browser tests not run. See `design/during-a-step-w12.md` |
 | W13 | Plan tab shows all steps and saved thoughts; tabs leave a sub-view; Load a copy keeps the welcome note hidden | PlanListView | Built, browser tests not run. See `design/plan-tab-w13.md` |
+| W14 | Talk about this step (Talking about, Clear) and Use these as my steps from a chat reply | TalkView talkingAbout, talkUseSteps | Built, browser tests not run. See `design/talk-about-step-w14.md` |
 | D1 | Deploy script that builds the clean folder; parent runs it | n/a | Built. See `design/deploy.md` |
 
 Each slice follows `AGENTS.md`: design note, review, tests first, build, review, `npm run check`, one commit, `PROGRESS.md`.

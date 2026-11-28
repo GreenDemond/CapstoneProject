@@ -411,3 +411,16 @@ Not yet done by anyone: the browser tests for this slice (`tests/browser/tabs.sp
 6. Me, then My profile, type in a goal box, press the **Talk** tab: the profile stays and warns about unsaved changes. Press Save, then the tab: it works.
 7. Press **Hide this note** on Today. Me, Save a copy, then Load a copy with that file and confirm. After the reload the note is not back. Same on a device that never hid the note.
 8. Phone width and keyboard only: Tab reaches **Take this out** and the two answers; nothing overlaps the bottom tabs.
+
+## Talk about this step, and Use these as my steps (web, W14)
+
+Needs an AI helper set up in Settings.
+
+1. Write two steps ("I'll write my steps"), press **Start**, then **Stuck**. **Talk about this step** shows. With no AI helper set up it does not show.
+2. Press it. The Talk screen shows "Talking about: <your step>" with **Clear**, and the privacy line ends "This step is sent along with your messages."
+3. Pick a kind and send a message. Reply arrives. **Back to my step** returns to the Stuck view with the same hints, and focus is on **Talk about this step**.
+4. Open the chat again, press **Clear**: the "Talking about" line goes, a new chat starts, and the old one is in My chats. Reopen the old chat from My chats: no "Talking about" line.
+5. Ask the AI "give me steps for this". When it replies with a numbered list of things to do, **Use these as my steps** shows under the chat. Press it: the home screen opens on "Write my steps" with each line in its own box. Change one, press **Done writing**, then **Start**.
+6. When the reply is a list of facts (for example "1. The theme is loss"), or one line, no button shows. Send another message: the button goes.
+7. Press **I'll write my steps** and type something, go to Talk (not from a step) and get a list reply: **Use these as my steps** says "You're already writing steps on the home screen..." and your typing is untouched.
+8. Phone width and keyboard only: Tab reaches **Clear**, **Use these as my steps** and **Back to my step**.

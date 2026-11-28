@@ -176,6 +176,11 @@ writeButton.addEventListener("click", () => {
     document.getElementById("editor-heading").focus(); // already writing: keep what was typed
     return;
   }
+  openOwnEditor([""]);
+});
+
+// Opens the editor on the paste screen with startDraft in its boxes. Nothing is saved until Start.
+function openOwnEditor(startDraft) {
   const start = ownStart(textBox.value);
   allSteps = [];
   shownCount = 0;
@@ -187,7 +192,7 @@ writeButton.addEventListener("click", () => {
   openStepsPreview();
   openFreshEditor(
     start.text,
-    start.draft,
+    startDraft,
     (edited) => {
       allSteps = edited;
       renderSteps(edited.length);
@@ -200,7 +205,21 @@ writeButton.addEventListener("click", () => {
       writeButton.focus();
     },
   );
-});
+}
+
+// "Use these as my steps" from the chat (design/talk-about-step-w14.md): the lines open in the editor for the
+// student to change. Returns false, changing nothing, when the student is already writing steps.
+export function openStepsFromChat(steps, kind) {
+  if (freshEditorOpen() || !Array.isArray(steps) || steps.length === 0) {
+    return false;
+  }
+  if (chosenKind === null && kind) {
+    chooseKind(kind);
+  }
+  showScreen("home");
+  openOwnEditor(steps);
+  return true;
+}
 
 document.getElementById("two-minute").addEventListener("click", () => {
   allSteps = withTwoMinuteStart(allSteps);

@@ -1,6 +1,6 @@
 // Entry point (design/review-plan-2026-11-17.md, step 12). Each screen lives in its own file under
 // js/screens/; this file only starts them. Pure logic lives in js/logic/.
-import { initHome, refreshHome, getChosenKind, getClassLabel, afterWorkClosed } from "./screens/home.js";
+import { initHome, refreshHome, getChosenKind, getClassLabel, afterWorkClosed, openStepsFromChat } from "./screens/home.js";
 import { initWork } from "./screens/work.js";
 import { initIntake } from "./screens/intake.js";
 import { initProfile } from "./screens/profile.js";
@@ -17,7 +17,7 @@ initProfile();
 initLooking();
 initHome();
 initCalendar({ onThoughtsChanged: refreshHome });
-initChat({ getChosenKind });
+initChat({ getChosenKind, useSteps: openStepsFromChat });
 refreshHome();
 initMe();
 initLookup();

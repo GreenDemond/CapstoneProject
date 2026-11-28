@@ -15,6 +15,8 @@ import { el, button, announce } from "../ui/dom.js";
 import { showScreen, setStepsPreviewOpen } from "../ui/screens.js";
 import { LOOKUP_ENABLED } from "../lookup-config.js";
 import { openLookup } from "./lookup.js";
+import { openChatAboutStep, chatReady } from "./chat.js";
+import { TALK_ABOUT_BUTTON } from "../logic/chat-steps.js";
 
 let onClose = () => {}; // set by initWork: runs after the work screen closes
 let getClassLabel = () => ""; // set by initWork: the optional class name typed on the paste screen
@@ -603,6 +605,11 @@ function renderWork(focusStep = true) {
     }
     if (showAskPerson(Math.min(hintsShown + 1, STUCK_HINTS.length), STUCK_HINTS.length)) {
       workBody.append(askSection(step));
+    }
+    if (chatReady()) {
+      const talkButton = button(TALK_ABOUT_BUTTON, () => openChatAboutStep(step.text, work.kind ?? getChosenKind(), () => workBody.querySelector("#stuck-talk")?.focus()));
+      talkButton.id = "stuck-talk";
+      workBody.append(talkButton);
     }
     if (LOOKUP_ENABLED) {
       const lookButton = button("Look it up", () => openLookup({

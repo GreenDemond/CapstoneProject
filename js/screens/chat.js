@@ -9,6 +9,7 @@ import { readKey } from "../keystore.js";
 import { askChat } from "../ai-direct.js";
 import { MAX_MESSAGE, OPENING_QUESTION, TRUSTED_ADULT_LINE } from "../logic/chat.js";
 import { MAX_CHATS, titleFor, isPlaceholderTitle, upsertChat, deleteChat, trimItems, sentMessages, savableItems, hasContent, dateLabel, isToday } from "../logic/chat-store.js";
+import { aboutLine, cleanStep, stepsFromChat, TALK_CLEAR, TALK_USE_STEPS, TALK_BACK_TO_STEP, STEP_SENT_LINE, EDITOR_BUSY_LINE } from "../logic/chat-steps.js";
 import { isOpenRouter } from "../logic/settings-flow.js";
 import { guideFor, lengthFor } from "../logic/chat-settings.js";
 import { getAiSettings, openSettingsScreen, setChosenHelper } from "../settings.js";
@@ -19,7 +20,9 @@ import { where } from "../ui/helpers.js";
 const chatBody = document.getElementById("chat-body");
 const chatHeading = document.getElementById("chat-heading");
 let getChosenKind = () => null; // set by initChat: the kind picked on the home screen
-let chat = null; // the open chat: { id, kind, title, startedOn, usedOn, items: [{ who, text, flagged? }] }
+let useStepsInEditor = () => false; // set by initChat: opens the steps editor with these lines; false when it cannot
+let chatBack = null; // set when the chat was opened from a step: { focusAfter } for "Back to my step"
+let chat = null; // the open chat: { id, kind, title, startedOn, usedOn, items: [{ who, text, flagged? }], step? } (step is in memory only, never saved)
 let chatView = "chat"; // "chat" or "list" (My chats)
 let chatCarry = null; // an older chat offered above a fresh one
 let chatBusy = false;
@@ -29,7 +32,7 @@ let chatRun = 0; // changes on New chat, Back, and Stop, so a late reply is igno
 let chatAbort = null;
 let effortLineShown = false; // the thinking-setting line is shown once per visit to the chat
 let chatSearch = false; // "Search the web" ticked; off at the start of every chat and when a chat is opened
-let chatParts = null; // the pieces on screen: log, input, send, stop, status, carry
+let chatParts = null; // the pieces on screen: log, input, send, stop, status, carry, useHolder
 
 function currentChatHelper() {
   const { services, chosenId } = getAiSettings();
@@ -99,6 +102,7 @@ function showChat() {
 }
 
 function openChatScreen() {
+  chatBack = null;
   resetChat();
   chatSearch = false;
   effortLineShown = false;
@@ -116,14 +120,49 @@ function openChatScreen() {
   chatHeading.focus();
 }
 
-function closeChat() {
+function leaveChat() {
   resetChat();
   chat = null;
   chatCarry = null;
   chatParts = null;
+  chatBack = null;
   chatBody.replaceChildren();
+}
+
+function closeChat() {
+  leaveChat();
   showScreen("home");
   document.getElementById("open-chat").focus();
+}
+
+// "Back to my step": the work screen is still as the student left it.
+function backToStep() {
+  const back = chatBack;
+  leaveChat();
+  showScreen("work");
+  back?.focusAfter?.();
+}
+
+// True when a chat about a step can be opened: an AI helper is ready.
+export function chatReady() {
+  return currentChatHelper() !== null;
+}
+
+// Opens a fresh chat about one step (the Stuck view's "Talk about this step"). The step is kept in memory
+// for this chat only. focusAfter runs when the student comes back.
+export function openChatAboutStep(stepText, kind, focusAfter) {
+  resetChat();
+  chatSearch = false;
+  effortLineShown = false;
+  const [recent] = loadChats();
+  showScreen("chat");
+  chatView = "chat";
+  chat = blankChat(kind ?? defaultChatKind());
+  chat.step = cleanStep(stepText);
+  chatCarry = recent ?? null;
+  chatBack = { focusAfter };
+  showChat();
+  chatHeading.focus();
 }
 
 function openSavedChat(id) {
@@ -138,6 +177,11 @@ function openSavedChat(id) {
   chatView = "chat";
   showChat();
   chatParts.input.focus();
+}
+
+// "Clear": the chat is no longer about the step. A new chat starts; the old one stays in My chats.
+function clearStep() {
+  newChat();
 }
 
 function newChat() {
@@ -190,6 +234,28 @@ function addChatBubble(who, text, extra = {}) {
     chatParts.log.append(chatBubble(who, text));
     chatParts.log.scrollTop = chatParts.log.scrollHeight;
   }
+  refreshUseSteps();
+}
+
+// "Use these as my steps" shows under the chat only while the newest message is an AI reply that is a list.
+function refreshUseSteps() {
+  if (!chatParts) {
+    return;
+  }
+  chatParts.useHolder.replaceChildren();
+  const steps = stepsFromChat(chat.items);
+  if (steps.length === 0) {
+    return;
+  }
+  const use = button(TALK_USE_STEPS, () => {
+    if (!useStepsInEditor(steps, chat.kind)) {
+      setChatStatus(EDITOR_BUSY_LINE);
+      return;
+    }
+    leaveChat(); // the home screen is showing, with the editor open
+  });
+  use.id = "chat-use-steps";
+  chatParts.useHolder.append(use);
 }
 
 // The links under a reply. Titles are text. An address is used only if it is https, and the link opens
@@ -263,6 +329,16 @@ function buildChat() {
   carry.hidden = chatCarry === null || chat.items.length > 0;
   chatBody.append(carry);
 
+  const about = aboutLine(chat.step);
+  if (about !== null) {
+    const row = el("p", undefined, { class: "chat-about", id: "chat-about" });
+    row.append(el("span", about), " ");
+    const clear = button(TALK_CLEAR, clearStep, "small");
+    clear.setAttribute("aria-label", `${TALK_CLEAR}: stop talking about this step`);
+    row.append(clear);
+    chatBody.append(row);
+  }
+
   const kinds = el("div", undefined, { class: "kind-buttons", role: "group", "aria-label": "What kind of work is this?" });
   const chatKindButtons = [];
   for (const kind of KINDS) {
@@ -283,7 +359,7 @@ function buildChat() {
   const drawHelper = () => {
     const current = currentChatHelper();
     if (goesTo && current) {
-      goesTo.textContent = `Your chats are saved on this device only. Your messages go to the AI service ${where(current)}. Don't type your name or anything private. Replies come from an AI, not a person.`;
+      goesTo.textContent = `Your chats are saved on this device only. Your messages go to the AI service ${where(current)}. Don't type your name or anything private. Replies come from an AI, not a person.${chat.step ? ` ${STEP_SENT_LINE}` : ""}`;
     }
     searchBox.replaceChildren();
     searchBox.hidden = !(current && isOpenRouter(current.url));
@@ -339,16 +415,21 @@ function buildChat() {
   if (!helper) {
     actions.append(button("Open Settings", () => openSettingsScreen()));
   }
+  if (chatBack) {
+    actions.append(button(TALK_BACK_TO_STEP, backToStep));
+  }
   actions.append(button("Back to home", closeChat));
   const status = el("p", "", { id: "chat-status", class: "message", role: "status", "aria-live": "polite" });
-  chatBody.append(log, input, actions, status);
-  chatParts = { log, input, send, stop, status, carry };
+  const useHolder = el("div");
+  chatBody.append(log, useHolder, input, actions, status);
+  chatParts = { log, input, send, stop, status, carry, useHolder };
 
   log.append(chatBubble("ai", OPENING_QUESTION));
   for (const item of chat.items) {
     log.append(item.who === "sources" ? sourcesNode(item.links) : chatBubble(item.who, item.text));
   }
   log.scrollTop = log.scrollHeight;
+  refreshUseSteps();
   if (chat.giveBack) {
     input.value = chat.giveBack;
     delete chat.giveBack;
@@ -452,6 +533,7 @@ function takeBackLastMessage() {
   chatParts.log.lastElementChild?.remove();
   giveBackWords(last.text);
   clearTitleIfNoMessage();
+  refreshUseSteps();
 }
 
 function stopChat() {
@@ -511,7 +593,7 @@ async function sendChat() {
 
   // Settings are read now, so a change made in Settings applies to the next message.
   const mine = loadChatSettings();
-  const result = await askChat(service, key, { kind: chat.kind, guide: guideFor(mine, chat.kind), length: lengthFor(mine, chat.kind), messages: sentMessages(chat.items), search }, chatAbort.signal);
+  const result = await askChat(service, key, { kind: chat.kind, guide: guideFor(mine, chat.kind), length: lengthFor(mine, chat.kind), messages: sentMessages(chat.items), search, step: chat.step ?? "" }, chatAbort.signal);
   clearTimeout(slowNote);
   if (run !== chatRun) {
     return; // Stop, New chat, or Back was pressed: ignore a late answer
@@ -551,7 +633,8 @@ async function sendChat() {
 }
 
 // getChosenKind says which kind of work the student picked on the home screen.
-export function initChat({ getChosenKind: getter }) {
+export function initChat({ getChosenKind: getter, useSteps }) {
   getChosenKind = getter;
+  useStepsInEditor = useSteps ?? useStepsInEditor;
   document.getElementById("open-chat").addEventListener("click", openChatScreen);
 }
