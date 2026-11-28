@@ -3,6 +3,9 @@ node_modules/
 playwright-report/
 test-results/
 
+# Built by npm run build:site; what gets deployed
+site/
+
 # Secrets never go in the repository (DECISIONS.md T11)
 .env
 .dev.vars

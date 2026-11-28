@@ -35,7 +35,7 @@ Apple's on-device AI, voice input, haptics, the Apple calendar sheet (a download
 | W7 | Me screens, Export and Import, Delete everything | MeView | |
 | W8 | Look it up (Wikipedia) if its API allows browser requests (unverified) | LookUpView | |
 | W9 | Put it on my calendar as a `.ics` download | CAL1 | |
-| D1 | Deploy script that builds the clean folder; parent runs it | n/a | |
+| D1 | Deploy script that builds the clean folder; parent runs it | n/a | Built. See `design/deploy.md` |
 
 Each slice follows `AGENTS.md`: design note, review, tests first, build, review, `npm run check`, one commit, `PROGRESS.md`.
 
