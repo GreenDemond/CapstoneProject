@@ -55,11 +55,13 @@ How to add one: date, who asked, one-line request in their words, then rule conf
 - **Next:** design note covering which events (one per assignment, or one per step), who creates and deletes them, and what happens when the student edits or deletes the assignment. Verify the EventKit declarations in the SDK first (`AGENTS.md` section 7), ask for the narrowest calendar permission that allows adding events, and add a one-line D8 note that the app itself sends nothing (the phone's own account sync may).
 
 ### F4. Make the app work well on older phones (iPhone 11 and similar)
-- **Asked by:** parent. "make the ui sane for someone with an older phone", test on an iPhone 11 simulator
-- **Status:** in progress. An iPhone 11 simulator on iOS 26.5 exists ("iPhone 11 (beta check)"), and the full UI suite was started on it. Results to be recorded in `PROGRESS.md`.
-- **Facts so far:** the app's minimum is iOS 26.0 (`DECISIONS.md` D12). iOS 26 runs on the iPhone 11 and newer. Apple Intelligence does not, so those phones run without on-device AI and the app falls back to fixed lines and starter steps (D5).
-- **Note:** an older iOS than 26 is not possible without losing the on-device AI and on-device voice typing; see the assessment on 2026-11-26 in the conversation notes.
-- **Next:** read the UI test results on the iPhone 11 simulator; fix layout or no-AI wording problems found; decide whether to lower the iOS target.
+- **Asked by:** parent. "make the ui sane for someone with an older phone", test on an iPhone 11 simulator, then "can we build for an older iOS and just reduce features?"
+- **Status:** measured 2026-11-26; nothing changed in the app yet.
+- **iPhone 11 simulator, iOS 26.5, full UI suite:** 70 tests, 68 passed, 1 skipped (iPad-only test, expected), 1 failed: `NudgeUITests testAskMeAQuestionReplacesTheFixedLineAndNoKeepsTheStep`. It fails again alone on the iPhone 11 and passes on the iPhone 15 Pro Max, so it is specific to the smaller screen. The recorded video ends on the work screen, so the test's tap on "Ask me a question" most likely landed on Start steps in the fixed bottom bar. Cause is probably the good-step card (R6) pushing the control below the fold on a shorter phone. From one video frame, not confirmed. The same pattern was already fixed in two StepReview tests with a scroll or "Got it".
+- **Older iOS compile test (throwaway copy, iOS 17 target, 26 SDK):** only two files fail: `AI/Apple/AppleLanguageModel.swift` (Apple's on-device model) and `Voice/Apple/AppleSpeechInput.swift` (on-device dictation). Everything else in FocusKit compiled. The build stopped at that package, so errors in the app target itself are not yet known.
+- **What lowering the target would cost:** the on-device AI and microphone dictation switch off on older iOS. The app already runs without AI (D5). Read-aloud uses older speech and should be unaffected (unverified). A new iOS floor is a D12 change, doubles the test matrix, and needs a pass on an iOS 17 or 18 simulator (an iOS 18.2 simulator runtime is installed).
+- **Facts:** the iPhone 11 can run iOS 26, so a lower target helps only students whose phones are not updated. The app's `@Observable` state needs iOS 17 at minimum.
+- **Next:** ask which phones and iOS versions the classmates have before deciding. Separately, fix the Nudge test and check small-screen layouts (the card should not hide the step controls at default text size).
 
 ### F5. Apple's cloud AI as an option
 - **Asked by:** parent. "will apple's cloud ai work?"
