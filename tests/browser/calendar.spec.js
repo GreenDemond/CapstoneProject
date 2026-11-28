@@ -173,8 +173,10 @@ test("a trip over several days shows on each day and in the trips list", async (
   await openCalendar(page);
   await page.getByLabel("What is it?").fill("Trip to Lisbon");
   await page.getByLabel("Type").selectOption("event");
-  await page.getByLabel("From date").fill(dayFromNow(1));
-  await page.getByLabel("To date").fill(dayFromNow(3));
+  // Keep all three days inside this month, because the month grid shows one month.
+  const start = new Date().getDate() > 25 ? -3 : 1;
+  await page.getByLabel("From date").fill(dayFromNow(start));
+  await page.getByLabel("To date").fill(dayFromNow(start + 2));
   await page.getByRole("button", { name: "Add to my calendar" }).click();
   await expect(page.locator("ul.cal-list").getByText("Trip to Lisbon")).toBeVisible();
 
