@@ -1065,6 +1065,9 @@ body.has-tabs input, body.has-tabs textarea, body.has-tabs select, body.has-tabs
   min-height: 3.5rem;
   font-size: 1.15rem;
 }
+/* Five buttons in two columns: the last one takes the full row so no cell is left empty.
+   Same look and height as the others (rule 6). */
+#work-body .answers button:last-child { grid-column: 1 / -1; }
 
 #work-body .timer-toggle {
   margin-top: var(--space-3);
@@ -1078,7 +1081,9 @@ body.has-tabs input, body.has-tabs textarea, body.has-tabs select, body.has-tabs
 
 @media (min-width: 48rem) {
   #work-body .current-step { font-size: 1.75rem; }
-  #work-body .answers { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  #work-body .answers { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  #work-body .answers button { font-size: 1rem; padding-left: 0.25rem; padding-right: 0.25rem; }
+  #work-body .answers button:last-child { grid-column: auto; }
 }
 
 /* Other screens (design/look.md): steps preview, editor, calendar, Plan, Me, Talk, Settings.

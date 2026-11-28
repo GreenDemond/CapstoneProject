@@ -43,6 +43,22 @@ Checked pairs (ratio): text on surface 14.0, text on soft 12.1, muted on soft 5.
 - **Secondary** (outlined, the default): other choices.
 - **Quiet** (looks like a link): leaving or hiding, such as Back to home, Hide this note, Show all my steps. Class `quiet`.
 
+## Work screen
+
+The step sits in a large card under a thin progress bar ("Step 2 of 5" above it). The five answer buttons (Done, Still working, Stuck, Drifted, Later) are identical in colour, border, size and tap height (rule 6). On a phone they are two columns with Later across the full row (no empty cell); at 48rem and wider they are one row of five. The countdown, Show all my steps, Park a thought and Back to home stay quiet underneath.
+
+## Wide screens, tablet, motion, dark mode
+
+- Desktop and tablet: one centred column, `--width` (40rem) on a phone and `--width-wide` (46rem) from 48rem up. Checked at 768 and 1280.
+- `prefers-reduced-motion`: transitions, animations and the completion check are turned off.
+- Dark mode already follows the device (and the app's light/dark switch); the new cards use the same variables, so nothing extra was needed. Not screenshotted.
+
+## Layout tests
+
+`tests/browser/look-layout.spec.js` checks boxes and computed styles, not pixels: nothing you press overlaps on Work at 360 and 1280; the five answer buttons are identical and at least 44px tall; the tab bar does not cover the last control on Today, Plan and Me; no sideways scrolling on Today, Work and Plan at 360.
+
 ## Screenshots
 
 `design/look-screens/before-*.png` is how it looked before this change (phone 390 wide and desktop 1280 wide: Today, filled Today, steps, Work, returning Today, Plan, Talk, Me). `after-*.png` is the same set after.
+
+`final-phone-*.png` (390 wide) and `final-desktop-*.png` (1280 wide) show Today, Work at step 2 of 5 with the progress bar part full, Plan, Talk, Me and Settings. Talk is shown with no AI helper added (the empty state); a Talk screen with a helper was not captured. The confetti at the top of some shots is the celebration caught mid-fall.
