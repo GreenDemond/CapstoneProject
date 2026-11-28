@@ -6,7 +6,7 @@ import { el, button, announce } from "./ui/dom.js";
 import { keyStoreAvailable, readKey, saveKey, deleteKey } from "./keystore.js";
 import { keyHint } from "./logic/ai-key.js";
 import { plainHttpWarning } from "./logic/ai-services.js";
-import { encryptKeys, decryptKeys } from "./logic/helpers-crypto.js";
+import { encryptKeys, decryptKeys, isSafeKey } from "./logic/helpers-crypto.js";
 import {
   MAX_FILE_BYTES,
   MIN_PASSPHRASE,
@@ -14,6 +14,7 @@ import {
   WRONG_PASSPHRASE,
   helpersFileName,
   buildHelpersFile,
+  cleanHelperList,
   keysByRef,
   checkPassphrase,
   parseHelpersFile,
@@ -189,7 +190,8 @@ async function makeFile(pass, pass2) {
       plainKeys = keysByRef(services, byId);
       count = plainKeys.size;
       if (count > 0) {
-        block = await encryptKeys(globalThis.crypto.subtle, (bytes) => globalThis.crypto.getRandomValues(bytes), passphrase, plainKeys);
+        const tied = cleanHelperList(buildHelpersFile(services).helpers);
+        block = await encryptKeys(globalThis.crypto.subtle, (bytes) => globalThis.crypto.getRandomValues(bytes), passphrase, plainKeys, tied);
       }
     }
     const file = buildHelpersFile(services, { keysBlock: block, nowIso: new Date().toISOString() });
@@ -352,6 +354,11 @@ function drawPassphrase() {
   without.id = "hf-without-keys";
   const cancel = button("No, keep what I have", () => backHome("Nothing was changed.", "#hf-load"), "");
   cancel.id = "hf-no";
+  const sendTo = el("ul", "", { class: "looking-list", id: "hf-send-to" });
+  for (const helper of state.parsed.helpers) {
+    sendTo.append(el("li", helper.url));
+  }
+  host.append(el("p", "These keys will be sent to:", { class: "hint" }), sendTo);
   host.append(el("label", "Passphrase for the keys", { for: "hf-open-pass" }), box, el("div", "", { class: "actions" }));
   host.lastChild.append(open, without, cancel);
 }
@@ -365,7 +372,7 @@ async function openKeys(box) {
   host.querySelectorAll("button").forEach((b) => (b.disabled = true));
   let result;
   try {
-    result = await decryptKeys(globalThis.crypto.subtle, typed, state.parsed.keys);
+    result = await decryptKeys(globalThis.crypto.subtle, typed, state.parsed.keys, state.parsed.helpers);
   } catch {
     result = { ok: false };
   }
@@ -405,11 +412,11 @@ async function finish(keys, extraNote) {
   let failedKeys = 0;
   for (const { ref, service } of plan.toAdd) {
     const key = keys.get(ref);
-    if (typeof key === "string" && key !== "" && (await saveKey(service.id, key))) {
+    if (isSafeKey(key) && (await saveKey(service.id, key))) {
       savedIds.push(service.id);
       added.push({ ...service, keyReady: true, keyHint: keyHint(key) });
     } else {
-      if (typeof key === "string" && key !== "") {
+      if (key !== undefined) {
         failedKeys += 1;
       }
       added.push(service);

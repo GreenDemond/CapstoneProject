@@ -47,6 +47,27 @@ function own(object, name) {
   return object !== null && typeof object === "object" && !Array.isArray(object) && Object.hasOwn(object, name) ? object[name] : undefined;
 }
 
+// What the locked keys are tied to: each helper's ref, address and model, in ref order. It is passed to
+// AES-GCM as additional data, so a file whose address or model was edited after locking cannot be opened.
+// Returns null when the list is not usable.
+export function bindingFor(helpers) {
+  if (!Array.isArray(helpers) || helpers.length === 0) {
+    return null;
+  }
+  const rows = helpers.map((h) => [own(h, "ref"), own(h, "url"), own(h, "model")]);
+  if (rows.some((row) => row.some((part) => typeof part !== "string"))) {
+    return null;
+  }
+  rows.sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
+  return encoder.encode(JSON.stringify(rows));
+}
+
+// A key that is safe to save and send as a header: printable ASCII only, no spaces, no newlines or
+// other control characters, within the length limit.
+export function isSafeKey(key) {
+  return typeof key === "string" && key !== "" && key.length <= MAX_KEY_LENGTH && /^[\x21-\x7e]+$/.test(key);
+}
+
 async function deriveKey(subtle, passphrase, salt, iterations) {
   const material = await subtle.importKey("raw", encoder.encode(passphrase.normalize("NFKC")), "PBKDF2", false, ["deriveKey"]);
   return subtle.deriveKey(
@@ -59,16 +80,18 @@ async function deriveKey(subtle, passphrase, salt, iterations) {
 }
 
 // Locks keys. `keysByRef` is a Map of ref -> plain key. Returns the block to put in the file:
-// { kdf, iterations, salt, iv, data } with salt, iv and data in base64.
-export async function encryptKeys(subtle, getRandomValues, passphrase, keysByRef, iterations = PBKDF2_ITERATIONS) {
+// { kdf, iterations, salt, iv, data } with salt, iv and data in base64. `helpers` is the list that goes
+// in the same file ({ ref, url, model } each); the keys are tied to it. Throws if it is not usable.
+export async function encryptKeys(subtle, getRandomValues, passphrase, keysByRef, helpers, iterations = PBKDF2_ITERATIONS) {
+  const additionalData = bindingFor(helpers);
+  if (additionalData === null) {
+    throw new Error("helpers needed");
+  }
   const salt = getRandomValues(new Uint8Array(SALT_BYTES));
   const iv = getRandomValues(new Uint8Array(IV_BYTES));
-  const plain = {};
-  for (const [ref, key] of keysByRef) {
-    plain[ref] = key;
-  }
+  const plain = Object.fromEntries(keysByRef);
   const aesKey = await deriveKey(subtle, passphrase, salt, iterations);
-  const sealed = await subtle.encrypt({ name: "AES-GCM", iv }, aesKey, encoder.encode(JSON.stringify(plain)));
+  const sealed = await subtle.encrypt({ name: "AES-GCM", iv, additionalData }, aesKey, encoder.encode(JSON.stringify(plain)));
   return { kdf: KDF_NAME, iterations, salt: toBase64(salt), iv: toBase64(iv), data: toBase64(new Uint8Array(sealed)) };
 }
 
@@ -96,22 +119,27 @@ export function cleanKeysBlock(block) {
 
 // Unlocks keys. Returns { ok: true, keys: Map ref -> key } or { ok: false }. A wrong passphrase, a
 // changed file and a damaged block all give the same { ok: false }, so nothing is revealed about why.
-export async function decryptKeys(subtle, passphrase, block) {
+export async function decryptKeys(subtle, passphrase, block, helpers) {
   const clean = cleanKeysBlock(block);
-  if (clean === null || typeof passphrase !== "string" || passphrase === "") {
+  const additionalData = bindingFor(helpers);
+  if (clean === null || additionalData === null || typeof passphrase !== "string" || passphrase === "") {
     return { ok: false };
   }
   try {
     const aesKey = await deriveKey(subtle, passphrase, fromBase64(clean.salt), clean.iterations);
-    const opened = await subtle.decrypt({ name: "AES-GCM", iv: fromBase64(clean.iv) }, aesKey, fromBase64(clean.data));
+    const opened = await subtle.decrypt({ name: "AES-GCM", iv: fromBase64(clean.iv), additionalData }, aesKey, fromBase64(clean.data));
     const parsed = JSON.parse(decoder.decode(opened));
     const keys = new Map();
     if (parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)) {
       for (const ref of Object.keys(parsed)) {
         const key = own(parsed, ref);
-        if (/^h\d{1,2}$/.test(ref) && typeof key === "string" && key !== "" && key.length <= MAX_KEY_LENGTH) {
-          keys.set(ref, key);
+        if (!/^h\d{1,2}$/.test(ref)) {
+          continue;
         }
+        if (!isSafeKey(key)) {
+          return { ok: false }; // a key with a newline, space or control character is never used
+        }
+        keys.set(ref, key);
       }
     }
     return { ok: true, keys };

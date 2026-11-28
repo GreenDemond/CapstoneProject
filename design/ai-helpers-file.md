@@ -49,12 +49,12 @@ Bad-file lines (all end "Nothing was changed."): "That file isn't an AI helpers 
 }
 ```
 
-`keys` is absent in the safe file. `data` is AES-GCM of JSON `{ "h1": "<key>" }`. A helper with no key is not in it. No ids, no key hints, no chats, no profile, no work.
+`keys` is absent in the safe file. `data` is AES-GCM of JSON `{ "h1": "<key>" }`, with the helpers' refs, addresses and models passed as AES-GCM additional data (see "Keys are tied to the helper list"). A helper with no key is not in it. No ids, no key hints, no chats, no profile, no work.
 
 ## Code
 
 - `js/logic/ai-helpers-file.js` (pure): `FILE_APP`, `FILE_VERSION`, `MAX_FILE_BYTES` (200000), `MIN_PASSPHRASE` (10), `helpersFileName(nowIso)`, `refFor(index)`, `keysByRef(services, keysById)` (Map helper id to plain key, gives Map ref to key), `buildHelpersFile(services, { keysBlock, nowIso })`, `checkPassphrase(pass, again)` gives `{ ok, passphrase }` or `{ ok:false, reason }`, `parseHelpersFile(text)` gives `{ ok:true, helpers:[{ref,label,url,model,effort}], keys: block|null, dropped }` or `{ ok:false, reason }`, `planLoad(existing, helpers)` gives `{ toAdd:[{ref, service}], skipped:[{label, reason}], list }`, plus the exported message constants (`WRONG_PASSPHRASE` etc).
-- `js/logic/helpers-crypto.js` (pure; SubtleCrypto passed in): `encryptKeys(subtle, getRandomValues, passphrase, keysByRefMap, iterations?)` gives the `keys` block; `decryptKeys(subtle, passphrase, block)` gives `{ ok:true, keys: Map ref to key }` or `{ ok:false }`; `cleanKeysBlock(block)`; `PBKDF2_ITERATIONS` (600000).
+- `js/logic/helpers-crypto.js` (pure; SubtleCrypto passed in): `encryptKeys(subtle, getRandomValues, passphrase, keysByRefMap, iterations?)` gives the `keys` block; `decryptKeys(subtle, passphrase, block, helpers)` gives `{ ok:true, keys: Map ref to key }` or `{ ok:false }`; `cleanKeysBlock(block)`; `PBKDF2_ITERATIONS` (600000).
 - The screen (FEAT-002) reads keys with `readKey`, applies `planLoad`'s `list` only after Yes, saves each opened key with `saveKey` (key first, then list, as `commit()` does), and never touches `chosenId`.
 
 ## Strict loading
@@ -74,7 +74,23 @@ Bad-file lines (all end "Nothing was changed."): "That file isn't an AI helpers 
 | `user:password` in an address | Refused by `parseAddress`, via `chatAddress` |
 | Plain http | Allowed as for hand-made helpers (T6 decision); the preview shows the address |
 | Wrong passphrase or changed file | One generic failure; AES-GCM detects changes |
+| Address, model or ref edited after locking, to send a key elsewhere | Helper list is AES-GCM additional data; unlock fails (tested in logic and browser) |
+| Key with a newline or control character | Refused at unlock and again before saving |
 | File replaces or edits current helpers | Never: loading only adds; existing objects and the chosen helper are untouched (tested) |
+
+## Keys are tied to the helper list
+
+The ref, address and model of every helper in the file are written in a fixed order (sorted by ref) and given to AES-GCM as additional data, on lock and on unlock. If anyone edits an address, model or ref, or adds or removes a helper, after the file was locked, unlocking fails with the same plain "That passphrase didn't open the keys." and no helper is added with keys. (Labels and effort are not tied; they cannot redirect a key.) Saving and loading both use the same cleaned values (`cleanHelperList` and `parseHelpersFile`). A file with a damaged entry that the reader drops will not unlock its keys either; the student can still add the helpers without keys.
+
+The passphrase screen repeats "These keys will be sent to:" with each address, as text.
+
+## Key checks after unlocking
+
+A decrypted key must be printable ASCII with no spaces, newlines or other control characters, and at most 300 characters (`isSafeKey`). One bad key makes the whole unlock fail with the same plain message. `finish` checks again before `saveKey`. Keys typed by hand already go through `checkKey` (no whitespace); the request code puts the key only in an `Authorization` header, and a key with a newline would be refused there by the browser as well.
+
+## The wait after three wrong tries
+
+The 5 second wait is only a slow-down for casual retries. It resets if the student leaves, reloads or picks the file again, so it is not protection. The real protection is the 600,000-round PBKDF2 and a good passphrase. The screen does not call it a lockout.
 
 ## Why PBKDF2 at 600,000 rounds
 

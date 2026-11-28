@@ -110,6 +110,11 @@ function cleanHelper(entry, index) {
   };
 }
 
+// Cleans a list of helpers the way loading does, so saving and loading tie the keys to the same text.
+export function cleanHelperList(list) {
+  return (Array.isArray(list) ? list : []).slice(0, MAX_SERVICES).map(cleanHelper).filter((h) => h !== null);
+}
+
 // Reads a file's text. Returns { ok: false, reason } (reason ends "Nothing was changed.") or
 // { ok: true, helpers: [{ ref, label, url, model, effort }], keys: null | { kdf, iterations, salt, iv, data }, dropped }.
 // `dropped` counts entries that were damaged or had an address the app can't use.

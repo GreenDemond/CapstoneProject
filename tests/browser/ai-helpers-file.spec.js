@@ -115,6 +115,48 @@ test("Wrong passphrase: plain message, then the helpers can be added without key
   expect(ai.services[0].keyHint).toBe("");
 });
 
+test("Three wrong passphrases add a short wait, then the box opens again", async ({ page }) => {
+  await standIn(page);
+  await openSettings(page);
+  await addOther(page);
+  const saved = await saveFile(page, { passphrase: PASS });
+  await wipe(page);
+  await openSettings(page);
+  await loadFile(page, saved.text);
+  await page.getByRole("button", { name: "Yes, add these helpers" }).click();
+  await expect(page.locator("#hf-send-to")).toContainText(`${HOST}/v1/chat/completions`);
+  for (let i = 0; i < 3; i += 1) {
+    await page.getByLabel("Passphrase for the keys").fill(`not the passphrase ${i}`);
+    await page.getByRole("button", { name: "Open the keys and add the helpers" }).click();
+    await expect(page.locator("#hf-status")).toContainText("That passphrase didn't open the keys.");
+  }
+  await expect(page.locator("#hf-status")).toContainText("Wait a few seconds");
+  await expect(page.locator("#hf-open")).toBeDisabled();
+  await expect(page.locator(".helper-card")).toHaveCount(0);
+  await expect(page.locator("#hf-open")).toBeEnabled({ timeout: 10000 });
+  await page.getByLabel("Passphrase for the keys").fill(PASS);
+  await page.getByRole("button", { name: "Open the keys and add the helpers" }).click();
+  await expect(page.locator(".helper-card")).toHaveCount(1);
+});
+
+test("An address edited after locking: the right passphrase still fails and nothing is added", async ({ page }) => {
+  await standIn(page);
+  await openSettings(page);
+  await addOther(page);
+  const saved = await saveFile(page, { passphrase: PASS });
+  const edited = JSON.parse(saved.text);
+  edited.helpers[0].url = "https://evil.example/v1/chat/completions";
+  await wipe(page);
+  await openSettings(page);
+  await loadFile(page, edited);
+  await page.getByRole("button", { name: "Yes, add these helpers" }).click();
+  await page.getByLabel("Passphrase for the keys").fill(PASS);
+  await page.getByRole("button", { name: "Open the keys and add the helpers" }).click();
+  await expect(page.locator("#hf-status")).toHaveText("That passphrase didn't open the keys.");
+  await expect(page.locator(".helper-card")).toHaveCount(0);
+  expect((await stored(page))?.services ?? []).toHaveLength(0);
+});
+
 test("Passphrase rules: too short and not matching are refused, and no file is made", async ({ page }) => {
   await standIn(page);
   await openSettings(page);

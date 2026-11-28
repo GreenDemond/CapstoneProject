@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
-  buildHelpersFile, parseHelpersFile, planLoad, checkPassphrase, helpersFileName, keysByRef, refFor,
+  buildHelpersFile, parseHelpersFile, planLoad, checkPassphrase, cleanHelperList, helpersFileName, keysByRef, refFor,
   FILE_APP, FILE_VERSION, MAX_FILE_BYTES, MIN_PASSPHRASE,
 } from "../../js/logic/ai-helpers-file.js";
 import { encryptKeys, decryptKeys } from "../../js/logic/helpers-crypto.js";
@@ -52,16 +52,27 @@ test("a file without keys never holds a key, a hint, or an id", () => {
 test("round trip with keys and a passphrase; a helper without a key is absent from the keys", async () => {
   const keys = keysByRef(SERVICES, new Map([["svc-2", KEY_B]]));
   assert.deepEqual([...keys], [["h2", KEY_B]]);
-  const block = await encryptKeys(subtle, rng, "a long passphrase", keys, 1000);
+  const tied = cleanHelperList(buildHelpersFile(SERVICES, { nowIso: NOW }).helpers);
+  const block = await encryptKeys(subtle, rng, "a long passphrase", keys, tied, 1000);
   const text = JSON.stringify(buildHelpersFile(SERVICES, { keysBlock: block, nowIso: NOW }));
   for (const bad of [KEY_A, KEY_B, "EFGH5678", "5678"]) {
     assert.ok(!text.includes(bad), bad);
   }
   const parsed = parseOk(text);
   assert.notEqual(parsed.keys, null);
-  const opened = await decryptKeys(subtle, "a long passphrase", parsed.keys);
+  const opened = await decryptKeys(subtle, "a long passphrase", parsed.keys, parsed.helpers);
   assert.deepEqual([...opened.keys], [["h2", KEY_B]]);
-  assert.equal((await decryptKeys(subtle, "not the passphrase", parsed.keys)).ok, false);
+  assert.equal((await decryptKeys(subtle, "not the passphrase", parsed.keys, parsed.helpers)).ok, false);
+});
+
+test("an address edited after locking: the file loads but the keys do not open", async () => {
+  const keys = keysByRef(SERVICES, new Map([["svc-2", KEY_B]]));
+  const tied = cleanHelperList(buildHelpersFile(SERVICES, { nowIso: NOW }).helpers);
+  const block = await encryptKeys(subtle, rng, "a long passphrase", keys, tied, 1000);
+  const file = buildHelpersFile(SERVICES, { keysBlock: block, nowIso: NOW });
+  file.helpers[1].url = "https://evil.example/v1/chat/completions";
+  const parsed = parseOk(JSON.stringify(file));
+  assert.deepEqual(await decryptKeys(subtle, "a long passphrase", parsed.keys, parsed.helpers), { ok: false });
 });
 
 test("passphrase checks use plain words", () => {
