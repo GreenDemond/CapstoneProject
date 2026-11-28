@@ -8,6 +8,8 @@ import { saveWork, loadParked, saveParked, loadRecall, saveRecall, loadMoments, 
 import { confetti } from "../confetti.js";
 import { el, button, announce } from "../ui/dom.js";
 import { showScreen, setStepsPreviewOpen } from "../ui/screens.js";
+import { LOOKUP_ENABLED } from "../lookup-config.js";
+import { openLookup } from "./lookup.js";
 
 let onClose = () => {}; // set by initWork: runs after the work screen closes
 let getChosenKind = () => null; // set by initWork: the kind picked on the home screen
@@ -486,6 +488,15 @@ function renderWork(focusStep = true) {
     }
     if (showAskPerson(Math.min(hintsShown + 1, STUCK_HINTS.length), STUCK_HINTS.length)) {
       workBody.append(askSection(step));
+    }
+    if (LOOKUP_ENABLED) {
+      const lookButton = button("Look it up", () => openLookup({
+        screen: "work",
+        label: "Back to the step",
+        focusAfter: () => workBody.querySelector("#stuck-lookup")?.focus(),
+      }));
+      lookButton.id = "stuck-lookup";
+      workBody.append(lookButton);
     }
     workBody.append(button("Back to the step", () => { mode = "steps"; renderWork(); }));
     focusTarget.focus();

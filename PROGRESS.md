@@ -61,6 +61,7 @@ Nothing. The whole-app review plan (`design/review-plan-2026-11-17.md`) is finis
 
 **Parent**
 
+- **Look it up (web W8) is built but switched off.** To turn it on after confirming the draft T8 row (design/look-it-up-w8.md): change `LOOKUP_ENABLED` to `true` in `js/lookup-config.js`, update the test that checks it is off, run `npm run check`, put the app online again. Its browser tests were not run, and it was never tried against the real Wikipedia.
 - Confirm the draft T8/T6 rows (chat sends the conversation and the guide; resumed chats send older messages again) before classmates use the chat.
 - The native iPhone app: approved and built (see `ios/PROGRESS.md`). Its open parent items (D8, the trusted-adult proposals, TestFlight upload, the answer-giving checks) are listed in `ios/PROGRESS.md` "Waiting on".
 - Hosting (T7). Teacher approval and written parent permission before classmates use the app.

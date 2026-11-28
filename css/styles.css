@@ -781,3 +781,9 @@ button {
 .me-links { list-style: none; padding: 0; }
 .me-links li { margin: 0.4rem 0; }
 #me-file { max-width: 100%; }
+
+/* Look it up (design/look-it-up-w8.md) */
+.lookup-form { display: flex; flex-direction: column; gap: 0.5rem; margin: 0.75rem 0; }
+.lookup-list { list-style: none; padding: 0; }
+.lookup-list li { margin: 1rem 0; }
+.lookup-list h3 { margin: 0 0 0.25rem; }

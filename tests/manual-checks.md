@@ -336,3 +336,17 @@ Not yet done by anyone: the browser tests for this slice were not run.
 6. Add an item with a very long title (or accents and emoji): the event title is complete and not cut.
 7. Press Complete on an item: its calendar button is gone. Reopen it: the button is back.
 8. Refresh, then download again: it still works. Check at phone width and with the keyboard only (the message takes focus). Check no line says "missed" or "behind".
+
+
+## Look it up with Wikipedia (web, W8)
+
+Not yet done by anyone: the browser tests for this slice were not run, and it was never tried against the real Wikipedia. It is switched off (`js/lookup-config.js`). To try it, change `false` to `true` on a private copy only.
+
+1. With the switch off, home and the Stuck sheet have no **Look it up** button.
+2. With it on, press **Look it up** on home. The screen says "Your words go to Wikipedia." before you type anything.
+3. Type "cell division" and press **Search Wikipedia**: up to three results, each with a title, a short plain intro, and **Read it on Wikipedia**. The link opens the Wikipedia page in a new tab. Check the browser's network list: one request, to en.wikipedia.org, with only your words in it.
+4. Press **Search Wikipedia** with an empty box: it asks for words. Try a nonsense string like "qzxqzxqzx": a calm "nothing" message. Switch the internet off and search: "That didn't work."
+5. Tap Search twice fast: one request. Press **Back to home** mid-search: nothing appears later.
+6. Start work, press **Stuck**, then **Look it up**, search, and press **Back to the step**: you are back on the same hint.
+7. Paste an assignment on home first: its text is not in the request. Refresh: nothing from the search is saved.
+8. Check at phone width and with the keyboard only (Enter submits). Check no line says "wrong", "missed" or "score".

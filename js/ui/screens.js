@@ -10,6 +10,7 @@ export const SCREENS = {
   profile: document.getElementById("profile-screen"),
   looking: document.getElementById("looking-screen"),
   me: document.getElementById("me-screen"),
+  lookup: document.getElementById("lookup-screen"),
   work: document.getElementById("work-screen"),
   calendar: document.getElementById("calendar-screen"),
   chat: document.getElementById("chat-screen"),
