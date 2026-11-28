@@ -44,6 +44,10 @@
           <legend>What kind of work is this?</legend>
           <div id="kind-buttons" class="kind-buttons"></div>
         </fieldset>
+        <p id="kind-suggestion" class="hint" aria-live="polite" hidden>
+          <span id="kind-suggestion-text"></span>
+          <button type="button" id="kind-suggestion-use">Use this</button>
+        </p>
 
         <div id="ai-box" hidden>
           <p><label><input type="checkbox" id="ai-use" checked> <span id="ai-use-label">Use an AI helper to suggest steps</span></label></p>
@@ -93,6 +97,11 @@
 
       <section id="steps-screen" hidden aria-labelledby="steps-heading">
         <h2 id="steps-heading" tabindex="-1">Here's a start</h2>
+        <div id="requirements" class="requirements" hidden>
+          <h3 id="requirements-heading">What your assignment says</h3>
+          <p class="hint">Copied from what you pasted. Does each one have a step?</p>
+          <ul id="requirements-list"></ul>
+        </div>
         <ol id="steps" class="steps" tabindex="-1"></ol>
         <p id="showing-note" class="hint"></p>
         <button type="button" id="show-more" hidden>Show more steps</button>

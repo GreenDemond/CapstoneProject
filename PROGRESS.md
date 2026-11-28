@@ -4,6 +4,8 @@ The only memory between sessions. Keep it current; rewrite it, do not let it gro
 
 ## Working
 
+- **Suggestions from the pasted text, no AI (H1)** (`design/heuristics-h1.md`, `js/logic/heuristics.js`). A "Looks like: <kind>" line with a Use this button (never picks for the student), a "What your assignment says" box of requirement lines copied word for word on the steps screen, and a range such as "problems 1-10" becomes chunk steps. Fails closed to the old behavior. Tested with `tests/fixtures/assignments.json` (22 written assignments) plus properties, and 7 browser tests. **Student-visible wording is waiting for the parent's okay** (list in the design note).
+
 - **Project setup.** `npm start` serves the app at http://localhost:3000 (only `index.html`, `js/` and `css/`). `npm run check` runs lint, the logic tests, and the browser tests at phone (360 px) and desktop widths. Code layout: `js/app.js` is a short entry point; one file per screen in `js/screens/`; shared helpers in `js/ui/`; pure logic in `js/logic/`; `js/storage.js` is the only file that touches saved data (DECISIONS T13).
 - **Home screen and saved steps** (`design/home-screen.md`). Opens on the next step with **Start this step** under a row of buttons (Talk it through, My calendar, My profile, How I like to work, Settings). Steps, progress and the kind of work are saved after every tap. A day or more later: "Welcome back. Pick up where you left off." (never a count of days). **Show all my steps**, **New assignment** (replaces the saved steps, said on screen).
 - **Paste screen** (`design/paste-and-split.md`). Paste, pick one of six kinds, see five starter steps ("Showing 5 of 12" when there are more; Show more steps adds the rest). **Start runs exactly the steps on screen.** Two-minute start. Pasted text is cut at 6,000 characters with a message. The steps preview stays when the student visits another screen and comes back.
@@ -19,6 +21,8 @@ The only memory between sessions. Keep it current; rewrite it, do not let it gro
 - **Navigation.** One `showScreen` decides which screen shows, so two screens never show together. Every screen leaves with **Back to home**, at the top (and at the bottom on long screens).
 
 ## In progress
+
+- **Getting the web app as close to the iPhone app as a browser can, for classmates who cannot use TestFlight** (`design/web-parity-plan.md`; slices H1, W1 to W9, D1). Plain web, not required to be a PWA, no offline needed (parent, 2026-11-27). **H1 is built** (see Working). Next: W1, the steps editor.
 
 Nothing. The whole-app review plan (`design/review-plan-2026-11-17.md`) is finished; see its Progress list.
 

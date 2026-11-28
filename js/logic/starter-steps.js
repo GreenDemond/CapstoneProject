@@ -3,10 +3,14 @@
 //
 // Rules:
 // - Numbered or bulleted items in the pasted text come first, in their order.
+// - If there are none and the text names one range ("problems 1-10"), steps for chunks of it come next
+//   (design/heuristics-h1.md).
 // - Then the starter steps for the kind of work the student picked fill the rest.
 // - The student sees five by default; the full list is returned so the screen
 //   can show more on request.
 // - These are process steps only, never answers (DECISIONS P1, rule 1 in AGENTS.md).
+
+import { chunkQuestionSteps } from "./heuristics.js";
 
 export const DEFAULT_STEP_COUNT = 5;
 export const MAX_STEP_LENGTH = 200;
@@ -99,6 +103,9 @@ export function findListItems(text) {
 export function starterStepsFor(kindId, pastedText = "") {
   const starters = STARTER_STEPS[kindId] ?? STARTER_STEPS.other;
   const steps = [...findListItems(pastedText)];
+  if (steps.length === 0) {
+    steps.push(...(chunkQuestionSteps(pastedText, DEFAULT_STEP_COUNT) ?? []));
+  }
   for (const starter of starters) {
     if (!steps.includes(starter)) {
       steps.push(starter);

@@ -229,3 +229,16 @@ Needs your real OpenRouter key.
 6. On the home screen, paste text and press Show my steps with that helper: steps appear; the same line appears once.
 7. A helper that is not OpenRouter has the same choice in Manage, also starting on Low.
 8. PolyStrata: choose None on the PolyStrata helper and send a chat message. It should answer faster. If a line about thinking appears, PolyStrata refused the setting. If replies are no faster and no line appears, PolyStrata ignored it: tell the agent which setting PolyStrata documents.
+
+## Suggestions from your text, no AI (design/heuristics-h1.md)
+
+No key needed. Do this on a phone as well as a computer.
+
+1. Open the app on the home screen. Paste: "Write a five paragraph essay about the causes of the American Revolution. Include a clear thesis. Use at least 3 sources. Due Friday." Under the kind buttons a line appears: "Looks like: Essay." with a button "Use this". No kind is picked yet.
+2. Tap "Use this". Essay is now picked and the line goes away.
+3. Tap Show my steps. Above the steps a box says "What your assignment says" with three lines: "Include a clear thesis.", "Use at least 3 sources.", "Due Friday." and under the heading "Copied from what you pasted. Does each one have a step?"
+4. Go back, clear the box and paste: "Math worksheet: do problems 1-10. Show your work for each one." Pick Problem set. The steps are "Do problems 1 to 2" up to "Do problems 9 to 10", and the box shows "Show your work for each one."
+5. Paste "asdf qwer zxcv". No "Looks like" line. Pick any kind, Show my steps: normal starter steps and no "What your assignment says" box.
+6. Pick a kind first, then paste the essay text. No "Looks like" line appears.
+7. Paste "Do problems 1-30, odd only." The steps are the normal starter steps, with no chunks.
+8. Check the wording is calm: nothing says "you missed", "wrong" or "vague".

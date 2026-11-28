@@ -1,0 +1,186 @@
+[
+  {
+    "name": "five paragraph essay",
+    "text": "Write a five paragraph essay about the causes of the American Revolution. Include a clear thesis. Use at least 3 sources. Due Friday.",
+    "kind": "essay",
+    "requirements": [
+      "Include a clear thesis.",
+      "Use at least 3 sources.",
+      "Due Friday."
+    ]
+  },
+  {
+    "name": "essay with numbered requirements",
+    "text": "Persuasive essay\n1. Pick a topic you care about\n2. Your essay must be 2 pages, double-spaced\n3. Cite two sources in MLA format",
+    "kind": "essay",
+    "requirements": [
+      "Your essay must be 2 pages, double-spaced",
+      "Cite two sources in MLA format"
+    ]
+  },
+  {
+    "name": "reading with page range",
+    "text": "Read chapter 4 in your textbook, pages 88-112. Take notes as you go.",
+    "kind": "reading",
+    "requirements": []
+  },
+  {
+    "name": "reading a novel",
+    "text": "Finish reading the novel by next week and be ready to discuss chapters 9 to 12.",
+    "kind": "reading",
+    "requirements": []
+  },
+  {
+    "name": "problem set with range",
+    "text": "Math worksheet: do problems 1-10. Show your work for each one.",
+    "kind": "problem-set",
+    "requirements": [
+      "Show your work for each one."
+    ],
+    "chunks": {
+      "count": 5,
+      "steps": [
+        "Do problems 1 to 2",
+        "Do problems 3 to 4",
+        "Do problems 5 to 6",
+        "Do problems 7 to 8",
+        "Do problems 9 to 10"
+      ]
+    }
+  },
+  {
+    "name": "questions at the end of a chapter",
+    "text": "Answer questions 1 through 8 at the end of the section.",
+    "kind": null,
+    "requirements": [],
+    "chunks": {
+      "count": 5,
+      "steps": [
+        "Do questions 1 to 2",
+        "Do questions 3 to 4",
+        "Do questions 5 to 6",
+        "Do questions 7 to 8"
+      ]
+    }
+  },
+  {
+    "name": "exercises with a long range",
+    "text": "Solve exercises 1 to 23 on page 56.",
+    "kind": "problem-set",
+    "requirements": [],
+    "chunks": {
+      "count": 5,
+      "steps": [
+        "Do exercises 1 to 5",
+        "Do exercises 6 to 10",
+        "Do exercises 11 to 15",
+        "Do exercises 16 to 20",
+        "Do exercises 21 to 23"
+      ]
+    }
+  },
+  {
+    "name": "range with odd only is not chunked",
+    "text": "Do problems 1-30, odd only.",
+    "kind": "problem-set",
+    "requirements": [],
+    "chunks": null
+  },
+  {
+    "name": "two different ranges are not chunked",
+    "text": "Do problems 1-10 and questions 20-30.",
+    "kind": "problem-set",
+    "requirements": [],
+    "chunks": null
+  },
+  {
+    "name": "test prep",
+    "text": "Unit 3 test on Monday. Study for the test using your notes and the study guide.",
+    "kind": "test-prep",
+    "requirements": []
+  },
+  {
+    "name": "quiz and chapter",
+    "text": "There will be a quiz on chapter 7 on Thursday.",
+    "kind": "test-prep",
+    "requirements": []
+  },
+  {
+    "name": "project with presentation",
+    "text": "Group project: build a poster and give a 5 minute presentation. Include at least 4 slides.",
+    "kind": "project",
+    "requirements": [
+      "Group project: build a poster and give a 5 minute presentation.",
+      "Include at least 4 slides."
+    ]
+  },
+  {
+    "name": "science lab report is not clear",
+    "text": "Write up the lab we did on Tuesday.",
+    "kind": null,
+    "requirements": []
+  },
+  {
+    "name": "tie between two kinds gives no suggestion",
+    "text": "Write a short essay and make a quiz about it.",
+    "kind": null,
+    "requirements": []
+  },
+  {
+    "name": "must and should lines",
+    "text": "Your report must have a title page. It should be typed. Length: 800 words. Staple it.",
+    "kind": null,
+    "requirements": [
+      "Your report must have a title page.",
+      "It should be typed.",
+      "Length: 800 words."
+    ]
+  },
+  {
+    "name": "abbreviations do not make fake lines",
+    "text": "Bring e.g. a pencil and a ruler. You need to cite at least 2 books.",
+    "kind": null,
+    "requirements": [
+      "You need to cite at least 2 books."
+    ]
+  },
+  {
+    "name": "empty",
+    "text": "",
+    "kind": null,
+    "requirements": []
+  },
+  {
+    "name": "only spaces and newlines",
+    "text": "   \n\n  \t ",
+    "kind": null,
+    "requirements": []
+  },
+  {
+    "name": "nonsense",
+    "text": "asdf qwer zxcv lorem ipsum",
+    "kind": null,
+    "requirements": []
+  },
+  {
+    "name": "messy copy and paste with page furniture",
+    "text": "Home > Courses > ENG 10\n\nLogin | Help\n\nResponse paper (due 11/30)\nWrite 1 page about the poem. Use one quote.\n\nPosted by Ms. Lee",
+    "kind": "essay",
+    "requirements": [
+      "Response paper (due 11/30)",
+      "Write 1 page about the poem."
+    ]
+  },
+  {
+    "name": "a very long requirement line is skipped, not cut",
+    "text": "You must make sure that everything you hand in has been checked carefully by you and by at least one other person who is not on your team and who has read all of the instructions and the rubric and the example from last year and the notes from class and the handout and the website that your teacher gave you.",
+    "kind": null,
+    "requirements": []
+  },
+  {
+    "name": "word problem keywords",
+    "text": "Solve the equations on the worksheet. Simplify each answer.",
+    "kind": "problem-set",
+    "requirements": []
+  }
+]

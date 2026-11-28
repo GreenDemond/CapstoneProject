@@ -68,3 +68,19 @@ test("showingLine only appears when some steps are hidden", () => {
   assert.equal(showingLine(12, 12), "");
   assert.equal(showingLine(3, 3), "");
 });
+
+test("a range of problems in the text becomes chunk steps, before the starter steps", () => {
+  const steps = starterStepsFor("problem-set", "Do problems 1-10. Show your work.");
+  assert.deepEqual(steps.slice(0, 5), ["Do problems 1 to 2", "Do problems 3 to 4", "Do problems 5 to 6", "Do problems 7 to 8", "Do problems 9 to 10"]);
+  assert.equal(steps[5], "Read the instructions and count how many problems there are");
+});
+
+test("numbered lines in the text win: no chunk steps are added next to them", () => {
+  const steps = starterStepsFor("problem-set", "Do problems 1-10:\n1. Warm up\n2. Check answers");
+  assert.deepEqual(steps.slice(0, 2), ["Warm up", "Check answers"]);
+  assert.ok(!steps.some((step) => step.startsWith("Do problems")));
+});
+
+test("an unclear or odd-only range leaves the starter steps as they were", () => {
+  assert.deepEqual(starterStepsFor("essay", "Do problems 1-30, odd only."), starterStepsFor("essay", ""));
+});

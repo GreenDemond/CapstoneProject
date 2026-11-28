@@ -4,6 +4,7 @@
 // back to the starter steps. Text from the student is only ever put on screen with textContent (DECISIONS T11).
 import { cleanPastedText, limitPaste } from "../logic/clean-text.js";
 import { KINDS, DEFAULT_STEP_COUNT, starterStepsFor, withTwoMinuteStart, showingLine } from "../logic/starter-steps.js";
+import { suggestKind, findRequirements } from "../logic/heuristics.js";
 import { loadWork } from "../storage.js";
 import { pickupLine } from "../logic/home.js";
 import { currentIndex, allDone } from "../logic/work.js";
@@ -47,6 +48,47 @@ function chooseKind(id) {
     button.setAttribute("aria-pressed", String(button.dataset.kind === id));
   }
   message.textContent = "";
+  refreshKindSuggestion();
+}
+
+// A suggested kind, worked out from the pasted words. The student must tap it; nothing is picked for them.
+const kindSuggestion = document.getElementById("kind-suggestion");
+const kindSuggestionText = document.getElementById("kind-suggestion-text");
+const kindSuggestionUse = document.getElementById("kind-suggestion-use");
+let suggestedKind = null;
+
+function refreshKindSuggestion() {
+  suggestedKind = chosenKind === null ? suggestKind(limitPaste(textBox.value).text) : null;
+  kindSuggestion.hidden = suggestedKind === null;
+  if (suggestedKind !== null) {
+    const label = KINDS.find((kind) => kind.id === suggestedKind).label;
+    kindSuggestionText.textContent = `Looks like: ${label}.`;
+  }
+}
+
+textBox.addEventListener("input", refreshKindSuggestion);
+kindSuggestionUse.addEventListener("click", () => {
+  const id = suggestedKind;
+  if (id !== null) {
+    chooseKind(id);
+    kindButtons.querySelector(`[data-kind="${id}"]`).focus();
+  }
+});
+
+// The lines of the assignment that say what the finished work must have, copied as they were pasted.
+const requirementsBox = document.getElementById("requirements");
+const requirementsList = document.getElementById("requirements-list");
+
+function showRequirements(text) {
+  const lines = findRequirements(cleanPastedText(text));
+  requirementsList.replaceChildren(
+    ...lines.map((line) => {
+      const item = document.createElement("li");
+      item.textContent = line;
+      return item;
+    }),
+  );
+  requirementsBox.hidden = lines.length === 0;
 }
 
 // How many steps are on screen. Start runs exactly these.
@@ -91,6 +133,7 @@ showButton.addEventListener("click", async () => {
   allSteps = starterStepsFor(chosenKind, cleanPastedText(text));
   ready.textContent = "";
   renderSteps(DEFAULT_STEP_COUNT);
+  showRequirements(text);
   message.textContent = truncated
     ? "That's a long one. The first 6,000 characters are kept."
     : "";
@@ -228,6 +271,7 @@ async function suggestWithChosenService(text) {
   }
   ready.textContent = "";
   renderSteps(DEFAULT_STEP_COUNT);
+  showRequirements(text);
   openStepsPreview();
 }
 // Home screen (design/home-screen.md): when steps are saved, the app opens on the next
