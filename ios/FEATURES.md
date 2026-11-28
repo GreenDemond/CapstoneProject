@@ -30,7 +30,8 @@ How to add one: date, who asked, one-line request in their words, then rule conf
   - Cancel everything on Delete everything.
 - **Data and permissions:** one new permission (notifications). Local only, so no D8 row for sending; a D8 sentence stating nothing leaves the phone. Scheduling must sit behind a protocol in an `Apple/` folder with a fake for tests.
 - **Unverified:** the `UserNotifications` API details. Check the SDK declarations before writing code.
-- **Next:** design note after the parent approves wording and the "off by default" rule.
+- **Status update 2026-11-26:** this is now CAL2, queued behind CAL1 (`design/slices/CAL1-calendar-and-reminders.md`). It needs its own design note and gates before any code. CAL2 stores a switch, a chosen time and an id to cancel by, so it is not covered by CAL1's "stores nothing". Delete everything must clear pending notifications.
+- **Next:** design note after CAL1 ships and the parent approves wording and the "off by default" rule.
 
 ### F3. Link to the student's own Google Calendar
 - **Asked by:** parent. "can we link google calendar to it? student needs to sign in to THEIR google calendar"
