@@ -9,6 +9,7 @@ site/
 # Secrets never go in the repository (DECISIONS.md T11)
 .env
 .dev.vars
+gemini-key
 
 # The first web-app attempt (React and TypeScript) is not part of the project.
 # Kept on disk until Ben decides whether to delete it.
