@@ -12,6 +12,8 @@ const SAVED = {
   profile: { goals: { today: "Read chapter 3", week: "", month: "", year: "" }, gotInTheWay: [] },
   parked: [{ id: 1, text: "email Sam", date: NOW }],
   work: { steps: [{ id: 0, text: "Find three sources", done: false }], nextId: 1, savedOn: NOW },
+  blocks: [{ minutes: 25, answer: "shorter", on: NOW }],
+  lookbackCard: { on: NOW },
   ai: { services: [{ id: "s1", label: "Mine", url: "https://example.com/v1/chat/completions", model: "m", keyHint: "wxyz", checked: true }], chosenId: "s1" },
 };
 const CHAT = { id: "c1", kind: "essay", title: "Essay chat", startedOn: NOW, usedOn: NOW, items: [{ who: "you", text: "hello there" }] };
@@ -34,16 +36,10 @@ async function stored(page, key = "focusapp.v1") {
   return page.evaluate((k) => globalThis.localStorage.getItem(k), key);
 }
 
-// After Delete everything the app reloads, and the home screen starts the weekly look-back clock again
-// (design/class-and-return-w11.md): one date, nothing the student wrote. "Nothing left" means only that.
-async function onlyClock(page) {
-  return page.evaluate(() => {
-    const keys = Object.keys(globalThis.localStorage).filter((k) => k.startsWith("focusapp"));
-    if (keys.length === 0) return true;
-    if (keys.length > 1 || keys[0] !== "focusapp.v1") return false;
-    const main = JSON.parse(globalThis.localStorage.getItem("focusapp.v1"));
-    return Object.keys(main).filter((k) => k !== "schemaVersion" && k !== "lookbackCard").length === 0;
-  });
+// After Delete everything the app reloads. Nothing is left saved, not even the look-back date:
+// the next visit starts that week again (design/class-and-return-w11.md).
+async function nothingLeft(page) {
+  return page.evaluate(() => Object.keys(globalThis.localStorage).filter((k) => k.startsWith("focusapp")).length === 0);
 }
 
 function file(name, content) {
@@ -105,16 +101,18 @@ test("Round trip: delete everything, then load the copy and get the data back", 
   await expect(page.getByText("Delete all of it? It can't be undone.")).toBeVisible();
   await page.getByRole("button", { name: "Yes, delete everything" }).click();
   await expect(page.locator("#me-status")).toContainText("Everything is deleted");
-  expect(await onlyClock(page)).toBe(true);
+  expect(await nothingLeft(page)).toBe(true);
   expect(await stored(page, "focusapp.v1.chats")).toBeNull();
 
   await page.locator("#me-file").setInputFiles(file("copy.json", text));
   await expect(page.getByText("Loading it replaces what is saved on this device.")).toBeVisible();
   await expect(page.getByText("1 parked thought")).toBeVisible();
+  await expect(page.getByText("1 answer about how long a step felt")).toBeVisible();
   await page.getByRole("button", { name: "Yes, replace what is saved" }).click();
   await expect(page.locator("#me-status")).toContainText("Your copy is loaded");
   const main = JSON.parse(await stored(page));
   expect(main.parked[0].text).toBe("email Sam");
+  expect(main.blocks).toEqual([{ minutes: 25, answer: "shorter", on: NOW }]);
   expect(JSON.parse(await stored(page, "focusapp.v1.chats")).chats[0].id).toBe("c1");
   expect(main.ai).toBeUndefined();
 });
@@ -201,7 +199,7 @@ test("Delete everything: needs a second tap, No keeps data, Yes removes saved da
   await page.getByRole("button", { name: "Delete everything", exact: true }).click();
   await page.getByRole("button", { name: "Yes, delete everything" }).click();
   await expect(page.locator("#me-status")).toContainText("Everything is deleted");
-  expect(await onlyClock(page)).toBe(true);
+  expect(await nothingLeft(page)).toBe(true);
   await page.getByRole("button", { name: "Back to home" }).click();
   await expect(page.getByRole("button", { name: "Suggest some to start" })).toBeVisible();
 });

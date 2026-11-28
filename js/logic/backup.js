@@ -5,6 +5,7 @@
 import { normalizeProfile } from "./profile.js";
 import { normalizeWork } from "./work.js";
 import { normalizeParked, normalizeRecall } from "./work-extras.js";
+import { normalizeBlockAnswers } from "./block-length.js";
 import { normalizeMoments, normalizeHelps } from "./looking-back.js";
 import { normalizeChatSettings } from "./chat-settings.js";
 import { normalizeChats } from "./chat-store.js";
@@ -21,7 +22,7 @@ export const MAX_LINK_LENGTH = 500;
 export const MAX_CHAT_TITLE = 100;
 const MAX_DATE_TEXT = 40;
 
-const DATA_NAMES = ["profile", "calendar", "work", "parked", "recall", "moments", "helps", "chat", "tips"];
+const DATA_NAMES = ["profile", "calendar", "work", "parked", "recall", "moments", "helps", "blocks", "chat", "tips"];
 
 function isPlainObject(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -43,7 +44,7 @@ export function backupFileName(nowIso) {
 }
 
 // Builds the object to save. `sections` holds what the app has now:
-// { profile, calendarItems, counts, work, workSavedOn, parked, recall, moments, helps, chatSettings, tipsHidden, chats }.
+// { profile, calendarItems, counts, work, workSavedOn, parked, recall, moments, helps, blocks, chatSettings, tipsHidden, chats }.
 // Chats go in only when includeChats is true. Nothing about AI helpers or keys is ever added.
 export function buildBackup(sections, { includeChats = false, nowIso = new Date().toISOString() } = {}) {
   const data = {};
@@ -54,7 +55,7 @@ export function buildBackup(sections, { includeChats = false, nowIso = new Date(
   if (sections.work) {
     data.work = { ...sections.work, ...(sections.workSavedOn ? { savedOn: sections.workSavedOn } : {}) };
   }
-  for (const name of ["parked", "recall", "moments", "helps"]) {
+  for (const name of ["parked", "recall", "moments", "helps", "blocks"]) {
     if ((sections[name] ?? []).length > 0) data[name] = sections[name];
   }
   const chat = sections.chatSettings;
@@ -151,7 +152,7 @@ export function parseBackup(text, byteSize = null) {
     }
   }
 
-  const lists = { parked: normalizeParked, recall: normalizeRecall, moments: normalizeMoments, helps: normalizeHelps };
+  const lists = { parked: normalizeParked, recall: normalizeRecall, moments: normalizeMoments, helps: normalizeHelps, blocks: normalizeBlockAnswers };
   for (const [name, normalize] of Object.entries(lists)) {
     const raw = own(data, name);
     if (!present(raw)) continue;
@@ -198,6 +199,7 @@ export function describeBackup(sections, chats) {
   if (sections.recall) lines.push(plural(sections.recall.length, "written answer", "written answers"));
   if (sections.moments) lines.push(plural(sections.moments.length, "finished step kept as a count", "finished steps kept as a count"));
   if (sections.helps) lines.push(plural(sections.helps.length, "did-that-help mark", "did-that-help marks"));
+  if (sections.blocks) lines.push(plural(sections.blocks.length, "answer about how long a step felt", "answers about how long a step felt"));
   if (sections.chat) lines.push("My chat guides");
   if (chats !== undefined) lines.push(plural(chats.length, "saved chat", "saved chats"));
   if (lines.length === 0) lines.push("Nothing saved (it would clear what is saved here)");

@@ -6,7 +6,7 @@ import {
 } from "../../js/logic/backup.js";
 import {
   loadForBackup, importSections, deleteAllSaved, saveProfile, saveAiSettings, loadAiSettings, saveWork, saveParked,
-  saveChats, loadChats, loadProfileState, loadWork, loadParked, saveCalendarItems, loadCalendarItems, STORAGE_KEY,
+  saveChats, loadChats, saveBlockAnswers, loadBlockAnswers, loadProfileState, loadWork, loadParked, saveCalendarItems, loadCalendarItems, STORAGE_KEY,
 } from "../../js/storage.js";
 import { setGoals, emptyProfile } from "../../js/logic/profile.js";
 
@@ -238,4 +238,27 @@ test("delete everything removes every focusapp key, backups too, and leaves othe
   assert.equal(deleteAllSaved(b), true);
   assert.deepEqual(Array.from(b._data.keys()), ["other"]);
   assert.equal(deleteAllSaved(null), false);
+});
+
+test("round trip: block-length answers travel in a copy and are named in the lines", () => {
+  const a = fakeStorage();
+  fill(a);
+  const answers = [{ minutes: 25, answer: "shorter", on: NOW }, { minutes: 12, answer: "aboutRight", on: NOW }];
+  saveBlockAnswers(answers, a);
+  const copy = buildBackup(loadForBackup(a), { nowIso: NOW });
+  assert.deepEqual(copy.data.blocks, answers);
+  const parsed = parseBackup(JSON.stringify(copy));
+  assert.equal(parsed.ok, true);
+  assert.ok(parsed.lines.includes("2 answers about how long a step felt"));
+  const b = fakeStorage();
+  assert.equal(importSections(parsed.sections, parsed.chats, b), true);
+  assert.deepEqual(loadBlockAnswers(b), answers);
+});
+
+test("a copy with damaged block-length answers keeps only the good ones; a non-list is refused", () => {
+  const good = { minutes: 25, answer: "shorter", on: NOW };
+  const file = (blocks) => JSON.stringify({ app: FILE_APP, fileVersion: FILE_VERSION, savedOn: NOW, data: { blocks } });
+  const parsed = parseBackup(file([good, { minutes: 99, answer: "shorter", on: NOW }, "x"]));
+  assert.deepEqual(parsed.sections.blocks, [good]);
+  assert.equal(parseBackup(file("nope")).ok, false);
 });

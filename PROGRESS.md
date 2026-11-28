@@ -4,6 +4,8 @@ The only memory between sessions. Keep it current; rewrite it, do not let it gro
 
 ## Working
 
+- **Backup and delete tidy-ups (web).** Save a copy / Load a copy now include the answers about how long a step felt (`blocks`), and Delete everything leaves nothing saved, not even the look-back date. `ai-direct.spec.js` uses exact button names.
+
 - **Suggestions from the pasted text, no AI (H1)** (`design/heuristics-h1.md`, `js/logic/heuristics.js`). A "Looks like: <kind>" line with a Use this button (never picks for the student), a "What your assignment says" box of requirement lines copied word for word on the steps screen, and a range such as "problems 1-10" becomes chunk steps. Fails closed to the old behavior. Tested with `tests/fixtures/assignments.json` (22 written assignments) plus properties, and 7 browser tests. **Student-visible wording is waiting for the parent's okay** (list in the design note).
 
 - **Isolated browser test runner.** `npm run test:browser:isolated [-- --project=phone <file>]` runs each Playwright test in its own run (needed in sandboxes where Chromium dies after one test) and prints PASS/FAIL per test (see SETUP.md). `npm run check` is unchanged.

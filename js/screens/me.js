@@ -2,7 +2,7 @@
 // Load a copy, and Delete everything. Nothing leaves the device except the file the student chooses to save.
 // Student text never goes on screen here; the lines shown come from counts. Everything uses textContent.
 import { buildBackup, parseBackup, backupFileName, MAX_FILE_BYTES } from "../logic/backup.js";
-import { loadForBackup, importSections, deleteAllSaved } from "../storage.js";
+import { loadForBackup, importSections, deleteAllSaved, skipNextLookbackClock } from "../storage.js";
 import { deleteAllKeys } from "../keystore.js";
 import { openRemembers } from "./looking.js";
 import { el, button, announce } from "../ui/dom.js";
@@ -184,6 +184,7 @@ async function deleteAll() {
   const keysGone = await deleteAllKeys();
   busy = false;
   if (savedGone && keysGone) {
+    skipNextLookbackClock();
     reloadWith("deleted");
     return;
   }

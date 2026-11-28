@@ -13,7 +13,7 @@ test("Suggest steps shows steps labelled as AI with the host, and the key stays 
   const seen = await standIn(page, { content: "Read two sources about rivers\nWrite a plan with three points\nWrite the first paragraph" });
   await openSettings(page);
   await addOther(page);
-  await page.getByRole("button", { name: "Back" }).click();
+  await page.getByRole("button", { name: "Back to home", exact: true }).click();
   await pasteAndPick(page);
   await expect(page.locator("#ai-privacy")).toContainText("the AI service ai.example.test to suggest steps");
   await page.getByRole("button", { name: "Suggest some to start" }).click();
@@ -35,7 +35,7 @@ test("a rejected key on the paste screen gives one plain line and the starter st
   // After setup, the service stops accepting this key.
   await page.unroute(/ai\.example\.test\/v1\/chat\/completions/);
   await standIn(page, { acceptKey: "another-key" });
-  await page.getByRole("button", { name: "Back" }).click();
+  await page.getByRole("button", { name: "Back to home", exact: true }).click();
   await pasteAndPick(page);
   await page.getByRole("button", { name: "Suggest some to start" }).click();
   await expect(page.locator("#message")).toContainText("didn't accept the key");
@@ -49,7 +49,7 @@ test("a double click on Suggest sends one request", async ({ page }) => {
   const seen = await standIn(page, { content: "One step\nTwo step" });
   await openSettings(page);
   await addOther(page);
-  await page.getByRole("button", { name: "Back" }).click();
+  await page.getByRole("button", { name: "Back to home", exact: true }).click();
   await pasteAndPick(page);
   const before = seen.chat.length;
   await page.getByRole("button", { name: "Suggest some to start" }).dblclick();
@@ -72,7 +72,7 @@ test("the tick box sits above the button, and unticking sends nothing and gives 
   const seen = await standIn(page, { content: "AI step one\nAI step two" });
   await openSettings(page);
   await addOther(page);
-  await page.getByRole("button", { name: "Back" }).click();
+  await page.getByRole("button", { name: "Back to home", exact: true }).click();
   await pasteAndPick(page);
   const box = await page.locator("#ai-use").boundingBox();
   const button = await page.getByRole("button", { name: "Suggest some to start" }).boundingBox();
