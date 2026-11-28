@@ -1,6 +1,6 @@
 // Bottom tabs and the first-visit welcome note (design/tabs-w3.md). Everything here only presses the
 // buttons and calls the functions that already exist; no screen is changed. Text is set with textContent.
-import { TABS, tabForScreen, tabBarVisible, screenForTab, WELCOME_LINE, WELCOME_HIDE } from "../logic/tabs.js";
+import { TABS, tabForScreen, tabBarVisible, screenForTab, chooseBack, WELCOME_LINE, WELCOME_HIDE } from "../logic/tabs.js";
 import { loadWelcomeSeen, saveWelcomeSeen } from "../storage.js";
 import { SCREENS, currentScreenName, registerOnScreenChange } from "../ui/screens.js";
 
@@ -21,19 +21,21 @@ function paint(screenName) {
   }
 }
 
-// Leaves the screen the student is on by pressing that screen's own "Back to home" button, so its own checks run
-// (for example the profile's unsaved-changes warning). Stops if the screen did not change.
+// Leaves the screen the student is on by pressing that screen's own Back button, so its own checks run
+// (for example the profile's unsaved-changes warning). Inside a sub-view (for example What the app remembers)
+// "Back..." steps out one level at a time until a "Back to home" is there. Stops if "Back to home" leaves
+// the screen where it is (the screen is asking something first), or after a few steps.
 function backToHome() {
-  for (let tries = 0; tries < 4; tries += 1) {
+  for (let tries = 0; tries < 8; tries += 1) {
     const name = currentScreenName();
     if (name === "home") return true;
     const section = SCREENS[name];
-    const back = section
-      ? Array.from(section.querySelectorAll("button")).find((b) => b.textContent.trim() === "Back to home")
-      : null;
-    if (!back) return false;
-    back.click();
-    if (currentScreenName() === name) return false;
+    if (!section) return false;
+    const visible = Array.from(section.querySelectorAll("button")).filter((b) => !b.closest("[hidden]"));
+    const choice = chooseBack(visible.map((b) => ({ text: b.textContent })));
+    if (!choice) return false;
+    visible[choice.index].click();
+    if (choice.home && currentScreenName() === name) return false;
   }
   return currentScreenName() === "home";
 }

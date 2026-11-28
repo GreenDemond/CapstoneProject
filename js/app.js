@@ -16,7 +16,7 @@ initIntake();
 initProfile();
 initLooking();
 initHome();
-initCalendar();
+initCalendar({ onThoughtsChanged: refreshHome });
 initChat({ getChosenKind });
 refreshHome();
 initMe();

@@ -9,6 +9,7 @@ import { confetti } from "../confetti.js";
 import { el, button } from "../ui/dom.js";
 import { showScreen } from "../ui/screens.js";
 import { dayKey } from "../ui/helpers.js";
+import { renderPlanExtras, resetPlanExtras } from "./plan.js";
 
 const calendarScreen = document.getElementById("calendar-screen");
 const calendarBody = document.getElementById("calendar-body");
@@ -171,6 +172,7 @@ function renderCalendar(notice = "", opts = {}) {
   } else {
     renderTimeView();
   }
+  renderPlanExtras(calendarBody, { redraw: (focus) => renderCalendar("", focus ? { focus } : {}), goHome: backFromCalendar, changed: planChanged });
   calendarBody.append(button("Back to home", backFromCalendar));
   if (opts.focus) {
     calendarBody.querySelector(opts.focus)?.focus();
@@ -395,6 +397,7 @@ function confirmDelete(id) {
 }
 
 function openCalendarScreen() {
+  resetPlanExtras();
   showScreen("calendar");
   confirmDeleteId = null;
   celebrateText = "";
@@ -621,6 +624,9 @@ function spanBarsFor(days) {
   return bars;
 }
 
-export function initCalendar() {
+let planChanged = null; // told when a saved thought is taken out, so the home screen can update
+
+export function initCalendar({ onThoughtsChanged } = {}) {
+  planChanged = onThoughtsChanged ?? null;
   openCalendar.addEventListener("click", openCalendarScreen);
 }

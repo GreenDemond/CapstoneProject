@@ -457,6 +457,8 @@ export function importSections(sections, chats, storage = defaultStorage()) {
     if (state === "ok" && data.ai !== undefined) {
       next.ai = data.ai;
     }
+    // Someone loading a copy has used the app before, so the first-visit note stays away (design/plan-tab-w13.md).
+    next.welcome = { seen: true };
     for (const [name, value] of Object.entries(sections)) {
       if (value === null || value === undefined) continue;
       if (name === "work") {

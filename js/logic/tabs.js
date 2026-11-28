@@ -30,3 +30,15 @@ export function screenForTab(tabId) {
 
 export const WELCOME_LINE = "Welcome. Paste an assignment above to begin, or use the tabs at the bottom.";
 export const WELCOME_HIDE = "Hide this note";
+
+// Which button leaves the screen the student is on. `buttons` is the visible buttons of that screen, as
+// [{ text }]. The one called "Back to home" wins; inside a sub-view the first button starting with "Back"
+// steps out one level. Returns { index, home } or null when there is nothing to press.
+export function chooseBack(buttons) {
+  if (!Array.isArray(buttons)) return null;
+  const texts = buttons.map((b) => (b && typeof b.text === "string" ? b.text.trim() : ""));
+  const home = texts.indexOf("Back to home");
+  if (home >= 0) return { index: home, home: true };
+  const back = texts.findIndex((t) => t === "Back" || t.startsWith("Back "));
+  return back >= 0 ? { index: back, home: false } : null;
+}

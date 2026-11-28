@@ -400,3 +400,14 @@ Not yet done by anyone: the browser tests for this slice (`tests/browser/tabs.sp
 7. Press **Drifted** on a step like "Find three sources and then read the first one": the box starts with "Find three sources". On a short step it starts with the whole step. Typing your own words works as before.
 8. In What the app remembers, **Delete all** removes the saved answers: the "point to" line goes.
 9. Phone width and keyboard only: Tab reaches the card buttons and the Done when: box; nothing overlaps the bottom of the screen.
+
+## Plan tab, tabs inside a sub-view, Load a copy (web, W13)
+
+1. Start some steps, finish one. Press the **Plan** tab. Under the calendar: "All my steps" lists every step, and the finished one ends with "(done)".
+2. Park a thought while working, and answer a recall question after a reading step. On Plan, "Saved thoughts" lists both, newest first, each with a short date.
+3. Press **Take this out** on one: "Take this one out?" appears and nothing is gone yet. **No, leave it** keeps it. **Take this out** then **Yes, take it out** removes it; Today no longer shows it under "Thoughts you set aside".
+4. With clean data, Plan shows "No steps yet." and **Make some steps**, which goes to the paste screen. No Saved thoughts heading.
+5. Me, then What the app remembers, then press the **Talk** tab: you land on Talk. Repeat with Plan and Today.
+6. Me, then My profile, type in a goal box, press the **Talk** tab: the profile stays and warns about unsaved changes. Press Save, then the tab: it works.
+7. Press **Hide this note** on Today. Me, Save a copy, then Load a copy with that file and confirm. After the reload the note is not back. Same on a device that never hid the note.
+8. Phone width and keyboard only: Tab reaches **Take this out** and the two answers; nothing overlaps the bottom tabs.
