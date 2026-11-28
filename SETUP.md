@@ -46,3 +46,18 @@ Why this is needed: Playwright's browser is not installed on this Mac, and the i
 
 ### Running the browser tests one at a time (sandboxes)
 Where Chromium crashes after its first test (for example inside an agent sandbox), run `npm run test:browser:isolated`. It lists every test, runs each in its own Playwright run with `--single-process --no-zygote`, and prints PASS or FAIL per test and a total. Options: `npm run test:browser:isolated -- --project=phone tests/browser/tabs.spec.js`. It writes a temporary `pw-isolated-*.tmp.config.js` and deletes it afterwards. `npm run check` is unchanged.
+
+## 9. Set up Gemini as an AI helper (for you and Ben only)
+Who it is for: your device and Ben's only. Classmates do not use an outside AI. Whatever is typed to the helper goes to Google. Google's free tier may use prompts to improve its products, and an adult Google account is needed (check Google's current terms; this was not verified). Do not type names or anything private.
+
+1. An adult gets a key. Open aistudio.google.com, sign in with the adult's Google account, choose Get API key, then Create API key, and copy it. Google changes the page, so the button names may differ.
+2. The key is like a password. Never put it in the project folder or send it to anyone. If you keep a copy in a file, keep it outside the project folder (the project already ignores a file named `gemini-key`).
+3. In the app, open the Me tab, then Settings, then Add an AI helper. Choose Another service.
+4. Under "Its web address" type `https://generativelanguage.googleapis.com/v1beta/openai`, then Next.
+5. Under "Your key" paste the key, then Next. The app looks up Google's list of models.
+6. Under "Pick an AI" choose one from the list. Do not guess a name. Optionally type a name such as Gemini under "Name this helper (optional)". Next, then Done once the check passes.
+7. To use it: on Today, tick "Use Gemini to suggest steps" (it shows the helper's name), then press Suggest some to start. In Talk, the "Which AI helper?" menu chooses which helper answers.
+8. If something goes wrong, the app shows a plain line. Likely causes: a mistyped key, the free quota or rate limit reached (wait and try again), or the browser blocking the request. Whether Google accepts requests straight from a web page, and how it treats the "How hard should the AI think?" setting, have not been tried with a real key. Tell the agent the exact line the app shows.
+9. To undo: Me, Settings, choose the helper, then "Forget key" or "Remove this helper".
+
+The real-key check is in tests/manual-checks.md, under "Google Gemini address".
