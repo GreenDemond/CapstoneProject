@@ -551,6 +551,30 @@ private struct ServiceEditor: View {
   var body: some View {
     NavigationStack {
       Form {
+        if id == nil {
+          Section {
+            field(Words.ownAIPresetsTitle) {
+              HStack {
+                ForEach(OwnAIConfig.presets, id: \.id) { preset in
+                  Button(preset.label) {
+                    label = preset.label
+                    endpoint = preset.address
+                    modelId = preset.modelId
+                  }
+                  .buttonStyle(.bordered)
+                  .accessibilityIdentifier("own-ai-preset-\(preset.id)")
+                }
+                Button(Words.ownAIPresetOther) {
+                  label = ""
+                  endpoint = ""
+                  modelId = ""
+                }
+                .buttonStyle(.bordered)
+                .accessibilityIdentifier("own-ai-preset-other")
+              }
+            }
+          }
+        }
         Section {
           field(Words.ownAILabel) {
             TextField(Words.ownAILabelPlaceholder, text: $label)

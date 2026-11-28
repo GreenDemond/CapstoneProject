@@ -86,6 +86,25 @@ public struct OwnAIConfig: Equatable, Sendable {
     return Words.ownAIGoogleModel
   }
 
+  /// Ready-made starting points for the Add a service form. Each only fills in the label, address and
+  /// model name; the student still pastes their own key and can change any field.
+  public struct Preset: Sendable, Equatable {
+    public let id: String
+    public let label: String
+    public let address: String
+    public let modelId: String
+  }
+
+  public static let presets: [Preset] = [
+    Preset(
+      id: "openrouter", label: Words.ownAIDefaultLabel, address: Words.ownAIDefaultAddress,
+      modelId: Words.ownAIDefaultModel),
+    Preset(
+      id: "gemini", label: Words.ownAIGeminiLabel,
+      address: "https://generativelanguage.googleapis.com/v1beta/openai/",
+      modelId: Words.ownAIGoogleModel),
+  ]
+
   public static let addressLimit = 500
   public static let modelLimit = 100
 

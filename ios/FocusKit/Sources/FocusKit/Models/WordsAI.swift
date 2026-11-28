@@ -173,6 +173,9 @@ extension Words {
   public static let ownAIDefaultModel = "openrouter/free"
   /// The model filled in when the address is Google's (the parent's choice, 2026-11-28).
   public static let ownAIGoogleModel = "models/gemini-flash-lite-latest"
+  public static let ownAIGeminiLabel = "Gemini"
+  public static let ownAIPresetsTitle = "Start from"
+  public static let ownAIPresetOther = "Other"
   public static let ownAIKeyHelp = "How to get an OpenRouter key"
   public static let ownAIKeyHelpURL = "https://openrouter.ai/docs/api-reference/authentication"
   public static let ownAIAddressHelp =

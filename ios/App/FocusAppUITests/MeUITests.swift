@@ -179,6 +179,26 @@ final class MeUITests: XCTestCase {
     app.buttons["own-ai-cancel"].tap()
   }
 
+  /// The Gemini button fills in the name, address and model; Other empties them.
+  func testStartFromButtonsFillInTheForm() {
+    let app = launch()
+    app.openMe("me-row-services")
+    let add = app.buttons["own-ai-add"]
+    app.scrollTo(add)
+    add.tap()
+    let gemini = app.buttons["own-ai-preset-gemini"]
+    XCTAssertTrue(gemini.waitForExistence(timeout: 5))
+    gemini.tap()
+    XCTAssertEqual(app.textFields["own-ai-label"].value as? String, "Gemini")
+    XCTAssertEqual(
+      app.textFields["own-ai-address"].value as? String,
+      "https://generativelanguage.googleapis.com/v1beta/openai/")
+    let model = app.textFields["own-ai-model"]
+    app.scrollTo(model)
+    XCTAssertEqual(model.value as? String, "models/gemini-flash-lite-latest")
+    app.buttons["own-ai-cancel"].tap()
+  }
+
   /// Add a service (after the disclosure), see it in the list, see it on Talk, and remove it.
   func testAddAServiceSeeItOnTalkAndRemoveIt() {
     let app = launch()
@@ -251,7 +271,8 @@ extension XCUIElement {
     let app = XCUIApplication()
     app.putKeyboardAway()
     var swipes = 0
-    while !isHittable && swipes < 4 {
+    let lowest = app.windows.firstMatch.frame.height * 0.75
+    while (!isHittable || frame.maxY > lowest) && swipes < 4 {
       app.swipeUp()
       swipes += 1
     }

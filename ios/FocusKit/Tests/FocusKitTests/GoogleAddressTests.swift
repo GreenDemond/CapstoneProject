@@ -241,3 +241,20 @@ private let googleModel = "gemini-4-hydrogen"
     #expect(suggest("", "") == nil)
   }
 }
+
+@Suite struct OwnAIPresetTests {
+  @Test func presetsAreOpenRouterAndGeminiAndAreValid() {
+    #expect(OwnAIConfig.presets.map(\.id) == ["openrouter", "gemini"])
+    for preset in OwnAIConfig.presets {
+      #expect(!preset.label.isEmpty && !preset.modelId.isEmpty)
+      #expect(OwnAIConfig.parse(preset.address) != nil)
+    }
+  }
+
+  @Test func geminiPresetUsesGoogleAddressAndDefaultModel() {
+    let gemini = OwnAIConfig.presets.first { $0.id == "gemini" }
+    #expect(gemini?.modelId == Words.ownAIGoogleModel)
+    #expect(OwnAIConfig.parse(gemini?.address ?? "")?.host == OwnAIConfig.googleHost)
+    #expect(OwnAIConfig.parse(gemini?.address ?? "")?.path == "/v1beta/openai/chat/completions")
+  }
+}
