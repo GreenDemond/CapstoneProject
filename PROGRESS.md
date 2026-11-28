@@ -29,6 +29,8 @@ The only memory between sessions. Keep it current; rewrite it, do not let it gro
 
 - **AI choice in Talk (web)** (`design/talk-ai-choice.md`). The **Which AI helper?** menu now shows with one or more saved helpers; unready ones are greyed with the reason; "Finish setting up a helper in Settings." when none is ready. Logic: `talkHelperMenu`.
 
+- **Save and load AI helpers (web)** (`design/ai-helpers-file.md`, `js/settings-helpers-file.js`, `js/logic/ai-helpers-file.js`, `js/logic/helpers-crypto.js`). Settings, **Move your helpers**: a file of the helpers without keys (default) or with keys locked by a passphrase (PBKDF2 600,000 + AES-GCM); loading shows a preview and adds helpers only after Yes, never changes the helper in use, skips duplicates. 7 browser tests (`tests/browser/ai-helpers-file.spec.js`, phone and desktop) and logic tests pass. Not tried with a real key. A DECISIONS.md change-log row for this new opt-in file is still **waiting for the parent's okay**.
+
 ## In progress
 
 - **Web navigation (finish, FEAT-003).** The row of seven buttons on Today is gone; Talk and Plan are tabs and the rest is on Me. Welcome note moved above the paste box. Tab bar no longer covers fields (tested at phone and desktop). Long unbroken text no longer widens the page. See `design/tabs-w3.md`.

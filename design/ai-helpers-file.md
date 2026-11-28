@@ -1,6 +1,6 @@
 # Save and load my AI helpers (a separate, opt-in file)
 
-Status: logic built (FEAT-001). Settings screen comes next (FEAT-002).
+Status: built (logic FEAT-001, Settings screen FEAT-002). Screen code: js/settings-helpers-file.js. Load asks for a passphrase only after Yes; three wrong tries add a 5 second wait.
 
 ## Why
 

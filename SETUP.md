@@ -61,3 +61,12 @@ Who it is for: your device and Ben's only. Classmates do not use an outside AI. 
 9. To undo: Me, Settings, choose the helper, then "Forget key" or "Remove this helper".
 
 The real-key check is in tests/manual-checks.md, under "Google Gemini address".
+
+## 10. Move your AI helpers to another browser (for the parent)
+The app can save the AI helpers (name, address, AI, thinking effort) to a file and load them in another browser. Settings, then **Move your helpers**: **Save my AI helpers** and **Load AI helpers**.
+
+- The normal file has no keys. It is safe to share with other adults, for example to set up a second device. Keys still need to be added there.
+- A file with keys is locked with a passphrase the student picks (10 or more characters; a few words in a row works well). The passphrase is not stored and cannot be recovered. The locking is AES-GCM with a key made from the passphrase (PBKDF2, 600,000 rounds), using the browser's own tools.
+- Honest limit: anyone who steals a file with keys can guess passphrases on their own computer with no limit on tries. A weak or common passphrase can be found. Keep that file private, delete it after use, and turn the key off in the AI account if the file is lost.
+- Only load a file you made yourself. A file from someone else could point a helper at an address that reads what is typed. The app shows every address before anything is added and adds helpers without keys unless the file's passphrase is given.
+- Loading only adds helpers. It never changes the helper in use or the ones already there. The data copy in Me and my data does not include AI settings and is unchanged.

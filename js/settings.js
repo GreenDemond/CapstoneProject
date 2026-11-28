@@ -23,6 +23,7 @@ import {
 import { testService, listModels } from "./ai-direct.js";
 import { announce } from "./ui/dom.js";
 import { renderTalkSettings } from "./chat-settings.js";
+import { renderMoveSection, resetHelpersFile, clearTypedPassphrases } from "./settings-helpers-file.js";
 
 let aiSettings = loadAiSettings();
 const listeners = [];
@@ -178,6 +179,21 @@ async function renderList(message = "", focusSelector = null) {
     el("p", { class: "hint", text: "Talk it through can follow your own guide for how the AI talks." }),
     el("p", {}, button("How the AI talks", () => { show("talk"); renderTalkSettings(views.talk, () => renderList("", "#open-talk")); }, { id: "open-talk" })),
   );
+  const move = el("div", { id: "helpers-move" });
+  root.append(move);
+  renderMoveSection(move, {
+    getSettings: () => aiSettings,
+    // Saves the list; true only if it was saved. The chosen helper is whatever it already was.
+    commitSettings: (next) => {
+      if (!persist(next)) {
+        return false;
+      }
+      aiSettings = next;
+      notify();
+      return true;
+    },
+    done: (text) => renderList(text, "#add-helper"),
+  });
   const live = el("p", { class: "setup-message", role: "status", "aria-live": "polite" });
   root.append(live);
   announce(live, message);
@@ -198,6 +214,7 @@ export function openSettingsScreen() {
 
 function closeSettings() {
   endFlow();
+  resetHelpersFile();
   showScreen("home");
   openButton.focus();
 }
@@ -924,10 +941,12 @@ export function initSettings({ screen: screenEl, showScreen: showScreenFn, openB
   // Leaving the page or hiding the tab drops the key and hides a shown key.
   window.addEventListener("pagehide", () => {
     dropKey();
+    resetHelpersFile();
     abortRequest();
   });
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
+      clearTypedPassphrases();
       const input = document.getElementById("flow-key");
       if (input) {
         input.type = "password";

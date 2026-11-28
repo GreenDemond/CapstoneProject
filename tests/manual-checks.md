@@ -479,3 +479,14 @@ Needs an AI helper set up in Settings.
 4. Scroll to the bottom of Today, Plan and Me on a phone: the last button is not hidden behind the tabs.
 5. Turn on reduced motion in the device settings: no animation on finishing a step.
 6. Change one colour at the top of `css/styles.css` (see `design/look.md`): the whole app follows.
+
+## Save and load AI helpers (web)
+
+1. Settings (Me, then Settings). Under **Move your helpers**, press **Save my AI helpers**. "Without keys (safest)" is already picked. Press **Make the file**. A file `focus-app-ai-helpers-<date>.json` downloads and the screen names it and says "without keys". Open it in a text editor: addresses and names only, no key.
+2. Save again, pick **With keys, locked with a passphrase**. Type a short phrase twice: it is refused ("Use at least 10 characters"). Type two different long phrases: "don't match". Use a few words (10 or more characters) twice: the file downloads and says how many keys are locked. The key text is not in the file.
+3. Move your real Gemini helper (address `https://generativelanguage.googleapis.com/v1beta/openai`; needs the parent's real key): save with keys, open the app in a second browser (or Me, then Delete everything), Settings, **Load AI helpers**, choose the file. The preview lists the name, AI and address. Press **Yes, add these helpers**, type the passphrase, **Open the keys and add the helpers**. The helper shows ready with the last four characters. Manage, **Test it again**: "It works." (Not tried with a real key yet.)
+4. Load again and type a wrong passphrase: "That passphrase didn't open the keys." Three wrong tries make the button wait about 5 seconds. **Add the helpers without their keys** adds them as "needs a key".
+5. Load a file twice: the second time the helpers are listed as skipped and nothing is added. Press **No, keep what I have**: "Nothing was changed."
+6. Load a text file or a copy made with **Save a copy of my data**: "That file isn't an AI helpers file. Nothing was changed."
+7. Loading never changes which helper is in use and never edits helpers you already have.
+8. Phone width and keyboard only: Tab reaches every button and box; the passphrase boxes hide what is typed.
