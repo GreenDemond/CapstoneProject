@@ -1,1 +1,0 @@
-{"task_id":"task-deploy-d1","task_description":"Slice D1: build clean site/ folder and rsync deploy script, docs, test","status":"in_progress","feature_order":["FEAT-001"],"blocked_reason":null}
