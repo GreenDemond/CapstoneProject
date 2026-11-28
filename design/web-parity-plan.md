@@ -30,7 +30,7 @@ Apple's on-device AI, voice input, haptics, the Apple calendar sheet (a download
 | W2 | Step count (3, 5, 8) and the good-step card | A2, R6 | Built, browser tests not run. See `design/step-count-w2.md` |
 | W3 | Four-tab layout (Today, Talk, Plan, Me), welcome screen, phone and tablet widths | RootView, IPAD1 | |
 | W4 | Work screen extras: the Stuck sheet, park a thought, recall question after study steps | StuckView, WorkView Built, browser tests not run. See `design/work-extras-w4.md` |
-| W5 | Check my steps against the assignment, with no AI (word matching) | S3, S2 | |
+| W5 | Check my steps against the assignment, with no AI (word matching) | S3, S2 | Built, browser tests not run. See `design/check-steps-w5.md` |
 | W6 | Looking back: Did that help, What I did, weekly look-back with fixed lines, What the app remembers with per-line delete | R5, PROG1, C5, M4 | |
 | W7 | Me screens, Export and Import, Delete everything | MeView | |
 | W8 | Look it up (Wikipedia) if its API allows browser requests (unverified) | LookUpView | |

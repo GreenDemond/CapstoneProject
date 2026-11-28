@@ -17,6 +17,7 @@ import { showScreen, currentScreenName, openStepsPreview, registerOnLeaveHome } 
 import { where } from "../ui/helpers.js";
 import { openWorkScreen, stepListNode } from "./work.js";
 import { initStepsEditor, closeEditor } from "./steps-editor.js";
+import { fillCheck } from "./step-check.js";
 
 const textBox = document.getElementById("assignment-text");
 const kindButtons = document.getElementById("kind-buttons");
@@ -81,8 +82,15 @@ kindSuggestionUse.addEventListener("click", () => {
 const requirementsBox = document.getElementById("requirements");
 const requirementsList = document.getElementById("requirements-list");
 
+let requirementLines = [];
+const checkButton = document.getElementById("check-steps");
+const checkHolder = document.getElementById("steps-check");
+
 function showRequirements(text) {
   const lines = findRequirements(cleanPastedText(text));
+  requirementLines = lines;
+  checkButton.hidden = lines.length === 0;
+  checkHolder.replaceChildren();
   requirementsList.replaceChildren(
     ...lines.map((line) => {
       const item = document.createElement("li");
@@ -106,6 +114,7 @@ let shownCount = DEFAULT_STEP_COUNT;
 
 function renderSteps(count) {
   closeEditor();
+  checkHolder.replaceChildren(); // an old check is not kept once the steps change
   shownCount = count;
   stepsList.replaceChildren();
   for (const step of allSteps.slice(0, count)) {
@@ -165,12 +174,17 @@ showMore.addEventListener("click", () => {
 // The editor changes the steps on screen; any steps not shown yet stay behind them for Show more steps.
 initStepsEditor(
   () => allSteps.slice(0, shownCount),
+  () => requirementLines,
   (edited) => {
     allSteps = edited.concat(allSteps.slice(shownCount));
     renderSteps(edited.length);
     stepsList.focus();
   },
 );
+
+checkButton.addEventListener("click", () => {
+  fillCheck(checkHolder, requirementLines, allSteps.slice(0, shownCount));
+});
 
 startButton.addEventListener("click", () => {
   openWorkScreen(allSteps.slice(0, shownCount));

@@ -20,6 +20,8 @@ import {
 import { STEP_TIPS_TITLE, STEP_TIPS_LINES } from "../logic/step-count.js";
 import { loadStepTipsHidden, saveStepTipsHidden } from "../storage.js";
 import { el, button } from "../ui/dom.js";
+import { fillCheck } from "./step-check.js";
+import { checkSteps } from "../logic/step-check.js";
 
 const view = document.getElementById("steps-view");
 const editor = document.getElementById("steps-editor");
@@ -29,6 +31,8 @@ let draft = [];
 let dismissed = new Set(); // step words whose "split it?" question the student said no to
 let onDone = null;
 let getSteps = null;
+let getRequirements = () => [];
+let checkHolder = null; // the live "does each line have a step" box, redrawn as the steps change
 let status = "";
 let focusTarget = null; // a selector to focus after the next redraw
 let tipsOpen = false; // the good-step card is folded each time the editor opens
@@ -51,6 +55,17 @@ function fillNote(holder, index) {
   }
 }
 
+// True when the assignment gave lines worth checking, so the heading is worth showing.
+function checkNumbers() {
+  return checkSteps(getRequirements(), ["x"]) !== null;
+}
+
+function refreshCheck() {
+  if (checkHolder !== null) {
+    fillCheck(checkHolder, getRequirements(), cleanSteps(draft));
+  }
+}
+
 function rowFor(index) {
   const n = index + 1;
   const row = el("li", undefined, { class: "editor-row" });
@@ -60,6 +75,7 @@ function rowFor(index) {
   input.addEventListener("input", () => {
     draft = setStepText(draft, index, input.value);
     fillNote(noteHolder, index);
+    refreshCheck();
   });
   const actions = el("div", undefined, { class: "editor-actions" });
   const act = (label, name, change) =>
@@ -182,6 +198,13 @@ function render() {
   }
   editor.append(extra);
 
+  checkHolder = el("div", undefined, { class: "steps-check", id: "editor-check", role: "status", "aria-live": "polite" });
+  refreshCheck();
+  if (checkNumbers()) {
+    editor.append(el("h4", "Lines from your assignment"));
+  }
+  editor.append(checkHolder);
+
   editor.append(el("p", status, { class: "message", role: "status", "aria-live": "polite" }));
   const finish = el("div", undefined, { class: "editor-extra" });
   finish.append(
@@ -214,6 +237,7 @@ export function closeEditor() {
   const wasOpen = !editor.hidden;
   editor.hidden = true;
   editor.replaceChildren();
+  checkHolder = null;
   view.hidden = false;
   draft = [];
   if (wasOpen) {
@@ -233,9 +257,10 @@ function openEditor() {
   render();
 }
 
-// getStepList returns the steps now on screen; done receives the cleaned edited list.
-export function initStepsEditor(getStepList, done) {
+// getStepList returns the steps now on screen; getRequirementLines the assignment's lines; done receives the cleaned edited list.
+export function initStepsEditor(getStepList, getRequirementLines, done) {
   getSteps = getStepList;
+  getRequirements = getRequirementLines;
   onDone = done;
   openButton.addEventListener("click", openEditor);
 }

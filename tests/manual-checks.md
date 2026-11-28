@@ -280,3 +280,16 @@ Not yet done by anyone: the browser tests for this slice were not run.
 8. Finish the last step with Skip: "All your steps are done." and Close works.
 9. Pick Essay and press Done: no recall question.
 10. Check at phone width, with the keyboard only, and that nothing says "wrong", "missed" or "score".
+
+## Check my steps against the assignment (web, W5)
+
+Not yet done by anyone: the browser tests for this slice were not run.
+
+1. Paste "Write a short report on volcanoes. You must include a glossary of terms. You must include 2 diagrams." on separate lines, pick Essay, Show my steps. "What your assignment says" lists two lines and a button "Check my steps against the assignment" is there.
+2. Press it: both lines show as `The assignment says "..."` with "Is this covered by a step?", plus "This is from matching words, not from understanding your work." Nothing is red and nothing says missing or wrong.
+3. Press Change my steps: "Lines from your assignment" shows the same two. Type "Make a glossary of terms and 2 diagrams" in Step 1: it says "Every line you checked has a step with its words in it." Change Step 1 to "Something else": the questions come back.
+4. Press Done changing: the old check result is gone from the steps view.
+5. Paste "Think about volcanoes", pick Essay, Show my steps: no check button, and Change my steps has no "Lines from your assignment".
+6. Paste a line with "<b>bold</b>" in it that says "must include": it shows as plain text.
+7. Check at phone width and with the keyboard only.
+

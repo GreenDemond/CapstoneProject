@@ -1,0 +1,80 @@
+[
+  {
+    "name": "sources line covered by a step, thesis line open",
+    "lines": [
+      "Include a clear thesis.",
+      "Use at least 3 sources."
+    ],
+    "steps": [
+      "Find 3 sources",
+      "Write a first draft"
+    ],
+    "open": [
+      "Include a clear thesis."
+    ]
+  },
+  {
+    "name": "plural matches singular",
+    "lines": [
+      "Cite two sources in MLA format"
+    ],
+    "steps": [
+      "Check each source is in MLA format"
+    ],
+    "open": []
+  },
+  {
+    "name": "all key words must be in one step",
+    "lines": [
+      "Include a graph of your data"
+    ],
+    "steps": [
+      "Collect data",
+      "Draw a graph"
+    ],
+    "open": [
+      "Include a graph of your data"
+    ]
+  },
+  {
+    "name": "number covers the number",
+    "lines": [
+      "The essay must be 500 words"
+    ],
+    "steps": [
+      "Write the essay, 500 words"
+    ],
+    "open": []
+  },
+  {
+    "name": "substring is not a match: tree is not in street",
+    "lines": [
+      "Draw the tree"
+    ],
+    "steps": [
+      "Walk down the street"
+    ],
+    "open": [
+      "Draw the tree"
+    ]
+  },
+  {
+    "name": "no lines gives nothing",
+    "lines": [],
+    "steps": [
+      "Do something"
+    ],
+    "open": null
+  },
+  {
+    "name": "line with only short or stop words is skipped",
+    "lines": [
+      "Include a rap",
+      "Use it"
+    ],
+    "steps": [
+      "Anything here"
+    ],
+    "open": null
+  }
+]

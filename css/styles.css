@@ -750,3 +750,16 @@ button {
 .ask textarea {
   margin-bottom: 0.5rem;
 }
+
+/* Check my steps against the assignment (design/check-steps-w5.md) */
+.steps-check {
+  margin: 0.5rem 0;
+}
+
+.check-list {
+  padding-left: 1.2rem;
+}
+
+.check-list li {
+  margin-bottom: 0.6rem;
+}
