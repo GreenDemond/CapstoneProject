@@ -301,3 +301,28 @@ test("talkHelperMenu: duplicate labels and damaged entries do not break it", asy
   assert.deepEqual(menu.options.map((o) => o.label), ["Same", "Same (2)"]);
   assert.equal(menu.selectedId, "a");
 });
+
+const GOOGLE_CHAT = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
+
+test("Google's Gemini base address gets the chat path, with or without a trailing slash", () => {
+  assert.equal(chatAddress("https://generativelanguage.googleapis.com/v1beta/openai"), GOOGLE_CHAT);
+  assert.equal(chatAddress("https://generativelanguage.googleapis.com/v1beta/openai/"), GOOGLE_CHAT);
+  assert.equal(chatAddress(GOOGLE_CHAT), GOOGLE_CHAT);
+  assert.equal(chatAddress("https://generativelanguage.googleapis.com/v1beta/openai/?key=x#top"), GOOGLE_CHAT);
+});
+
+test("the Google path is accepted for Google's host only", () => {
+  assert.equal(chatAddress("https://home.example.com/v1beta/openai"), null);
+  assert.equal(chatAddress("https://generativelanguage.googleapis.com.evil.example/v1beta/openai"), null);
+});
+
+test("Google's native addresses are still refused", () => {
+  assert.equal(chatAddress("https://generativelanguage.googleapis.com/v1beta/models/gemini-x:generateContent"), null);
+  assert.equal(chatAddress("https://generativelanguage.googleapis.com/v1beta/models"), null);
+  assert.equal(chatAddress("https://generativelanguage.googleapis.com/v1beta"), null);
+});
+
+test("the Google model list address comes from the expanded address, and models/ ids are read as typed", () => {
+  assert.equal(modelsAddress(chatAddress("https://generativelanguage.googleapis.com/v1beta/openai")), "https://generativelanguage.googleapis.com/v1beta/openai/models");
+  assert.deepEqual(readModelIds({ object: "list", data: [{ id: "models/gemini-a" }, { id: "gemini-b" }] }), ["models/gemini-a", "gemini-b"]);
+});

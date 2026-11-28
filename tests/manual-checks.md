@@ -463,3 +463,10 @@ Needs an AI helper set up in Settings.
 4. Only unfinished helpers: Talk says "Finish setting up a helper in Settings." and **Open Settings** opens Settings.
 5. No helpers: "Add an AI helper in Settings first." as before.
 6. Phone width and keyboard only: Tab reaches the menu; arrow keys skip greyed options.
+
+## Google Gemini address (web, needs the parent's real Gemini key)
+
+1. Settings, Add an AI helper, Another service. Type `https://generativelanguage.googleapis.com/v1beta/openai` and Next. Paste the key.
+2. Pick an AI: the list shows Google's models (names may start with `models/`). Pick one, Next.
+3. The check passes and Done shows. If the browser blocks the request (CORS) or Google refuses the thinking setting, write down exactly what shows; neither has been tried against the real service.
+4. Talk it through: send a message; a reply comes. Try `https://generativelanguage.googleapis.com/v1beta/models/x:generateContent`: the app asks for "the address the service gives".

@@ -328,7 +328,7 @@ function renderServiceStep() {
     "div",
     { id: "address-row" },
     el("label", { for: "flow-address", text: "Its web address" }),
-    el("p", { class: "hint", text: "It looks like http://my-computer:8080 or https://example.com." }),
+    el("p", { class: "hint", text: "It looks like http://my-computer:8080, https://example.com or https://generativelanguage.googleapis.com/v1beta/openai." }),
     addressInput,
     el("p", { id: "http-note", class: "hint reserved" }),
   );

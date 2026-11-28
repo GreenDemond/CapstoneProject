@@ -274,6 +274,7 @@ export function readModelIds(data) {
 //   https://openrouter.ai/api/v1 -> https://openrouter.ai/api/v1/chat/completions
 // A full chat address (ending in /chat/completions) is kept as typed. Any other path gives null,
 // and the app asks the student for the address the service gives instead of guessing.
+const GOOGLE_HOST = "generativelanguage.googleapis.com";
 export function chatAddress(typed) {
   const parsed = parseAddress(typed);
   if (!parsed.ok) {
@@ -285,7 +286,9 @@ export function chatAddress(typed) {
   if (path.endsWith(suffix)) {
     return url.href;
   }
-  if (path === "" || path === "/v1" || path.endsWith("/api/v1") || path === "/api/v1") {
+  // Google's OpenAI-compatible Gemini base. This one extra path is accepted for this one host only.
+  const google = url.hostname === GOOGLE_HOST && path === "/v1beta/openai";
+  if (google || path === "" || path === "/v1" || path.endsWith("/api/v1") || path === "/api/v1") {
     url.pathname = (path === "" ? "/v1" : path) + suffix;
     url.search = "";
     url.hash = "";
