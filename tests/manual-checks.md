@@ -376,3 +376,15 @@ Not yet done by anyone: the browser tests for this slice (`tests/browser/tabs.sp
 7. Type something, press **Back to the paste box**: you are on the paste screen, your pasted text is still in its box, and nothing is saved. Refresh the page while writing: you are back on the paste screen.
 8. Paste text, pick a kind, press **Suggest some to start**: "Here's a start" with starter steps, as before. Without a kind it says "Tap the kind of work it is, then try again."
 9. Phone width and keyboard only: Tab reaches both buttons in order, Enter works.
+
+## Class name and the return visit (web, W11)
+
+1. On the paste screen, under the assignment box, find **Class (optional)** with "For example: History". Type "  History  ", press **I'll write my steps**, write one step, press **Done writing**, then **Start**. The work screen shows "Class: History". Refresh: the pick-up card shows "Class: History".
+2. Start another assignment with the class box empty (or only spaces): no "Class:" line anywhere. After Start, the class box is empty again.
+3. Paste 80 letters into the class box: it stops at 40. Type `<b>Art</b>`: it shows as typed on the work screen, not bold.
+4. Finish the only step and press **Close**: home shows "That's today done." and "A good time to close the app." Refresh: it is still there only if nothing new was started. Start a new assignment: the lines go.
+5. First visit with clean data: no look-back card. In the browser tools, set `focusapp.v1` section `lookbackCard` to `{"on": "<a date 8 days ago, ISO>"}` and refresh: a card "A quick look back at your week" with **Take a look** and **Not now**. No number of days is shown.
+6. **Take a look** opens What I did (with "Your week"). Back to home: the card is gone. **Not now**: card gone, and stays gone after a refresh. A date 6 days ago: no card.
+7. Set `lookbackCard` to a string, a number, or a date in the future: home still opens and shows no card.
+8. Park a thought while working (Park a thought). On home, "Thoughts you set aside" shows the newest three as plain text, with "You can read or delete these in What I did." Delete one in What the app remembers: it leaves home too.
+9. Phone width and keyboard only: Tab reaches the card buttons and the class box; nothing overlaps the bottom tabs.

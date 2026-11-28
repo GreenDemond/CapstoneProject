@@ -845,3 +845,26 @@ body.has-tabs { padding-bottom: 5rem; }
   border: 1px solid #c9c9c9;
   border-radius: 0.5rem;
 }
+
+/* Return visit (design/class-and-return-w11.md): the look-back card, set-aside thoughts and the all-done line. */
+.lookback-card,
+.thoughts,
+.all-done {
+  margin: 0 0 1rem;
+}
+
+.lookback-card p,
+.all-done p:first-child {
+  margin: 0 0 0.5rem;
+}
+
+.thoughts ul {
+  margin: 0 0 0.5rem;
+  padding-left: 1.25rem;
+}
+
+#class-label {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+}

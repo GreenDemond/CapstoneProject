@@ -2,6 +2,7 @@
 // Done, and the first part of a Drifted step, count the same (DECISIONS P5).
 // Still working and Stuck never change the steps. Later moves a step to the end.
 import { KINDS } from "./starter-steps.js";
+import { normalizeClassLabel } from "./class-label.js";
 
 export const STUCK_HINTS = [
   "Re-read the instructions and underline the verb.",
@@ -120,5 +121,6 @@ export function normalizeWork(raw) {
   const nextId = Number.isInteger(raw.nextId) && raw.nextId > highest ? raw.nextId : highest + 1;
   // The kind of work is optional: it lets the chat pre-select it after a refresh.
   const kind = KINDS.some((k) => k.id === raw.kind) ? raw.kind : undefined;
-  return kind ? { steps, nextId, kind } : { steps, nextId };
+  const classLabel = normalizeClassLabel(raw.classLabel);
+  return { steps, nextId, ...(kind ? { kind } : {}), ...(classLabel ? { classLabel } : {}) };
 }

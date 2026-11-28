@@ -24,8 +24,15 @@
           <button type="button" id="open-lookup" hidden>Look it up</button>
         </nav>
 
+        <div id="lookback-card" class="lookback-card" hidden>
+          <p id="lookback-line"></p>
+          <button type="button" id="lookback-open"></button>
+          <button type="button" id="lookback-later"></button>
+        </div>
+
         <div id="pickup" class="pickup" hidden>
           <p class="hint" id="pickup-line"></p>
+          <p class="hint" id="pickup-class" hidden></p>
           <p class="pickup-step" id="pickup-step"></p>
           <button type="button" id="pickup-start" class="primary">Start this step</button>
           <div class="pickup-more">
@@ -35,6 +42,17 @@
           <ol id="pickup-list" class="steps" hidden></ol>
         </div>
 
+        <div id="all-done" class="all-done" hidden>
+          <p id="all-done-line"></p>
+          <p class="hint" id="close-app-line"></p>
+        </div>
+
+        <div id="thoughts" class="thoughts" hidden>
+          <h3 id="thoughts-heading"></h3>
+          <ul id="thoughts-list"></ul>
+          <p class="hint" id="thoughts-hint"></p>
+        </div>
+
         <div id="paste-form">
         <h2 id="paste-heading">What's the assignment?</h2>
         <p class="hint" id="paste-hint">Paste the instructions or what you have to do. This stays on your device.</p>
@@ -42,6 +60,12 @@
 
         <label for="assignment-text" class="visually-hidden">Assignment text</label>
         <textarea id="assignment-text" rows="8" placeholder="Paste here"></textarea>
+
+        <p>
+          <label for="class-label" id="class-label-title"></label>
+          <input type="text" id="class-label" maxlength="40" autocomplete="off" aria-describedby="class-label-hint">
+        </p>
+        <p class="hint" id="class-label-hint"></p>
 
         <fieldset class="kinds">
           <legend>What kind of work is this?</legend>
@@ -122,6 +146,7 @@
 
       <section id="work-screen" hidden aria-labelledby="work-heading">
         <h2 id="work-heading" tabindex="-1">Work</h2>
+        <p class="hint" id="work-class" hidden></p>
         <p class="hint" id="work-saved"></p>
         <div id="work-body"></div>
       </section>

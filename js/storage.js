@@ -4,6 +4,8 @@
 import { emptyProfile, normalizeProfile } from "./logic/profile.js";
 import { normalizeServices } from "./logic/ai-services.js";
 import { normalizeWork } from "./logic/work.js";
+import { normalizeClassLabel } from "./logic/class-label.js";
+import { normalizeHandledOn } from "./logic/return-visit.js";
 import { normalizeParked, normalizeRecall } from "./logic/work-extras.js";
 import { normalizeMoments, normalizeHelps } from "./logic/looking-back.js";
 import { normalizeChatSettings } from "./logic/chat-settings.js";
@@ -253,7 +255,24 @@ export function loadWork(storage = defaultStorage()) {
 }
 
 export function saveWork(work, savedOn = new Date().toISOString(), storage = defaultStorage()) {
-  return saveSection("work", work === null ? null : { steps: work.steps, nextId: work.nextId, savedOn, ...(work.kind ? { kind: work.kind } : {}) }, storage);
+  return saveSection("work", work === null ? null : { steps: work.steps, nextId: work.nextId, savedOn, ...(work.kind ? { kind: work.kind } : {}), ...(normalizeClassLabel(work.classLabel) ? { classLabel: normalizeClassLabel(work.classLabel) } : {}) }, storage);
+}
+
+// The day the weekly look-back card was last dealt with (Take a look, Not now, or the first visit).
+// Loads as "" when nothing usable is saved. Only a date is kept (design/class-and-return-w11.md).
+export function loadLookbackCardDate(nowMs = Date.now(), storage = defaultStorage()) {
+  if (!storage) {
+    return "";
+  }
+  try {
+    return normalizeHandledOn(readSection(storage, "lookbackCard")?.on, nowMs);
+  } catch {
+    return "";
+  }
+}
+
+export function saveLookbackCardDate(iso, storage = defaultStorage()) {
+  return saveSection("lookbackCard", { on: iso }, storage);
 }
 
 // Thoughts the student parked during work, and their own recall answers (design/work-extras-w4.md).

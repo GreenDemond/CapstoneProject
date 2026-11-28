@@ -6,7 +6,12 @@ import { cleanPastedText, limitPaste } from "../logic/clean-text.js";
 import { KINDS, DEFAULT_STEP_COUNT, starterStepsFor, withTwoMinuteStart, showingLine } from "../logic/starter-steps.js";
 import { suggestKind, findRequirements } from "../logic/heuristics.js";
 import { normalizeStepCount, DEFAULT_PICKED_COUNT } from "../logic/step-count.js";
-import { loadWork } from "../storage.js";
+import { loadWork, loadParked, loadLookbackCardDate, saveLookbackCardDate } from "../storage.js";
+import { normalizeClassLabel, classLine, CLASS_LABEL_TITLE, CLASS_LABEL_HINT } from "../logic/class-label.js";
+import {
+  lookbackCardState, thoughtsToShow, LOOKBACK_CARD_LINE, LOOKBACK_OPEN_LABEL, LOOKBACK_LATER_LABEL, THOUGHTS_HEADING, THOUGHTS_HINT,
+  ALL_DONE_LINE, CLOSE_APP_LINE,
+} from "../logic/return-visit.js";
 import { pickupLine } from "../logic/home.js";
 import { currentIndex, allDone } from "../logic/work.js";
 import { inUseHelper, usableServices, pasteStatus, isReady, effortRefusedLine } from "../logic/ai-services.js";
@@ -225,6 +230,7 @@ checkButton.addEventListener("click", () => {
 
 startButton.addEventListener("click", () => {
   openWorkScreen(allSteps.slice(0, shownCount));
+  classInput.value = ""; // the class name belongs to the assignment just started, not the next one
 });
 const aiBox = document.getElementById("ai-box");
 // The top line must stay true: the text leaves this device only when the AI tick box is on.
@@ -356,11 +362,74 @@ const pickupList = document.getElementById("pickup-list");
 const pasteForm = document.getElementById("paste-form");
 const replaceNote = document.getElementById("replace-note");
 let pickupWork = null;
+let justFinished = false; // set when the student closes the work screen with every step done
+const classInput = document.getElementById("class-label");
+document.getElementById("class-label-title").textContent = CLASS_LABEL_TITLE;
+document.getElementById("class-label-hint").textContent = CLASS_LABEL_HINT;
+
+// The optional class name for the assignment being started (the student's own words, up to 40 characters).
+export function getClassLabel() {
+  return normalizeClassLabel(classInput.value);
+}
+
+// The weekly look-back card: one quiet card, at most once a week, with no AI and no counts of days away.
+const lookbackCard = document.getElementById("lookback-card");
+const lookbackOpen = document.getElementById("lookback-open");
+const lookbackLater = document.getElementById("lookback-later");
+document.getElementById("lookback-line").textContent = LOOKBACK_CARD_LINE;
+lookbackOpen.textContent = LOOKBACK_OPEN_LABEL;
+lookbackLater.textContent = LOOKBACK_LATER_LABEL;
+
+function refreshLookbackCard() {
+  const nowMs = Date.now();
+  const state = lookbackCardState(loadLookbackCardDate(nowMs), nowMs);
+  if (state.startClock) {
+    saveLookbackCardDate(new Date(nowMs).toISOString()); // the first week starts now; nothing is shown yet
+  }
+  lookbackCard.hidden = !state.show;
+}
+
+function handleLookbackCard() {
+  saveLookbackCardDate(new Date().toISOString()); // Take a look and Not now both wait another week
+  lookbackCard.hidden = true;
+}
+
+lookbackOpen.addEventListener("click", () => {
+  handleLookbackCard();
+  document.getElementById("open-looking").click(); // the same screen as the What I did button
+});
+lookbackLater.addEventListener("click", () => {
+  handleLookbackCard();
+  (pickup.hidden ? writeButton : pickupStart).focus();
+});
+
+// Thoughts the student set aside while working, newest first, read-only here (delete is in What I did).
+const thoughtsBox = document.getElementById("thoughts");
+document.getElementById("thoughts-heading").textContent = THOUGHTS_HEADING;
+document.getElementById("thoughts-hint").textContent = THOUGHTS_HINT;
+
+function refreshThoughts() {
+  const shown = thoughtsToShow(loadParked());
+  document.getElementById("thoughts-list").replaceChildren(
+    ...shown.map((thought) => {
+      const item = document.createElement("li");
+      item.textContent = thought.text;
+      return item;
+    }),
+  );
+  thoughtsBox.hidden = shown.length === 0;
+}
 
 export function refreshHome() {
   effortLineShown = false;
   const saved = loadWork();
   const live = saved.work && !allDone(saved.work) ? saved : null;
+  const everythingDone = live === null && (justFinished || (saved.work !== null && allDone(saved.work)));
+  document.getElementById("all-done").hidden = !everythingDone;
+  document.getElementById("all-done-line").textContent = everythingDone ? ALL_DONE_LINE : "";
+  document.getElementById("close-app-line").textContent = everythingDone ? CLOSE_APP_LINE : "";
+  refreshLookbackCard();
+  refreshThoughts();
   pickupWork = live ? live.work : null;
   pickup.hidden = live === null;
   pasteForm.hidden = live !== null;
@@ -369,6 +438,9 @@ export function refreshHome() {
   pickupList.replaceChildren();
   pickupShow.textContent = "Show all my steps";
   pickupShow.setAttribute("aria-expanded", "false");
+  const pickupClass = document.getElementById("pickup-class");
+  pickupClass.textContent = live ? classLine(live.work.classLabel) : "";
+  pickupClass.hidden = pickupClass.textContent === "";
   if (!live) {
     return;
   }
@@ -391,6 +463,7 @@ pickupShow.addEventListener("click", () => {
 });
 
 document.getElementById("new-assignment").addEventListener("click", () => {
+  justFinished = false;
   pasteForm.hidden = false;
   textBox.focus();
 });
@@ -401,7 +474,8 @@ export function getChosenKind() {
 }
 
 // Runs when the work screen closes: shows the right home view and puts focus on its main button.
-export function afterWorkClosed() {
+export function afterWorkClosed(finished = false) {
+  justFinished = finished;
   refreshHome();
   (pickup.hidden ? writeButton : pickupStart).focus();
 }

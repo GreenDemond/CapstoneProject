@@ -1,5 +1,6 @@
 // The work screen: one step at a time (design/work-screen.md). Steps and progress are saved on the
 // device after every change (design/home-screen.md).
+import { normalizeClassLabel, classLine } from "../logic/class-label.js";
 import { createWork, currentIndex, doneCount, allDone, applyChoice, hintAt, ringFraction, formatTime, secondsUntil, STUCK_HINTS } from "../logic/work.js";
 import { asksRecall, addParked, addRecall, removeItem, showAskPerson, buildQuestion, hasOwnWords, MAX_PARKED_LENGTH, MAX_RECALL_LENGTH, MAX_ASK_LENGTH } from "../logic/work-extras.js";
 import { listLabel } from "../logic/home.js";
@@ -12,6 +13,7 @@ import { LOOKUP_ENABLED } from "../lookup-config.js";
 import { openLookup } from "./lookup.js";
 
 let onClose = () => {}; // set by initWork: runs after the work screen closes
+let getClassLabel = () => ""; // set by initWork: the optional class name typed on the paste screen
 let getChosenKind = () => null; // set by initWork: the kind picked on the home screen
 
 const workBody = document.getElementById("work-body");
@@ -119,6 +121,7 @@ function ringSvg(fraction) {
 }
 
 const workSavedLine = document.getElementById("work-saved");
+const workClass = document.getElementById("work-class");
 let workListOpen = false;
 
 // Steps are saved after every change, so a refresh or a week away loses nothing.
@@ -140,7 +143,10 @@ export function stepListNode(steps) {
 export function openWorkScreen(texts, existing = null) {
   stopTimer();
   // The kind chosen on the paste screen is kept with the steps, so the chat can pre-select it later.
-  work = existing ?? { ...createWork(texts), ...(getChosenKind() ? { kind: getChosenKind() } : {}) };
+  const label = normalizeClassLabel(getClassLabel());
+  work = existing ?? { ...createWork(texts), ...(getChosenKind() ? { kind: getChosenKind() } : {}), ...(label ? { classLabel: label } : {}) };
+  workClass.textContent = classLine(work.classLabel);
+  workClass.hidden = workClass.textContent === "";
   persistWork();
   parked = loadParked();
   recalls = loadRecall();
@@ -172,13 +178,14 @@ function closeWork() {
   stopTimer();
   helpCard = null;
   helpNote = "";
-  if (work && allDone(work)) {
+  const finished = Boolean(work && allDone(work));
+  if (finished) {
     saveWork(null); // finished: nothing left to pick up
   }
   work = null;
   workBody.replaceChildren();
   showScreen("home");
-  onClose();
+  onClose(finished);
 }
 
 function currentStepId() {
@@ -599,7 +606,8 @@ function renderWork(focusStep = true) {
   }
 }
 
-export function initWork({ onClose: onCloseFn, getChosenKind: getter }) {
+export function initWork({ onClose: onCloseFn, getChosenKind: getter, getClassLabel: labelGetter }) {
   onClose = onCloseFn;
   getChosenKind = getter;
+  getClassLabel = labelGetter;
 }
