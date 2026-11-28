@@ -166,6 +166,7 @@ test("Recall: Skip and blank both go on; blank Save asks for a few words; the la
   expect(await storedSection(page, "recall")).toBeNull();
   // Keep finishing steps: each one asks, each can be skipped, and the last one still reaches the end.
   for (let i = 0; i < 30 && (await page.getByText("All your steps are done.").count()) === 0; i += 1) {
+    await page.waitForTimeout(450); // the work screen ignores a second tap within 400 ms
     await page.getByRole("button", { name: "Done", exact: true }).click();
     await expect(page.getByText("One thing you just learned?", { exact: true })).toBeVisible();
     await page.getByRole("button", { name: "Skip" }).click();
