@@ -125,6 +125,60 @@ final class MeUITests: XCTestCase {
     XCTAssertTrue(app.element("own-ai-empty").waitForExistence(timeout: 5))
   }
 
+  /// Typing Google's address fills in the model name; another address leaves a name alone.
+  func testGoogleAddressFillsInTheModelName() {
+    let app = launch()
+    app.openMe("me-row-services")
+    let add = app.buttons["own-ai-add"]
+    app.scrollTo(add)
+    add.tap()
+    let address = app.textFields["own-ai-address"]
+    XCTAssertTrue(address.waitForExistence(timeout: 5))
+    address.clearAndType("https://generativelanguage.googleapis.com/v1beta/openai/")
+    let model = app.textFields["own-ai-model"]
+    app.scrollTo(model)
+    XCTAssertEqual(model.value as? String, "models/gemini-flash-lite-latest")
+    // Another address does not replace a name that is already there.
+    app.scrollTo(address)
+    address.clearAndType("https://api.example.com/v1")
+    app.scrollTo(model)
+    XCTAssertEqual(model.value as? String, "models/gemini-flash-lite-latest")
+    app.buttons["own-ai-cancel"].tap()
+  }
+
+  /// A saved Google service keeps the model name the student typed when it is opened to edit.
+  func testEditingASavedGoogleServiceKeepsItsModelName() {
+    let app = launch()
+    app.openMe("me-row-services")
+    let add = app.buttons["own-ai-add"]
+    app.scrollTo(add)
+    add.tap()
+    let label = app.textFields["own-ai-label"]
+    XCTAssertTrue(label.waitForExistence(timeout: 5))
+    label.clearAndType("Gem")
+    // The model is typed first, so the address fill-in has nothing to replace
+    // (the edit helper cannot reliably delete the 30-character default).
+    let model = app.textFields["own-ai-model"]
+    model.clearAndType("gemini-4-hydrogen")
+    let address = app.textFields["own-ai-address"]
+    address.clearAndType("https://generativelanguage.googleapis.com/v1beta/openai/")
+    let key = app.secureTextFields["own-ai-key"]
+    key.tap()
+    key.typeText("test-key-123")
+    app.putKeyboardAway()
+    app.buttons["own-ai-save"].tap()
+    XCTAssertTrue(app.element("own-ai-row").waitForExistence(timeout: 5))
+
+    let edit = app.buttons["Edit Gem"]
+    app.scrollTo(edit)
+    edit.tap()
+    let reopened = app.textFields["own-ai-model"]
+    XCTAssertTrue(reopened.waitForExistence(timeout: 5))
+    app.scrollTo(reopened)
+    XCTAssertEqual(reopened.value as? String, "gemini-4-hydrogen")
+    app.buttons["own-ai-cancel"].tap()
+  }
+
   /// Add a service (after the disclosure), see it in the list, see it on Talk, and remove it.
   func testAddAServiceSeeItOnTalkAndRemoveIt() {
     let app = launch()

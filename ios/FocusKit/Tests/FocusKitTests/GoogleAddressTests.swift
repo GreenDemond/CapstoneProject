@@ -209,3 +209,35 @@ private let googleModel = "gemini-4-hydrogen"
     #expect(outcome == .found(["gemini-4-hydrogen", "gemini-4-neon"]))
   }
 }
+
+@Suite struct GoogleDefaultModelTests {
+  private func suggest(_ address: String, _ current: String) -> String? {
+    OwnAIConfig.suggestedModel(address: address, current: current)
+  }
+
+  @Test func googlesAddressFillsAnEmptyOrStartingModelBox() {
+    let base = "https://generativelanguage.googleapis.com/v1beta/openai/"
+    #expect(suggest(base, "") == "models/gemini-flash-lite-latest")
+    #expect(suggest(base, "   ") == "models/gemini-flash-lite-latest")
+    #expect(suggest(base, "openrouter/free") == "models/gemini-flash-lite-latest")
+    #expect(suggest("GENERATIVELANGUAGE.googleapis.com/v1beta/openai", "") != nil)
+    #expect(suggest(base + "chat/completions", "") != nil)
+  }
+
+  @Test func aNameTheStudentChoseIsNeverReplaced() {
+    let base = "https://generativelanguage.googleapis.com/v1beta/openai/"
+    #expect(suggest(base, "gemini-4-hydrogen") == nil)
+    #expect(suggest(base, "models/other") == nil)
+    #expect(suggest(base, "models/gemini-flash-lite-latest") == nil)
+  }
+
+  @Test func otherAddressesNeverChangeTheBox() {
+    #expect(suggest("https://openrouter.ai/api/v1", "") == nil)
+    #expect(suggest("https://api.example.com/v1", "openrouter/free") == nil)
+    #expect(
+      suggest("https://generativelanguage.googleapis.com.example.org/v1beta/openai", "") == nil)
+    #expect(suggest("https://evil.googleapis.com/v1", "") == nil)
+    #expect(suggest("not an address", "") == nil)
+    #expect(suggest("", "") == nil)
+  }
+}

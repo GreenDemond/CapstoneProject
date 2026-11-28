@@ -73,6 +73,19 @@ public struct OwnAIConfig: Equatable, Sendable {
   /// address would end up in the settings file).
   public var url: URL? { Self.parse(address) }
 
+  /// Google's Gemini API host, the only one whose model names and default get special handling.
+  static let googleHost = "generativelanguage.googleapis.com"
+
+  /// A model name to fill in for an address that has a known default, only while the model box is
+  /// empty or still holds the app's own starting name. A name the student typed is never replaced.
+  public static func suggestedModel(address: String, current: String) -> String? {
+    let name = current.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard name.isEmpty || name == Words.ownAIDefaultModel,
+      parse(address)?.host?.lowercased() == googleHost
+    else { return nil }
+    return Words.ownAIGoogleModel
+  }
+
   public static let addressLimit = 500
   public static let modelLimit = 100
 
@@ -421,7 +434,7 @@ public enum ModelLister {
     switch status {
     case 200...299:
       // Google lists models as `models/<name>`; chat takes `<name>`. Only that exact host.
-      let google = config.url?.host?.lowercased() == "generativelanguage.googleapis.com"
+      let google = config.url?.host?.lowercased() == OwnAIConfig.googleHost
       let names = readNames(data, stripPrefix: google ? "models/" : nil)
       return names.isEmpty ? .problem : .found(names)
     case 401, 403: return .keyNotAccepted

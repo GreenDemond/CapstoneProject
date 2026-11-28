@@ -155,6 +155,7 @@ How to add one: date, who asked, one-line request in their words, then rule conf
 ### F11. Google's Gemini API (and Groq) addresses
 - **Asked by:** parent. "can we adjust the app to also accept google's api paths?", with a key of his own to try. Then: "look for coding examples from google and set tests up that way."
 - **Status:** built and checked as GOOGLE1 (`design/slices/GOOGLE1-more-provider-addresses.md`), committed 2026-11-27; waits for his device check with his own key. Google blocks under-18 students from AI Studio even on school accounts, so this is for adults only (see the D8 note).
+- **Default model (GOOGLE2, 2026-11-28):** Google's address fills in `models/gemini-flash-lite-latest`; committed, waits for his device check.
 - **Finding:** before this change the app did not complete Google's base address `https://generativelanguage.googleapis.com/v1beta/openai/` (nor Groq's `.../openai/v1`); only the full `.../chat/completions` address worked.
 - **Source of the tests:** Google's OpenAI-compatibility page (https://aistudio.google.com/docs/openai, read 2026-11-27): the base address, the REST chat URL, `Authorization: Bearer`, a system then a user message, the short model name, `reasoning_effort: "low"`, and the list URL. Google also says reasoning cannot be turned off for Gemini 2.5 Pro, Gemini 3 and Gemini 4, so the app's "none" thinking level may be refused for those; unverified how the error reads.
 - **Not built:** Google's native API.

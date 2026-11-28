@@ -688,7 +688,12 @@ private struct ServiceEditor: View {
         }
       }
       .onAppear(perform: load)
-      .onChange(of: endpoint) { own.addressTyped(endpoint) }
+      .onChange(of: endpoint) {
+        own.addressTyped(endpoint)
+        if let suggested = OwnAIConfig.suggestedModel(address: endpoint, current: modelId) {
+          modelId = suggested
+        }
+      }
     }
   }
 
