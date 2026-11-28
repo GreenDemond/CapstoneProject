@@ -388,3 +388,15 @@ Not yet done by anyone: the browser tests for this slice (`tests/browser/tabs.sp
 7. Set `lookbackCard` to a string, a number, or a date in the future: home still opens and shows no card.
 8. Park a thought while working (Park a thought). On home, "Thoughts you set aside" shows the newest three as plain text, with "You can read or delete these in What I did." Delete one in What the app remembers: it leaves home too.
 9. Phone width and keyboard only: Tab reaches the card buttons and the class box; nothing overlaps the bottom tabs.
+
+## During a step (web, W12)
+
+1. Start some steps. On the work screen press **Say when this is finished**, type "I have three links", press **Save that line** (or Enter). "Done when: I have three links" shows under the step. Refresh and pick the steps up again: the line is still there.
+2. Press **Change that line**, then **Clear that line**: the line goes. Save a box with only spaces: nothing is saved, and the step works as before.
+3. Tick **Show a countdown** and wait 12 minutes (or set the clock forward). A card asks "Did that time feel about right?" with **About right**, **Longer**, **Skip**. There is no **Shorter** at 12 minutes. Press **Longer**: "Noted." shows and the card goes. At 25 minutes the card offers **Shorter**, **About right**, **Skip**, no **Longer**.
+4. Do the same with **Skip**: nothing is noted. Ignore the card and press **Done**: the step moves on normally.
+5. Let a countdown run out and wait more than two minutes before looking: no card appears.
+6. Answer **Longer** at 12 minutes three times (on different steps). A line "Your answers so far point to 25 minutes." shows under the 12 / 25 buttons, and the next step's countdown starts at 25:00. Choosing 12 minutes yourself still works.
+7. Press **Drifted** on a step like "Find three sources and then read the first one": the box starts with "Find three sources". On a short step it starts with the whole step. Typing your own words works as before.
+8. In What the app remembers, **Delete all** removes the saved answers: the "point to" line goes.
+9. Phone width and keyboard only: Tab reaches the card buttons and the Done when: box; nothing overlaps the bottom of the screen.

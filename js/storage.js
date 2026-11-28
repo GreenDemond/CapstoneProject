@@ -8,6 +8,7 @@ import { normalizeClassLabel } from "./logic/class-label.js";
 import { normalizeHandledOn } from "./logic/return-visit.js";
 import { normalizeParked, normalizeRecall } from "./logic/work-extras.js";
 import { normalizeMoments, normalizeHelps } from "./logic/looking-back.js";
+import { normalizeBlockAnswers } from "./logic/block-length.js";
 import { normalizeChatSettings } from "./logic/chat-settings.js";
 import { normalizeChats } from "./logic/chat-store.js";
 import { normalizeCalendarItems, normalizeCounts } from "./logic/calendar.js";
@@ -339,11 +340,28 @@ export function saveHelps(items, storage = defaultStorage()) {
   return saveSection("helps", items.length === 0 ? null : items, storage);
 }
 
+// How the student said each countdown length felt (design/during-a-step-w12.md). Loads as an empty list
+// when nothing usable is saved. An empty list removes the section.
+export function loadBlockAnswers(storage = defaultStorage()) {
+  if (!storage) {
+    return [];
+  }
+  try {
+    return normalizeBlockAnswers(readSection(storage, "blocks"));
+  } catch {
+    return [];
+  }
+}
+
+export function saveBlockAnswers(items, storage = defaultStorage()) {
+  return saveSection("blocks", items.length === 0 ? null : items, storage);
+}
+
 // Delete everything the app remembers apart from the profile (the profile screen holds that):
 // parked thoughts, recall answers, did-that-help marks and the finished-step counts.
 // Returns true only if every section was confirmed gone.
 export function deleteRemembered(storage = defaultStorage()) {
-  const results = [saveParked([], storage), saveRecall([], storage), saveHelps([], storage), saveMoments([], storage)];
+  const results = [saveParked([], storage), saveRecall([], storage), saveHelps([], storage), saveMoments([], storage), saveBlockAnswers([], storage)];
   return results.every(Boolean);
 }
 

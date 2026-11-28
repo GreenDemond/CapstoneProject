@@ -1,11 +1,15 @@
 // The work screen: one step at a time (design/work-screen.md). Steps and progress are saved on the
 // device after every change (design/home-screen.md).
 import { normalizeClassLabel, classLine } from "../logic/class-label.js";
-import { createWork, currentIndex, doneCount, allDone, applyChoice, hintAt, ringFraction, formatTime, secondsUntil, STUCK_HINTS } from "../logic/work.js";
+import { createWork, currentIndex, doneCount, allDone, applyChoice, driftStart, hintAt, ringFraction, formatTime, secondsUntil, STUCK_HINTS } from "../logic/work.js";
 import { asksRecall, addParked, addRecall, removeItem, showAskPerson, buildQuestion, hasOwnWords, MAX_PARKED_LENGTH, MAX_RECALL_LENGTH, MAX_ASK_LENGTH } from "../logic/work-extras.js";
+import {
+  LENGTHS, BLOCK_QUESTION, BLOCK_LABELS, BLOCK_SKIP, BLOCK_NOTED, BLOCK_SAVE_FAILED, learnedLine, offeredAnswers, addBlockAnswer, suggestedLength, shouldAsk,
+  MAX_DONE_WHEN_LENGTH, DONE_WHEN_LABEL, DONE_WHEN_ADD, DONE_WHEN_CHANGE, DONE_WHEN_PROMPT, DONE_WHEN_SAVE, DONE_WHEN_CLEAR, setDoneWhen,
+} from "../logic/block-length.js";
 import { listLabel } from "../logic/home.js";
 import { addMoment, addHelp } from "../logic/looking-back.js";
-import { saveWork, loadParked, saveParked, loadRecall, saveRecall, loadMoments, saveMoments, loadHelps, saveHelps } from "../storage.js";
+import { saveWork, loadBlockAnswers, saveBlockAnswers, loadParked, saveParked, loadRecall, saveRecall, loadMoments, saveMoments, loadHelps, saveHelps } from "../storage.js";
 import { confetti } from "../confetti.js";
 import { el, button, announce } from "../ui/dom.js";
 import { showScreen, setStepsPreviewOpen } from "../ui/screens.js";
@@ -19,7 +23,7 @@ let getChosenKind = () => null; // set by initWork: the kind picked on the home 
 const workBody = document.getElementById("work-body");
 const workHeading = document.getElementById("work-heading");
 
-const TIMER_CHOICES = [12, 25];
+const TIMER_CHOICES = LENGTHS;
 const ADVANCE_GUARD_MS = 400;
 let work = null;
 let mode = "steps"; // "steps", "stuck", "drifting", "recall", "done"
@@ -48,6 +52,13 @@ let secondsLeft = 0;
 let endMs = 0; // when the countdown ends, by the clock
 let timeUp = false;
 let tick = null;
+// "Did that time feel about right?" after a countdown ends (design/during-a-step-w12.md).
+let blockAnswers = [];
+let askBlock = null; // null, or the length of the countdown that just ended
+let blockNote = "";
+let pendingLength = null; // the length the answers point to, used when the next step starts
+let doneWhenOpen = false;
+let doneWhenText = "";
 
 function stopTimer() {
   if (tick !== null) {
@@ -73,6 +84,8 @@ function updateRing() {
 function startTimer() {
   stopTimer();
   timeUp = false;
+  askBlock = null;
+  blockNote = "";
   if (!timerOn) {
     return;
   }
@@ -84,6 +97,11 @@ function startTimer() {
     if (secondsLeft <= 0) {
       stopTimer();
       timeUp = true;
+      // One quiet question, only soon after the countdown ended. Nothing waits on it.
+      if (shouldAsk(endMs, Date.now())) {
+        askBlock = timerMinutes;
+        blockNote = "";
+      }
       // Only redraw the step view. If a box or a hint is open, the line waits
       // until the student returns to the step, so their words are not lost.
       if (mode === "steps") {
@@ -156,6 +174,16 @@ export function openWorkScreen(texts, existing = null) {
   helpCard = null;
   helpNote = "";
   resetAsk();
+  blockAnswers = loadBlockAnswers();
+  askBlock = null;
+  blockNote = "";
+  pendingLength = null;
+  doneWhenOpen = false;
+  doneWhenText = "";
+  const learned = suggestedLength(blockAnswers, Date.now());
+  if (learned !== null) {
+    timerMinutes = learned;
+  }
   workListOpen = false;
   mode = "steps";
   hintsShown = 0;
@@ -203,6 +231,7 @@ function choose(choice, splitText = "") {
   mode = "steps";
   hintsShown = 0;
   driftNote = "";
+  doneWhenOpen = false;
   if (choice !== "still") {
     resetAsk(); // a different step needs its own question
   }
@@ -239,6 +268,10 @@ function choose(choice, splitText = "") {
     stopTimer();
     mode = "done";
   } else if (currentStepId() !== beforeId) {
+    if (pendingLength !== null) {
+      timerMinutes = pendingLength; // what the student's answers pointed to
+      pendingLength = null;
+    }
     startTimer(); // a new step starts a new countdown
   }
   // After a reading or study step, one optional question in the student's own words.
@@ -440,6 +473,78 @@ function askSection(step) {
   return wrap;
 }
 
+function answerBlock(answer) {
+  const minutes = askBlock;
+  askBlock = null;
+  if (minutes !== null && answer !== null) {
+    const next = addBlockAnswer(blockAnswers, minutes, answer, new Date().toISOString());
+    if (next !== blockAnswers && !saveBlockAnswers(next)) {
+      blockNote = BLOCK_SAVE_FAILED;
+    } else {
+      blockAnswers = next;
+      const learned = suggestedLength(blockAnswers, Date.now());
+      pendingLength = learned !== null && learned !== timerMinutes ? learned : null;
+      blockNote = learned !== null ? `${BLOCK_NOTED} ${learnedLine(learned)}` : BLOCK_NOTED;
+    }
+  }
+  renderWork(false);
+}
+
+// One quiet question when a countdown ends. Skip saves nothing. The student can ignore it and go on.
+function blockSection() {
+  if (askBlock !== null && !shouldAsk(endMs, Date.now())) {
+    askBlock = null; // too long ago to ask now
+  }
+  if (askBlock === null) {
+    return blockNote ? el("p", blockNote, { class: "hint", role: "status" }) : null;
+  }
+  const wrap = el("div", undefined, { class: "help-card", role: "group", "aria-label": BLOCK_QUESTION });
+  wrap.append(el("p", BLOCK_QUESTION));
+  for (const answer of offeredAnswers(askBlock)) {
+    wrap.append(button(BLOCK_LABELS[answer], () => answerBlock(answer)));
+  }
+  wrap.append(button(BLOCK_SKIP, () => answerBlock(null)));
+  return wrap;
+}
+
+// An optional line the student writes for this step: how they will know it is finished.
+function doneWhenSection(step) {
+  const wrap = el("div", undefined, { class: "done-when-box" });
+  const stepId = step.id;
+  const save = (text) => {
+    work = setDoneWhen(work, stepId, text);
+    persistWork();
+    doneWhenOpen = false;
+    renderWork(false);
+    workBody.querySelector("#done-when-open")?.focus();
+  };
+  if (!doneWhenOpen) {
+    const open = button(step.doneWhen ? DONE_WHEN_CHANGE : DONE_WHEN_ADD, () => {
+      doneWhenOpen = true;
+      doneWhenText = step.doneWhen ?? "";
+      renderWork(false);
+      workBody.querySelector("#done-when-text")?.focus();
+    }, "small");
+    open.id = "done-when-open";
+    wrap.append(open);
+    return wrap;
+  }
+  const input = el("input", undefined, { type: "text", id: "done-when-text", maxlength: String(MAX_DONE_WHEN_LENGTH), "aria-label": DONE_WHEN_PROMPT });
+  input.value = doneWhenText;
+  input.addEventListener("input", () => { doneWhenText = input.value; });
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      save(doneWhenText);
+    }
+  });
+  wrap.append(el("p", DONE_WHEN_PROMPT, { class: "hint" }), input, button(DONE_WHEN_SAVE, () => save(doneWhenText), "small"));
+  if (step.doneWhen) {
+    wrap.append(button(DONE_WHEN_CLEAR, () => save(""), "small"));
+  }
+  return wrap;
+}
+
 // focusStep is true when the screen opens or the student's tap replaced the step view.
 // Other redraws (timer, countdown controls, step list) keep focus on the same button.
 function renderWork(focusStep = true) {
@@ -468,6 +573,9 @@ function renderWork(focusStep = true) {
   workBody.append(el("h3", `Step ${doneCount(work) + 1} of ${total}`, { tabindex: "-1" }));
   const stepText = el("p", step.text, { class: "current-step", tabindex: "-1" });
   workBody.append(stepText);
+  if (step.doneWhen && !(mode === "steps" && doneWhenOpen)) {
+    workBody.append(el("p", `${DONE_WHEN_LABEL} ${step.doneWhen}`, { class: "hint done-when" }));
+  }
   if (workNote) {
     const reward = workNote === "Step done." || workNote.startsWith("That counts");
     const noteLine = el("p", undefined, { class: reward ? "reward" : "gentle", role: "status" });
@@ -512,7 +620,7 @@ function renderWork(focusStep = true) {
 
   if (mode === "drifting") {
     const box = el("textarea", undefined, { id: "split-text", rows: "2", maxlength: "500", "aria-label": "The smallest part of this step" });
-    box.value = step.text;
+    box.value = driftStart(step.text);
     workBody.append(el("p", "Start with the smallest part of this.", { class: "hint" }));
     workBody.append(box);
     if (driftNote) {
@@ -533,6 +641,10 @@ function renderWork(focusStep = true) {
     box.focus();
     return;
   }
+
+  const block = blockSection();
+  if (block) workBody.append(block);
+  workBody.append(doneWhenSection(step));
 
   const stepHelp = helpSection();
   if (stepHelp) workBody.append(stepHelp);
@@ -570,11 +682,15 @@ function renderWork(focusStep = true) {
   if (timerOn) {
     const pick = el("div", undefined, { class: "kind-buttons" });
     for (const minutes of TIMER_CHOICES) {
-      const b = button(`${minutes} minutes`, () => { timerMinutes = minutes; startTimer(); renderWork(false); }, "kind");
+      const b = button(`${minutes} minutes`, () => { timerMinutes = minutes; pendingLength = null; startTimer(); renderWork(false); }, "kind");
       if (minutes === timerMinutes) b.setAttribute("aria-pressed", "true");
       pick.append(b);
     }
     workBody.append(pick);
+    const learnedNow = suggestedLength(blockAnswers, Date.now());
+    if (learnedNow !== null) {
+      workBody.append(el("p", learnedLine(learnedNow), { class: "hint" }));
+    }
   }
 
   const listToggle = button(workListOpen ? "Hide my steps" : "Show all my steps", () => {

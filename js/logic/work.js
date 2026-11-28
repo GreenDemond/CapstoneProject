@@ -3,6 +3,8 @@
 // Still working and Stuck never change the steps. Later moves a step to the end.
 import { KINDS } from "./starter-steps.js";
 import { normalizeClassLabel } from "./class-label.js";
+import { cleanDoneWhen } from "./block-length.js";
+import { splitParts } from "./step-editor.js";
 
 export const STUCK_HINTS = [
   "Re-read the instructions and underline the verb.",
@@ -71,6 +73,13 @@ export function applyChoice(work, choice, splitText = "") {
   return work;
 }
 
+// What the Drifted box starts with: the first part of the step, cut the same way as in Change my steps
+// (js/logic/step-editor.js). A step too short to split starts as it is; the student can type anything.
+export function driftStart(stepText) {
+  const parts = splitParts(stepText);
+  return parts === null ? String(stepText) : parts[0];
+}
+
 // The hint for a given number of hints already shown, or null after the last one.
 export function hintAt(index) {
   return index < STUCK_HINTS.length ? STUCK_HINTS[index] : null;
@@ -112,7 +121,9 @@ export function normalizeWork(raw) {
     if (!step || typeof step.text !== "string" || step.text.trim() === "") continue;
     if (!Number.isInteger(step.id) || step.id < 0 || seen.has(step.id)) continue;
     seen.add(step.id);
-    steps.push({ id: step.id, text: step.text.slice(0, MAX_SAVED_STEP_LENGTH), done: step.done === true });
+    // The "Done when:" line is optional; a missing or damaged one is simply left out.
+    const doneWhen = cleanDoneWhen(step.doneWhen);
+    steps.push({ id: step.id, text: step.text.slice(0, MAX_SAVED_STEP_LENGTH), done: step.done === true, ...(doneWhen ? { doneWhen } : {}) });
   }
   if (steps.length === 0) {
     return null;

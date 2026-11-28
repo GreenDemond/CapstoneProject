@@ -37,6 +37,7 @@ Apple's on-device AI, voice input, haptics, the Apple calendar sheet (a download
 | W9 | Put it on my calendar as a `.ics` download | CAL1 | Built, browser tests not run. See `design/ics-w9.md` |
 | W10 | Write my own steps as the main path; Show my steps becomes Suggest some to start | AssignmentView, T05 | Built, browser tests not run. See `design/own-steps-w10.md` |
 | W11 | Class name on an assignment; return visit: weekly look-back card, set-aside thoughts, all-done line | M0b, C5, NextStepView | Built, browser tests not run. See `design/class-and-return-w11.md` |
+| W12 | During a step: Done when: line, "Did that time feel about right?" with a length suggestion, Drifted uses the better split | WorkView, BlockLength | Built, browser tests not run. See `design/during-a-step-w12.md` |
 | D1 | Deploy script that builds the clean folder; parent runs it | n/a | Built. See `design/deploy.md` |
 
 Each slice follows `AGENTS.md`: design note, review, tests first, build, review, `npm run check`, one commit, `PROGRESS.md`.
