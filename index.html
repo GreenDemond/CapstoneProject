@@ -69,6 +69,11 @@
         <p id="ai-choice-row" hidden><label for="ai-choice">Which AI helper?</label> <select id="ai-choice"></select></p>
         <p id="message" class="message" role="status" aria-live="polite"></p>
         </div>
+
+        <div id="welcome-note" class="welcome-note" hidden>
+          <p class="hint" id="welcome-line"></p>
+          <button type="button" id="welcome-hide"></button>
+        </div>
       </section>
 
       <section id="calendar-screen" hidden aria-labelledby="calendar-heading">
@@ -141,6 +146,7 @@
         <p id="ready" class="message" role="status" aria-live="polite"></p>
       </section>
     </main>
+    <div id="tabbar" class="tabbar" role="tablist" aria-label="Main tabs" hidden></div>
     <div id="print-area" hidden></div>
     <script type="module" src="js/app.js"></script>
   </body>

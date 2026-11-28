@@ -9,6 +9,7 @@ import { initCalendar } from "./screens/calendar.js";
 import { initMe } from "./screens/me.js";
 import { initChat } from "./screens/chat.js";
 import { initLookup } from "./screens/lookup.js";
+import { initTabs } from "./screens/tabs.js";
 
 initWork({ onClose: afterWorkClosed, getChosenKind });
 initIntake();
@@ -20,3 +21,4 @@ initChat({ getChosenKind });
 refreshHome();
 initMe();
 initLookup();
+initTabs();

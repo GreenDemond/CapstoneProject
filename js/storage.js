@@ -221,6 +221,22 @@ export function saveStepTipsHidden(hidden, storage = defaultStorage()) {
   return saveSection("tips", hidden === true ? { stepTipsHidden: true } : null, storage);
 }
 
+// Whether the first-visit welcome note was hidden (design/tabs-w3.md). Anything that is not exactly true loads as not seen.
+export function loadWelcomeSeen(storage = defaultStorage()) {
+  if (!storage) {
+    return false;
+  }
+  try {
+    return readSection(storage, "welcome")?.seen === true;
+  } catch {
+    return false;
+  }
+}
+
+export function saveWelcomeSeen(storage = defaultStorage()) {
+  return saveSection("welcome", { seen: true }, storage);
+}
+
 // The student's steps and progress, in their own section. Pass null to clear them.
 // Returns { work, savedOn } (work is null when nothing usable is saved).
 export function loadWork(storage = defaultStorage()) {

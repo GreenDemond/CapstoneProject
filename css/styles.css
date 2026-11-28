@@ -787,3 +787,51 @@ button {
 .lookup-list { list-style: none; padding: 0; }
 .lookup-list li { margin: 1rem 0; }
 .lookup-list h3 { margin: 0 0 0.25rem; }
+
+/* Bottom tabs and the welcome note (design/tabs-w3.md). Plain media queries only, so older Safari copes. */
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  max-width: 40rem;
+  margin: 0 auto;
+  background: var(--bg);
+  border-top: 2px solid var(--border);
+  padding-bottom: 0;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.tabbar button {
+  flex: 1 1 0;
+  min-height: 3.25rem;
+  margin: 0;
+  border-radius: 0;
+  border: 0;
+  border-top: 4px solid transparent;
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 1rem;
+}
+.tabbar button[aria-selected="true"] {
+  color: var(--text);
+  font-weight: 700;
+  border-top-color: var(--accent);
+}
+/* Room under the page so the last buttons are never behind the bar. */
+body.has-tabs { padding-bottom: 5rem; }
+.welcome-note {
+  margin-top: 1rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+}
+.welcome-note p { margin: 0 0 0.5rem; }
+
+@media (min-width: 48rem) {
+  .tabbar { max-width: 46rem; }
+  .tabbar button { min-height: 3.5rem; font-size: 1.15rem; }
+  #app { padding: 2rem 2rem; }
+  body.has-tabs { padding-bottom: 5.5rem; }
+}

@@ -19,6 +19,7 @@ export const SCREENS = {
 let currentScreen = "home";
 let stepsPreviewOpen = false;
 let leaveHomeCallback = null; // set by the home screen: cancels its AI request when the student leaves
+let screenChangeCallback = null; // set by the tabs: told which screen is showing now
 
 export function currentScreenName() {
   return currentScreen;
@@ -27,6 +28,10 @@ export function currentScreenName() {
 // The home screen registers one function to run whenever the student leaves home.
 export function registerOnLeaveHome(callback) {
   leaveHomeCallback = callback;
+}
+
+export function registerOnScreenChange(callback) {
+  screenChangeCallback = callback;
 }
 
 export function setStepsPreviewOpen(open) {
@@ -42,6 +47,7 @@ export function showScreen(name) {
     section.hidden = id !== name;
   }
   stepsScreen.hidden = !(name === "home" && stepsPreviewOpen);
+  screenChangeCallback?.(name);
 }
 
 // Shows the steps preview. It appears at once on the home screen, or when the student returns home.

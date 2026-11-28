@@ -350,3 +350,17 @@ Not yet done by anyone: the browser tests for this slice were not run, and it wa
 6. Start work, press **Stuck**, then **Look it up**, search, and press **Back to the step**: you are back on the same hint.
 7. Paste an assignment on home first: its text is not in the request. Refresh: nothing from the search is saved.
 8. Check at phone width and with the keyboard only (Enter submits). Check no line says "wrong", "missed" or "score".
+
+
+## Bottom tabs and the welcome note (web, W3)
+
+Not yet done by anyone: the browser tests for this slice (`tests/browser/tabs.spec.js`) were not run, and the look of the bar was never seen. Check at phone width (about 360px) and at tablet width (768px and wider).
+
+1. Open the app with clean saved data. A bar with **Today, Talk, Plan, Me** sits at the bottom; Today is marked (bold, with a line above it, not only colour).
+2. Scroll to the end of the home screen: the welcome note is the last thing, and **Hide this note** is fully visible above the bar. Press it, refresh: the note stays gone.
+3. Press Talk, Plan, Me, Today: each opens that screen, and the marked tab follows. Press the tab you are already on: nothing happens.
+4. Open Profile (from Me), type something, press a tab: you stay, with the unsaved-changes line. Press Save, then a tab: it works.
+5. Press **Start** on some steps: the bar is gone on the work screen and back after **Back to home**.
+6. Keyboard only: Tab to the bar, Left and Right arrows move between tabs, Enter opens one.
+7. Tablet width: the page and bar are centred in one column, the tabs are larger; nothing sits behind the bar at the bottom of any screen (calendar, chat, settings).
+8. Dark mode: the bar and note are readable. Print preview does not show the bar.
