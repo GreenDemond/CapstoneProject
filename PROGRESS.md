@@ -48,7 +48,7 @@ Nothing. The whole-app review plan (`design/review-plan-2026-11-17.md`) is finis
 ## Broken or worrying
 
 - **One browser test is flaky** (found 2026-11-20): `tests/browser/ai-choice.spec.js:44` failed 2 of 6 repeats; after a reload the status line read "Using: a.example.test", not "isn't ready yet". Cause not yet known (`ROADMAP.md` item G1).
-- **Browser tests cannot run as configured on this Mac**: Playwright's own browser is not installed. On 2026-11-20 they were run through installed Chrome (364 passed, 1 skipped, the 1 flaky failure above). `npm ci` needs `--registry=https://registry.npmjs.org/` here.
+- **Browser tests cannot run as configured on this Mac**: Playwright's own browser is not installed, and from inside a sandboxed agent session Chrome aborts on launch (SIGABRT, re-confirmed 2026-11-27 with `--headless=new`, `--headless=old`, `--disable-gpu`; no headless-shell, Chromium or Playwright WebKit/Firefox exists on disk). Fix: run the steps in SETUP.md section 8 once in a normal Terminal (`npx playwright install chromium`). Before the sandbox, tests ran through installed Chrome on 2026-11-20 (364 passed, 1 skipped, the 1 flaky failure above). `npm ci` needs `--registry=https://registry.npmjs.org/` here.
 - **OpenRouter search uses a deprecated feature** (`plugins: web`); the replacement is in `ROADMAP.md` item S1.
 - **`web-app/` is a leftover** (React and TypeScript, not allowed by T1). Excluded from git and lint. Ben decides whether to delete it. Ignore `SETUP.md` step 6.
 - **Editing the steps before starting is not built** (P1). With the AI turned on, this is the biggest gap against the research: the student should make the plan. Next #1.

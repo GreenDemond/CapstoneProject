@@ -32,3 +32,14 @@ Open the local address it prints (usually http://localhost:5173).
 
 ## 7. Chrome extension (later, stretch goal)
 Once built, in Chrome go to chrome://extensions, turn on Developer mode, click "Load unpacked", and pick the chrome-extension folder.
+
+## 8. Running the browser tests (Playwright)
+The browser tests (`npm run test:browser`, part of `npm run check`) need a browser that Playwright can drive. Run this once in a normal Terminal (not inside a sandboxed agent session, which has no network):
+
+cd ~/Documents/ben-project/CapstoneProject
+npm ci --registry=https://registry.npmjs.org/
+npx playwright install chromium
+
+Then `npm run check` runs everything. Playwright's Chromium is a separate download, so it does not touch your normal Chrome.
+
+Why this is needed: Playwright's browser is not installed on this Mac, and the installed Google Chrome aborts at launch (SIGABRT in macOS window-server registration) when started from inside an agent's sandbox, even with `--headless`. Chrome works from a normal Terminal, so a fallback without the download is a temporary config that sets `channel: "chrome"` on the `phone` and `desktop` projects, run with `npx playwright test -c <that file>`.
