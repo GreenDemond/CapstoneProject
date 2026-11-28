@@ -143,7 +143,7 @@ function renderCalendar(notice = "", opts = {}) {
   celebrateText = "";
   calendarBody.replaceChildren();
 
-  calendarBody.append(button("Back to home", backFromCalendar));
+  calendarBody.append(button("Back to home", backFromCalendar, "quiet"));
 
   const addButton = button("Add something", () => {
     calFormOpen = !calFormOpen;
@@ -179,7 +179,7 @@ function renderCalendar(notice = "", opts = {}) {
     renderTimeView();
   }
   renderPlanExtras(calendarBody, { redraw: (focus) => renderCalendar("", focus ? { focus } : {}), goHome: backFromCalendar, changed: planChanged });
-  calendarBody.append(button("Back to home", backFromCalendar));
+  calendarBody.append(button("Back to home", backFromCalendar, "quiet"));
   if (opts.focus) {
     calendarBody.querySelector(opts.focus)?.focus();
   }

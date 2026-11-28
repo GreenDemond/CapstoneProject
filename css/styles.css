@@ -137,13 +137,15 @@ legend {
   gap: 0.5rem;
 }
 
+/* Button levels (design/look.md): primary = the one main thing on a screen (filled),
+   secondary = every other choice (outlined, the default), quiet = leaving or hiding (looks like a link). */
 button {
   font: inherit;
   min-height: var(--tap);
-  padding: 0.5rem 0.9rem;
+  padding: 0.5rem 1rem;
   border: 1px solid var(--accent);
   border-radius: var(--radius-small);
-  background: var(--bg);
+  background: var(--surface);
   color: var(--text);
   cursor: pointer;
 }
@@ -151,10 +153,23 @@ button {
 button.primary {
   background: var(--accent);
   color: var(--on-accent);
+  font-weight: 600;
+  padding: 0.5rem 1.4rem;
+  box-shadow: var(--shadow);
   margin-top: 0.5rem;
 }
 
-button[aria-pressed="true"] {
+button.quiet {
+  background: transparent;
+  border-color: transparent;
+  color: var(--accent);
+  text-decoration: underline;
+  padding-left: 0;
+  padding-right: 0.6rem;
+}
+
+button[aria-pressed="true"],
+button.primary[aria-pressed="true"] {
   background: var(--accent);
   color: var(--on-accent);
 }
@@ -235,7 +250,7 @@ h3 {
 }
 
 .timer-toggle {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 0.5rem;
   min-height: var(--tap);

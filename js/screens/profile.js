@@ -45,7 +45,7 @@ function typedValues() {
 }
 function renderProfile(draft = { goals: profile.goals, noteDraft: "" }) {
   profileBody.replaceChildren();
-  profileBody.append(button("Back to home", backFromProfile));
+  profileBody.append(button("Back to home", backFromProfile, "quiet"));
 
   if (loadStatus === "recovered") {
     profileBody.append(el("p", "Something in your saved data couldn't be read, so we started fresh. A copy was kept.", { class: "message" }));
@@ -96,7 +96,7 @@ function renderProfile(draft = { goals: profile.goals, noteDraft: "" }) {
   } else {
     profileBody.append(button("Clear my profile", () => { clearAsked = true; renderProfile(typedValues()); }));
   }
-  profileBody.append(button("Back to home", backFromProfile));
+  profileBody.append(button("Back to home", backFromProfile, "quiet"));
 }
 
 function markDirty() {

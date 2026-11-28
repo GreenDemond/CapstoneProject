@@ -34,7 +34,7 @@ function renderOverview() {
   heading.textContent = "What I did";
   const data = readAll();
   const nowMs = Date.now();
-  body.append(button("Back to home", leave));
+  body.append(button("Back to home", leave, "quiet"));
 
   body.append(el("h3", "The last 30 days"));
   const lines = doingLines(data, nowMs, 30);

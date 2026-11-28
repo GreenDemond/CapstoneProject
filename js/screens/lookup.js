@@ -98,7 +98,7 @@ async function runSearch() {
 
 function render() {
   body.replaceChildren();
-  body.append(button(back.label, leave));
+  body.append(button(back.label, leave, "quiet"));
   body.append(
     el("p", "Your words go to Wikipedia.", { class: "hint", id: "lookup-notice" }),
     el("p", "This shows what Wikipedia says. It does not write your answer for you.", { class: "hint" }),

@@ -13,7 +13,7 @@ let intakeView = "start"; // "start", "card", or a question index
 let changingId = null; // set while a card line's Change button is in use
 function renderIntake() {
   intakeBody.replaceChildren();
-  intakeBody.append(button("Back to home", closeIntake));
+  intakeBody.append(button("Back to home", closeIntake, "quiet"));
 
   if (intakeView === "start") {
     intakeBody.append(
@@ -56,7 +56,7 @@ function renderIntake() {
   } else if (index > 0) {
     intakeBody.append(button("Back", () => showIntakeView(index - 1)));
   }
-  intakeBody.append(button("Back to home", closeIntake));
+  intakeBody.append(button("Back to home", closeIntake, "quiet"));
 }
 
 function showIntakeView(view) {

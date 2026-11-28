@@ -39,7 +39,7 @@ Checked pairs (ratio): text on surface 14.0, text on soft 12.1, muted on soft 5.
 
 ## Buttons
 
-- **Primary** (filled): the one main thing on a screen. Class `primary`.
+- **Primary** (filled): the one main thing on a screen. Class `primary`. The five answer buttons on the Work screen (Done, Still working, Stuck, Drifted, Later) deliberately stay equal, so none of them is primary (rule 6: honest answers earn the same).
 - **Secondary** (outlined, the default): other choices.
 - **Quiet** (looks like a link): leaving or hiding, such as Back to home, Hide this note, Show all my steps. Class `quiet`.
 

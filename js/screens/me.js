@@ -30,7 +30,7 @@ function go(id) {
 }
 
 function renderLinks() {
-  body.append(button("Back to home", leave));
+  body.append(button("Back to home", leave, "quiet"));
   body.append(el("h3", "My things"));
   const list = el("ul", undefined, { class: "me-links" });
   const links = [

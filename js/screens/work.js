@@ -709,7 +709,7 @@ function renderWork(focusStep = true) {
     workListOpen = !workListOpen;
     renderWork(false);
     workBody.querySelector("#work-list-toggle")?.focus();
-  });
+  }, "quiet");
   listToggle.id = "work-list-toggle";
   workBody.append(listToggle);
   if (workListOpen) {
@@ -718,7 +718,7 @@ function renderWork(focusStep = true) {
 
   workBody.append(parkSection());
 
-  workBody.append(button("Back to home", closeWork));
+  workBody.append(button("Back to home", closeWork, "quiet"));
   // Keep focus where it was; if that control is gone (or it was the step text), the step gets it,
   // so keyboard and screen-reader users are never dropped to the top of the page.
   let kept = null;
