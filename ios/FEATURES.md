@@ -12,10 +12,10 @@ How to add one: date, who asked, one-line request in their words, then rule conf
 
 ### F1. Reminders and calendar entries for each task
 - **Asked by:** parent. "notifications/calendar integration for each task"
-- **Status:** idea
+- **Status:** designed in part. Calendar entry is `design/slices/CAL1-calendar-and-reminders.md` (draft, gate 1 review requested 2026-11-26). The reminder is CAL2, queued behind it. Parent approved the shape 2026-11-26: "this all looks good"
 - **Rules to check:** rule 2 (never shame), rule 4 and D8 (what leaves the phone), rule 5 (no reports to others), `ROADMAP.md` section 5 (no mid-step nudges).
 - **Notes:** `ROADMAP.md` Phase 3 already lists reminders, deferred because it needs a new permission and an Apple API check (`AGENTS.md` sections 7 and 9).
-- **Next:** parent decides the shape (see F2 and F3), then a design note.
+- **Next:** gate 1 verdict on CAL1, then parent sees the exact wording, then build.
 
 ### F2. Phone notifications for tasks started but not finished
 - **Asked by:** parent. "notifications pushed to general iphone notifications for tasks started and not completed"
