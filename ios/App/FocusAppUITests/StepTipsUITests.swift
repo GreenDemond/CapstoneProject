@@ -28,6 +28,11 @@ final class StepTipsUITests: XCTestCase {
     app.launch()
     openEditor(app)
     XCTAssertTrue(app.element("step-tips").waitForExistence(timeout: 5))
+    let toggle = app.buttons["step-tips-toggle"]
+    XCTAssertEqual(toggle.value as? String, "collapsed", "tips start collapsed")
+    XCTAssertFalse(app.buttons["step-tips-got-it"].exists)
+    toggle.tap()
+    XCTAssertEqual(toggle.value as? String, "expanded")
     app.buttons["step-tips-got-it"].tap()
     XCTAssertTrue(app.element("step-tips").waitForNonExistence(timeout: 5))
     app.buttons["start-steps"].tap()
@@ -46,6 +51,7 @@ final class StepTipsUITests: XCTestCase {
     app.putKeyboardAway()
     app.buttons["suggest-steps"].tap()
     XCTAssertTrue(app.element("step-tips").waitForExistence(timeout: 5))
+    app.buttons["step-tips-toggle"].tap()
     app.buttons["step-tips-got-it"].tap()
     XCTAssertTrue(app.element("step-tips").waitForNonExistence(timeout: 5))
     app.openMe("me-row-how")
@@ -59,6 +65,9 @@ final class StepTipsUITests: XCTestCase {
     app.tab("Today").tap()
     XCTAssertTrue(
       app.element("step-tips").waitForExistence(timeout: 5),
-      "the editor should still be open with the card back")
+      "the editor should still be open with the tips back")
+    XCTAssertEqual(
+      app.buttons["step-tips-toggle"].value as? String, "collapsed",
+      "tips are collapsed again after coming back")
   }
 }

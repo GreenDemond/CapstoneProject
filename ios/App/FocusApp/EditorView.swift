@@ -6,6 +6,8 @@ struct EditorView: View {
   let model: AppModel
   let planner: PlannerModel
   @State private var reordering = false
+  /// The step tips start collapsed every time the editor opens. Not saved.
+  @State private var tipsOpen = false
 
   var body: some View {
     List {
@@ -28,23 +30,69 @@ struct EditorView: View {
       if !model.me.stepTipsHidden {
         Section {
           VStack(alignment: .leading, spacing: Theme.Space.small) {
-            Text(Words.stepTipsTitle).font(Theme.Typography.title)
-              .foregroundStyle(Theme.Palette.ink)
-            Text(Words.stepTipsDo).font(Theme.Typography.body).foregroundStyle(Theme.Palette.ink)
-            Text(Words.stepTipsSmall).font(Theme.Typography.body)
-              .foregroundStyle(Theme.Palette.ink)
-            Text(Words.stepTipsExample).font(Theme.Typography.small)
-              .foregroundStyle(Theme.Palette.quiet)
-            Button(Words.stepTipsGotIt) { model.me.setStepTipsHidden(true) }
+            Button {
+              tipsOpen.toggle()
+            } label: {
+              HStack {
+                Text(Words.stepTipsTitle).font(Theme.Typography.body)
+                  .foregroundStyle(Theme.Palette.ink)
+                Spacer()
+                Image(systemName: tipsOpen ? "chevron.up" : "chevron.down")
+                  .foregroundStyle(Theme.Palette.quiet)
+                  .accessibilityHidden(true)
+              }
+              .frame(minHeight: Theme.Space.touch)
+              .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityValue(tipsOpen ? "expanded" : "collapsed")
+            .accessibilityIdentifier("step-tips-toggle")
+            if tipsOpen {
+              Text(Words.stepTipsDo).font(Theme.Typography.body)
+                .foregroundStyle(Theme.Palette.ink)
+              Text(Words.stepTipsSmall).font(Theme.Typography.body)
+                .foregroundStyle(Theme.Palette.ink)
+              Text(Words.stepTipsExample).font(Theme.Typography.small)
+                .foregroundStyle(Theme.Palette.quiet)
+              Button(Words.stepTipsGotIt) {
+                tipsOpen = false
+                model.me.setStepTipsHidden(true)
+              }
               .buttonStyle(LinkButtonStyle())
               .frame(minHeight: 44, alignment: .leading)
               .accessibilityIdentifier("step-tips-got-it")
+            }
           }
           .accessibilityElement(children: .contain)
           .accessibilityIdentifier("step-tips")
         }
         .listRowBackground(Theme.Palette.card)
       }
+      Section {
+        ForEach(planner.draft.steps) { step in
+          StepRow(planner: planner, step: step)
+            .listRowBackground(Theme.Palette.card)
+        }
+        .onDelete { planner.delete(at: $0) }
+        .onMove { planner.move(from: $0, to: $1) }
+        Button(Words.addAStep) { planner.addStep() }
+          .buttonStyle(LinkButtonStyle())
+          .accessibilityIdentifier("add-step")
+          .listRowBackground(Color.clear)
+      }
+      Section {
+        if !planner.hasGetReady {
+          Button(Words.addGetReady) { planner.addGetReady() }
+            .buttonStyle(LinkButtonStyle())
+            .accessibilityIdentifier("add-get-ready")
+        }
+        if !planner.hasPutAway {
+          Button(Words.addPutAway) { planner.addPutAway() }
+            .buttonStyle(LinkButtonStyle())
+            .accessibilityIdentifier("add-put-away")
+        }
+      }
+      .listRowBackground(Color.clear)
       if planner.canCheckRequirements || planner.checkingRequirements
         || planner.requirementsResult != nil
       {
@@ -90,31 +138,6 @@ struct EditorView: View {
           }
         }
       }
-      Section {
-        ForEach(planner.draft.steps) { step in
-          StepRow(planner: planner, step: step)
-            .listRowBackground(Theme.Palette.card)
-        }
-        .onDelete { planner.delete(at: $0) }
-        .onMove { planner.move(from: $0, to: $1) }
-        Button(Words.addAStep) { planner.addStep() }
-          .buttonStyle(LinkButtonStyle())
-          .accessibilityIdentifier("add-step")
-          .listRowBackground(Color.clear)
-      }
-      Section {
-        if !planner.hasGetReady {
-          Button(Words.addGetReady) { planner.addGetReady() }
-            .buttonStyle(LinkButtonStyle())
-            .accessibilityIdentifier("add-get-ready")
-        }
-        if !planner.hasPutAway {
-          Button(Words.addPutAway) { planner.addPutAway() }
-            .buttonStyle(LinkButtonStyle())
-            .accessibilityIdentifier("add-put-away")
-        }
-      }
-      .listRowBackground(Color.clear)
     }
     .scrollContentBackground(.hidden)
     .environment(\.editMode, .constant(reordering ? .active : .inactive))
@@ -156,6 +179,8 @@ struct EditorView: View {
       }
       .padding(Theme.Space.medium)
       .background(Theme.Palette.sand)
+      .accessibilityElement(children: .contain)
+      .accessibilityIdentifier("editor-bottom-bar")
     }
     .accessibilityElement(children: .contain)
     .accessibilityIdentifier("editor-screen")

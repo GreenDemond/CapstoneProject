@@ -83,9 +83,7 @@ final class StepReviewUITests: XCTestCase {
     app.putKeyboardAway()
     app.buttons["add-said"].tap()
     app.buttons["thats-all"].tap()
-    // The step tips card has its own tests; hide it so the new step row is on screen.
-    app.buttons["step-tips-got-it"].tap()
-
+    app.scrollTo(app.buttons["check-requirements"])
     app.buttons["check-requirements"].tap()
     let question = app.element("requirement-uncovered")
     XCTAssertTrue(question.waitForExistence(timeout: 5))

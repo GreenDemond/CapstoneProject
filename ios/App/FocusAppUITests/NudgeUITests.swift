@@ -46,6 +46,27 @@ final class NudgeUITests: XCTestCase {
       app.element("step-text-0").value as? String, "Read the chapter and write the notes")
   }
 
+  /// On a short phone the first step's controls must be on screen, above the bottom bar, without
+  /// scrolling. No scrolling here on purpose: scrolling would hide the very problem this checks.
+  /// XCUITest calls a link hittable even when the list is clipped above it, so this compares the
+  /// link's frame with the top of the whole bar (its padding included), not with the Start button.
+  func testTheFirstStepsLinkIsAboveTheBottomBarWithoutScrolling() {
+    let app = openEditor("-focus-fake-ai-yesno", step: "Read the chapter and write the notes")
+    let ask = app.buttons["nudge-ask-0"]
+    XCTAssertTrue(ask.waitForExistence(timeout: 5))
+    let bar = app.element("editor-bottom-bar")
+    XCTAssertTrue(bar.exists)
+    let numbers = "ask \(ask.frame), bar \(bar.frame), screen \(app.frame)"
+    let note = XCTAttachment(string: numbers)
+    note.lifetime = .keepAlways
+    add(note)
+    let picture = XCTAttachment(screenshot: app.screenshot())
+    picture.name = "editor"
+    picture.lifetime = .keepAlways
+    add(picture)
+    XCTAssertLessThanOrEqual(ask.frame.maxY, bar.frame.minY, numbers)
+  }
+
   /// With no AI there is no link and the fixed line still shows.
   func testWithoutAnAITheFixedLineShowsAndThereIsNoLink() {
     let app = openEditor("-focus-no-ai", step: "Read the chapter and write the notes")
