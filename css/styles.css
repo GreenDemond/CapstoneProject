@@ -1011,3 +1011,67 @@ body.has-tabs input, body.has-tabs textarea, body.has-tabs select, body.has-tabs
   min-height: 0;
   margin: 0.25rem 0;
 }
+
+/* Work screen (design/look.md): the step in a large card, a thin progress bar, five equal answer
+   buttons in one grid (none is primary: rule 6), and the extras kept quiet underneath. */
+#work-body h3 {
+  margin: 0 0 var(--space-1);
+  font-size: var(--font-small);
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.step-progress {
+  display: block;
+  width: 100%;
+  height: 0.5rem;
+  margin: 0 0 var(--space-2);
+  border: 0;
+  border-radius: 0.25rem;
+  background: var(--line);
+  color: var(--accent);
+  -webkit-appearance: none;
+  appearance: none;
+  overflow: hidden;
+}
+.step-progress::-webkit-progress-bar { background: var(--line); }
+.step-progress::-webkit-progress-value { background: var(--accent); border-radius: 0.25rem; }
+.step-progress::-moz-progress-bar { background: var(--accent); border-radius: 0.25rem; }
+
+#work-body .current-step {
+  padding: var(--space-4) var(--space-3);
+  margin: 0 0 var(--space-3);
+  font-size: 1.6rem;
+  line-height: 1.35;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+#work-body .answers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: var(--space-3) 0 var(--space-4);
+}
+#work-body .answers button {
+  width: 100%;
+  min-height: 3.5rem;
+  font-size: 1.15rem;
+}
+
+#work-body .timer-toggle {
+  margin-top: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+}
+
+#work-body .ring { margin: var(--space-1) 0 var(--space-2); }
+#work-body .park { margin: var(--space-1) 0; }
+
+@media (min-width: 48rem) {
+  #work-body .current-step { font-size: 1.75rem; }
+  #work-body .answers { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
