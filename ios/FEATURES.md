@@ -126,6 +126,22 @@ How to add one: date, who asked, one-line request in their words, then rule conf
 - **Needs from the parent when it starts:** the server address and whether the model can be pulled there; permission to use a key from the environment for the larger AI test; the D2 answer in F7 if an embedded model is ever considered.
 - **Rules to hold:** no student data in fixtures (write them), no secrets in the repository, no new permission, and no change to what the shipped app sends.
 
+### F9. A web version (PWA) for the non-AI parts, or another way around the App Store
+- **Asked by:** parent. "how much of this could be implemented as a progressive web-app for non AI things -- or some way to avoid the itunes store"
+- **Status:** assessed. Not started.
+- **What already exists:** the repository root holds the original web app (`index.html`, `js/`, `css/`, tests). It has the home screen, paste and split, the one-step work screen with the five check-ins and a countdown, profile and goals, a calendar page, saved chats and AI helpers (own key). Data stays in the browser. It is **not** a PWA yet: no manifest and no service worker (searched 2026-11-26).
+- **What it lacks next to the iPhone app:** everything built since the iOS app started: the coaching and memory layer, What I did, the weekly look-back, step count as a guide, the good-step card, iPad layout, and the planned reset plan, comeback and delayed recall. Those exist only in Swift. Bringing them to the web means writing each twice, with two test suites.
+- **PWA on iPhone, from general knowledge (not checked this session):** Add to Home Screen is manual from Safari's Share sheet; offline works through a service worker; browser storage is not the app's file folder, so backup, Delete everything and eviction after long non-use need their own check; web push works only for a Home Screen app and needs a permission; no EventKit, but a downloaded `.ics` file opens Apple's Add to Calendar; browser speech input is unreliable (already judged a trap in `research/05`); read-aloud works; no haptics; no on-device AI.
+- **The real advantage of a PWA:** reach. It runs on Android phones, Chromebooks, laptops and older iPhones that cannot run iOS 26, with no Apple account and no review. The iOS app reaches none of those.
+- **Ways around the App Store for the native app:**
+  - TestFlight (in use): not the public store. Internal testers need no review; external testers (a public link, up to 10,000) need one short beta review per version. Builds expire after 90 days. Fits 5 to 10 classmates.
+  - Ad Hoc: up to 100 registered devices a year, each by its UDID; installed through a Mac or an HTTPS install page. More personal data and parent work than TestFlight.
+  - A free Apple ID install: expires in 7 days. Not for classmates.
+  - EU alternative marketplaces: EU only, and not checked.
+- **Rules to hold:** hosting is the parent's (root `DECISIONS.md` T7); a host sees request addresses, so the privacy text needs one line; classmates use no AI on the web version until the answer-giving checks pass.
+- **Recommendation:** keep TestFlight for the iPhone beta. Treat a PWA as a separate, small task that freezes today's web app as a labelled "core only" version for students on other devices: manifest, icons, service worker, offline tests, and hosting set up by the parent. Do not port the newer iOS features unless a student need shows up.
+- **Next:** parent decides whether classmates include Android, Chromebook or older iPhone users. That answer decides whether this is worth doing.
+
 ---
 
 ## Earlier ideas now tracked elsewhere
