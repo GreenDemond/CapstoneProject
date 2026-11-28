@@ -160,6 +160,37 @@ export function isReady(service) {
   return service.keyReady === true && service.model !== "";
 }
 
+// Why a saved helper cannot answer yet, in plain words, or "" when it is ready.
+export function needsLine(service) {
+  const noKey = service.keyReady !== true;
+  const noModel = typeof service.model !== "string" || service.model === "";
+  if (noKey && noModel) {
+    return "needs a key and an AI picked";
+  }
+  if (noKey) {
+    return "needs a key";
+  }
+  return noModel ? "needs an AI picked" : "";
+}
+
+// The "Which AI helper?" menu in Talk. Every saved helper is listed; one that cannot answer yet is
+// disabled and says why. selectedId is the helper in use when it is ready, else null.
+// finishInSettings is true when helpers exist but none is ready.
+export function talkHelperMenu(list, chosenId) {
+  const entries = Array.isArray(list) ? list.filter((s) => s && typeof s.id === "string" && typeof s.label === "string") : [];
+  const inUse = inUseHelper(entries, chosenId);
+  const selectedId = inUse && isReady(inUse) ? inUse.id : null;
+  const seen = new Map();
+  const options = entries.map((service) => {
+    const why = needsLine(service);
+    const count = (seen.get(service.label) ?? 0) + 1;
+    seen.set(service.label, count);
+    const name = count > 1 ? `${service.label} (${count})` : service.label;
+    return { id: service.id, label: why === "" ? name : `${name} (${why})`, disabled: why !== "", selected: service.id === selectedId };
+  });
+  return { options, selectedId, show: options.length > 0, finishInSettings: options.length > 0 && selectedId === null };
+}
+
 // Ids never repeat, so an old encrypted key can never attach to a new helper at another address.
 function newId() {
   const random = globalThis.crypto?.randomUUID?.();

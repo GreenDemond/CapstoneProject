@@ -24,6 +24,8 @@ The only memory between sessions. Keep it current; rewrite it, do not let it gro
 - **Storage safety** (`js/storage.js`). Unreadable saved data is backed up once and the app starts fresh, so saving never gets stuck; data from another version is backed up before anything is written; saving one section never drops another.
 - **Navigation.** One `showScreen` decides which screen shows, so two screens never show together. Every screen leaves with **Back to home**, at the top (and at the bottom on long screens).
 
+- **AI choice in Talk (web)** (`design/talk-ai-choice.md`). The **Which AI helper?** menu now shows with one or more saved helpers; unready ones are greyed with the reason; "Finish setting up a helper in Settings." when none is ready. Logic: `talkHelperMenu`.
+
 ## In progress
 
 - **Web navigation (finish, FEAT-003).** The row of seven buttons on Today is gone; Talk and Plan are tabs and the rest is on Me. Welcome note moved above the paste box. Tab bar no longer covers fields (tested at phone and desktop). Long unbroken text no longer widens the page. See `design/tabs-w3.md`.

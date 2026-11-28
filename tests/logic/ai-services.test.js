@@ -250,3 +250,54 @@ test("the refused-setting line depends on the effort", () => {
   assert.equal(effortRefusedLine({ effort: "none" }), MUST_THINK_LINE);
   assert.equal(effortRefusedLine({ effort: "low" }), EFFORT_IGNORED_LINE);
 });
+
+// The "Which AI helper?" menu in Talk.
+const svc = (id, label, extra = {}) => ({ id, label, url: "https://x.example.test/v1/chat/completions", model: "m", keyReady: true, checked: true, ...extra });
+
+test("talkHelperMenu: no helpers means no menu", async () => {
+  const { talkHelperMenu } = await import("../../js/logic/ai-services.js");
+  assert.deepEqual(talkHelperMenu([], null), { options: [], selectedId: null, show: false, finishInSettings: false });
+  assert.equal(talkHelperMenu(undefined, null).show, false);
+});
+
+test("talkHelperMenu: one ready helper is listed and selected", async () => {
+  const { talkHelperMenu } = await import("../../js/logic/ai-services.js");
+  const menu = talkHelperMenu([svc("a", "One")], null);
+  assert.equal(menu.show, true);
+  assert.equal(menu.selectedId, "a");
+  assert.deepEqual(menu.options, [{ id: "a", label: "One", disabled: false, selected: true }]);
+  assert.equal(menu.finishInSettings, false);
+});
+
+test("talkHelperMenu: unready helpers are disabled with the reason", async () => {
+  const { talkHelperMenu } = await import("../../js/logic/ai-services.js");
+  const menu = talkHelperMenu([svc("a", "NoKey", { keyReady: false }), svc("b", "NoAi", { model: "" }), svc("c", "Neither", { keyReady: false, model: "" }), svc("d", "Fine")], "d");
+  assert.deepEqual(menu.options.map((o) => [o.label, o.disabled, o.selected]), [
+    ["NoKey (needs a key)", true, false],
+    ["NoAi (needs an AI picked)", true, false],
+    ["Neither (needs a key and an AI picked)", true, false],
+    ["Fine", false, true],
+  ]);
+});
+
+test("talkHelperMenu: only unready helpers selects nothing and asks to finish in Settings", async () => {
+  const { talkHelperMenu } = await import("../../js/logic/ai-services.js");
+  const menu = talkHelperMenu([svc("a", "One", { keyReady: false })], "a");
+  assert.equal(menu.selectedId, null);
+  assert.equal(menu.finishInSettings, true);
+  assert.equal(menu.options[0].selected, false);
+});
+
+test("talkHelperMenu: a chosen helper that is not ready is not replaced by another", async () => {
+  const { talkHelperMenu } = await import("../../js/logic/ai-services.js");
+  const menu = talkHelperMenu([svc("a", "One", { model: "" }), svc("b", "Two")], "a");
+  assert.equal(menu.selectedId, null);
+  assert.equal(menu.finishInSettings, true);
+});
+
+test("talkHelperMenu: duplicate labels and damaged entries do not break it", async () => {
+  const { talkHelperMenu } = await import("../../js/logic/ai-services.js");
+  const menu = talkHelperMenu([svc("a", "Same"), null, { label: "no id" }, svc("b", "Same"), 5], null);
+  assert.deepEqual(menu.options.map((o) => o.label), ["Same", "Same (2)"]);
+  assert.equal(menu.selectedId, "a");
+});

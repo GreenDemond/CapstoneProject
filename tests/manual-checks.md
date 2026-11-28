@@ -454,3 +454,12 @@ Needs an AI helper set up in Settings.
 3. Press **Delete** on one: only that line goes and "Deleted." shows. If three agreed, the "Your answers so far point to..." line on the work screen goes after deleting one.
 4. Delete the last one: the heading goes. With nothing else saved, the page says "Nothing yet."
 5. Phone width and keyboard only: Tab reaches each Delete.
+
+## Choosing the AI in Talk (web)
+
+1. Settings: add one helper that works. Open Talk it through: **Which AI helper?** shows that helper, chosen.
+2. Add a second helper but leave out its key or AI pick (Save it anyway / older data). Open Talk: it is listed greyed out, "(needs a key)" or "(needs an AI picked)", and cannot be chosen. The working helper stays chosen.
+3. With two working helpers, switch in the menu mid-chat and send: the reply comes from the one chosen. Home shows the same helper in its menu.
+4. Only unfinished helpers: Talk says "Finish setting up a helper in Settings." and **Open Settings** opens Settings.
+5. No helpers: "Add an AI helper in Settings first." as before.
+6. Phone width and keyboard only: Tab reaches the menu; arrow keys skip greyed options.

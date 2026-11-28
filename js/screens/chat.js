@@ -4,7 +4,7 @@
 // the log and the status line is changed in place, so screen readers announce only what is new.
 import { KINDS } from "../logic/starter-steps.js";
 import { loadWork, loadChats, saveChats, deleteAllChats, loadChatSettings } from "../storage.js";
-import { inUseHelper, isReady, usableServices, effortRefusedLine } from "../logic/ai-services.js";
+import { inUseHelper, isReady, talkHelperMenu, effortRefusedLine } from "../logic/ai-services.js";
 import { readKey } from "../keystore.js";
 import { askChat } from "../ai-direct.js";
 import { MAX_MESSAGE, OPENING_QUESTION, TRUSTED_ADULT_LINE } from "../logic/chat.js";
@@ -301,7 +301,8 @@ function buildChat() {
   chatParts = null;
   const helper = currentChatHelper();
   const hasSaved = loadChats().length > 0;
-  if (!helper && !hasSaved) {
+  const hasSavedHelper = getAiSettings().services.length > 0;
+  if (!helper && !hasSaved && !hasSavedHelper) {
     chatBody.append(
       el("p", "Add an AI helper in Settings first.", { class: "hint" }),
       button("Open Settings", () => openSettingsScreen(), "primary"),
@@ -318,7 +319,7 @@ function buildChat() {
     );
   } else {
     chatBody.append(
-      el("p", "Add an AI helper in Settings first.", { class: "hint" }),
+      el("p", hasSavedHelper ? "Finish setting up a helper in Settings." : "Add an AI helper in Settings first.", { class: "hint" }),
       el("p", "Your chats are saved on this device only. You can still read them.", { class: "hint" }),
     );
   }
@@ -376,14 +377,16 @@ function buildChat() {
       );
     }
   };
-  // With more than one ready helper, the same "Which AI helper?" menu as the paste screen. The next message
-  // goes to the one chosen, even in the middle of a chat.
-  const ready = usableServices(getAiSettings().services);
-  if (helper && ready.length > 1) {
+  // The "Which AI helper?" menu shows whenever a helper is saved, so the student can see which AI answers.
+  // A helper that cannot answer yet is listed but disabled, with the reason. The next message goes to the
+  // one chosen, even in the middle of a chat.
+  const menu = talkHelperMenu(getAiSettings().services, getAiSettings().chosenId);
+  if (menu.show) {
     const select = el("select", undefined, { id: "chat-helper" });
-    for (const item of ready) {
+    for (const item of menu.options) {
       const option = el("option", item.label, { value: item.id });
-      option.selected = item.id === helper.id;
+      option.disabled = item.disabled;
+      option.selected = item.selected;
       select.append(option);
     }
     select.addEventListener("change", () => {
