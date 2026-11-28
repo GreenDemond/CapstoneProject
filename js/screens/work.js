@@ -578,7 +578,7 @@ function renderWork(focusStep = true) {
   const step = work.steps[index];
   const total = work.steps.length;
   workBody.append(el("h3", `Step ${doneCount(work) + 1} of ${total}`, { tabindex: "-1" }));
-  const bar = el("progress", undefined, { class: "step-progress", max: String(total), "aria-label": "Steps done" });
+  const bar = el("progress", undefined, { class: "step-progress", max: String(total), "aria-hidden": "true" });
   bar.value = doneCount(work);
   workBody.append(bar);
   const stepText = el("p", step.text, { class: "current-step", tabindex: "-1" });
@@ -679,7 +679,9 @@ function renderWork(focusStep = true) {
   );
   const othersLeft = work.steps.some((s, i) => i !== index && !s.done);
   if (othersLeft) {
-    choices.append(button("Later", () => choose("later"), "kind"));
+    const later = button("Later", () => choose("later"), "kind");
+    later.classList.add("later");
+    choices.append(later);
   }
   workBody.append(choices);
 

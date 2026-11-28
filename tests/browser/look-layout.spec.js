@@ -114,3 +114,41 @@ test("no sideways scrolling on Today, Work and Plan at 360 wide", async ({ page 
   await openScreen(page, "My calendar");
   expect(await sideways()).toBeLessThanOrEqual(0);
 });
+
+// Width and row of each answer button, for the grid tests below.
+async function answerBoxes(page) {
+  return page.locator("#work-body .answers button").evaluateAll((nodes) =>
+    nodes.map((node) => {
+      const r = node.getBoundingClientRect();
+      return { name: node.textContent.trim(), x: r.left, y: r.top, w: r.width };
+    }),
+  );
+}
+
+test("on the last step the four answer buttons make a clean 2 by 2 at 360 wide", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.clock.install();
+  await startWork(page, "- Only one step");
+  // Starter steps pad a short list, so mark steps done until the last one is showing.
+  for (let i = 0; i < 4; i++) {
+    await page.clock.runFor(450);
+    await page.getByRole("button", { name: "Done", exact: true }).click();
+  }
+  await expect(page.getByRole("button", { name: "Later", exact: true })).toHaveCount(0);
+  await expect(page.locator("#work-body .answers button")).toHaveCount(4);
+  const list = await answerBoxes(page);
+  expect(list.map((b) => b.name)).toEqual(["Done", "Still working", "Stuck", "Drifted"]);
+  for (const b of list) expect(Math.abs(b.w - list[0].w)).toBeLessThan(1.5);
+  expect(Math.abs(list[0].y - list[1].y)).toBeLessThan(1);
+  expect(Math.abs(list[2].y - list[3].y)).toBeLessThan(1);
+  expect(list[2].y).toBeGreaterThan(list[0].y);
+});
+
+test("with five answer buttons at 360 wide, Later is the same width as the others", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  await startWork(page);
+  const list = await answerBoxes(page);
+  expect(list).toHaveLength(5);
+  for (const b of list) expect(Math.abs(b.w - list[0].w)).toBeLessThan(1.5);
+  expect(list[4].y).toBeGreaterThan(list[2].y);
+});
