@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {
   loadProfileState, saveProfile, saveCalendarItems, loadCalendarItems, STORAGE_KEY, BACKUP_KEY,
   saveCompletionCounts, loadCompletionCounts, saveAiSettings, loadAiSettings, saveWork, loadWork,
-  saveChatSettings, loadChatSettings, loadChats, saveChats, deleteAllChats, CHATS_KEY, CHATS_BACKUP_KEY,
+  saveChatSettings, loadChatSettings, loadMoments, saveMoments, loadHelps, saveHelps, deleteRemembered, saveParked, loadParked, saveRecall, loadRecall, loadChats, saveChats, deleteAllChats, CHATS_KEY, CHATS_BACKUP_KEY,
 } from "../../js/storage.js";
 import { emptyProfile, setGoals } from "../../js/logic/profile.js";
 
@@ -401,4 +401,51 @@ test("deleteAllChats empties the list and removes the chats backup", () => {
   assert.deepEqual(loadChats(storage), []);
   assert.equal(storage._data.has(CHATS_BACKUP_KEY), false);
   assert.equal(deleteAllChats(null), false);
+});
+
+test("finished-step moments and help marks save, reload, and keep other sections", () => {
+  const storage = fakeStorage();
+  assert.equal(saveProfile(setGoals(emptyProfile(), { today: "Read" }), storage), true);
+  const moments = [{ id: 1, kind: "done", date: "2026-11-20T10:00:00.000Z" }];
+  const helps = [{ id: 1, answer: "yes", timer: 12, date: "2026-11-20T10:00:00.000Z" }];
+  assert.equal(saveMoments(moments, storage), true);
+  assert.equal(saveHelps(helps, storage), true);
+  assert.deepEqual(loadMoments(storage), moments);
+  assert.deepEqual(loadHelps(storage), helps);
+  assert.equal(loadProfileState(storage).profile.goals.today, "Read");
+  assert.equal(saveMoments([], storage), true);
+  assert.deepEqual(loadMoments(storage), []);
+  assert.equal(JSON.parse(storage._data.get(STORAGE_KEY)).moments, undefined);
+});
+
+test("damaged moments and help marks load as empty lists", () => {
+  const damaged = fakeStorage({ [STORAGE_KEY]: "{not json" });
+  assert.deepEqual(loadMoments(damaged), []);
+  assert.deepEqual(loadHelps(damaged), []);
+  const wrong = fakeStorage({ [STORAGE_KEY]: JSON.stringify({ schemaVersion: 1, moments: "x", helps: { a: 1 } }) });
+  assert.deepEqual(loadMoments(wrong), []);
+  assert.deepEqual(loadHelps(wrong), []);
+  assert.deepEqual(loadMoments(null), []);
+  assert.deepEqual(loadHelps(null), []);
+});
+
+test("deleteRemembered clears the four sections and keeps the profile", () => {
+  const storage = fakeStorage();
+  saveProfile(setGoals(emptyProfile(), { today: "Read" }), storage);
+  saveParked([{ id: 1, text: "song", date: "" }], storage);
+  saveRecall([{ id: 1, answer: "a fact", date: "" }], storage);
+  saveHelps([{ id: 1, answer: "no", timer: 0, date: "" }], storage);
+  saveMoments([{ id: 1, kind: "done", date: "2026-11-20T10:00:00.000Z" }], storage);
+  assert.equal(deleteRemembered(storage), true);
+  assert.deepEqual(loadParked(storage), []);
+  assert.deepEqual(loadRecall(storage), []);
+  assert.deepEqual(loadHelps(storage), []);
+  assert.deepEqual(loadMoments(storage), []);
+  assert.equal(loadProfileState(storage).profile.goals.today, "Read");
+});
+
+test("deleteRemembered reports false when the browser refuses to save", () => {
+  const storage = fakeStorage();
+  storage.setItem = () => { throw new Error("full"); };
+  assert.equal(deleteRemembered(storage), false);
 });

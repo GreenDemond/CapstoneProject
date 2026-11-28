@@ -293,3 +293,17 @@ Not yet done by anyone: the browser tests for this slice were not run.
 6. Paste a line with "<b>bold</b>" in it that says "must include": it shows as plain text.
 7. Check at phone width and with the keyboard only.
 
+
+## Looking back (web, W6)
+
+Not yet done by anyone: the browser tests for this slice were not run.
+
+1. Open the app with nothing saved, press **What I did**: "Nothing yet. After you work on a step, you'll see it here." and "A quiet week." show. Back to home returns.
+2. Paste three lines, pick Essay, Show my steps, Start. Press Done: the next step shows a card "Did that way of working help?" with It helped, A bit, Not really, Not now. Press It helped: "Noted." and the card goes.
+3. Press Done again and ignore the card, press Done once more: nothing is blocked, and the last step ends with "All your steps are done." and the card under Close. Press Not now.
+4. Start again, tick "Show a countdown", pick 25 minutes, press Done, press A bit. Open What the app remembers later: the line says "Working with a 25-minute countdown: helped a bit".
+5. Press Drifted, type a smaller step, Start this part. The card appears too. Back to home, then What I did: "N steps finished" counts Done and Drifted together, with "1 step made smaller, then finished" and a Your week line "You finished N steps."
+6. Press Park a thought, save "look up that song". Open What I did, then What the app remembers: the thought, help marks, any profile notes and "N finished steps kept as a count" are listed, each with Delete. Type `<b>hi</b>` as a thought: it shows as plain text.
+7. Press Delete on the thought: "Deleted." and it is gone; the rest stay. Refresh and check it is still gone.
+8. Press Delete all of this: a second question shows. Press No, keep it: nothing is deleted. Press it again, then Yes, delete it all: "Everything is deleted." Open My profile: goals are still there, notes are gone. What I did shows "Nothing yet."
+9. Check at phone width and with the keyboard only (focus moves to the page text after a delete). Check no line says "missed", "streak", "behind" or "score".

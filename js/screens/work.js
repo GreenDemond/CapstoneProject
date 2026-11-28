@@ -3,7 +3,8 @@
 import { createWork, currentIndex, doneCount, allDone, applyChoice, hintAt, ringFraction, formatTime, secondsUntil, STUCK_HINTS } from "../logic/work.js";
 import { asksRecall, addParked, addRecall, removeItem, showAskPerson, buildQuestion, hasOwnWords, MAX_PARKED_LENGTH, MAX_RECALL_LENGTH, MAX_ASK_LENGTH } from "../logic/work-extras.js";
 import { listLabel } from "../logic/home.js";
-import { saveWork, loadParked, saveParked, loadRecall, saveRecall } from "../storage.js";
+import { addMoment, addHelp } from "../logic/looking-back.js";
+import { saveWork, loadParked, saveParked, loadRecall, saveRecall, loadMoments, saveMoments, loadHelps, saveHelps } from "../storage.js";
 import { confetti } from "../confetti.js";
 import { el, button, announce } from "../ui/dom.js";
 import { showScreen, setStepsPreviewOpen } from "../ui/screens.js";
@@ -30,6 +31,9 @@ let parkNote = "";
 let recallStepId = null;
 let recallText = "";
 let recallNote = "";
+// "Did that help?" after a finished step (design/looking-back-w6.md). Optional, in memory until tapped.
+let helpCard = null; // null, or { timer } for the step just finished
+let helpNote = "";
 let hintsShown = 0;
 let workNote = "";
 let driftNote = "";
@@ -141,6 +145,8 @@ export function openWorkScreen(texts, existing = null) {
   parkOpen = false;
   parkText = "";
   parkNote = "";
+  helpCard = null;
+  helpNote = "";
   resetAsk();
   workListOpen = false;
   mode = "steps";
@@ -162,6 +168,8 @@ function resetAsk() {
 
 function closeWork() {
   stopTimer();
+  helpCard = null;
+  helpNote = "";
   if (work && allDone(work)) {
     saveWork(null); // finished: nothing left to pick up
   }
@@ -206,6 +214,15 @@ function choose(choice, splitText = "") {
   work = next;
   persistWork();
   if (choice !== "still") {
+    helpCard = null;
+    helpNote = "";
+  }
+  if (choice === "done" || choice === "drifted") {
+    // Both count as a finished step, the same. If this cannot be saved, the step is still finished.
+    saveMoments(addMoment(loadMoments(), choice, new Date().toISOString()));
+    helpCard = { timer: timerOn ? timerMinutes : 0 };
+  }
+  if (choice !== "still") {
     lastAdvance = now;
   }
   if (choice === "done" || choice === "drifted") confetti();
@@ -247,6 +264,41 @@ function finishRecall(save) {
   workNote = "";
   mode = allDone(work) ? "done" : "steps";
   renderWork();
+}
+
+function answerHelp(answer) {
+  if (!helpCard) {
+    return;
+  }
+  if (answer === null) {
+    helpCard = null;
+    helpNote = "";
+  } else if (saveHelps(addHelp(loadHelps(), answer, helpCard.timer, new Date().toISOString()))) {
+    helpCard = null;
+    helpNote = "Noted.";
+  } else {
+    helpNote = "That could not be saved here. You can tap Not now.";
+  }
+  renderWork(false);
+}
+
+// One quiet question. Nothing waits on it, and Not now costs nothing.
+function helpSection() {
+  if (!helpCard) {
+    return helpNote ? el("p", helpNote, { class: "hint", role: "status" }) : null;
+  }
+  const wrap = el("div", undefined, { class: "help-card", role: "group", "aria-label": "Did that help?" });
+  wrap.append(el("p", "Did that way of working help?"));
+  wrap.append(
+    button("It helped", () => answerHelp("yes")),
+    button("A bit", () => answerHelp("bit")),
+    button("Not really", () => answerHelp("no")),
+    button("Not now", () => answerHelp(null)),
+  );
+  if (helpNote) {
+    wrap.append(el("p", helpNote, { class: "hint", role: "status" }));
+  }
+  return wrap;
 }
 
 function renderRecall() {
@@ -394,6 +446,8 @@ function renderWork(focusStep = true) {
   if (mode === "done" || allDone(work)) {
     workHeading.textContent = "All your steps are done.";
     workBody.append(button("Close", closeWork, "primary"));
+    const doneHelp = helpSection();
+    if (doneHelp) workBody.append(doneHelp);
     workBody.querySelector("button")?.focus();
     return;
   }
@@ -461,6 +515,9 @@ function renderWork(focusStep = true) {
     box.focus();
     return;
   }
+
+  const stepHelp = helpSection();
+  if (stepHelp) workBody.append(stepHelp);
 
   const ring = timerOn ? el("div", undefined, { class: "ring" }) : null;
   if (ring) {

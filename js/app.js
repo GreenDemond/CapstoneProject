@@ -4,12 +4,14 @@ import { initHome, refreshHome, getChosenKind, afterWorkClosed } from "./screens
 import { initWork } from "./screens/work.js";
 import { initIntake } from "./screens/intake.js";
 import { initProfile } from "./screens/profile.js";
+import { initLooking } from "./screens/looking.js";
 import { initCalendar } from "./screens/calendar.js";
 import { initChat } from "./screens/chat.js";
 
 initWork({ onClose: afterWorkClosed, getChosenKind });
 initIntake();
 initProfile();
+initLooking();
 initHome();
 initCalendar();
 initChat({ getChosenKind });

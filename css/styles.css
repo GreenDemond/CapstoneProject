@@ -763,3 +763,16 @@ button {
 .check-list li {
   margin-bottom: 0.6rem;
 }
+
+/* Looking back (design/looking-back-w6.md): calm lists, no colours that mean good or bad. */
+.looking-list { padding-left: 1.25rem; }
+.looking-list li { margin: 0.4rem 0; }
+#looking-screen button.small { min-height: 2.75rem; }
+.help-card {
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--accent, #1a4fa0);
+  border-radius: 0.5rem;
+}
+.help-card p { margin: 0 0 0.5rem; }
+.help-card button { margin-right: 0.5rem; }

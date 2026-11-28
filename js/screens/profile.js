@@ -172,3 +172,19 @@ function backFromProfile() {
 export function initProfile() {
   openProfile.addEventListener("click", openProfileScreen);
 }
+
+// For What the app remembers (design/looking-back-w6.md): the notes, and a delete that saves at once.
+export function profileNotes() {
+  return notesNewestFirst(profile);
+}
+
+// Returns true only if the browser confirmed the save. On failure the note stays.
+export function deleteProfileNote(id) {
+  const before = profile;
+  profile = deleteNote(profile, id);
+  if (saveProfile(profile)) {
+    return true;
+  }
+  profile = before;
+  return false;
+}

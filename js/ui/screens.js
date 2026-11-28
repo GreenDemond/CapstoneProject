@@ -8,6 +8,7 @@ export const SCREENS = {
   home: document.getElementById("paste-screen"),
   intake: document.getElementById("intake-screen"),
   profile: document.getElementById("profile-screen"),
+  looking: document.getElementById("looking-screen"),
   work: document.getElementById("work-screen"),
   calendar: document.getElementById("calendar-screen"),
   chat: document.getElementById("chat-screen"),

@@ -5,6 +5,7 @@ import { emptyProfile, normalizeProfile } from "./logic/profile.js";
 import { normalizeServices } from "./logic/ai-services.js";
 import { normalizeWork } from "./logic/work.js";
 import { normalizeParked, normalizeRecall } from "./logic/work-extras.js";
+import { normalizeMoments, normalizeHelps } from "./logic/looking-back.js";
 import { normalizeChatSettings } from "./logic/chat-settings.js";
 import { normalizeChats } from "./logic/chat-store.js";
 
@@ -299,6 +300,46 @@ export function loadRecall(storage = defaultStorage()) {
 
 export function saveRecall(items, storage = defaultStorage()) {
   return saveSection("recall", items.length === 0 ? null : items, storage);
+}
+
+// Looking back (design/looking-back-w6.md): one entry per finished step (kept only as counts) and the
+// "did that help" marks. Each loads as an empty list when nothing usable is saved; an empty list removes the section.
+export function loadMoments(storage = defaultStorage()) {
+  if (!storage) {
+    return [];
+  }
+  try {
+    return normalizeMoments(readSection(storage, "moments"));
+  } catch {
+    return [];
+  }
+}
+
+export function saveMoments(items, storage = defaultStorage()) {
+  return saveSection("moments", items.length === 0 ? null : items, storage);
+}
+
+export function loadHelps(storage = defaultStorage()) {
+  if (!storage) {
+    return [];
+  }
+  try {
+    return normalizeHelps(readSection(storage, "helps"));
+  } catch {
+    return [];
+  }
+}
+
+export function saveHelps(items, storage = defaultStorage()) {
+  return saveSection("helps", items.length === 0 ? null : items, storage);
+}
+
+// Delete everything the app remembers apart from the profile (the profile screen holds that):
+// parked thoughts, recall answers, did-that-help marks and the finished-step counts.
+// Returns true only if every section was confirmed gone.
+export function deleteRemembered(storage = defaultStorage()) {
+  const results = [saveParked([], storage), saveRecall([], storage), saveHelps([], storage), saveMoments([], storage)];
+  return results.every(Boolean);
 }
 
 // The student's own chat guides and reply lengths, in their own section. Damaged entries are dropped one by one.
