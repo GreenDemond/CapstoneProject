@@ -116,9 +116,12 @@ test.describe("local date", () => {
     await page.getByLabel("Note").fill("Evening note");
     await page.getByRole("button", { name: "Add note" }).click();
     await page.getByRole("button", { name: "Save", exact: true }).click();
-    const stored = await page.evaluate(() => localStorage.getItem("focusapp.v1"));
-    expect(stored).toContain("2026-11-17");
-    expect(stored).not.toContain("2026-11-18");
+    const stored = await page.evaluate(() => {
+      const { lookbackCard, ...rest } = JSON.parse(localStorage.getItem("focusapp.v1")); // the look-back clock is a UTC time stamp, not a note date
+      return { clock: lookbackCard, saved: JSON.stringify(rest) };
+    });
+    expect(stored.saved).toContain("2026-11-17");
+    expect(stored.saved).not.toContain("2026-11-18");
   });
 });
 

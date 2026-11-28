@@ -33,6 +33,18 @@ async function stored(page, key = "focusapp.v1") {
   return page.evaluate((k) => globalThis.localStorage.getItem(k), key);
 }
 
+// After Delete everything the app reloads, and the home screen starts the weekly look-back clock again
+// (design/class-and-return-w11.md): one date, nothing the student wrote. "Nothing left" means only that.
+async function onlyClock(page) {
+  return page.evaluate(() => {
+    const keys = Object.keys(globalThis.localStorage).filter((k) => k.startsWith("focusapp"));
+    if (keys.length === 0) return true;
+    if (keys.length > 1 || keys[0] !== "focusapp.v1") return false;
+    const main = JSON.parse(globalThis.localStorage.getItem("focusapp.v1"));
+    return Object.keys(main).filter((k) => k !== "schemaVersion" && k !== "lookbackCard").length === 0;
+  });
+}
+
 function file(name, content) {
   return { name, mimeType: "application/json", buffer: Buffer.from(typeof content === "string" ? content : JSON.stringify(content)) };
 }
@@ -54,11 +66,11 @@ test("Me screen: shows its links and Back to home works", async ({ page }) => {
   }
   await page.getByRole("button", { name: "My profile", exact: true }).click();
   await expect(page.getByRole("heading", { name: "My profile", level: 2 })).toBeVisible();
-  await page.getByRole("button", { name: "Back to home" }).click();
+  await page.getByRole("button", { name: "Back to home" }).first().click(); // My profile has Back to home at the top and the bottom
   await page.getByRole("button", { name: "Me and my data" }).click();
   await page.getByRole("button", { name: "What the app remembers", exact: true }).click();
   await expect(page.getByRole("heading", { name: "What the app remembers", level: 2 })).toBeVisible();
-  await expect(page.getByText("email Sam")).toBeVisible();
+  await expect(page.locator("#looking-body").getByText("email Sam")).toBeVisible();
 });
 
 test("Save a copy: a file downloads, has no AI settings or chats unless ticked, and says so", async ({ page }) => {
@@ -92,7 +104,7 @@ test("Round trip: delete everything, then load the copy and get the data back", 
   await expect(page.getByText("Delete all of it? It can't be undone.")).toBeVisible();
   await page.getByRole("button", { name: "Yes, delete everything" }).click();
   await expect(page.locator("#me-status")).toContainText("Everything is deleted");
-  expect(await stored(page)).toBeNull();
+  expect(await onlyClock(page)).toBe(true);
   expect(await stored(page, "focusapp.v1.chats")).toBeNull();
 
   await page.locator("#me-file").setInputFiles(file("copy.json", text));
@@ -173,7 +185,7 @@ test("Awkward: a hostile file with html in its text loads as plain text and noth
   expect(main.ai.services[0].label).toBe("Mine");
   expect(main.parked[0].text).toBe(html);
   await page.getByRole("button", { name: "What the app remembers", exact: true }).click();
-  await expect(page.getByText(html)).toBeVisible();
+  await expect(page.locator("#looking-body").getByText(html)).toBeVisible();
   expect(await page.evaluate(() => globalThis.hacked)).toBeUndefined();
   expect(await page.locator("#looking-body img").count()).toBe(0);
 });
@@ -188,7 +200,7 @@ test("Delete everything: needs a second tap, No keeps data, Yes removes saved da
   await page.getByRole("button", { name: "Delete everything", exact: true }).click();
   await page.getByRole("button", { name: "Yes, delete everything" }).click();
   await expect(page.locator("#me-status")).toContainText("Everything is deleted");
-  expect(await page.evaluate(() => Object.keys(globalThis.localStorage).filter((k) => k.startsWith("focusapp")))).toEqual([]);
+  expect(await onlyClock(page)).toBe(true);
   await page.getByRole("button", { name: "Back to home" }).click();
   await expect(page.getByRole("button", { name: "Suggest some to start" })).toBeVisible();
 });
