@@ -56,6 +56,10 @@ test("Did that help: Not now saves nothing, and ignoring the card costs nothing"
   await pressDone(page);
   await expect(page.getByText("Did that way of working help?")).toBeVisible();
   await expect(page.locator(".current-step")).toHaveText("Write a draft");
+  // The step count choice (W2) shows five steps: the three pasted ones, then two starter steps.
+  await pressDone(page);
+  await expect(page.getByRole("heading", { name: "Step 4 of 5", level: 3 })).toBeVisible();
+  await pressDone(page);
   await pressDone(page);
   await expect(page.getByRole("heading", { name: "All your steps are done." })).toBeVisible();
   // After the last step the card is still only a question.
@@ -112,7 +116,8 @@ test("What I did: Done and Drifted both count as finished, with weekly lines", a
   await expect(page.getByText("You finished 2 steps.")).toBeVisible();
   await expect(page.getByText("1 step started big and got smaller. That counts too.")).toBeVisible();
   // Nothing shaming or ranking.
-  const text = await page.locator("#looking-screen").innerText();
+  // The screen's own reassurance says "It is not a grade", so leave that sentence out of the check.
+  const text = (await page.locator("#looking-screen").innerText()).replace("It is not a grade, and days away are not counted.", "");
   expect(text).not.toMatch(/missed|streak|behind|score|grade|rank/i);
   // Still there after a refresh.
   await page.reload();
@@ -154,26 +159,26 @@ async function seed(page) {
 
 test("What the app remembers: lists everything saved, as plain text", async ({ page }) => {
   await seed(page);
-  await expect(page.getByText("look up that song")).toBeVisible();
-  await expect(page.getByText("email Sam")).toBeVisible();
-  await expect(page.getByText("plants make sugar")).toBeVisible();
-  await expect(page.getByText("Working with a 12-minute countdown: helped")).toBeVisible();
-  await expect(page.getByText("<b>phone buzzed</b>")).toBeVisible();
+  await expect(page.locator("#looking-body").getByText("look up that song")).toBeVisible();
+  await expect(page.locator("#looking-body").getByText("email Sam")).toBeVisible();
+  await expect(page.locator("#looking-body").getByText("plants make sugar")).toBeVisible();
+  await expect(page.locator("#looking-body").getByText("Working with a 12-minute countdown: helped")).toBeVisible();
+  await expect(page.locator("#looking-body").getByText("<b>phone buzzed</b>")).toBeVisible();
   await expect(page.locator("#looking-body b")).toHaveCount(0);
-  await expect(page.getByText("1 finished step kept as a count")).toBeVisible();
+  await expect(page.locator("#looking-body").getByText("1 finished step kept as a count")).toBeVisible();
 });
 
 test("What the app remembers: Delete removes one line and keeps the rest", async ({ page }) => {
   await seed(page);
   await page.getByRole("button", { name: "Delete: look up that song" }).click();
-  await expect(page.getByText("Deleted.")).toBeVisible();
-  await expect(page.getByText("look up that song")).toHaveCount(0);
-  await expect(page.getByText("email Sam")).toBeVisible();
+  await expect(page.locator("#looking-body").getByText("Deleted.")).toBeVisible();
+  await expect(page.locator("#looking-body").getByText("look up that song")).toHaveCount(0);
+  await expect(page.locator("#looking-body").getByText("email Sam")).toBeVisible();
   expect((await stored(page, "parked")).map((p) => p.text)).toEqual(["email Sam"]);
   await page.getByRole("button", { name: "Delete: plants make sugar" }).click();
   expect(await stored(page, "recall")).toBeNull();
   await page.getByRole("button", { name: "Delete: <b>phone buzzed</b>" }).click();
-  await expect(page.getByText("<b>phone buzzed</b>")).toHaveCount(0);
+  await expect(page.locator("#looking-body").getByText("<b>phone buzzed</b>")).toHaveCount(0);
   expect((await stored(page, "profile")).gotInTheWay).toEqual([]);
   expect((await stored(page, "profile")).goals.today).toBe("Read");
   await page.getByRole("button", { name: "Delete: the count of steps I finished" }).click();
@@ -183,22 +188,22 @@ test("What the app remembers: Delete removes one line and keeps the rest", async
 test("What the app remembers: Delete all needs a second tap, and Keep it changes nothing", async ({ page }) => {
   await seed(page);
   await page.getByRole("button", { name: "Delete all of this" }).click();
-  await expect(page.getByText("Delete all of this? It can't be undone.")).toBeVisible();
+  await expect(page.locator("#looking-body").getByText("Delete all of this? It can't be undone.")).toBeVisible();
   expect(await stored(page, "parked")).toHaveLength(2);
   await page.getByRole("button", { name: "No, keep it" }).click();
-  await expect(page.getByText("email Sam")).toBeVisible();
+  await expect(page.locator("#looking-body").getByText("email Sam")).toBeVisible();
   expect(await stored(page, "parked")).toHaveLength(2);
   await page.getByRole("button", { name: "Delete all of this" }).click();
   await page.getByRole("button", { name: "Yes, delete it all" }).click();
-  await expect(page.getByText("Everything is deleted.")).toBeVisible();
-  await expect(page.getByText("Nothing yet. As you use the app, the things you save will show up here.")).toBeVisible();
+  await expect(page.locator("#looking-body").getByText("Everything is deleted.")).toBeVisible();
+  await expect(page.locator("#looking-body").getByText("Nothing yet. As you use the app, the things you save will show up here.")).toBeVisible();
   for (const name of ["parked", "recall", "helps", "moments"]) {
     expect(await stored(page, name)).toBeNull();
   }
   expect((await stored(page, "profile")).gotInTheWay).toEqual([]);
   // The counts screen is empty too.
   await page.getByRole("button", { name: "Back to What I did" }).first().click();
-  await expect(page.getByText("Nothing yet. After you work on a step, you'll see it here.")).toBeVisible();
+  await expect(page.locator("#looking-body").getByText("Nothing yet. After you work on a step, you'll see it here.")).toBeVisible();
 });
 
 test("What the app remembers: a deleted thought is gone from the work screen too", async ({ page }) => {
