@@ -146,6 +146,12 @@ How to add one: date, who asked, one-line request in their words, then rule conf
 - **Recommendation:** keep TestFlight for the iPhone beta. Treat a PWA as a separate, small task that freezes today's web app as a labelled "core only" version for students on other devices: manifest, icons, service worker, offline tests, and hosting set up by the parent. Do not port the newer iOS features unless a student need shows up.
 - **Next:** parent decides whether classmates include Android, Chromebook or older iPhone users. That answer decides whether this is worth doing.
 
+### F10. Documents for an App Store release
+- **Asked by:** parent. "what do i need to be accepted for appstore release? can we set that documentation up"
+- **Status:** drafts written 2026-11-27 in `release/`: `README.md`, `APP-STORE-CHECKLIST.md`, `PRIVACY-POLICY-DRAFT.md`, `SUBMISSION-TEXT-DRAFT.md`. Nothing submitted, hosted or entered anywhere.
+- **Main findings:** no privacy manifest file yet (A4); Apple's rule on sharing data with third-party AI needs a disclosure and explicit permission (A1), and the app has the disclosure but no "I agree" step; no hosted privacy policy or support page (A2, A9); the age rating questionnaire and the App Privacy answers need the parent (A3, A5); placeholders remain (icon, name, Wikipedia contact); T14 and D8 still gate everything.
+- **Next:** parent reads the drafts and decides the items marked decide; then REL1 to REL6 as separate tasks.
+
 ---
 
 ## Earlier ideas now tracked elsewhere

@@ -46,7 +46,7 @@ Do not start this until: the AI checks are cleared by the Advisor; you have answ
 21. Click **Distribute App** > **App Store Connect** > **Upload**. Follow the prompts; Xcode signs with your account.
 22. In App Store Connect (appstoreconnect.apple.com), create the app record with the same bundle identifier, then open **TestFlight**.
 23. Add the build to an **external** or **internal** group and add testers by email. Apple reviews the first external build.
-24. In the app's privacy answers in App Store Connect, say: no data collected. The app has no account and no analytics. The only thing sent off the phone is the search words to Wikipedia when the student taps Search (`DECISIONS.md` D8).
+24. For the privacy answers and everything else App Store Connect asks, use `release/APP-STORE-CHECKLIST.md` and the drafts in `release/`. (This step used to say "no data collected, only Wikipedia search words leave the phone". That is out of date: a student can now also send messages to an AI service they add in Me.)
 
 ## Open questions, in plain words
 
@@ -57,7 +57,7 @@ Do not start this until: the AI checks are cleared by the Advisor; you have answ
 | D6 | Is it all right that version 1 uses only the AI built into the phone, with no cloud AI and no keys? | Yes. Nothing students type leaves the phone and nothing costs money. |
 | D7 | Is it all right that talking is off until the student turns it on, the microphone listens only while held or tapped, and nothing is recorded? | Yes. |
 | D8 | Do you confirm the list of what may leave the phone: search words to Wikipedia, and opening a source link? | Yes, before any classmate gets the app. |
-| Backup | Should the app's data stay out of phone backups? It is set that way now. | Keep it out. Then nothing reaches iCloud. The cost: if the phone is lost, the steps are lost. |
+| Backup | **Decided 2026-11-21 (D13):** a switch in Me, "Include in my backup", on by default, so a lost phone does not lose the steps. The old recommendation to keep data out of backups is withdrawn. | Nothing to do. |
 | Mic use | May students under your care use the microphone? | Yes, with the one-sentence explanation the app already shows. |
 | Language download | Talking needs a one-time download of speech files from Apple. Nothing of the student's is sent. Is that acceptable, and not a "leaves the phone" item? | Yes. |
 | Trusted-adult line | When a student's chat message suggests danger or distress, the app shows one fixed line to talk to a trusted adult and does not save that message. Do you approve this? | Yes. The wording is "If something serious is going on, please talk to an adult you trust." |
