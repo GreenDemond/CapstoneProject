@@ -28,6 +28,15 @@ final class MeUITests: XCTestCase {
     app.buttons["note-add"].tap()
     let row = app.element("note-row")
     XCTAssertTrue(row.waitForExistence(timeout: 5))
+    // On iOS 18 the new row can sit under the tab bar, which XCUITest still calls hittable, so a
+    // swipe would hit the tab bar. Scroll until the row is above it, judged by position.
+    let barTop = app.tabBars.firstMatch.exists ? app.tabBars.firstMatch.frame.minY : app.frame.maxY
+    var swipes = 0
+    // Only a bottom tab bar can cover the row; on an iPad the tabs are at the top.
+    while barTop > app.frame.midY && row.frame.maxY > barTop && swipes < 6 {
+      app.swipeUp()
+      swipes += 1
+    }
     row.swipeLeft()
     app.buttons["Delete"].tap()
     app.buttons["note-delete-confirm"].firstMatch.tap()

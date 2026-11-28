@@ -48,11 +48,21 @@ enum AppBoot {
       let none = Services(keys: keys, transport: transport, backup: backup)
       return AppModel(content: content, store: store, services: none)
     }
-    let services = Services(
-      speechInput: AppleSpeechInput(), speechOutput: AppleSpeechOutput(),
-      headphones: AppleHeadphones(), languageModel: AppleLanguageModel(), keys: keys,
+    if #available(iOS 26.0, *) {
+      let services = Services(
+        speechInput: AppleSpeechInput(), speechOutput: AppleSpeechOutput(),
+        headphones: AppleHeadphones(), languageModel: AppleLanguageModel(), keys: keys,
+        transport: transport, backup: backup)
+      return AppModel(content: content, store: store, services: services)
+    }
+    // iOS 18 to 25: Apple's on-device model and dictation do not exist. The app runs with no AI
+    // and no dictation (D5); read-aloud, the Keychain, the student's own AI service and the backup
+    // flag work as on iOS 26.
+    let older = Services(
+      speechOutput: AppleSpeechOutput(), headphones: AppleHeadphones(),
+      languageModel: UnavailableLanguageModel(reason: .deviceNotEligible), keys: keys,
       transport: transport, backup: backup)
-    return AppModel(content: content, store: store, services: services)
+    return AppModel(content: content, store: store, services: older)
   }
 
   /// Used only by the UI tests: a scripted AI, so the chat can be driven without Apple's model.

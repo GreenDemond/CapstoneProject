@@ -7,6 +7,8 @@
   /// (declarations verified in the SDK's Speech.swiftinterface; see design/slices/T09-voice-in.md).
   /// The microphone is on only between `listen()` and the end of its stream. Audio goes from the
   /// microphone to the analyzer in memory. It is never written to a file and never sent anywhere.
+  /// On-device dictation exists only from iOS 26. Below that the microphone is not offered.
+  @available(iOS 26.0, macOS 26.0, *)
   public final class AppleSpeechInput: SpeechInput, @unchecked Sendable {
     private let locale: Locale
     private let lock = NSLock()
@@ -157,6 +159,7 @@
   }
 
   /// Turns microphone buffers into what the analyzer wants, in memory.
+  @available(iOS 26.0, macOS 26.0, *)
   private final class Pump: @unchecked Sendable {
     private let converter: AVAudioConverter?
     private let target: AVAudioFormat

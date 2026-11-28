@@ -64,8 +64,8 @@ How to add one: date, who asked, one-line request in their words, then rule conf
 - **iOS 18 trial, 2026-11-27 (throwaway copy `/tmp/ios-old2`, not the repository):**
   - Changes needed: mark `AppleLanguageModel`, `AppleSpeechInput` and its helper `Pump` as iOS 26 only, and in `AppBoot.swift` use the existing no-AI, no-dictation services below iOS 26. At iOS 17 the tab bar (`RootView.swift`, SwiftUI `Tab`) also fails; at iOS 18.0 the whole app builds.
   - Results on an iPhone 11 simulator, iOS 18.2: 683 of 683 unit tests passed; UI suite 71 tests, 68 passed, 1 expected iPad-only skip, 2 failed. Both failures were test assumptions about iOS 26, not app defects: `openMe` relied on a tab re-tap scrolling to the top, and `MeUITests.testAddAndDeleteANote` swiped a note row hidden under the tab bar (XCUITest still calls it hittable). With two test fixes both pass on iOS 18.
-  - Not yet done: a full rerun with the test fixes on iOS 18 and on iOS 26; a real device on iOS 18; how the layout looks without iOS 26's glass styling.
-- **Next:** the real change needs a design note, gates and a D12 change (minimum iOS 18.0). The small-screen fix (SMALL1) is done.
+  - Done in OLD1 (repository change, 2026-11-27): full iOS 18.2 suite 71 tests, 70 passed, 1 expected iPad-only skip, 0 failures. Not done: a real device on iOS 18.
+- **Status 2026-11-27:** being done as OLD1 (`design/slices/OLD1-ios18-floor.md`, gate 1 GO). The small-screen fix (SMALL1) is done.
 
 ### F5. Apple's cloud AI as an option
 - **Asked by:** parent. "will apple's cloud ai work?"

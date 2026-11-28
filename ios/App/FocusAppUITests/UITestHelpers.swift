@@ -53,6 +53,14 @@ extension XCUIApplication {
   func openMe(_ row: String) {
     tab("Me").tap()
     let target = buttons[row]
+    // Re-tapping the tab scrolls back to the top on iOS 26 but not on iOS 18. If the row is above
+    // the navigation bar (off screen at the top), scroll down until it is below it.
+    let navBottom = navigationBars.firstMatch.exists ? navigationBars.firstMatch.frame.maxY : 0
+    var up = 0
+    while target.exists && target.frame.minY < navBottom && up < 10 {
+      swipeDown()
+      up += 1
+    }
     if !target.waitForExistence(timeout: 2) {
       let back = navigationBars.buttons.element(boundBy: 0)
       if back.exists { back.tap() }

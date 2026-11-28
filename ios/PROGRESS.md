@@ -4,11 +4,13 @@ Read this first in any session. It is the memory between sessions. Rewrite it ea
 
 **As of 2026-11-26, build 25 (`CURRENT_PROJECT_VERSION = 25`).** Build 24 is installed on the parent's iPhone and iPad. Build 25 (the same app code, build number bumped) is archived as `Bens Steps 0.1 (25).xcarchive` in Organizer and waits for the parent to upload it to TestFlight (use the stable Xcode, not the beta). Everything is pushed to the `craighagan` fork (never `origin`). Last full check: ALL CHECKS PASSED (683 unit tests plus UI tests, 0 skipped).
 
-**Latest (2026-11-26, not yet in a build):** small-screen editor fix (SMALL1): tips card collapsed by default and Check my steps moved below the steps, so the first step's controls clear the Start bar on the iPhone 11 and SE simulators. Full check passed. Next build number is 26. An iPhone 11 and an iPhone SE simulator (iOS 26.5) exist for testing. Other sessions are working on the web app in the repository root; leave those files alone.
+**Latest (2026-11-27, not yet in a build):** minimum iOS lowered to 18.0 (OLD1). Earlier, small-screen editor fix (SMALL1): tips card collapsed by default and Check my steps moved below the steps, so the first step's controls clear the Start bar on the iPhone 11 and SE simulators. Full check passed. Next build number is 26. An iPhone 11 and an iPhone SE simulator (iOS 26.5) exist for testing. Other sessions are working on the web app in the repository root; leave those files alone.
 
 **Recent work (2026-11-25 to 26):** coaching queue finished (M1, M3, M4, C4 to C6, C9, R5), What I did (PROG1), goal in the weekly look-back (PROG2), step count as a guide (A2), good-step card (R6), iPad support (IPAD1). Not needed or skipped: C7 (no change), A1 (type `any` as the model name for the parent's Polystrata server), M2 (skipped). Deferred: C8. Held: C3 and R1 comeback.
 
 **The plan for what comes next is `design/coaching-roadmap-plan.md`** (expert-panel approved 2026-11-26): R0 beta readiness, R1 reset plan, R2 timer (no Pomodoro), R3 comeback, R4 delayed recall. Nothing in it is built; each part waits for the approvals in its section 7.
+
+**Minimum iOS is 18.0 (OLD1, 2026-11-27).** On iOS 18 to 25 Apple's on-device AI and dictation are off. `checks/check.sh` runs the iOS 26 simulator only. The iOS 18 suite is run by hand: `cd App && xcodebuild test -project FocusApp.xcodeproj -scheme FocusApp -destination "id=CA32B322-11C7-44A1-BE0F-61DF1CAAA7F0"` (iPhone 11, iOS 18.2). Shut down other simulators first. Other test simulators: iPhone 11 on iOS 26.5 `9CD99C89-864F-4092-BF01-DA1BAC3F57A6`, iPhone SE (3rd generation) on iOS 26.5 `7CC84638-4F50-4563-B3AE-C355B77FF265`.
 
 **Xcode note:** the parent's iPhone runs an iOS 27.3 beta. Installing from the Mac needs `DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer` and the phone unlocked. Archives for TestFlight use the stable `/Applications/Xcode.app`.
 

@@ -46,7 +46,8 @@ xcodebuild build-for-testing -project App/FocusApp.xcodeproj -scheme FocusApp -s
 echo "ran: xcodebuild build-for-testing (generic iOS device: app and UI tests compile)"
 
 echo "== 4. UI tests =="
-# Only simulators running iOS 26 or later work with this Xcode; skip older runtimes (e.g. iOS 18).
+# The automatic run uses an iOS 26 simulator. The app also supports iOS 18 (OLD1); that suite is
+# run by hand on an iOS 18.2 simulator (see PROGRESS.md).
 # Prefer the iPhone 15 Pro Max (the simulator the suite is known to pass on). Another iPhone has
 # crashed whole groups of UI tests with "signal kill". Set FOCUS_SIM to a simulator id to override.
 PREFERRED=$(xcrun simctl list devices available 2>/dev/null | awk '

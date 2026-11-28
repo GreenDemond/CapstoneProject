@@ -5,6 +5,8 @@
   /// The model that runs on the phone (`SystemLanguageModel.default`). It never uses Apple's cloud
   /// model: it is not referenced anywhere, and a test checks that.
   /// Declarations verified in the SDK's FoundationModels.swiftinterface; see design/slices/T11-phone-ai.md.
+  /// Apple's on-device model exists only from iOS 26. Below that the app runs with no AI (D5).
+  @available(iOS 26.0, macOS 26.0, *)
   public final class AppleLanguageModel: LanguageModel, @unchecked Sendable {
     public init() {}
 
