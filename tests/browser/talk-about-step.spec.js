@@ -47,7 +47,7 @@ test("Talk about this step opens a chat about the step and sends it", async ({ p
 test("Clear stops the chat being about the step, and the step is no longer sent", async ({ page }) => {
   const seen = await stuckWithHelper(page, { content: "Tell me more." });
   await page.getByRole("button", { name: "Talk about this step" }).click();
-  await page.getByRole("button", { name: "Clear", exact: true }).click();
+  await page.getByRole("button", { name: "Clear: stop talking about this step" }).click();
   await expect(page.locator("#chat-about")).toHaveCount(0);
   await expect(page.locator("#chat-goes-to")).not.toContainText("This step is sent");
   await page.getByRole("button", { name: "Reading" }).click();
