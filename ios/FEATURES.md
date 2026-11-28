@@ -93,6 +93,24 @@ How to add one: date, who asked, one-line request in their words, then rule conf
 - **How to know it is better:** build a fixture set of 30 to 50 realistic assignment texts (essay, reading, problem set, project, test prep, messy copy-pasted text, empty and very long text) with the steps and requirement lines a person expects, and score each heuristic against them. Do not tune on a few examples. No claim that it improves outcomes.
 - **Next:** pick which of 1 to 7 matter most to Ben. My recommendation is 2 (requirements) and 4 (splitting), because they feed Check my steps and Drifted and keep to copying the student's own words. Then a design note and a fixture set before any code.
 
+### F7. A very small language model inside the app
+- **Asked by:** parent. "is there a small llm that we could embed?" then "very very small"
+- **Status:** assessed. Not designed or built. Sizes and model names below are from general knowledge and a web search on 2026-11-26, not measured here.
+- **Is it possible:** yes. Models of about 0.1 to 1 billion parameters, squeezed to 4 bits, are roughly 100 to 600 MB. Small families that come up are Gemma 3 (270M and 1B), SmolLM2 (135M and 360M), Qwen (0.5B to 1.7B) and Llama 3.2 1B. A 1B model runs on recent iPhones; an iPhone 11 has 4 GB of memory and an older Neural Engine, so only the smallest sizes are realistic there. Speed on an iPhone 11 is unmeasured.
+- **What a very small model is good for, and not:**
+  - Poor at following the app's rules (hints not answers, no shame, stay on topic). Apple's own 3B model already needs T14 and `research/08-phone-ai.md` shows it drifts. A model under 1B would be worse.
+  - Plausible for narrow jobs whose result the code checks: choosing a kind of work, copying requirement lines out of the assignment, and spotting vague steps. The safe rule from S3 applies: show only lines found word for word in the student's text.
+  - Not suitable for generating steps, the Stuck question, Talk, or anything that writes new text for the student.
+- **Rule and decision checks:**
+  - **D2 (no third-party code):** running a model needs a runtime. Core ML is Apple's own and fits. MLX Swift and llama.cpp are third-party packages and do not. Converting a model to Core ML uses Python tools (coremltools), which are third-party tooling that D2 also bars. This needs a parent decision before any work.
+  - **Rule 4 / D8:** an embedded model sends nothing anywhere, so no D8 row is needed. A model downloaded after install needs hosting and a network request (parent, T7).
+  - **Size:** a model in the app adds its full size. Apple warns before downloading apps over 200 MB on cellular. Apple's On-Demand Resources allow downloading assets later, but that is a hosting and App Store step for the parent.
+  - **Licence:** each model has its own terms (for example Gemma and Llama use their own licences with use restrictions). The parent must read and accept them, and the licence text may need to ship with the app. Not checked here.
+  - **T14:** any model that can write words to a student must pass the answer-giving checks as its own configuration. A model used only to pick a label or copy lines needs a smaller check: the output is validated by code.
+  - **Code:** it would sit behind the existing `LanguageModel` protocol, so the safety word, answer guard and process-step check already apply.
+- **Recommendation:** do F6 (better plain-code heuristics) first. It likely covers the same narrow jobs with no model, no licence, no size and no D2 conflict. If the fixture scores from F6 show a clear gap, run a small bake-off of one or two tiny models on the same fixtures before deciding. Do not embed a model for text generation.
+- **Next:** parent decides whether D2 can bend for Core ML conversion tooling. No other work until F6 has fixture scores.
+
 ---
 
 ## Earlier ideas now tracked elsewhere
