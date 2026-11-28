@@ -1,0 +1,26 @@
+{
+  "id": "FEAT-004",
+  "type": "feat",
+  "description": "Slice W4 of design/web-parity-plan.md. Work screen extras: Stuck sheet (ladder, read ios T07-stuck-ladder.md), park a thought, recall question after study steps (P9). Independent of later slices; depends on earlier ones only for existing code.",
+  "status": "completed",
+  "steps": [
+    "Write design/work-extras-w4.md (parent pre-approved the plan, 'go do it all'; list student-visible wording as awaiting parent okay) and run the AGENTS.md design review checklist",
+    "Put pure logic in js/logic/ with node tests incl. awkward cases; screen code in js/screens/ or existing screen files; save data only via js/storage.js",
+    "Add Playwright spec tests/browser/<slice>.spec.js: main path and awkward path (distracted, empty, refresh mid-step, damaged storage)",
+    "Add steps to tests/manual-checks.md; update PROGRESS.md and the slice table status in design/web-parity-plan.md",
+    "Self-review the diff against the AGENTS.md Stage 2 checklist, then run lint, logic tests and full browser suite via temp Chrome config (delete config after)",
+    "Commit only own files by name: git -c user.email=hagan@cih.com commit -m 'feat(web): ...'. If it cannot be finished, revert the slice and record why in PROGRESS.md"
+  ],
+  "acceptance_criteria": [
+    "npm run lint clean, npm run test:logic passes, browser suite passes except known flaky ai-choice.spec.js:44",
+    "Design note exists; slice committed as one commit; PROGRESS.md and plan table updated",
+    "No AGENTS.md rule 1-11 broken; nothing in ios/ changed; no AI needed"
+  ],
+  "verification": [
+    "npm run lint",
+    "npm run test:logic",
+    "npx playwright test --config pw-chrome.tmp.config.js"
+  ],
+  "blocked_reason": null,
+  "findings": "Built W4: js/logic/work-extras.js, storage sections parked/recall, work.js Stuck Ask a person + Park a thought + recall card, css, tests/logic/work-extras.test.js (passing, 346 total), tests/browser/work-extras.spec.js (10 tests x phone/desktop, listed OK by playwright but NOT RUN: Chrome aborts on launch in this sandbox). Lint clean. Existing work-screen tests reasoned through only. Saved parked/recall have no read/delete screen until W6/W7. Rule 11 typed-text check not present (flagged). Wording awaits parent okay."
+}

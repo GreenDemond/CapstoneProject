@@ -4,6 +4,7 @@
 import { emptyProfile, normalizeProfile } from "./logic/profile.js";
 import { normalizeServices } from "./logic/ai-services.js";
 import { normalizeWork } from "./logic/work.js";
+import { normalizeParked, normalizeRecall } from "./logic/work-extras.js";
 import { normalizeChatSettings } from "./logic/chat-settings.js";
 import { normalizeChats } from "./logic/chat-store.js";
 
@@ -266,6 +267,38 @@ export function loadWork(storage = defaultStorage()) {
 
 export function saveWork(work, savedOn = new Date().toISOString(), storage = defaultStorage()) {
   return saveSection("work", work === null ? null : { steps: work.steps, nextId: work.nextId, savedOn, ...(work.kind ? { kind: work.kind } : {}) }, storage);
+}
+
+// Thoughts the student parked during work, and their own recall answers (design/work-extras-w4.md).
+// Each loads as an empty list when nothing usable is saved. An empty list removes the section.
+export function loadParked(storage = defaultStorage()) {
+  if (!storage) {
+    return [];
+  }
+  try {
+    return normalizeParked(readSection(storage, "parked"));
+  } catch {
+    return [];
+  }
+}
+
+export function saveParked(items, storage = defaultStorage()) {
+  return saveSection("parked", items.length === 0 ? null : items, storage);
+}
+
+export function loadRecall(storage = defaultStorage()) {
+  if (!storage) {
+    return [];
+  }
+  try {
+    return normalizeRecall(readSection(storage, "recall"));
+  } catch {
+    return [];
+  }
+}
+
+export function saveRecall(items, storage = defaultStorage()) {
+  return saveSection("recall", items.length === 0 ? null : items, storage);
 }
 
 // The student's own chat guides and reply lengths, in their own section. Damaged entries are dropped one by one.

@@ -1,8 +1,9 @@
 // The work screen: one step at a time (design/work-screen.md). Steps and progress are saved on the
 // device after every change (design/home-screen.md).
-import { createWork, currentIndex, doneCount, allDone, applyChoice, hintAt, ringFraction, formatTime, secondsUntil } from "../logic/work.js";
+import { createWork, currentIndex, doneCount, allDone, applyChoice, hintAt, ringFraction, formatTime, secondsUntil, STUCK_HINTS } from "../logic/work.js";
+import { asksRecall, addParked, addRecall, removeItem, showAskPerson, buildQuestion, hasOwnWords, MAX_PARKED_LENGTH, MAX_RECALL_LENGTH, MAX_ASK_LENGTH } from "../logic/work-extras.js";
 import { listLabel } from "../logic/home.js";
-import { saveWork } from "../storage.js";
+import { saveWork, loadParked, saveParked, loadRecall, saveRecall } from "../storage.js";
 import { confetti } from "../confetti.js";
 import { el, button, announce } from "../ui/dom.js";
 import { showScreen, setStepsPreviewOpen } from "../ui/screens.js";
@@ -16,7 +17,19 @@ const workHeading = document.getElementById("work-heading");
 const TIMER_CHOICES = [12, 25];
 const ADVANCE_GUARD_MS = 400;
 let work = null;
-let mode = "steps"; // "steps", "stuck", "drifting", "done"
+let mode = "steps"; // "steps", "stuck", "drifting", "recall", "done"
+// Work screen extras (design/work-extras-w4.md). The Ask a person boxes live in memory only.
+let askOn = null; // null until the Stuck sheet opens, then the step text the student may edit
+let askTried = "";
+let askDontGet = "";
+let parked = [];
+let recalls = [];
+let parkOpen = false;
+let parkText = "";
+let parkNote = "";
+let recallStepId = null;
+let recallText = "";
+let recallNote = "";
 let hintsShown = 0;
 let workNote = "";
 let driftNote = "";
@@ -123,6 +136,12 @@ export function openWorkScreen(texts, existing = null) {
   // The kind chosen on the paste screen is kept with the steps, so the chat can pre-select it later.
   work = existing ?? { ...createWork(texts), ...(getChosenKind() ? { kind: getChosenKind() } : {}) };
   persistWork();
+  parked = loadParked();
+  recalls = loadRecall();
+  parkOpen = false;
+  parkText = "";
+  parkNote = "";
+  resetAsk();
   workListOpen = false;
   mode = "steps";
   hintsShown = 0;
@@ -133,6 +152,12 @@ export function openWorkScreen(texts, existing = null) {
   startTimer();
   renderWork();
   workHeading.focus();
+}
+
+function resetAsk() {
+  askOn = null;
+  askTried = "";
+  askDontGet = "";
 }
 
 function closeWork() {
@@ -161,6 +186,9 @@ function choose(choice, splitText = "") {
   mode = "steps";
   hintsShown = 0;
   driftNote = "";
+  if (choice !== "still") {
+    resetAsk(); // a different step needs its own question
+  }
   if (choice === "still") {
     timeUp = false; // the student chose to keep going, so the time's-up line goes
   }
@@ -187,7 +215,168 @@ function choose(choice, splitText = "") {
   } else if (currentStepId() !== beforeId) {
     startTimer(); // a new step starts a new countdown
   }
+  // After a reading or study step, one optional question in the student's own words.
+  if (choice === "done" && asksRecall(work.kind)) {
+    recallStepId = beforeId;
+    recallText = "";
+    recallNote = "";
+    mode = "recall";
+  }
   renderWork();
+}
+
+function finishRecall(save) {
+  if (save) {
+    const next = addRecall(recalls, recallText, recallStepId, new Date().toISOString());
+    if (next === recalls) {
+      recallNote = "Write a few words, or tap Skip.";
+      renderWork();
+      workBody.querySelector("#recall-text")?.focus();
+      return;
+    }
+    if (!saveRecall(next)) {
+      recallNote = "That could not be saved here. Tap Skip to go on.";
+      renderWork();
+      workBody.querySelector("#recall-text")?.focus();
+      return;
+    }
+    recalls = next;
+  }
+  recallText = "";
+  recallNote = "";
+  workNote = "";
+  mode = allDone(work) ? "done" : "steps";
+  renderWork();
+}
+
+function renderRecall() {
+  workHeading.textContent = "Work";
+  if (workNote) {
+    const noteLine = el("p", undefined, { class: "reward", role: "status" });
+    workBody.append(noteLine);
+    announce(noteLine, `✓ ${workNote}`);
+  }
+  workBody.append(el("p", "One thing you just learned?", { class: "current-step", tabindex: "-1", id: "recall-question" }));
+  workBody.append(el("p", "In your own words. Nothing is graded, and you can skip.", { class: "hint" }));
+  const box = el("textarea", undefined, { id: "recall-text", rows: "3", maxlength: String(MAX_RECALL_LENGTH), "aria-label": "One thing you just learned?" });
+  box.value = recallText;
+  box.addEventListener("input", () => { recallText = box.value; });
+  workBody.append(box);
+  if (recallNote) {
+    workBody.append(el("p", recallNote, { class: "gentle", role: "status" }));
+  }
+  workBody.append(button("Save answer", () => finishRecall(true), "primary"));
+  workBody.append(button("Skip", () => finishRecall(false)));
+  box.focus();
+}
+
+// A box for a stray thought, so the student can set it aside and go back to the step.
+function parkSection() {
+  const wrap = el("div", undefined, { class: "park" });
+  const toggle = button("Park a thought", () => {
+    parkOpen = !parkOpen;
+    parkNote = "";
+    renderWork(false);
+    workBody.querySelector(parkOpen ? "#park-text" : "#park-toggle")?.focus();
+  });
+  toggle.id = "park-toggle";
+  toggle.setAttribute("aria-expanded", parkOpen ? "true" : "false");
+  wrap.append(toggle);
+  if (!parkOpen) {
+    return wrap;
+  }
+  const panel = el("div", undefined, { id: "park-panel", class: "park-panel" });
+  const input = el("input", undefined, { type: "text", id: "park-text", maxlength: String(MAX_PARKED_LENGTH), "aria-label": "A thought for later" });
+  input.value = parkText;
+  input.addEventListener("input", () => { parkText = input.value; });
+  const save = () => {
+    const next = addParked(parked, parkText, new Date().toISOString());
+    if (next === parked) {
+      parkNote = "Write a few words first.";
+    } else {
+      parked = next;
+      parkText = "";
+      parkNote = saveParked(parked) ? "Saved for later." : "That could not be saved here, so it will be lost if you close this page.";
+    }
+    renderWork(false);
+    workBody.querySelector("#park-text")?.focus();
+  };
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      save();
+    }
+  });
+  panel.append(input, button("Save thought", save));
+  if (parkNote) {
+    panel.append(el("p", parkNote, { class: "hint", role: "status" }));
+  }
+  if (parked.length > 0) {
+    const list = el("ul", undefined, { class: "parked-list" });
+    parked.slice(0, 5).forEach((item, i) => {
+      const li = el("li", item.text);
+      const remove = button("Remove", () => {
+        parked = removeItem(parked, item.id);
+        saveParked(parked);
+        parkNote = "";
+        renderWork(false);
+        workBody.querySelector("#park-text")?.focus();
+      }, "small");
+      remove.setAttribute("aria-label", `Remove parked thought ${i + 1}`);
+      li.append(" ", remove);
+      list.append(li);
+    });
+    panel.append(list);
+  }
+  wrap.append(panel);
+  return wrap;
+}
+
+// After two hints the student can word a question for a person. The app writes nothing for them:
+// the boxes hold only their own words, and nothing is sent anywhere.
+function askSection(step) {
+  if (askOn === null) {
+    askOn = step.text;
+  }
+  const wrap = el("div", undefined, { class: "ask" });
+  wrap.append(el("p", "Ask a person", { class: "ask-title" }));
+  wrap.append(el("p", "A person can help most. Fill this in, then copy it or show it.", { class: "hint" }));
+  const boxes = [
+    ["ask-on", "I'm on:", () => askOn, (v) => { askOn = v; }],
+    ["ask-tried", "I tried:", () => askTried, (v) => { askTried = v; }],
+    ["ask-dont-get", "I don't get:", () => askDontGet, (v) => { askDontGet = v; }],
+  ];
+  for (const [id, label, get, set] of boxes) {
+    const box = el("textarea", undefined, { id, rows: "2", maxlength: String(MAX_ASK_LENGTH), "aria-label": label });
+    box.value = get();
+    box.addEventListener("input", () => set(box.value));
+    wrap.append(box);
+  }
+  const status = el("p", undefined, { class: "gentle", role: "status", id: "ask-status" });
+  const copy = button("Copy my question", () => {
+    const fields = { on: askOn, tried: askTried, dontGet: askDontGet };
+    if (!hasOwnWords(fields)) {
+      announce(status, "Write a little in I tried or I don't get first.");
+      return;
+    }
+    const question = buildQuestion(fields);
+    const showFallback = () => {
+      const shown = el("textarea", undefined, { id: "ask-copy-fallback", rows: "4", readonly: "", "aria-label": "Your question, to copy" });
+      shown.value = question;
+      wrap.append(shown);
+      shown.focus();
+      shown.select();
+      announce(status, "Copying did not work here. Select the text above and copy it.");
+    };
+    const clip = globalThis.navigator && globalThis.navigator.clipboard;
+    if (clip && typeof clip.writeText === "function") {
+      clip.writeText(question).then(() => announce(status, "Copied."), showFallback);
+    } else {
+      showFallback();
+    }
+  });
+  wrap.append(copy, status);
+  return wrap;
 }
 
 // focusStep is true when the screen opens or the student's tap replaced the step view.
@@ -198,6 +387,10 @@ function renderWork(focusStep = true) {
   const keepLabel = !focusStep && workBody.contains(active) && active.tagName === "BUTTON" ? active.textContent : null;
   const hadFocus = !focusStep && workBody.contains(active);
   workBody.replaceChildren();
+  if (mode === "recall") {
+    renderRecall();
+    return;
+  }
   if (mode === "done" || allDone(work)) {
     workHeading.textContent = "All your steps are done.";
     workBody.append(button("Close", closeWork, "primary"));
@@ -227,6 +420,7 @@ function renderWork(focusStep = true) {
   if (mode === "stuck") {
     const hint = hintAt(hintsShown);
     let focusTarget;
+    workBody.append(el("p", "Stuck is okay.", { class: "hint" }));
     if (hint === null) {
       focusTarget = el("p", "That's all the hints for now. Try the first small part, or tap Still working.", { class: "gentle", tabindex: "-1" });
     } else {
@@ -235,6 +429,9 @@ function renderWork(focusStep = true) {
     workBody.append(focusTarget);
     if (hint !== null) {
       workBody.append(button("Another hint", () => { hintsShown += 1; renderWork(); }));
+    }
+    if (showAskPerson(Math.min(hintsShown + 1, STUCK_HINTS.length), STUCK_HINTS.length)) {
+      workBody.append(askSection(step));
     }
     workBody.append(button("Back to the step", () => { mode = "steps"; renderWork(); }));
     focusTarget.focus();
@@ -315,6 +512,8 @@ function renderWork(focusStep = true) {
   if (workListOpen) {
     workBody.append(stepListNode(work));
   }
+
+  workBody.append(parkSection());
 
   workBody.append(button("Back to home", closeWork));
   // Keep focus where it was; if that control is gone (or it was the step text), the step gets it,

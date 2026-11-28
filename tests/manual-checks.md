@@ -265,3 +265,18 @@ No key needed. Do this on a phone as well as a computer.
 6. Press Got it: the row goes and a small "Show step tips" appears. Refresh, paste again, open Change my steps: the card stays away. Press Show step tips: the card opens.
 7. Leave my steps as they were, then Change my steps again: the card is folded again.
 8. Check the words are calm, at phone width, and with the keyboard only (Tab to the radios, arrow between them, Tab to the card).
+
+## Work screen extras (web, W4)
+
+Not yet done by anyone: the browser tests for this slice were not run.
+
+1. Paste three lines, pick Essay, Show my steps, Start. Press Stuck: "Stuck is okay." and the first hint show. No "Ask a person" yet.
+2. Press Another hint: "Ask a person" and three boxes appear. "I'm on:" holds the step's words. Press Copy my question with nothing else written: a calm line says to write a little first.
+3. Write in "I tried:" and press Copy my question: "Copied." Paste somewhere: three lines of your own words, nothing added.
+4. Press Another hint again: what you typed is still there. Back to the step: same step. Stuck again: still there. Press Done, then Stuck, Another hint: the boxes are empty and "I'm on:" has the new step.
+5. On the step screen press Park a thought, type "look up that song", press Enter: "Saved for later." and the thought is listed. The step has not changed. Refresh and start again: the thought is still in the list. Press Remove: it goes. Try a blank save: "Write a few words first."
+6. Type "<b>hi</b>" as a thought: it shows as plain text.
+7. Start again with Reading (or Studying for a test). Press Done: "One thing you just learned?" with a box, Save answer and Skip. Type a few words, press Save answer: the next step shows. Press Done, then Save answer with nothing typed: a calm line asks for a few words, the box keeps focus. Press Skip: the next step shows.
+8. Finish the last step with Skip: "All your steps are done." and Close works.
+9. Pick Essay and press Done: no recall question.
+10. Check at phone width, with the keyboard only, and that nothing says "wrong", "missed" or "score".

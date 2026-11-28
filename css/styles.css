@@ -710,3 +710,43 @@ button {
 .step-tips-body p {
   margin: 0.4rem 0;
 }
+
+/* Work screen extras: park a thought, Ask a person, recall (design/work-extras-w4.md) */
+.park {
+  margin: 0.5rem 0;
+}
+
+.park-panel {
+  border-left: 3px solid var(--accent);
+  margin: 0.25rem 0 0.75rem;
+  padding: 0.25rem 0.75rem;
+}
+
+.park-panel input[type="text"] {
+  width: 100%;
+  font: inherit;
+  padding: 0.6rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--muted);
+  border-radius: 0.5rem;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.parked-list {
+  padding-left: 1.25rem;
+  margin: 0.5rem 0;
+}
+
+.ask {
+  margin: 1rem 0;
+}
+
+.ask-title {
+  font-weight: 600;
+  margin: 0 0 0.25rem;
+}
+
+.ask textarea {
+  margin-bottom: 0.5rem;
+}
