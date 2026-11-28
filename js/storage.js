@@ -9,6 +9,7 @@ import { normalizeHandledOn } from "./logic/return-visit.js";
 import { normalizeParked, normalizeRecall } from "./logic/work-extras.js";
 import { normalizeMoments, normalizeHelps } from "./logic/looking-back.js";
 import { normalizeBlockAnswers } from "./logic/block-length.js";
+import { normalizeCourses } from "./logic/courses.js";
 import { normalizeChatSettings } from "./logic/chat-settings.js";
 import { normalizeChats } from "./logic/chat-store.js";
 import { normalizeCalendarItems, normalizeCounts } from "./logic/calendar.js";
@@ -276,6 +277,28 @@ export function saveLookbackCardDate(iso, storage = defaultStorage()) {
   return saveSection("lookbackCard", { on: iso }, storage);
 }
 
+// After "Delete everything" the page reloads once. That one load must not write the look-back date again,
+// so nothing is left saved. The next visit starts the week as usual. Held in sessionStorage only.
+const NO_CLOCK_KEY = "focusapp-no-clock";
+
+export function skipNextLookbackClock() {
+  try {
+    globalThis.sessionStorage.setItem(NO_CLOCK_KEY, "1");
+  } catch {
+    // Only a courtesy: without it the date is written again, which holds no student text.
+  }
+}
+
+export function takeSkipLookbackClock() {
+  try {
+    const skip = globalThis.sessionStorage.getItem(NO_CLOCK_KEY) === "1";
+    globalThis.sessionStorage.removeItem(NO_CLOCK_KEY);
+    return skip;
+  } catch {
+    return false;
+  }
+}
+
 // Thoughts the student parked during work, and their own recall answers (design/work-extras-w4.md).
 // Each loads as an empty list when nothing usable is saved. An empty list removes the section.
 export function loadParked(storage = defaultStorage()) {
@@ -357,11 +380,28 @@ export function saveBlockAnswers(items, storage = defaultStorage()) {
   return saveSection("blocks", items.length === 0 ? null : items, storage);
 }
 
+// The steps the student used for each class (design/course-memory.md). Loads as an empty list when nothing
+// usable is saved. An empty list removes the section.
+export function loadCourses(storage = defaultStorage()) {
+  if (!storage) {
+    return [];
+  }
+  try {
+    return normalizeCourses(readSection(storage, "courses"));
+  } catch {
+    return [];
+  }
+}
+
+export function saveCourses(items, storage = defaultStorage()) {
+  return saveSection("courses", items.length === 0 ? null : items, storage);
+}
+
 // Delete everything the app remembers apart from the profile (the profile screen holds that):
 // parked thoughts, recall answers, did-that-help marks and the finished-step counts.
 // Returns true only if every section was confirmed gone.
 export function deleteRemembered(storage = defaultStorage()) {
-  const results = [saveParked([], storage), saveRecall([], storage), saveHelps([], storage), saveMoments([], storage), saveBlockAnswers([], storage)];
+  const results = [saveParked([], storage), saveRecall([], storage), saveHelps([], storage), saveMoments([], storage), saveBlockAnswers([], storage), saveCourses([], storage)];
   return results.every(Boolean);
 }
 
@@ -430,6 +470,7 @@ export function loadForBackup(storage = defaultStorage()) {
     recall: loadRecall(storage),
     moments: loadMoments(storage),
     helps: loadHelps(storage),
+    blocks: loadBlockAnswers(storage),
     chatSettings: loadChatSettings(storage),
     tipsHidden: loadStepTipsHidden(storage),
     chats: loadChats(storage),

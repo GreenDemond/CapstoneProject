@@ -430,3 +430,12 @@ Needs an AI helper set up in Settings.
 6. When the reply is a list of facts (for example "1. The theme is loss"), or one line, no button shows. Send another message: the button goes.
 7. Press **I'll write my steps** and type something, go to Talk (not from a step) and get a list reply: **Use these as my steps** says "You're already writing steps on the home screen..." and your typing is untouched.
 8. Phone width and keyboard only: Tab reaches **Clear**, **Use these as my steps** and **Back to my step**.
+
+## Course memory (web)
+
+1. Write one step ("I'll write my steps") with Class (optional) set to History. Start it and press **Done**, then **Close**.
+2. On Today, type "history" in Class (optional). "You have steps from last time for History." and **Use my History steps from last time** appear.
+3. Press the button: the editor opens with your earlier step in its box. Change it, press **Done writing**, then **Start**. It works as for any steps.
+4. Type a different class, or clear the box: the offer goes. Finish an assignment with no class: nothing new is kept.
+5. Me, then What the app remembers: "Steps I used for a class" lists History with its steps. Press **Delete** on it: it goes, and typing History no longer offers anything.
+6. Phone width and keyboard only: Tab reaches the offer button; nothing overlaps the bottom tabs.

@@ -1,9 +1,10 @@
 // "What I did" and "What the app remembers" (design/looking-back-w6.md). One screen, two views.
 // It only reads what the student saved and lets them delete it. Student text goes on screen as text.
 import { doingLines, weeklyLines, helpLine, shortDate, removeById, plural } from "../logic/looking-back.js";
+import { removeCourse, courseLine, COURSE_HEADING } from "../logic/courses.js";
 import { removeItem } from "../logic/work-extras.js";
 import {
-  loadMoments, saveMoments, loadHelps, saveHelps, loadParked, saveParked, loadRecall, saveRecall, deleteRemembered,
+  loadMoments, saveMoments, loadHelps, saveHelps, loadParked, saveParked, loadRecall, saveRecall, loadCourses, saveCourses, deleteRemembered,
 } from "../storage.js";
 import { profileNotes, deleteProfileNote } from "./profile.js";
 import { el, button, announce } from "../ui/dom.js";
@@ -19,7 +20,7 @@ let statusText = "";
 let dataChanged = null; // set by app.js: lets the home screen redraw its list of set-aside thoughts
 
 function readAll() {
-  return { moments: loadMoments(), helps: loadHelps(), parked: loadParked(), recall: loadRecall() };
+  return { moments: loadMoments(), helps: loadHelps(), parked: loadParked(), recall: loadRecall(), courses: loadCourses() };
 }
 
 function lineList(lines) {
@@ -93,7 +94,7 @@ function renderRemembers() {
   body.append(status);
   announce(status, statusText);
 
-  const empty = data.parked.length + data.recall.length + data.helps.length + data.moments.length + notes.length === 0;
+  const empty = data.parked.length + data.recall.length + data.helps.length + data.moments.length + data.courses.length + notes.length === 0;
   if (empty) {
     body.append(el("p", "Nothing yet. As you use the app, the things you save will show up here.", { class: "hint" }));
   }
@@ -101,6 +102,7 @@ function renderRemembers() {
   group("Thoughts I parked", data.parked, (p) => withDate(p.text, p.date), (p) => afterDelete(saveParked(removeItem(data.parked, p.id))));
   group("What I wrote after reading or studying", data.recall, (r) => withDate(r.answer, r.date), (r) => afterDelete(saveRecall(removeItem(data.recall, r.id))));
   group("Did that help?", data.helps, (h) => withDate(helpLine(h), h.date), (h) => afterDelete(saveHelps(removeById(data.helps, h.id))));
+  group(COURSE_HEADING, data.courses, (c) => withDate(courseLine(c), c.on), (c) => afterDelete(saveCourses(removeCourse(data.courses, c.label))));
   group("Notes from My profile", notes, (n) => n.text, (n) => afterDelete(deleteProfileNote(n.id)));
 
   if (data.moments.length > 0) {

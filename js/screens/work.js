@@ -9,7 +9,8 @@ import {
 } from "../logic/block-length.js";
 import { listLabel } from "../logic/home.js";
 import { addMoment, addHelp } from "../logic/looking-back.js";
-import { saveWork, loadBlockAnswers, saveBlockAnswers, loadParked, saveParked, loadRecall, saveRecall, loadMoments, saveMoments, loadHelps, saveHelps } from "../storage.js";
+import { saveWork, loadBlockAnswers, saveBlockAnswers, loadParked, saveParked, loadRecall, saveRecall, loadMoments, saveMoments, loadHelps, saveHelps, loadCourses, saveCourses } from "../storage.js";
+import { recordCourse } from "../logic/courses.js";
 import { confetti } from "../confetti.js";
 import { el, button, announce } from "../ui/dom.js";
 import { showScreen, setStepsPreviewOpen } from "../ui/screens.js";
@@ -269,6 +270,10 @@ function choose(choice, splitText = "") {
   if (allDone(work)) {
     stopTimer();
     mode = "done";
+    if (work.classLabel) {
+      // The student's own steps are kept for this class. If it cannot be saved, nothing else changes.
+      saveCourses(recordCourse(loadCourses(), work.classLabel, work.steps.map((step) => step.text), new Date().toISOString()));
+    }
   } else if (currentStepId() !== beforeId) {
     if (pendingLength !== null) {
       timerMinutes = pendingLength; // what the student's answers pointed to

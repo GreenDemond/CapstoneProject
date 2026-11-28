@@ -38,6 +38,8 @@ The only memory between sessions. Keep it current; rewrite it, do not let it gro
 
 **W14 (talk about this step, and use a reply as my steps) is built** (`design/talk-about-step-w14.md`): on the Stuck view, **Talk about this step** (only when an AI helper is ready) opens a fresh chat with a "Talking about: <step>" line and **Clear**, plus **Back to my step**; when the newest AI reply is a list of things to do, **Use these as my steps** opens it in the steps editor (nothing saved until Start; refused with a plain line if the student is already writing steps). Lines that look like answer content are not offered. **T8 change for the parent to confirm:** the step text (up to 200 characters) is sent to the AI with that chat's messages, in memory only, never saved with the chat. Logic tests pass (486); its 6 browser tests (`tests/browser/talk-about-step.spec.js`, phone and desktop) have **not been run** (Chrome aborts in the sandbox), so run them and the whole suite first. Wording awaits the parent's okay.
 
+**Course memory (web) is built** (`design/course-memory.md`): finishing an assignment with a class keeps its steps for that class; typing the same class on the paste screen offers **Use my <class> steps from last time**, which opens them in the editor to change; a line-by-line deletable list "Steps I used for a class" is in What the app remembers. No AI, nothing leaves the device. Wording awaits the parent's okay.
+
 Nothing. The whole-app review plan (`design/review-plan-2026-11-17.md`) is finished; see its Progress list.
 
 ## Known gaps

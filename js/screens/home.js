@@ -6,7 +6,8 @@ import { cleanPastedText, limitPaste } from "../logic/clean-text.js";
 import { KINDS, DEFAULT_STEP_COUNT, starterStepsFor, withTwoMinuteStart, showingLine } from "../logic/starter-steps.js";
 import { suggestKind, findRequirements } from "../logic/heuristics.js";
 import { normalizeStepCount, DEFAULT_PICKED_COUNT } from "../logic/step-count.js";
-import { loadWork, loadParked, loadLookbackCardDate, saveLookbackCardDate } from "../storage.js";
+import { loadWork, loadParked, loadCourses, loadLookbackCardDate, saveLookbackCardDate, takeSkipLookbackClock } from "../storage.js";
+import { courseFor, offerLine, offerButton } from "../logic/courses.js";
 import { normalizeClassLabel, classLine, CLASS_LABEL_TITLE, CLASS_LABEL_HINT } from "../logic/class-label.js";
 import {
   lookbackCardState, thoughtsToShow, LOOKBACK_CARD_LINE, LOOKBACK_OPEN_LABEL, LOOKBACK_LATER_LABEL, THOUGHTS_HEADING, THOUGHTS_HINT,
@@ -250,6 +251,7 @@ checkButton.addEventListener("click", () => {
 startButton.addEventListener("click", () => {
   openWorkScreen(allSteps.slice(0, shownCount));
   classInput.value = ""; // the class name belongs to the assignment just started, not the next one
+  refreshCourseOffer();
 });
 const aiBox = document.getElementById("ai-box");
 // The top line must stay true: the text leaves this device only when the AI tick box is on.
@@ -386,6 +388,34 @@ const classInput = document.getElementById("class-label");
 document.getElementById("class-label-title").textContent = CLASS_LABEL_TITLE;
 document.getElementById("class-label-hint").textContent = CLASS_LABEL_HINT;
 
+// Course memory (design/course-memory.md): the steps the student used last time for this class, offered
+// as a suggestion that opens in the editor to change. Nothing is chosen for them.
+const courseOffer = document.getElementById("course-offer");
+const courseOfferUse = document.getElementById("course-offer-use");
+let offeredSteps = null;
+
+function refreshCourseOffer() {
+  const course = courseFor(loadCourses(), classInput.value);
+  offeredSteps = course ? course.steps : null;
+  courseOffer.hidden = course === null;
+  if (course) {
+    document.getElementById("course-offer-line").textContent = offerLine(course.label);
+    courseOfferUse.textContent = offerButton(course.label);
+  }
+}
+
+classInput.addEventListener("input", refreshCourseOffer);
+courseOfferUse.addEventListener("click", () => {
+  if (offeredSteps === null) {
+    return;
+  }
+  if (freshEditorOpen()) {
+    document.getElementById("editor-heading").focus(); // already writing: keep what was typed
+    return;
+  }
+  openOwnEditor(offeredSteps);
+});
+
 // The optional class name for the assignment being started (the student's own words, up to 40 characters).
 export function getClassLabel() {
   return normalizeClassLabel(classInput.value);
@@ -402,7 +432,7 @@ lookbackLater.textContent = LOOKBACK_LATER_LABEL;
 function refreshLookbackCard() {
   const nowMs = Date.now();
   const state = lookbackCardState(loadLookbackCardDate(nowMs), nowMs);
-  if (state.startClock) {
+  if (state.startClock && !takeSkipLookbackClock()) {
     saveLookbackCardDate(new Date(nowMs).toISOString()); // the first week starts now; nothing is shown yet
   }
   lookbackCard.hidden = !state.show;
@@ -449,6 +479,7 @@ export function refreshHome() {
   document.getElementById("close-app-line").textContent = everythingDone ? CLOSE_APP_LINE : "";
   refreshLookbackCard();
   refreshThoughts();
+  refreshCourseOffer();
   pickupWork = live ? live.work : null;
   pickup.hidden = live === null;
   pasteForm.hidden = live !== null;
