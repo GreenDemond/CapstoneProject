@@ -237,3 +237,42 @@ export function isEvent(item) {
 export function taskGroupsSource(items) {
   return items.filter((item) => !isEvent(item));
 }
+
+// Checks calendar items read back from the device (or from a copy a student loads). Items with the
+// wrong shape are dropped one by one; the rest are rebuilt with only the known fields.
+export function normalizeCalendarItems(items) {
+  if (!Array.isArray(items)) {
+    return [];
+  }
+  return items
+    .filter((item) => {
+      if (!item || typeof item.id !== "string" || typeof item.title !== "string") return false;
+      if (item.kind === "event") {
+        return /^\d{4}-\d{2}-\d{2}$/.test(item.start ?? "") && /^\d{4}-\d{2}-\d{2}$/.test(item.end ?? "");
+      }
+      return typeof item.due === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(item.due);
+    })
+    .map((item) => ({
+      id: item.id,
+      title: item.title,
+      kind: item.kind === "event" ? "event" : "task",
+      ...(item.kind === "event" ? { start: item.start, end: item.end } : { due: item.due }),
+      notes: typeof item.notes === "string" ? item.notes : "",
+      links: Array.isArray(item.links)
+        ? item.links.filter((link) => typeof link === "string" && link.startsWith("https://"))
+        : [],
+      category: ["school", "personal", "family", "friends", "other"].includes(item.category) ? item.category : "other",
+      status: ["open", "in progress", "completed"].includes(item.status) ? item.status : "open",
+      completedOn: typeof item.completedOn === "string" ? item.completedOn : null,
+    }));
+}
+
+// Finished-item counts by day: only real days with a whole number above zero are kept.
+export function normalizeCounts(counts) {
+  if (!counts || typeof counts !== "object") {
+    return {};
+  }
+  return Object.fromEntries(
+    Object.entries(counts).filter(([day, n]) => /^\d{4}-\d{2}-\d{2}$/.test(day) && Number.isInteger(n) && n > 0),
+  );
+}

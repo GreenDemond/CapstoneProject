@@ -9,6 +9,7 @@ export const SCREENS = {
   intake: document.getElementById("intake-screen"),
   profile: document.getElementById("profile-screen"),
   looking: document.getElementById("looking-screen"),
+  me: document.getElementById("me-screen"),
   work: document.getElementById("work-screen"),
   calendar: document.getElementById("calendar-screen"),
   chat: document.getElementById("chat-screen"),

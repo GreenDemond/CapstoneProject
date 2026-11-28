@@ -174,6 +174,16 @@ function openLooking() {
   heading.focus();
 }
 
+// For the Me screen: opens straight onto What the app remembers.
+export function openRemembers() {
+  view = "remembers";
+  confirmAll = false;
+  statusText = "";
+  showScreen("looking");
+  render();
+  heading.focus();
+}
+
 export function initLooking() {
   openButton.addEventListener("click", openLooking);
 }

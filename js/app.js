@@ -6,6 +6,7 @@ import { initIntake } from "./screens/intake.js";
 import { initProfile } from "./screens/profile.js";
 import { initLooking } from "./screens/looking.js";
 import { initCalendar } from "./screens/calendar.js";
+import { initMe } from "./screens/me.js";
 import { initChat } from "./screens/chat.js";
 
 initWork({ onClose: afterWorkClosed, getChosenKind });
@@ -16,3 +17,4 @@ initHome();
 initCalendar();
 initChat({ getChosenKind });
 refreshHome();
+initMe();

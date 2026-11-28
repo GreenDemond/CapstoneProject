@@ -776,3 +776,8 @@ button {
 }
 .help-card p { margin: 0 0 0.5rem; }
 .help-card button { margin-right: 0.5rem; }
+
+/* Me and my data (design/me-export-w7.md) */
+.me-links { list-style: none; padding: 0; }
+.me-links li { margin: 0.4rem 0; }
+#me-file { max-width: 100%; }

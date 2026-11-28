@@ -8,6 +8,7 @@ import { normalizeParked, normalizeRecall } from "./logic/work-extras.js";
 import { normalizeMoments, normalizeHelps } from "./logic/looking-back.js";
 import { normalizeChatSettings } from "./logic/chat-settings.js";
 import { normalizeChats } from "./logic/chat-store.js";
+import { normalizeCalendarItems, normalizeCounts } from "./logic/calendar.js";
 
 export const STORAGE_KEY = "focusapp.v1";
 export const BACKUP_KEY = "focusapp.v1.backup";
@@ -158,32 +159,7 @@ export function loadCalendarItems(storage = defaultStorage()) {
     return [];
   }
   try {
-    const items = readSection(storage, "calendar")?.items;
-    if (!Array.isArray(items)) {
-      return [];
-    }
-    // Keep only items that have the expected shape; drop the rest one by one.
-    return items
-      .filter((item) => {
-        if (!item || typeof item.id !== "string" || typeof item.title !== "string") return false;
-        if (item.kind === "event") {
-          return /^\d{4}-\d{2}-\d{2}$/.test(item.start ?? "") && /^\d{4}-\d{2}-\d{2}$/.test(item.end ?? "");
-        }
-        return typeof item.due === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(item.due);
-      })
-      .map((item) => ({
-        id: item.id,
-        title: item.title,
-        kind: item.kind === "event" ? "event" : "task",
-        ...(item.kind === "event" ? { start: item.start, end: item.end } : { due: item.due }),
-        notes: typeof item.notes === "string" ? item.notes : "",
-        links: Array.isArray(item.links)
-          ? item.links.filter((link) => typeof link === "string" && link.startsWith("https://"))
-          : [],
-        category: ["school", "personal", "family", "friends", "other"].includes(item.category) ? item.category : "other",
-        status: ["open", "in progress", "completed"].includes(item.status) ? item.status : "open",
-        completedOn: typeof item.completedOn === "string" ? item.completedOn : null,
-      }));
+    return normalizeCalendarItems(readSection(storage, "calendar")?.items);
   } catch {
     return [];
   }
@@ -200,13 +176,7 @@ export function loadCompletionCounts(storage = defaultStorage()) {
     return {};
   }
   try {
-    const counts = readSection(storage, "calendar")?.counts;
-    if (!counts || typeof counts !== "object") {
-      return {};
-    }
-    return Object.fromEntries(
-      Object.entries(counts).filter(([day, n]) => /^\d{4}-\d{2}-\d{2}$/.test(day) && Number.isInteger(n) && n > 0),
-    );
+    return normalizeCounts(readSection(storage, "calendar")?.counts);
   } catch {
     return {};
   }
@@ -388,6 +358,94 @@ export function deleteAllChats(storage = defaultStorage()) {
   try {
     storage.removeItem(CHATS_BACKUP_KEY);
     return storage.getItem(CHATS_BACKUP_KEY) === null;
+  } catch {
+    return false;
+  }
+}
+
+// Save a copy / Load a copy (design/me-export-w7.md). Everything a copy can hold, read for saving to a file.
+// AI helpers are not included: their addresses and the end of each key never go in a copy.
+export function loadForBackup(storage = defaultStorage()) {
+  const { work, savedOn } = loadWork(storage);
+  return {
+    profile: loadProfileState(storage).profile,
+    calendarItems: loadCalendarItems(storage),
+    counts: loadCompletionCounts(storage),
+    work,
+    workSavedOn: savedOn,
+    parked: loadParked(storage),
+    recall: loadRecall(storage),
+    moments: loadMoments(storage),
+    helps: loadHelps(storage),
+    chatSettings: loadChatSettings(storage),
+    tipsHidden: loadStepTipsHidden(storage),
+    chats: loadChats(storage),
+  };
+}
+
+// Replaces the saved sections with a checked copy (see parseBackup). The AI helper list stays as it is.
+// The main object is written in one step. If saving the chats then fails, the main object is put back,
+// so a failed load changes nothing. Returns true only if the browser confirmed everything.
+export function importSections(sections, chats, storage = defaultStorage()) {
+  if (!storage) {
+    return false;
+  }
+  try {
+    const { data, state, raw } = readAll(storage);
+    if (state === "unavailable") {
+      return false;
+    }
+    if (state === "damaged" || state === "other-version") {
+      if (!backUpOnce(storage, raw)) {
+        return false;
+      }
+    }
+    const next = { schemaVersion: SCHEMA_VERSION };
+    if (state === "ok" && data.ai !== undefined) {
+      next.ai = data.ai;
+    }
+    for (const [name, value] of Object.entries(sections)) {
+      if (value === null || value === undefined) continue;
+      if (name === "work") {
+        const { savedOn, ...rest } = value;
+        next.work = { ...rest, savedOn: savedOn || new Date().toISOString() };
+      } else {
+        next[name] = value;
+      }
+    }
+    const text = JSON.stringify(next);
+    storage.setItem(STORAGE_KEY, text);
+    if (storage.getItem(STORAGE_KEY) !== text) {
+      throw new Error("not saved");
+    }
+    if (chats !== undefined) {
+      const saved = saveChats(chats, storage);
+      if (!saved) {
+        if (raw === null) storage.removeItem(STORAGE_KEY);
+        else storage.setItem(STORAGE_KEY, raw);
+        return false;
+      }
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Removes everything this app saved in localStorage: every key that starts with "focusapp", backups included.
+// Returns true only if none is left.
+export function deleteAllSaved(storage = defaultStorage()) {
+  if (!storage) {
+    return false;
+  }
+  try {
+    const names = [];
+    for (let i = 0; i < storage.length; i += 1) {
+      const name = storage.key(i);
+      if (typeof name === "string" && name.startsWith("focusapp")) names.push(name);
+    }
+    for (const name of names) storage.removeItem(name);
+    return names.every((name) => storage.getItem(name) === null);
   } catch {
     return false;
   }

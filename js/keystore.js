@@ -111,3 +111,22 @@ export async function readKey(serviceId) {
     return null;
   }
 }
+
+// Deletes the whole encrypted key store (every saved AI key and the master key) from this browser.
+// Resolves true when it is gone or was never there; false if the browser refused or it stayed in use.
+export function deleteAllKeys() {
+  return new Promise((resolve) => {
+    if (!globalThis.indexedDB) {
+      resolve(true);
+      return;
+    }
+    try {
+      const request = indexedDB.deleteDatabase(DB_NAME);
+      request.onsuccess = () => resolve(true);
+      request.onerror = () => resolve(false);
+      request.onblocked = () => resolve(false);
+    } catch {
+      resolve(false);
+    }
+  });
+}

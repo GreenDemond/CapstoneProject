@@ -307,3 +307,18 @@ Not yet done by anyone: the browser tests for this slice were not run.
 7. Press Delete on the thought: "Deleted." and it is gone; the rest stay. Refresh and check it is still gone.
 8. Press Delete all of this: a second question shows. Press No, keep it: nothing is deleted. Press it again, then Yes, delete it all: "Everything is deleted." Open My profile: goals are still there, notes are gone. What I did shows "Nothing yet."
 9. Check at phone width and with the keyboard only (focus moves to the page text after a delete). Check no line says "missed", "streak", "behind" or "score".
+
+
+## Me and my data: save a copy, load a copy, delete everything (web, W7)
+
+Not yet done by anyone: the browser tests for this slice were not run.
+
+1. Add a goal in My profile and park a thought. On home press **Me and my data**. The six buttons (My profile, How I like to work, My calendar, What I did, What the app remembers, Settings) each open their screen.
+2. Press **Save a copy of my data**: a file named `focus-app-copy-<date>.json` downloads and the screen says to look in Downloads. Open the file in a text editor: your goal and thought are there; no key, no AI helper, no chats.
+3. Tick "Also put my saved chats in the copy" (after saving a chat) and save again: the file now has a `chats` list. The box starts unticked each time.
+4. Press **Delete everything**, then **No, keep it**: nothing is deleted. Press it again, then **Yes, delete everything**: "Everything is deleted from this device." Home is empty, My profile has no goal, and Settings has no AI helpers.
+5. Under Load a copy choose the file from step 2: it lists what it holds as counts (no text), and says it replaces what is saved. Press **No, keep what I have**: nothing changes. Choose it again and press **Yes, replace what is saved**: "Your copy is loaded." and the goal and thought are back.
+6. Choose a file that is not a copy (a photo, a text file, or a copy edited so it is no longer JSON): a plain message and "Nothing was changed." Try a very big file (over 2 MB): "too big". Check the data is still there each time.
+7. Edit a copy so a thought reads `<b>hi</b>` and load it: it shows as plain text in What the app remembers.
+8. Refresh the page in the middle of the Delete or Load question: nothing was deleted or replaced.
+9. Check at phone width and with the keyboard only (the chosen file's result takes focus). Check no line says "wrong", "missed" or "score".

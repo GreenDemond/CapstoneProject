@@ -32,7 +32,7 @@ Apple's on-device AI, voice input, haptics, the Apple calendar sheet (a download
 | W4 | Work screen extras: the Stuck sheet, park a thought, recall question after study steps | StuckView, WorkView Built, browser tests not run. See `design/work-extras-w4.md` |
 | W5 | Check my steps against the assignment, with no AI (word matching) | S3, S2 | Built, browser tests not run. See `design/check-steps-w5.md` |
 | W6 | Looking back: Did that help, What I did, weekly look-back with fixed lines, What the app remembers with per-line delete | R5, PROG1, C5, M4 | Built, browser tests not run. See `design/looking-back-w6.md` |
-| W7 | Me screens, Export and Import, Delete everything | MeView | |
+| W7 | Me screens, Export and Import, Delete everything | MeView | Built, browser tests not run. See `design/me-export-w7.md` |
 | W8 | Look it up (Wikipedia) if its API allows browser requests (unverified) | LookUpView | |
 | W9 | Put it on my calendar as a `.ics` download | CAL1 | |
 | D1 | Deploy script that builds the clean folder; parent runs it | n/a | Built. See `design/deploy.md` |
