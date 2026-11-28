@@ -322,3 +322,17 @@ Not yet done by anyone: the browser tests for this slice were not run.
 7. Edit a copy so a thought reads `<b>hi</b>` and load it: it shows as plain text in What the app remembers.
 8. Refresh the page in the middle of the Delete or Load question: nothing was deleted or replaced.
 9. Check at phone width and with the keyboard only (the chosen file's result takes focus). Check no line says "wrong", "missed" or "score".
+
+
+## Put it on my phone's calendar (web, W9)
+
+Not yet done by anyone: the browser tests for this slice were not run.
+
+1. Open My calendar and add a task due in three days at 3:30 pm called "Read chapter 5". A hint says the button saves a small file.
+2. Press **Add to my phone's calendar** on it: `read-chapter-5.ics` downloads and the message says to open it from Downloads. Open it on a phone or computer: the calendar app offers one 30 minute event at 3:30 pm with the right title.
+3. Press it twice and open both files: the calendar does not end up with two copies (or asks to update).
+4. Add a trip from the 10th to the 12th. Its file opens as an all-day event covering the 10th, 11th and 12th (not the 13th).
+5. Add an item titled `Math; ch 1, 2` with notes on two lines and a https link: the title shows exactly like that, and the notes and link are in the event's notes.
+6. Add an item with a very long title (or accents and emoji): the event title is complete and not cut.
+7. Press Complete on an item: its calendar button is gone. Reopen it: the button is back.
+8. Refresh, then download again: it still works. Check at phone width and with the keyboard only (the message takes focus). Check no line says "missed" or "behind".

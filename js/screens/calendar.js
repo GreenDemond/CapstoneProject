@@ -2,6 +2,7 @@
 // plus Day, Week and Month views (design/calendar.md, design/time-blocks.md). Saved only on this device.
 import { loadCalendarItems, saveCalendarItems, loadCompletionCounts, saveCompletionCounts } from "../storage.js";
 import { GROUPS, CATEGORIES, groupItems, makeItem, makeEvent, isEvent, removeItem, parseDue, setStatus, completedItems, bucketFor } from "../logic/calendar.js";
+import { buildIcs } from "../logic/ics.js";
 import { addCompletion, removeCompletion, totals } from "../logic/counter.js";
 import { addDays, addMonths, splitWeek, monthGrid, itemsOnDay, eventsCovering, blockPlacement, hourLabels, mondayOf } from "../logic/views.js";
 import { confetti } from "../confetti.js";
@@ -176,7 +177,39 @@ function renderCalendar(notice = "", opts = {}) {
   }
 }
 
+// Saves one item as a small .ics file. It stays on this device until the student opens it in a calendar app.
+function downloadIcs(item) {
+  const made = buildIcs(item, new Date());
+  if (!made.ok) {
+    renderCalendar(made.reason, { focus: "#cal-message" });
+    return;
+  }
+  try {
+    const blob = new Blob([made.text], { type: "text/calendar;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = made.fileName;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    renderCalendar(`Saved ${made.fileName}. Open it from your Downloads and your phone's calendar app will offer to add it.`, { focus: "#cal-message" });
+  } catch {
+    renderCalendar("That didn't work. Nothing was changed. Try again.", { focus: "#cal-message" });
+  }
+}
+
+function icsButton(item) {
+  const b = button("Add to my phone's calendar", () => downloadIcs(item), "small");
+  b.dataset.ics = item.id;
+  return b;
+}
+
 function renderCalendarList() {
+  if (calendarItems.length > 0) {
+    calendarBody.append(el("p", "Add to my phone's calendar saves a small file. Open it on your phone and your calendar app adds the item.", { class: "hint", id: "cal-ics-hint" }));
+  }
   const groups = groupItems(calendarItems, new Date());
   for (const group of GROUPS) {
     const heading = el("h3", group.label, { tabindex: "-1" });
@@ -202,7 +235,7 @@ function renderCalendarList() {
         row.append(linkList);
       }
       const actions = el("div", undefined, { class: "row-actions" });
-      actions.append(...statusButtons(item), deleteButtons(item));
+      actions.append(...statusButtons(item), icsButton(item), deleteButtons(item));
       row.append(actions);
       list.append(row);
     }
@@ -217,7 +250,7 @@ function renderCalendarList() {
       const row = el("li", undefined, { tabindex: "-1", "data-id": trip.id });
       row.append(el("span", `${trip.title}, ${trip.start} to ${trip.end}`), " ");
       const actions = el("div", undefined, { class: "row-actions" });
-      actions.append(deleteButtons(trip));
+      actions.append(icsButton(trip), deleteButtons(trip));
       row.append(actions);
       tripList.append(row);
     }
