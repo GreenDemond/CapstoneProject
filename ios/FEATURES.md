@@ -111,6 +111,18 @@ How to add one: date, who asked, one-line request in their words, then rule conf
 - **Recommendation:** do F6 (better plain-code heuristics) first. It likely covers the same narrow jobs with no model, no licence, no size and no D2 conflict. If the fixture scores from F6 show a clear gap, run a small bake-off of one or two tiny models on the same fixtures before deciding. Do not embed a model for text generation.
 - **Next:** parent decides whether D2 can bend for Core ML conversion tooling. No other work until F6 has fixture scores.
 
+### F8. Try Apple's language tools and a tiny model on the no-AI jobs (queued, not started)
+- **Asked by:** parent. "ok lets do some trying with apple's tools. if i have an ai configured, can i set things to have similar experience? how to test with qwen2.5 as well?" Then: "put that on the queue, don't do it just yet."
+- **Status:** queued. Nothing built or run. Do not start until the parent says so. It builds on F6 (heuristics) and F7 (tiny models).
+- **Plan, when it starts:**
+  1. **Fixture set first:** 30 to 50 realistic assignment texts with the expected kind of work, requirement lines and vague steps (shared with F6). Nothing below is judged without it.
+  2. **Apple's tools:** a throwaway spike outside the shipped app, using `NaturalLanguage` (`NLTagger` for verbs, nouns and numbers; `NLEmbedding` for sentence closeness) on the fixtures. Check what each handles well or badly, including imperative sentences and messy pasted text. Scored against the plain-code heuristics.
+  3. **A configured AI as a stand-in:** the app cannot narrow a big model by itself. The test would run the same three narrow jobs (kind, requirement lines, vague step) through the existing OpenAI-compatible code against any configured service, with the app's checks on the result (lines must appear word for word in the assignment). The results show how a small model would behave without changing the app. The existing harness `checks/phone-ai-eval.sh` and `StepsEval` run the app's own code on the Mac, and could be extended to read an address and key from the environment (never stored in the repository).
+  4. **Qwen 2.5 0.5B:** needs no code. The parent's server is an Ollama fork, so pull the model there (for example `ollama pull qwen2.5:0.5b`), then add it as a service in My AI services with the server's address and the model name `qwen2.5:0.5b`. Whether Polystrata serves it is unverified. Run the same fixtures through it and compare. This is for the parent's devices only; classmates stay on the on-device model or no AI.
+  5. **Report:** one table of fixture scores per method (plain code, Apple tools, Apple's on-device model, Qwen 2.5 0.5B, one larger configured AI), with counts of wrong lines shown to a student. A method counts only if its output is checked by code and never writes new text for the student.
+- **Needs from the parent when it starts:** the server address and whether the model can be pulled there; permission to use a key from the environment for the larger AI test; the D2 answer in F7 if an embedded model is ever considered.
+- **Rules to hold:** no student data in fixtures (write them), no secrets in the repository, no new permission, and no change to what the shipped app sends.
+
 ---
 
 ## Earlier ideas now tracked elsewhere
