@@ -247,6 +247,7 @@ h3 {
 /* Calendar groups: Urgent orange, Significant yellow, Not urgent blue (Ben, 2026-11-17).
    Dark brown text on each fill passes 4.5:1. Can wait and Later use earthy neutrals. */
 .cal-list li {
+  overflow-wrap: anywhere; /* a long title with no spaces must not push the buttons off the screen */
   padding: 0.5rem 0.7rem;
   margin-bottom: 0.4rem;
   border-radius: 0.5rem;
