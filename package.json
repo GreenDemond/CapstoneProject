@@ -6,7 +6,7 @@
   "description": "Study focus app for students with ADHD. Plain HTML, CSS and JavaScript; Node is only used for tooling.",
   "scripts": {
     "start": "node dev-server.mjs",
-    "test:logic": "node --test tests/logic/",
+    "test:logic": "node --test tests/logic/*.test.js",
     "test:browser": "playwright test --trace off",
     "build:site": "node scripts/build-site.mjs",
     "lint": "eslint .",
