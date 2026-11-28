@@ -106,17 +106,33 @@ h2 {
 
 .hint {
   color: var(--muted);
+  font-size: var(--font-small);
   margin: 0 0 0.75rem;
+}
+
+/* Every box you type in looks the same (design/look.md). */
+textarea,
+input[type="text"],
+input[type="search"],
+input[type="password"],
+select {
+  font: inherit;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  background: var(--surface);
+  color: var(--text);
+}
+
+input[type="text"],
+input[type="search"],
+input[type="password"],
+select {
+  min-height: var(--tap);
 }
 
 textarea {
   width: 100%;
-  font: inherit;
-  padding: 0.6rem;
-  border: 1px solid var(--muted);
-  border-radius: var(--radius-small);
-  background: var(--surface);
-  color: var(--text);
   resize: vertical;
 }
 
@@ -934,3 +950,64 @@ body.has-tabs input, body.has-tabs textarea, body.has-tabs select, body.has-tabs
 
 /* Long text with no spaces (a pasted link, say) wraps inside lists on Today and Plan instead of widening the page. */
 .thoughts li, .looking-list li, .plan-steps li, .steps li, .pickup-step { overflow-wrap: anywhere; }
+
+/* Today screen (design/look.md): the assignment box and its two buttons are the main area;
+   class, kind and step count sit together in a lighter Options card. */
+.pickup,
+.lookback-card {
+  padding: var(--space-3);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.thoughts {
+  padding: var(--space-2) var(--space-3);
+  background: var(--soft);
+  border-radius: var(--radius);
+}
+
+#paste-heading {
+  margin-top: var(--space-3);
+}
+
+.options-card {
+  margin: var(--space-3) 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.options-card > p {
+  margin: 0 0 0.4rem;
+}
+
+.options-card label[for="class-label"] {
+  font-weight: 600;
+}
+
+.options-card fieldset.kinds {
+  margin: var(--space-2) 0 0;
+}
+
+.options-card legend {
+  font-size: var(--font-small);
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+}
+
+.options-card .step-count label {
+  margin-right: var(--space-2);
+}
+
+.welcome-note {
+  margin-bottom: var(--space-2);
+}
+
+#ai-status,
+#message {
+  min-height: 0;
+  margin: 0.25rem 0;
+}

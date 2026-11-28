@@ -54,38 +54,40 @@
         <p class="hint" id="replace-note" hidden>Starting new steps replaces the ones you have saved.</p>
 
         <label for="assignment-text" class="visually-hidden">Assignment text</label>
-        <textarea id="assignment-text" rows="8" placeholder="Paste here"></textarea>
+        <textarea id="assignment-text" rows="6" placeholder="Paste here"></textarea>
 
-        <p>
-          <label for="class-label" id="class-label-title"></label>
-          <input type="text" id="class-label" maxlength="40" autocomplete="off" aria-describedby="class-label-hint">
-        </p>
-        <p class="hint" id="class-label-hint"></p>
-        <p id="course-offer" class="hint" hidden>
-          <span id="course-offer-line"></span>
-          <button type="button" id="course-offer-use"></button>
-        </p>
+        <div class="options-card">
+          <p>
+            <label for="class-label" id="class-label-title"></label>
+            <input type="text" id="class-label" maxlength="40" autocomplete="off" aria-describedby="class-label-hint">
+          </p>
+          <p class="hint" id="class-label-hint"></p>
+          <p id="course-offer" class="hint" hidden>
+            <span id="course-offer-line"></span>
+            <button type="button" id="course-offer-use"></button>
+          </p>
 
-        <fieldset class="kinds">
-          <legend>What kind of work is this?</legend>
-          <div id="kind-buttons" class="kind-buttons"></div>
-        </fieldset>
-        <p id="kind-suggestion" class="hint" aria-live="polite" hidden>
-          <span id="kind-suggestion-text"></span>
-          <button type="button" id="kind-suggestion-use">Use this</button>
-        </p>
+          <fieldset class="kinds">
+            <legend>What kind of work is this?</legend>
+            <div id="kind-buttons" class="kind-buttons"></div>
+          </fieldset>
+          <p id="kind-suggestion" class="hint" aria-live="polite" hidden>
+            <span id="kind-suggestion-text"></span>
+            <button type="button" id="kind-suggestion-use">Use this</button>
+          </p>
 
-        <fieldset class="kinds step-count">
-          <legend>About how many steps?</legend>
-          <label><input type="radio" name="step-count" value="3"> 3 steps</label>
-          <label><input type="radio" name="step-count" value="5" checked> 5 steps</label>
-          <label><input type="radio" name="step-count" value="8"> 8 steps</label>
-        </fieldset>
+          <fieldset class="kinds step-count">
+            <legend>About how many steps?</legend>
+            <label><input type="radio" name="step-count" value="3"> 3 steps</label>
+            <label><input type="radio" name="step-count" value="5" checked> 5 steps</label>
+            <label><input type="radio" name="step-count" value="8"> 8 steps</label>
+          </fieldset>
 
-        <div id="ai-box" hidden>
-          <p><label><input type="checkbox" id="ai-use" checked> <span id="ai-use-label">Use an AI helper to suggest steps</span></label></p>
-          <p class="hint" id="ai-privacy">If this is ticked, pressing Suggest some to start sends this text to an AI service to suggest steps. Don't paste your name or anything private.</p>
-          <p class="hint">Suggestions come from an AI, not a person. The app stores none of it.</p>
+          <div id="ai-box" hidden>
+            <p><label><input type="checkbox" id="ai-use" checked> <span id="ai-use-label">Use an AI helper to suggest steps</span></label></p>
+            <p class="hint" id="ai-privacy">If this is ticked, pressing Suggest some to start sends this text to an AI service to suggest steps. Don't paste your name or anything private.</p>
+            <p class="hint">Suggestions come from an AI, not a person. The app stores none of it.</p>
+          </div>
         </div>
         <button type="button" id="write-steps" class="primary">I'll write my steps</button>
         <button type="button" id="show-steps">Suggest some to start</button>
