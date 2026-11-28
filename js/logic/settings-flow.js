@@ -1,5 +1,5 @@
 // The rules behind the AI helpers screens (design/settings-ux.md v2). No screen or network code here.
-import { chatAddress, isReady, OPENROUTER_DEFAULT_MODEL, hostOf, nameTaken, MAX_LABEL, NAME_TAKEN } from "./ai-services.js";
+import { chatAddress, isReady, OPENROUTER_DEFAULT_MODEL, GOOGLE_DEFAULT_MODEL, GOOGLE_HOST, hostOf, nameTaken, MAX_LABEL, NAME_TAKEN } from "./ai-services.js";
 
 export const OPENROUTER_BASE = "https://openrouter.ai/api/v1";
 
@@ -100,6 +100,9 @@ export function defaultModel(chatUrl, ids, current) {
   }
   if (isOpenRouter(chatUrl)) {
     return OPENROUTER_DEFAULT_MODEL;
+  }
+  if (hostOf(chatUrl) === GOOGLE_HOST) {
+    return GOOGLE_DEFAULT_MODEL;
   }
   return ids.length === 1 ? ids[0] : "";
 }

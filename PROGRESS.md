@@ -4,6 +4,7 @@ The only memory between sessions. Keep it current; rewrite it, do not let it gro
 
 ## Working
 
+- **A calmer look (web)** (`design/look.md`, top of `css/styles.css`): cards, dividers, progress bar on Work, equal answer buttons (two columns on phone with Later full width, one row of five on wide screens), clearer tab bar, centred column on desktop. `tests/browser/look-layout.spec.js` (7 tests) checks overlaps, equal answer buttons, tab bar clearance and sideways scrolling. Screenshots in `design/look-screens/`.
 - **Backup and delete tidy-ups (web).** Save a copy / Load a copy now include the answers about how long a step felt (`blocks`), and Delete everything leaves nothing saved, not even the look-back date. `ai-direct.spec.js` uses exact button names.
 
 - **Suggestions from the pasted text, no AI (H1)** (`design/heuristics-h1.md`, `js/logic/heuristics.js`). A "Looks like: <kind>" line with a Use this button (never picks for the student), a "What your assignment says" box of requirement lines copied word for word on the steps screen, and a range such as "problems 1-10" becomes chunk steps. Fails closed to the old behavior. Tested with `tests/fixtures/assignments.json` (22 written assignments) plus properties, and 7 browser tests. **Student-visible wording is waiting for the parent's okay** (list in the design note).
@@ -24,7 +25,7 @@ The only memory between sessions. Keep it current; rewrite it, do not let it gro
 - **Storage safety** (`js/storage.js`). Unreadable saved data is backed up once and the app starts fresh, so saving never gets stuck; data from another version is backed up before anything is written; saving one section never drops another.
 - **Navigation.** One `showScreen` decides which screen shows, so two screens never show together. Every screen leaves with **Back to home**, at the top (and at the bottom on long screens).
 
-- **Google Gemini address (web)** (`design/google-address.md`). Typing `https://generativelanguage.googleapis.com/v1beta/openai` is expanded to the chat address (that host only). Tested with stand-ins; **not tried with a real key** (CORS and the thinking fields unverified). One hint line changed and **waits for the parent's okay**.
+- **Google Gemini address (web)** (`design/google-address.md`). Typing `https://generativelanguage.googleapis.com/v1beta/openai` is expanded to the chat address (that host only). Tested with stand-ins; **not tried with a real key** (CORS and the thinking fields unverified). One hint line changed and **waits for the parent's okay**. Gemini defaults to `models/gemini-flash-lite-latest` (parent's choice, 2026-11-28; the pull-down starts on it, sent unchanged; whether Google still serves it is unverified).
 
 - **AI choice in Talk (web)** (`design/talk-ai-choice.md`). The **Which AI helper?** menu now shows with one or more saved helpers; unready ones are greyed with the reason; "Finish setting up a helper in Settings." when none is ready. Logic: `talkHelperMenu`.
 

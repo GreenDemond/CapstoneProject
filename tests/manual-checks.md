@@ -467,6 +467,15 @@ Needs an AI helper set up in Settings.
 ## Google Gemini address (web, needs the parent's real Gemini key)
 
 1. Settings, Add an AI helper, Another service. Type `https://generativelanguage.googleapis.com/v1beta/openai` and Next. Paste the key.
-2. Pick an AI: the list shows Google's models (names may start with `models/`). Pick one, Next.
+2. Pick an AI: the pull-down starts on `models/gemini-flash-lite-latest` (even if Google's list lacks it). You can pick another. Leave it alone, Next. (Whether Google still serves that name is not verified; if not, write down the exact error.)
 3. The check passes and Done shows. If the browser blocks the request (CORS) or Google refuses the thinking setting, write down exactly what shows; neither has been tried against the real service.
 4. Talk it through: send a message; a reply comes. Try `https://generativelanguage.googleapis.com/v1beta/models/x:generateContent`: the app asks for "the address the service gives".
+
+## The look (web)
+
+1. Open the app on a phone and on a computer. Today, Plan, Talk, Me and Settings should look like the same app: sand background, white cards, olive buttons, nothing cut off.
+2. Start a step. The Work screen shows the step in a big card and a thin bar that fills as you finish steps. The five answer buttons are the same size and colour; none is highlighted.
+3. On a phone, Later sits alone on the last row, full width. On a computer all five are in one row.
+4. Scroll to the bottom of Today, Plan and Me on a phone: the last button is not hidden behind the tabs.
+5. Turn on reduced motion in the device settings: no animation on finishing a step.
+6. Change one colour at the top of `css/styles.css` (see `design/look.md`): the whole app follows.

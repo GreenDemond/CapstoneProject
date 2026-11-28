@@ -71,6 +71,15 @@ test("an OpenRouter service defaults to openrouter/free, and another service has
   assert.equal(other.model, "");
 });
 
+test("a Google service defaults to models/gemini-flash-lite-latest; a typed model wins; other hosts are unchanged", () => {
+  const google = addService([], { label: "G", url: "https://generativelanguage.googleapis.com/v1beta/openai" }).list[0];
+  assert.equal(google.model, "models/gemini-flash-lite-latest");
+  const typed = addService([], { label: "G", url: "https://generativelanguage.googleapis.com/v1beta/openai", model: "models/gemini-x" }).list[0];
+  assert.equal(typed.model, "models/gemini-x");
+  assert.equal(addService([], { label: "O", url: "https://other.example.com" }).list[0].model, "");
+  assert.equal(addService([], { label: "OR", url: "https://openrouter.ai/api/v1" }).list[0].model, "openrouter/free");
+});
+
 test("a model name is optional when adding; it is picked from the list later", () => {
   const { list, error } = addService([], { label: "A", url: "https://a.example.com" });
   assert.equal(error, null);

@@ -70,6 +70,17 @@ test("the AI pull-down starts with the preselected one, then A to Z, without rep
   assert.deepEqual(orderModels(["b", "a"], ""), ["a", "b"]);
 });
 
+test("Google starts on models/gemini-flash-lite-latest, listed or not, once; others unchanged", () => {
+  const g = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
+  const d = "models/gemini-flash-lite-latest";
+  assert.equal(defaultModel(g, ["models/a", "models/b"], ""), d);
+  assert.equal(defaultModel(g, [], "models/mine"), "models/mine");
+  assert.equal(defaultModel("https://openrouter.ai/api/v1/chat/completions", [], ""), "openrouter/free");
+  assert.equal(defaultModel("https://h.example.com/v1/chat/completions", ["a", "b"], ""), "");
+  assert.deepEqual(orderModels(["models/b", "models/a"], d), [d, "models/a", "models/b"]);
+  assert.deepEqual(orderModels(["models/b", d, "models/a"], d), [d, "models/a", "models/b"]);
+});
+
 test("OpenRouter defaults to openrouter/free even if the list lacks it, and a lone AI is picked", () => {
   assert.equal(defaultModel("https://openrouter.ai/api/v1/chat/completions", ["x"], ""), "openrouter/free");
   assert.equal(defaultModel("https://h.example.com/v1/chat/completions", ["only"], ""), "only");

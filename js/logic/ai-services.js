@@ -4,6 +4,9 @@
 export const MAX_SERVICES = 10;
 export const MAX_LABEL = 60;
 export const OPENROUTER_DEFAULT_MODEL = "openrouter/free";
+// Chosen by the parent on 2026-11-28 (not picked by an agent). Sent exactly as written, with the models/ prefix.
+export const GOOGLE_DEFAULT_MODEL = "models/gemini-flash-lite-latest";
+export const GOOGLE_HOST = "generativelanguage.googleapis.com";
 export const OPENROUTER_ADDRESS = "https://openrouter.ai/api/v1/chat/completions";
 export const MAX_MODEL = 100;
 
@@ -46,7 +49,9 @@ export function addService(list, { label, url, model = "", keyHint = "", checked
   // Its providers may keep prompts, so the account settings in DECISIONS T6 still apply.
   const isOpenRouter = new URL(chat).hostname === "openrouter.ai";
   const typedModel = typeof model === "string" ? model.trim() : "";
-  const modelName = typedModel === "" && isOpenRouter ? OPENROUTER_DEFAULT_MODEL : typedModel;
+  const isGoogle = new URL(chat).hostname === GOOGLE_HOST;
+  const hostDefault = isOpenRouter ? OPENROUTER_DEFAULT_MODEL : isGoogle ? GOOGLE_DEFAULT_MODEL : "";
+  const modelName = typedModel === "" ? hostDefault : typedModel;
   if (modelName.length > MAX_MODEL) {
     return { list, error: `Keep the model name under ${MAX_MODEL} characters.` };
   }
@@ -274,7 +279,6 @@ export function readModelIds(data) {
 //   https://openrouter.ai/api/v1 -> https://openrouter.ai/api/v1/chat/completions
 // A full chat address (ending in /chat/completions) is kept as typed. Any other path gives null,
 // and the app asks the student for the address the service gives instead of guessing.
-const GOOGLE_HOST = "generativelanguage.googleapis.com";
 export function chatAddress(typed) {
   const parsed = parseAddress(typed);
   if (!parsed.ok) {
